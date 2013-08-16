@@ -13,7 +13,6 @@ import "C"
 import (
 	"fmt"
 	"reflect"
-	"unicode"
 	"unsafe"
 )
 
@@ -24,7 +23,7 @@ type InitOptions struct {
 
 var initialized = false
 
-var gqApp unsafe.Pointer
+var qapp unsafe.Pointer
 
 var wordSize = C.size_t(unsafe.Sizeof(uintptr(0)))
 
@@ -44,12 +43,12 @@ func Init(options *InitOptions) {
 	*(**C.char)(unsafe.Pointer(uintptr(unsafe.Pointer(argv)) + uintptr(wordSize * 0))) = C.CString("")
 	*(*uintptr)(unsafe.Pointer(uintptr(unsafe.Pointer(argv)) + uintptr(wordSize * 1))) = 0
 
-	gqApp = C.newGuiApplication(1, argv)
+	qapp = C.newGuiApplication(1, argv)
 }
 
 // Run runs the main QML event loop.
 func Run() {
-	C.applicationExec(gqApp);
+	C.applicationExec(qapp);
 }
 
 // Engine provides an environment for instantiating QML components.
@@ -71,8 +70,8 @@ func (e *Engine) RootContext() *Context {
 }
 
 type reference struct {
-	goValue *interface{}
-	gqValue unsafe.Pointer
+	ifacep *interface{}
+	valuep unsafe.Pointer
 }
 
 var refs = make(map[interface{}]reference)
@@ -108,11 +107,11 @@ func (c *Context) Set(name string, value interface{}) {
 	// Must also lock refs.
 	ref, ok := refs[value]
 	if !ok {
-		ref.goValue = &value
-		ref.gqValue = C.newValue(unsafe.Pointer(&value), typeInfo(value))
+		ref.ifacep = &value
+		ref.valuep = C.newValue(unsafe.Pointer(&value), typeInfo(value))
 		refs[value] = ref
 	}
-	C.contextSetObject(c.addr, qname, ref.gqValue)
+	C.contextSetObject(c.addr, qname, ref.valuep)
 }
 
 func (c *Context) Get(name string) interface{} {
@@ -143,91 +142,6 @@ func (c *Context) Get(name string) interface{} {
 	panic(fmt.Sprintf("unsupported data type: %d", dtype))
 }
 
-
-var typeInfoSize = C.size_t(unsafe.Sizeof(C.GoTypeInfo{}))
-var memberInfoSize = C.size_t(unsafe.Sizeof(C.GoMemberInfo{}))
-
-func typeInfo(v interface{}) *C.GoTypeInfo {
-	vt := reflect.TypeOf(v)
-	for vt.Kind() == reflect.Ptr {
-		vt = vt.Elem()
-	}
-
-	typeInfo := (*C.GoTypeInfo)(C.malloc(typeInfoSize))
-	typeInfo.typeName = C.CString(vt.Name())
-
-	numField := vt.NumField()
-
-	// struct { FooBar T; Baz T } => "fooBar\0baz\0"
-	namesLen := 0
-	for i := 0; i < numField; i++ {
-		namesLen += len(vt.Field(i).Name)
-	}
-	names := make([]byte, 0, namesLen)
-	for i := 0; i < numField; i++ {
-		name := vt.Field(i).Name
-		for i, rune := range name {
-			if i == 0 {
-				names = append(names, string(unicode.ToLower(rune))...)
-			} else {
-				names = append(names, name[i:]...)
-				break
-			}
-		}
-		names = append(names, 0)
-	}
-	typeInfo.memberNames = C.CString(string(names))
-
-	// Assemble information on members.
-	membersi := uintptr(0)
-	mnamesi := uintptr(0)
-	members := uintptr(C.malloc(memberInfoSize*C.size_t(numField) + 1))
-	mnames := uintptr(unsafe.Pointer(typeInfo.memberNames))
-	for i := 0; i < numField; i++ {
-		field := vt.Field(i)
-		memberInfo := (*C.GoMemberInfo)(unsafe.Pointer(members + (uintptr(memberInfoSize) * membersi)))
-		memberInfo.memberName = (*C.char)(unsafe.Pointer(mnames + mnamesi))
-		memberInfo.memberType = gqKindFor(field.Type)
-		memberInfo.memberIndex = C.int(i)
-		membersi += 1
-		mnamesi += uintptr(len(field.Name)) + 1
-	}
-	typeInfo.members = (*C.GoMemberInfo)(unsafe.Pointer(members))
-	typeInfo.membersLen = C.int(membersi)
-	return typeInfo
-}
-
-var (
-	intIs64   bool
-	intT C.DataType
-)
-
-func init() {
-	intIs64 = unsafe.Sizeof(int64(0)) == unsafe.Sizeof(int(0))
-	if intIs64 {
-		intT = C.DTInt64
-	} else {
-		intT = C.DTInt32
-	}
-}
-
-func gqKindFor(typ reflect.Type) C.DataType {
-	switch typ.Kind() {
-	case reflect.String:
-		return C.DTString
-	case reflect.Int64:
-		return C.DTInt64
-	case reflect.Int32:
-		return C.DTInt32
-	case reflect.Int:
-		return intT
-	case reflect.Float32:
-		return C.DTFloat32
-	case reflect.Float64:
-		return C.DTFloat64
-	}
-	panic("Go type not supported yet: " + typ.Name())
-}
 
 //export hookReadField
 func hookReadField(ptr unsafe.Pointer, memberIndex C.int, result unsafe.Pointer) {

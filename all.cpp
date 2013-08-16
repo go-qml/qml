@@ -1,7 +1,7 @@
 
 // This is ugly, but significantly reduces the build time.
 
-#include "govalue.cpp_"
-#include "govaluetype.cpp_"
-#include "moc_govalue.cpp_"
-#include "capi.cpp_"
+#include "govalue.pp"
+#include "govaluetype.pp"
+#include "moc_govalue.pp"
+#include "capi.pp"
