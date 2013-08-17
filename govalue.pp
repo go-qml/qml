@@ -91,6 +91,12 @@ GoValue::GoValue(GoAddr *addr, GoTypeInfo *typeInfo)
     d->valueMeta = new GoValueMetaObject(this, d, typeInfo);
 }
 
+GoAddr *GoValue::addr()
+{
+    Q_D(GoValue);
+    return d->addr;
+}
+
 QMetaObject *GoValue::metaObjectFor(GoTypeInfo *typeInfo)
 {
     QMetaObjectBuilder mob;

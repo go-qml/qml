@@ -14,13 +14,15 @@ typedef void QObject_;
 typedef void QString_;
 typedef void QQmlEngine_;
 typedef void QQmlContext_;
+typedef void GoValue_;
 
 typedef enum {
-    DTString = 1,
-    DTInt64 = 2,
-    DTInt32 = 3,
+    DTString  = 1,
+    DTInt64   = 2,
+    DTInt32   = 3,
     DTFloat64 = 4,
     DTFloat32 = 5,
+    DTGoAddr  = 100,
 } DataType;
 
 typedef struct {
@@ -41,20 +43,22 @@ QApplication_ *newGuiApplication(int argc, char **argv);
 void applicationExec(QApplication_ *app);
 
 QQmlEngine_ *newEngine(QObject_ *parent);
+void delEngine(QQmlEngine_ *engine);
 QQmlContext_ *engineRootContext(QQmlEngine_ *engine);
 
-void contextGet(QQmlContext_ *context, QString_ *name, void *result, DataType *type);
-void contextSetObject(QQmlContext_ *context, QString_ *name, QObject_ *value);
-void contextSetString(QQmlContext_ *context, QString_ *name, QString_ *value);
-void contextSetInt64(QQmlContext_ *context, QString_ *name, int64_t value);
-void contextSetInt32(QQmlContext_ *context, QString_ *name, int32_t value);
-void contextSetFloat64(QQmlContext_ *context, QString_ *name, double value);
-void contextSetFloat32(QQmlContext_ *context, QString_ *name, float value);
+void contextGetProperty(QQmlContext_ *context, QString_ *name, void *result, DataType *type);
+void contextSetPropertyObject(QQmlContext_ *context, QString_ *name, QObject_ *value);
+void contextSetPropertyString(QQmlContext_ *context, QString_ *name, QString_ *value);
+void contextSetPropertyInt64(QQmlContext_ *context, QString_ *name, int64_t value);
+void contextSetPropertyInt32(QQmlContext_ *context, QString_ *name, int32_t value);
+void contextSetPropertyFloat64(QQmlContext_ *context, QString_ *name, double value);
+void contextSetPropertyFloat32(QQmlContext_ *context, QString_ *name, float value);
+void contextSetObject(QQmlContext_ *context, QObject_ *value);
 
 QString_ *newString(const char *data, int len);
 void delString(QString_ *s);
 
-QObject_ *newValue(GoAddr *addr, GoTypeInfo *typeInfo);
+GoValue_ *newValue(GoAddr *addr, GoTypeInfo *typeInfo);
 
 void hookReadField(GoAddr *addr, int memberIndex, void *result);
 

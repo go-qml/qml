@@ -56,17 +56,38 @@ type Engine struct {
 	addr unsafe.Pointer
 }
 
+func (e *Engine) assertValid() {
+	if e.addr == invalidPointer {
+		panic("engine already closed")
+	}
+}
+
 // NewEngine returns a new QML engine.
+//
+// The Close method must be called to release the resources
+// used by the engine when done using it.
 func NewEngine() *Engine {
 	return &Engine{C.newEngine(nil)}
 }
 
-type Context struct {
-	addr unsafe.Pointer
+var invalidPointer = unsafe.Pointer(uintptr(0));
+
+// Close releases resources used by the engine. The engine must
+// not be used after calling it.
+func (e *Engine) Close() {
+	if e.addr != invalidPointer {
+		C.delEngine(e.addr)
+		e.addr = invalidPointer;
+	}
 }
 
 func (e *Engine) RootContext() *Context {
+	e.assertValid()
 	return &Context{C.engineRootContext(e.addr)}
+}
+
+type Context struct {
+	addr unsafe.Pointer
 }
 
 type reference struct {
@@ -77,29 +98,32 @@ type reference struct {
 var refs = make(map[interface{}]reference)
 
 func newString(s string) unsafe.Pointer {
+	// TODO Test the s == "" case.
 	return C.newString(*(**C.char)(unsafe.Pointer(&s)), C.int(len(s)))
 }
 
 func (c *Context) Set(name string, value interface{}) {
-	// TODO Must handle the name == "" case.
 	qname := newString(name)
 	defer C.delString(qname)
 
 	switch value := value.(type) {
 	case string:
-		// TODO Must handle the value == "" case.
-		qvalue := C.newString(*(**C.char)(unsafe.Pointer(&value)), C.int(len(value)))
-		C.contextSetString(c.addr, qname, qvalue)
+		qvalue := newString(value)
+		C.contextSetPropertyString(c.addr, qname, qvalue)
 		C.delString(qvalue)
 		return
 	case int64:
-		C.contextSetInt64(c.addr, qname, C.int64_t(value))
+		C.contextSetPropertyInt64(c.addr, qname, C.int64_t(value))
 		return
 	case int32:
-		C.contextSetInt32(c.addr, qname, C.int32_t(value))
+		C.contextSetPropertyInt32(c.addr, qname, C.int32_t(value))
 		return
-	default:
-		panic(fmt.Sprintf("Context.Set of %T is unsupported for now", value))
+	case float64:
+		C.contextSetPropertyFloat64(c.addr, qname, C.double(value))
+		return
+	case float32:
+		C.contextSetPropertyFloat32(c.addr, qname, C.float(value))
+		return
 	}
 
 	// TODO This is leaking. Must figure how to decref the QObject when the context is done with it,
@@ -111,18 +135,30 @@ func (c *Context) Set(name string, value interface{}) {
 		ref.valuep = C.newValue(unsafe.Pointer(&value), typeInfo(value))
 		refs[value] = ref
 	}
-	C.contextSetObject(c.addr, qname, ref.valuep)
+	C.contextSetPropertyObject(c.addr, qname, ref.valuep)
+}
+
+func (c *Context) SetObject(value interface{}) {
+	// TODO This is leaking. Must figure how to decref the QObject when the context is done with it,
+	// so that we can decref it locally as well, and drop the map reference when it reaches zero.
+	// Must also lock refs.
+	ref, ok := refs[value]
+	if !ok {
+		ref.ifacep = &value
+		ref.valuep = C.newValue(unsafe.Pointer(&value), typeInfo(value))
+		refs[value] = ref
+	}
+	C.contextSetObject(c.addr, ref.valuep)
 }
 
 func (c *Context) Get(name string) interface{} {
-	// Do this in a more efficient way.
 	qname := newString(name)
 	defer C.delString(qname)
 
 	var mem int64
 	var result = unsafe.Pointer(&mem)
 	var dtype C.DataType
-	C.contextGet(c.addr, qname, result, &dtype)
+	C.contextGetProperty(c.addr, qname, result, &dtype)
 
 	switch dtype {
 	case C.DTString:
@@ -137,6 +173,8 @@ func (c *Context) Get(name string) interface{} {
 		return *(*float64)(result)
 	case C.DTFloat32:
 		return *(*float32)(result)
+	case C.DTGoAddr:
+		return **(**interface{})(result)
 	}
 
 	panic(fmt.Sprintf("unsupported data type: %d", dtype))
@@ -147,7 +185,7 @@ func (c *Context) Get(name string) interface{} {
 func hookReadField(ptr unsafe.Pointer, memberIndex C.int, result unsafe.Pointer) {
 	ifacep := (*interface{})(ptr)
 	fmt.Printf("QML requested member %d for Go's %T at %p.\n", memberIndex, *ifacep, ifacep)
-	field := reflect.ValueOf(*ifacep).Field(int(memberIndex))
+	field := reflect.ValueOf(*ifacep).Elem().Field(int(memberIndex))
 
 	switch field.Type().Kind() {
 	case reflect.String:

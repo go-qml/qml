@@ -24,21 +24,35 @@ QQmlEngine_ *newEngine(QObject_ *parent)
     return new QQmlEngine(reinterpret_cast<QObject *>(parent));
 }
 
+void delEngine(QQmlEngine_ *engine)
+{
+    QQmlEngine *qengine = reinterpret_cast<QQmlEngine *>(engine);
+    delete qengine;
+}
+
 QQmlContext_ *engineRootContext(QQmlEngine_ *engine)
 {
     return reinterpret_cast<QQmlEngine *>(engine)->rootContext();
 }
 
-void contextSetObject(QQmlContext_ *context, QString_ *name, QObject_ *value)
+void contextSetObject(QQmlContext_ *context, QObject_ *value)
+{
+    QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
+    QObject *qvalue = reinterpret_cast<QObject *>(value);
+
+    qcontext->setContextObject(qvalue);
+}
+
+void contextSetPropertyObject(QQmlContext_ *context, QString_ *name, QObject_ *value)
 {
     QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
     const QString *qname = reinterpret_cast<QString *>(name);
-    const QObject *qvalue = reinterpret_cast<QObject *>(value);
+    QObject *qvalue = reinterpret_cast<QObject *>(value);
 
     qcontext->setContextProperty(*qname, qvalue);
 }
 
-void contextSetString(QQmlContext_ *context, QString_ *name, QString_ *value)
+void contextSetPropertyString(QQmlContext_ *context, QString_ *name, QString_ *value)
 {
     QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
     const QString *qname = reinterpret_cast<QString *>(name);
@@ -47,7 +61,7 @@ void contextSetString(QQmlContext_ *context, QString_ *name, QString_ *value)
     qcontext->setContextProperty(*qname, *qvalue);
 }
 
-void contextSetInt64(QQmlContext_ *context, QString_ *name, int64_t value)
+void contextSetPropertyInt64(QQmlContext_ *context, QString_ *name, int64_t value)
 {
     QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
     const QString *qname = reinterpret_cast<QString *>(name);
@@ -55,7 +69,7 @@ void contextSetInt64(QQmlContext_ *context, QString_ *name, int64_t value)
     qcontext->setContextProperty(*qname, qint64(value));
 }
 
-void contextSetInt32(QQmlContext_ *context, QString_ *name, int32_t value)
+void contextSetPropertyInt32(QQmlContext_ *context, QString_ *name, int32_t value)
 {
     QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
     const QString *qname = reinterpret_cast<QString *>(name);
@@ -63,7 +77,7 @@ void contextSetInt32(QQmlContext_ *context, QString_ *name, int32_t value)
     qcontext->setContextProperty(*qname, qint32(value));
 }
 
-void contextSetFloat64(QQmlContext_ *context, QString_ *name, double value)
+void contextSetPropertyFloat64(QQmlContext_ *context, QString_ *name, double value)
 {
     QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
     const QString *qname = reinterpret_cast<QString *>(name);
@@ -71,7 +85,7 @@ void contextSetFloat64(QQmlContext_ *context, QString_ *name, double value)
     qcontext->setContextProperty(*qname, value);
 }
 
-void contextSetFloat32(QQmlContext_ *context, QString_ *name, float value)
+void contextSetPropertyFloat32(QQmlContext_ *context, QString_ *name, float value)
 {
     QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
     const QString *qname = reinterpret_cast<QString *>(name);
@@ -79,7 +93,7 @@ void contextSetFloat32(QQmlContext_ *context, QString_ *name, float value)
     qcontext->setContextProperty(*qname, value);
 }
 
-void contextGet(QQmlContext_ *context, QString_ *name, void *result, DataType *kind)
+void contextGetProperty(QQmlContext_ *context, QString_ *name, void *result, DataType *dtype)
 {
     const QString *qname = reinterpret_cast<QString *>(name);
     QVariant var = reinterpret_cast<QQmlContext *>(context)->contextProperty(*qname);
@@ -93,25 +107,36 @@ void contextGet(QQmlContext_ *context, QString_ *name, void *result, DataType *k
         {
             QByteArray ba = var.toByteArray();
             *(char**)(result) = strdup(ba.constData());
-            *kind = DTString;
+            *dtype = DTString;
             break;
         }
     case QMetaType::LongLong:
         *(qint64*)(result) = var.toLongLong();
-        *kind = DTInt64;
+        *dtype = DTInt64;
         break;
     case QMetaType::Int:
         *(qint32*)(result) = var.toInt();
-        *kind = DTInt32;
+        *dtype = DTInt32;
         break;
     case QMetaType::Double:
         *(double*)(result) = var.toDouble();
-        *kind = DTFloat64;
+        *dtype = DTFloat64;
         break;
     case QMetaType::Float:
         *(float*)(result) = var.toFloat();
-        *kind = DTFloat32;
+        *dtype = DTFloat32;
         break;
+    case QMetaType::QObjectStar:
+        {
+            QObject *qobject = var.value<QObject *>();
+            GoValue *value = dynamic_cast<GoValue *>(qobject);
+            if (value) {
+                *(void **)(result) = value->addr();
+                *dtype = DTGoAddr;
+                break;
+            }
+        }
+        // fallthrough
     default:
         qWarning() << "Unsupported variant type:" << var.type();
         break;

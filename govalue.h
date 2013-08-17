@@ -17,6 +17,8 @@ class GoValue : public QObject
 public:
     GoValue(GoAddr *addr, GoTypeInfo *typeInfo);
 
+    GoAddr *addr();
+
     static QMetaObject *metaObjectFor(GoTypeInfo *typeInfo);
 
 private:
