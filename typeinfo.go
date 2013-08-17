@@ -82,6 +82,8 @@ func dataTypeOf(typ reflect.Type) C.DataType {
 	switch typ.Kind() {
 	case reflect.String:
 		return C.DTString
+	case reflect.Bool:
+		return C.DTBool
 	case reflect.Int64:
 		return C.DTInt64
 	case reflect.Int32:

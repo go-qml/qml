@@ -61,6 +61,14 @@ void contextSetPropertyString(QQmlContext_ *context, QString_ *name, QString_ *v
     qcontext->setContextProperty(*qname, *qvalue);
 }
 
+void contextSetPropertyBool(QQmlContext_ *context, QString_ *name, int32_t value)
+{
+    QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
+    const QString *qname = reinterpret_cast<QString *>(name);
+
+    qcontext->setContextProperty(*qname, value == 0 ? false : true);
+}
+
 void contextSetPropertyInt64(QQmlContext_ *context, QString_ *name, int64_t value)
 {
     QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
@@ -110,6 +118,10 @@ void contextGetProperty(QQmlContext_ *context, QString_ *name, void *result, Dat
             *dtype = DTString;
             break;
         }
+    case QMetaType::Bool:
+        *(qint32*)(result) = var.toInt();
+        *dtype = DTBool;
+        break;
     case QMetaType::LongLong:
         *(qint64*)(result) = var.toLongLong();
         *dtype = DTInt64;

@@ -112,6 +112,13 @@ func (c *Context) Set(name string, value interface{}) {
 		C.contextSetPropertyString(c.addr, qname, qvalue)
 		C.delString(qvalue)
 		return
+	case bool:
+		var b C.int32_t
+		if value {
+			b = 1
+		}
+		C.contextSetPropertyBool(c.addr, qname, b)
+		return
 	case int64:
 		C.contextSetPropertyInt64(c.addr, qname, C.int64_t(value))
 		return
@@ -165,6 +172,11 @@ func (c *Context) Get(name string) interface{} {
 		s := C.GoString(*(**C.char)(result))
 		C.free(unsafe.Pointer(*(**C.char)(result)))
 		return s
+	case C.DTBool:
+		if *(*int32)(result) == 0 {
+			return false
+		}
+		return true
 	case C.DTInt64:
 		return *(*int64)(result)
 	case C.DTInt32:
@@ -190,6 +202,12 @@ func hookReadField(ptr unsafe.Pointer, memberIndex C.int, result unsafe.Pointer)
 	switch field.Type().Kind() {
 	case reflect.String:
 		*(**C.char)(result) = C.CString(field.String()) // XXX This is leaking.
+	case reflect.Bool:
+		var b int32
+		if field.Bool() {
+			b = 1
+		}
+		*(*int32)(result) = b
 	case reflect.Int:
 		if !intIs64 {
 			*(*int32)(result) = int32(field.Int())

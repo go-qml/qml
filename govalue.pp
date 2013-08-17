@@ -56,6 +56,9 @@ int GoValueMetaObject::metaCall(QMetaObject::Call c, int idx, void **a)
                 case DTString:
                     *out = *(char **)result;
                     break;
+                case DTBool:
+                    *out = *(qint32 *)result == 0 ? false : true;
+                    break;
                 case DTInt64:
                     *out = *(qint64 *)result;
                     break;

@@ -18,10 +18,11 @@ typedef void GoValue_;
 
 typedef enum {
     DTString  = 1,
-    DTInt64   = 2,
-    DTInt32   = 3,
-    DTFloat64 = 4,
-    DTFloat32 = 5,
+    DTBool    = 2,
+    DTInt64   = 3,
+    DTInt32   = 4,
+    DTFloat64 = 5,
+    DTFloat32 = 6,
     DTGoAddr  = 100,
 } DataType;
 
@@ -49,6 +50,7 @@ QQmlContext_ *engineRootContext(QQmlEngine_ *engine);
 void contextGetProperty(QQmlContext_ *context, QString_ *name, void *result, DataType *type);
 void contextSetPropertyObject(QQmlContext_ *context, QString_ *name, QObject_ *value);
 void contextSetPropertyString(QQmlContext_ *context, QString_ *name, QString_ *value);
+void contextSetPropertyBool(QQmlContext_ *context, QString_ *name, int32_t value);
 void contextSetPropertyInt64(QQmlContext_ *context, QString_ *name, int64_t value);
 void contextSetPropertyInt32(QQmlContext_ *context, QString_ *name, int32_t value);
 void contextSetPropertyFloat64(QQmlContext_ *context, QString_ *name, double value);
