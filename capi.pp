@@ -77,116 +77,109 @@ void contextSetObject(QQmlContext_ *context, QObject_ *value)
     qcontext->setContextObject(qvalue);
 }
 
-void contextSetPropertyObject(QQmlContext_ *context, QString_ *name, QObject_ *value)
+void contextSetProperty(QQmlContext_ *context, QString_ *name, DataValue *value)
 {
-    QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
     const QString *qname = reinterpret_cast<QString *>(name);
-    QObject *qvalue = reinterpret_cast<QObject *>(value);
+    QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
+    QVariant var;
 
-    qcontext->setContextProperty(*qname, qvalue);
+    switch (value->dataType) {
+    case DTString:
+        var = QString::fromUtf8(*(char **)value->data, value->len);
+        break;
+    case DTBool:
+        var = bool(*(char *)(value->data) != 0);
+        break;
+    case DTInt64:
+        var = *(qint64*)(value->data);
+        break;
+    case DTInt32:
+        var = *(qint32*)(value->data);
+        break;
+    case DTFloat64:
+        var = *(double*)(value->data);
+        break;
+    case DTFloat32:
+        var = *(float*)(value->data);
+        break;
+    case DTObject:
+        qcontext->setContextProperty(*qname, *(QObject**)(value->data));
+        return;
+    default:
+        qFatal("Unsupported data type: %d", value->dataType);
+        return;
+    }
+
+    qcontext->setContextProperty(*qname, var);
 }
 
-void contextSetPropertyString(QQmlContext_ *context, QString_ *name, QString_ *value)
+static void packDataValue(QVariant *var, DataValue *value)
 {
-    QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
-    const QString *qname = reinterpret_cast<QString *>(name);
-    const QString *qvalue = reinterpret_cast<QString *>(value);
-
-    qcontext->setContextProperty(*qname, *qvalue);
-}
-
-void contextSetPropertyBool(QQmlContext_ *context, QString_ *name, int32_t value)
-{
-    QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
-    const QString *qname = reinterpret_cast<QString *>(name);
-
-    qcontext->setContextProperty(*qname, value == 0 ? false : true);
-}
-
-void contextSetPropertyInt64(QQmlContext_ *context, QString_ *name, int64_t value)
-{
-    QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
-    const QString *qname = reinterpret_cast<QString *>(name);
-
-    qcontext->setContextProperty(*qname, qint64(value));
-}
-
-void contextSetPropertyInt32(QQmlContext_ *context, QString_ *name, int32_t value)
-{
-    QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
-    const QString *qname = reinterpret_cast<QString *>(name);
-
-    qcontext->setContextProperty(*qname, qint32(value));
-}
-
-void contextSetPropertyFloat64(QQmlContext_ *context, QString_ *name, double value)
-{
-    QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
-    const QString *qname = reinterpret_cast<QString *>(name);
-
-    qcontext->setContextProperty(*qname, value);
-}
-
-void contextSetPropertyFloat32(QQmlContext_ *context, QString_ *name, float value)
-{
-    QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
-    const QString *qname = reinterpret_cast<QString *>(name);
-
-    qcontext->setContextProperty(*qname, value);
-}
-
-void contextGetProperty(QQmlContext_ *context, QString_ *name, void *result, DataType *dtype)
-{
-    const QString *qname = reinterpret_cast<QString *>(name);
-    QVariant var = reinterpret_cast<QQmlContext *>(context)->contextProperty(*qname);
-
     // Some assumptions are made below regarding the size of types.
     // There's apparently no better way to handle this since that's
     // how the types with well defined sizes (qint64) are mapped to
     // meta-types (QMetaType::LongLong).
-    switch ((int)var.type()) {
+    switch ((int)var->type()) {
     case QMetaType::QString:
         {
-            QByteArray ba = var.toByteArray();
-            *(char**)(result) = strdup(ba.constData());
-            *dtype = DTString;
+            value->dataType = DTString;
+            QByteArray ba = var->toByteArray();
+            *(char**)(value->data) = strdup(ba.constData());
+            value->len = ba.size();
             break;
         }
     case QMetaType::Bool:
-        *(qint32*)(result) = var.toInt();
-        *dtype = DTBool;
+        value->dataType = DTBool;
+        *(qint8*)(value->data) = (qint8)var->toInt();
         break;
     case QMetaType::LongLong:
-        *(qint64*)(result) = var.toLongLong();
-        *dtype = DTInt64;
+        value->dataType = DTInt64;
+        *(qint64*)(value->data) = var->toLongLong();
         break;
     case QMetaType::Int:
-        *(qint32*)(result) = var.toInt();
-        *dtype = DTInt32;
+        value->dataType = DTInt32;
+        *(qint32*)(value->data) = var->toInt();
         break;
     case QMetaType::Double:
-        *(double*)(result) = var.toDouble();
-        *dtype = DTFloat64;
+        value->dataType = DTFloat64;
+        *(double*)(value->data) = var->toDouble();
         break;
     case QMetaType::Float:
-        *(float*)(result) = var.toFloat();
-        *dtype = DTFloat32;
+        value->dataType = DTFloat32;
+        *(float*)(value->data) = var->toFloat();
         break;
     case QMetaType::QObjectStar:
         {
-            QObject *qobject = var.value<QObject *>();
-            GoValue *value = dynamic_cast<GoValue *>(qobject);
-            if (value) {
-                *(void **)(result) = value->addr();
-                *dtype = DTGoAddr;
+            QObject *qobject = var->value<QObject *>();
+            GoValue *govalue = dynamic_cast<GoValue *>(qobject);
+            if (govalue) {
+                value->dataType = DTGoAddr;
+                *(void **)(value->data) = govalue->addr();
                 break;
             }
         }
         // fallthrough
     default:
-        qWarning() << "Unsupported variant type:" << var.type();
+        qFatal("Unsupported variant type: %d", var->type());
         break;
     }
+}
+
+void contextGetProperty(QQmlContext_ *context, QString_ *name, DataValue *value)
+{
+    QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
+    const QString *qname = reinterpret_cast<QString *>(name);
+
+    QVariant var = qcontext->contextProperty(*qname);
+    packDataValue(&var, value);
+}
+
+void objectGetProperty(QObject_ *object, const char *name, DataValue *value)
+{
+    QObject *qobject = reinterpret_cast<QObject *>(object);
+    
+    QVariant var = qobject->property(name);
+    packDataValue(&var, value);
 }
 
 QString_ *newString(const char *data, int len)

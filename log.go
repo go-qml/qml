@@ -8,8 +8,6 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
-	"reflect"
-	"unsafe"
 )
 
 // SetLogger sets the target for messages logged by the qml package,
@@ -151,15 +149,3 @@ func (m *logMessage) Text() string {
 }
 
 func (*logMessage) privateMarker() {}
-
-// unsafeString returns a Go string backed by C data.
-//
-// The returned string must be used only in the implementation
-// of the qml package, since its data cannot be relied upon.
-func unsafeString(data *C.char, size C.int) string {
-	var s string
-	sh := (*reflect.StringHeader)(unsafe.Pointer(&s))
-	sh.Data = uintptr(unsafe.Pointer(data))
-	sh.Len = int(size)
-	return s
-}

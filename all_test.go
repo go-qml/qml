@@ -1,6 +1,7 @@
 package qml_test
 
 import (
+	"fmt"
 	. "launchpad.net/gocheck"
 	"launchpad.net/qml"
 	"testing"
@@ -102,6 +103,8 @@ func (s *S) TestContextSetGetGoValue(c *C) {
 	c.Assert(s.context.Get("key"), Equals, &value)
 }
 
+// TODO Test getting of non-existent.
+
 func (s *S) TestContextSetObject(c *C) {
 	s.context.SetObject(&MyStruct{
 		String:  "<string value>",
@@ -136,25 +139,22 @@ func (s *S) TestComponentSetDataError(c *C) {
 }
 
 func (s *S) TestComponentSetData(c *C) {
-	s.context.Set("N", 42)
+	const N = 42
+	s.context.Set("N", N)
 	data := `
 		import QtQuick 2.0
-		Item { width: 84; Component.onCompleted: console.log("N is", N) }
+		Item { width: N*2; Component.onCompleted: console.log("N is", N) }
 	`
 
 	component := qml.NewComponent(s.engine)
 	err := component.SetData("file.qml", []byte(data))
 	c.Assert(err, IsNil)
 
-	pattern := ".* file.qml:3: N is 42\n.*"
+	pattern := fmt.Sprintf(".* file.qml:3: N is %d\n.*", N)
 	c.Assert(c.GetTestLog(), Not(Matches), pattern)
 
 	obj := component.Create(s.context)
 
 	c.Assert(c.GetTestLog(), Matches, pattern)
-
-	c.Assert(obj.Get("width"), Equals, 84)
-
-	// TODO Tests with obj.
-	_ = obj
+	c.Assert(obj.Get("width"), Equals, float64(N*2))
 }

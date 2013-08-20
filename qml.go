@@ -12,7 +12,6 @@ import "C"
 
 import (
 	"errors"
-	"fmt"
 	"reflect"
 	"strings"
 	"unsafe"
@@ -27,8 +26,6 @@ var initialized = false
 
 var qapp unsafe.Pointer
 
-var wordSize = C.size_t(unsafe.Sizeof(uintptr(0)))
-
 // Init initializes the qml package with the provided parameters.
 // If the options parameter is nil, default options suitable for a
 // normal graphic application will be used.
@@ -41,9 +38,9 @@ func Init(options *InitOptions) {
 	initialized = true
 
 	// Must not be de-allocated according to QApp's docs.
-	argv := (**C.char)(C.malloc(wordSize * 2))
-	*(**C.char)(unsafe.Pointer(uintptr(unsafe.Pointer(argv)) + uintptr(wordSize * 0))) = C.CString("")
-	*(*uintptr)(unsafe.Pointer(uintptr(unsafe.Pointer(argv)) + uintptr(wordSize * 1))) = 0
+	argv := (**C.char)(C.malloc(ptrSize * 2))
+	*(**C.char)(unsafe.Pointer(uintptr(unsafe.Pointer(argv)) + uintptr(ptrSize * 0))) = C.CString("")
+	*(*uintptr)(unsafe.Pointer(uintptr(unsafe.Pointer(argv)) + uintptr(ptrSize * 1))) = 0
 
 	qapp = C.newGuiApplication(1, argv)
 }
@@ -59,7 +56,7 @@ type Engine struct {
 }
 
 func (e *Engine) assertValid() {
-	if e.addr == nilPointer {
+	if e.addr == nilPtr {
 		panic("engine already closed")
 	}
 }
@@ -72,15 +69,12 @@ func NewEngine() *Engine {
 	return &Engine{C.newEngine(nil)}
 }
 
-var nilPointer = unsafe.Pointer(uintptr(0));
-var nilCharPointer = (*C.char)(unsafe.Pointer(uintptr(0)));
-
 // Close releases resources used by the engine. The engine must
 // not be used after calling it.
 func (e *Engine) Close() {
-	if e.addr != nilPointer {
+	if e.addr != nilPtr {
 		C.delEngine(e.addr)
-		e.addr = nilPointer;
+		e.addr = nilPtr;
 	}
 }
 
@@ -100,64 +94,13 @@ type reference struct {
 
 var refs = make(map[interface{}]reference)
 
-func unsafeBytesData(b []byte) (*C.char, C.int) {
-	return *(**C.char)(unsafe.Pointer(&b)), C.int(len(b))
-}
-
-func unsafeStringData(s string) (*C.char, C.int) {
-	return *(**C.char)(unsafe.Pointer(&s)), C.int(len(s))
-}
-
 func (c *Context) Set(name string, value interface{}) {
 	cname, cnamelen := unsafeStringData(name)
 	qname := C.newString(cname, cnamelen)
 	defer C.delString(qname)
 
-	switch value := value.(type) {
-	case string:
-		cvalue, cvaluelen := unsafeStringData(value)
-		qvalue := C.newString(cvalue, cvaluelen)
-		C.contextSetPropertyString(c.addr, qname, qvalue)
-		C.delString(qvalue)
-		return
-	case bool:
-		var b C.int32_t
-		if value {
-			b = 1
-		}
-		C.contextSetPropertyBool(c.addr, qname, b)
-		return
-	case int:
-		if intIs64 {
-			C.contextSetPropertyInt64(c.addr, qname, C.int64_t(value))
-		} else {
-			C.contextSetPropertyInt32(c.addr, qname, C.int32_t(value))
-		}
-		return
-	case int64:
-		C.contextSetPropertyInt64(c.addr, qname, C.int64_t(value))
-		return
-	case int32:
-		C.contextSetPropertyInt32(c.addr, qname, C.int32_t(value))
-		return
-	case float64:
-		C.contextSetPropertyFloat64(c.addr, qname, C.double(value))
-		return
-	case float32:
-		C.contextSetPropertyFloat32(c.addr, qname, C.float(value))
-		return
-	}
-
-	// TODO This is leaking. Must figure how to decref the QObject when the context is done with it,
-	// so that we can decref it locally as well, and drop the map reference when it reaches zero.
-	// Must also lock refs.
-	ref, ok := refs[value]
-	if !ok {
-		ref.ifacep = &value
-		ref.valuep = C.newValue(unsafe.Pointer(&value), typeInfo(value))
-		refs[value] = ref
-	}
-	C.contextSetPropertyObject(c.addr, qname, ref.valuep)
+	dvalue := packDataValue(value)
+	C.contextSetProperty(c.addr, qname, dvalue)
 }
 
 func (c *Context) SetObject(value interface{}) {
@@ -178,34 +121,9 @@ func (c *Context) Get(name string) interface{} {
 	qname := C.newString(cname, cnamelen)
 	defer C.delString(qname)
 
-	var mem int64
-	var result = unsafe.Pointer(&mem)
-	var dtype C.DataType
-	C.contextGetProperty(c.addr, qname, result, &dtype)
-
-	switch dtype {
-	case C.DTString:
-		s := C.GoString(*(**C.char)(result))
-		C.free(unsafe.Pointer(*(**C.char)(result)))
-		return s
-	case C.DTBool:
-		if *(*int32)(result) == 0 {
-			return false
-		}
-		return true
-	case C.DTInt64:
-		return *(*int64)(result)
-	case C.DTInt32:
-		return *(*int32)(result)
-	case C.DTFloat64:
-		return *(*float64)(result)
-	case C.DTFloat32:
-		return *(*float32)(result)
-	case C.DTGoAddr:
-		return **(**interface{})(result)
-	}
-
-	panic(fmt.Sprintf("unsupported data type: %d", dtype))
+	var dvalue C.DataValue
+	C.contextGetProperty(c.addr, qname, &dvalue)
+	return unpackDataValue(&dvalue)
 }
 
 type Component struct {
@@ -213,7 +131,7 @@ type Component struct {
 }
 
 func NewComponent(engine *Engine) *Component {
-	return &Component{C.newComponent(engine.addr, nilPointer)}
+	return &Component{C.newComponent(engine.addr, nilPtr)}
 }
 
 func (c *Component) SetData(location string, data []byte) error {
@@ -221,7 +139,7 @@ func (c *Component) SetData(location string, data []byte) error {
 	cloc, cloclen := unsafeStringData(location)
 	C.componentSetData(c.addr, cdata, cdatalen, cloc, cloclen)
 	message := C.componentErrorString(c.addr)
-	if message != nilCharPointer {
+	if message != nilCharPtr {
 		err := errors.New(strings.TrimRight(C.GoString(message), "\n"))
 		C.free(unsafe.Pointer(message))
 		return err
@@ -229,11 +147,22 @@ func (c *Component) SetData(location string, data []byte) error {
 	return nil
 }
 
-func (c *Component) Create(context *Context) interface{} {
-	object := C.componentCreate(c.addr, context.addr)
-	// TODO Represent these objects locally.
-	return uintptr(object)
+func (c *Component) Create(context *Context) *Object {
+	// TODO Destroy object.
+	return &Object{C.componentCreate(c.addr, context.addr)}
+}
 
+type Object struct {
+	addr unsafe.Pointer
+}
+
+func (o *Object) Get(property string) interface{} {
+	cproperty := C.CString(property)
+	defer C.free(unsafe.Pointer(cproperty))
+
+	var value C.DataValue
+	C.objectGetProperty(o.addr, cproperty, &value)
+	return unpackDataValue(&value)
 }
 
 // TODO What's a nice way to delete the component and created component objects?

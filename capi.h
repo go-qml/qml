@@ -19,6 +19,7 @@ typedef void QMessageLogContext_;
 typedef void GoValue_;
 
 typedef enum {
+    DTUnknown = 0,
     DTString  = 1,
     DTBool    = 2,
     DTInt64   = 3,
@@ -26,7 +27,14 @@ typedef enum {
     DTFloat64 = 5,
     DTFloat32 = 6,
     DTGoAddr  = 100,
+    DTObject  = 101
 } DataType;
+
+typedef struct {
+    DataType dataType;
+    char data[8];
+    int len;
+} DataValue;
 
 typedef struct {
     char *memberName; // points to memberNames
@@ -58,15 +66,11 @@ QQmlEngine_ *newEngine(QObject_ *parent);
 void delEngine(QQmlEngine_ *engine);
 QQmlContext_ *engineRootContext(QQmlEngine_ *engine);
 
-void contextGetProperty(QQmlContext_ *context, QString_ *name, void *result, DataType *type);
-void contextSetPropertyObject(QQmlContext_ *context, QString_ *name, QObject_ *value);
-void contextSetPropertyString(QQmlContext_ *context, QString_ *name, QString_ *value);
-void contextSetPropertyBool(QQmlContext_ *context, QString_ *name, int32_t value);
-void contextSetPropertyInt64(QQmlContext_ *context, QString_ *name, int64_t value);
-void contextSetPropertyInt32(QQmlContext_ *context, QString_ *name, int32_t value);
-void contextSetPropertyFloat64(QQmlContext_ *context, QString_ *name, double value);
-void contextSetPropertyFloat32(QQmlContext_ *context, QString_ *name, float value);
+void contextGetProperty(QQmlContext_ *context, QString_ *name, DataValue *value);
+void contextSetProperty(QQmlContext_ *context, QString_ *name, DataValue *value);
 void contextSetObject(QQmlContext_ *context, QObject_ *value);
+
+void objectGetProperty(QObject_ *object, const char *name, DataValue *value);
 
 QQmlComponent_ *newComponent(QQmlEngine_ *engine, QObject_ *parent);
 QObject_ *componentCreate(QQmlComponent_ *component, QQmlContext_ *context);
