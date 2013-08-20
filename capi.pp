@@ -35,6 +35,40 @@ QQmlContext_ *engineRootContext(QQmlEngine_ *engine)
     return reinterpret_cast<QQmlEngine *>(engine)->rootContext();
 }
 
+QQmlComponent_ *newComponent(QQmlEngine_ *engine, QObject_ *parent)
+{
+    QQmlEngine *qengine = reinterpret_cast<QQmlEngine *>(engine);
+    //QObject *qparent = reinterpret_cast<QObject *>(parent);
+    return new QQmlComponent(qengine);
+}
+
+void componentSetData(QQmlComponent_ *component, const char *data, int dataLen, const char *url, int urlLen)
+{
+    QByteArray qdata(data, dataLen);
+    QByteArray qurl(url, urlLen);
+    QString qsurl = QString::fromUtf8(qurl);
+    reinterpret_cast<QQmlComponent *>(component)->setData(qdata, qsurl);
+}
+
+char *componentErrorString(QQmlComponent_ *component)
+{
+    QQmlComponent *qcomponent = reinterpret_cast<QQmlComponent *>(component);
+    if (qcomponent->isReady()) {
+        return NULL;
+    }
+    if (qcomponent->isError()) {
+        QByteArray ba = qcomponent->errorString().toUtf8();
+        return strdup(ba.constData());
+    }
+    return strdup("component is not ready (why!?)");
+}
+
+QObject_ *componentCreate(QQmlComponent_ *component, QQmlContext_ *context)
+{
+    QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
+    return reinterpret_cast<QQmlComponent *>(component)->create(qcontext);
+}
+
 void contextSetObject(QQmlContext_ *context, QObject_ *value)
 {
     QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
@@ -190,6 +224,18 @@ int gqRunSpike(GoAddr *addr, GoTypeInfo *typeInfo)
     view.show();
 
     return app.exec();
+}
+
+void internalLogHandler(QtMsgType severity, const QMessageLogContext &context, const QString &text)
+{
+    QByteArray textba = text.toUtf8();
+    LogMessage message = {severity, textba.constData(), textba.size(), context.file, strlen(context.file), context.line};
+    hookLogHandler(&message);
+}
+
+void installLogHandler()
+{
+    qInstallMessageHandler(internalLogHandler);
 }
 
 // vim:ts=4:sw=4:et:ft=cpp

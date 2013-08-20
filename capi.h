@@ -14,6 +14,8 @@ typedef void QObject_;
 typedef void QString_;
 typedef void QQmlEngine_;
 typedef void QQmlContext_;
+typedef void QQmlComponent_;
+typedef void QMessageLogContext_;
 typedef void GoValue_;
 
 typedef enum {
@@ -40,6 +42,15 @@ typedef struct {
     int membersLen;
 } GoTypeInfo;
 
+typedef struct {
+    int severity;
+    const char *text;
+    int textLen;
+    const char *file;
+    int fileLen;
+    int line;
+} LogMessage;
+
 QApplication_ *newGuiApplication(int argc, char **argv);
 void applicationExec(QApplication_ *app);
 
@@ -57,12 +68,20 @@ void contextSetPropertyFloat64(QQmlContext_ *context, QString_ *name, double val
 void contextSetPropertyFloat32(QQmlContext_ *context, QString_ *name, float value);
 void contextSetObject(QQmlContext_ *context, QObject_ *value);
 
+QQmlComponent_ *newComponent(QQmlEngine_ *engine, QObject_ *parent);
+QObject_ *componentCreate(QQmlComponent_ *component, QQmlContext_ *context);
+void componentSetData(QQmlComponent_ *component, const char *data, int dataLen, const char *url, int urlLen);
+char *componentErrorString(QQmlComponent_ *component);
+
 QString_ *newString(const char *data, int len);
 void delString(QString_ *s);
 
 GoValue_ *newValue(GoAddr *addr, GoTypeInfo *typeInfo);
 
+void installLogHandler();
+
 void hookReadField(GoAddr *addr, int memberIndex, void *result);
+void hookLogHandler(LogMessage *message);
 
 #ifdef __cplusplus
 } // extern "C"

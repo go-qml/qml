@@ -21,12 +21,14 @@ func (s *S) SetUpSuite(c *C) {
 }
 
 func (s *S) SetUpTest(c *C) {
+	qml.SetLogger(c)
 	s.engine = qml.NewEngine()
 	s.context = s.engine.RootContext()
 }
 
 func (s *S) TearDownTest(c *C) {
 	s.engine.Close()
+	qml.SetLogger(nil)
 }
 
 type MyStruct struct {
@@ -38,6 +40,13 @@ type MyStruct struct {
 	Int32   int32
 	Float64 float64
 	Float32 float32
+}
+
+var intIs64 bool
+
+func init() {
+	var i int = 1<<31 - 1
+	intIs64 = (i+1 > 0)
 }
 
 func (s *S) TestEngineClosedUse(c *C) {
@@ -66,6 +75,15 @@ func (s *S) TestContextSetGetInt64(c *C) {
 func (s *S) TestContextSetGetInt32(c *C) {
 	s.context.Set("key", int32(42))
 	c.Assert(s.context.Get("key"), Equals, int32(42))
+}
+
+func (s *S) TestContextSetGetInt(c *C) {
+	s.context.Set("key", 42)
+	if intIs64 {
+		c.Assert(s.context.Get("key"), Equals, int64(42))
+	} else {
+		c.Assert(s.context.Get("key"), Equals, int32(42))
+	}
 }
 
 func (s *S) TestContextSetGetFloat64(c *C) {
@@ -104,8 +122,39 @@ func (s *S) TestContextSetObject(c *C) {
 	c.Assert(s.context.Get("float64"), Equals, float64(4.2))
 	c.Assert(s.context.Get("float32"), Equals, float32(4.2))
 
-	v := s.context.Get("int")
-	if v != int64(42) && v != int32(42) {
-		c.Fatalf("want int32(42) or int64(42), got %T(%v)", v, v)
+	if intIs64 {
+		c.Assert(s.context.Get("int"), Equals, int64(42))
+	} else {
+		c.Assert(s.context.Get("int"), Equals, int32(42))
 	}
+}
+
+func (s *S) TestComponentSetDataError(c *C) {
+	component := qml.NewComponent(s.engine)
+	err := component.SetData("file.qml", []byte("Item{}"))
+	c.Assert(err, ErrorMatches, "file.qml:1 Item is not a type")
+}
+
+func (s *S) TestComponentSetData(c *C) {
+	s.context.Set("N", 42)
+	data := `
+		import QtQuick 2.0
+		Item { width: 84; Component.onCompleted: console.log("N is", N) }
+	`
+
+	component := qml.NewComponent(s.engine)
+	err := component.SetData("file.qml", []byte(data))
+	c.Assert(err, IsNil)
+
+	pattern := ".* file.qml:3: N is 42\n.*"
+	c.Assert(c.GetTestLog(), Not(Matches), pattern)
+
+	obj := component.Create(s.context)
+
+	c.Assert(c.GetTestLog(), Matches, pattern)
+
+	c.Assert(obj.Get("width"), Equals, 84)
+
+	// TODO Tests with obj.
+	_ = obj
 }

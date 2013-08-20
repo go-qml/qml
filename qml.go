@@ -11,8 +11,10 @@ package qml
 import "C"
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
+	"strings"
 	"unsafe"
 )
 
@@ -57,7 +59,7 @@ type Engine struct {
 }
 
 func (e *Engine) assertValid() {
-	if e.addr == invalidPointer {
+	if e.addr == nilPointer {
 		panic("engine already closed")
 	}
 }
@@ -70,14 +72,15 @@ func NewEngine() *Engine {
 	return &Engine{C.newEngine(nil)}
 }
 
-var invalidPointer = unsafe.Pointer(uintptr(0));
+var nilPointer = unsafe.Pointer(uintptr(0));
+var nilCharPointer = (*C.char)(unsafe.Pointer(uintptr(0)));
 
 // Close releases resources used by the engine. The engine must
 // not be used after calling it.
 func (e *Engine) Close() {
-	if e.addr != invalidPointer {
+	if e.addr != nilPointer {
 		C.delEngine(e.addr)
-		e.addr = invalidPointer;
+		e.addr = nilPointer;
 	}
 }
 
@@ -97,18 +100,23 @@ type reference struct {
 
 var refs = make(map[interface{}]reference)
 
-func newString(s string) unsafe.Pointer {
-	// TODO Test the s == "" case.
-	return C.newString(*(**C.char)(unsafe.Pointer(&s)), C.int(len(s)))
+func unsafeBytesData(b []byte) (*C.char, C.int) {
+	return *(**C.char)(unsafe.Pointer(&b)), C.int(len(b))
+}
+
+func unsafeStringData(s string) (*C.char, C.int) {
+	return *(**C.char)(unsafe.Pointer(&s)), C.int(len(s))
 }
 
 func (c *Context) Set(name string, value interface{}) {
-	qname := newString(name)
+	cname, cnamelen := unsafeStringData(name)
+	qname := C.newString(cname, cnamelen)
 	defer C.delString(qname)
 
 	switch value := value.(type) {
 	case string:
-		qvalue := newString(value)
+		cvalue, cvaluelen := unsafeStringData(value)
+		qvalue := C.newString(cvalue, cvaluelen)
 		C.contextSetPropertyString(c.addr, qname, qvalue)
 		C.delString(qvalue)
 		return
@@ -118,6 +126,13 @@ func (c *Context) Set(name string, value interface{}) {
 			b = 1
 		}
 		C.contextSetPropertyBool(c.addr, qname, b)
+		return
+	case int:
+		if intIs64 {
+			C.contextSetPropertyInt64(c.addr, qname, C.int64_t(value))
+		} else {
+			C.contextSetPropertyInt32(c.addr, qname, C.int32_t(value))
+		}
 		return
 	case int64:
 		C.contextSetPropertyInt64(c.addr, qname, C.int64_t(value))
@@ -159,7 +174,8 @@ func (c *Context) SetObject(value interface{}) {
 }
 
 func (c *Context) Get(name string) interface{} {
-	qname := newString(name)
+	cname, cnamelen := unsafeStringData(name)
+	qname := C.newString(cname, cnamelen)
 	defer C.delString(qname)
 
 	var mem int64
@@ -192,11 +208,40 @@ func (c *Context) Get(name string) interface{} {
 	panic(fmt.Sprintf("unsupported data type: %d", dtype))
 }
 
+type Component struct {
+	addr unsafe.Pointer
+}
+
+func NewComponent(engine *Engine) *Component {
+	return &Component{C.newComponent(engine.addr, nilPointer)}
+}
+
+func (c *Component) SetData(location string, data []byte) error {
+	cdata, cdatalen := unsafeBytesData(data)
+	cloc, cloclen := unsafeStringData(location)
+	C.componentSetData(c.addr, cdata, cdatalen, cloc, cloclen)
+	message := C.componentErrorString(c.addr)
+	if message != nilCharPointer {
+		err := errors.New(strings.TrimRight(C.GoString(message), "\n"))
+		C.free(unsafe.Pointer(message))
+		return err
+	}
+	return nil
+}
+
+func (c *Component) Create(context *Context) interface{} {
+	object := C.componentCreate(c.addr, context.addr)
+	// TODO Represent these objects locally.
+	return uintptr(object)
+
+}
+
+// TODO What's a nice way to delete the component and created component objects?
 
 //export hookReadField
 func hookReadField(ptr unsafe.Pointer, memberIndex C.int, result unsafe.Pointer) {
 	ifacep := (*interface{})(ptr)
-	fmt.Printf("QML requested member %d for Go's %T at %p.\n", memberIndex, *ifacep, ifacep)
+	//fmt.Printf("QML requested member %d for Go's %T at %p.\n", memberIndex, *ifacep, ifacep)
 	field := reflect.ValueOf(*ifacep).Elem().Field(int(memberIndex))
 
 	switch field.Type().Kind() {
