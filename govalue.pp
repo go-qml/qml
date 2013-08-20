@@ -4,6 +4,7 @@
 #include <QDebug>
 
 #include "govalue.h"
+#include "capi.h"
 
 
 class GoValuePrivate;
@@ -48,33 +49,10 @@ int GoValueMetaObject::metaCall(QMetaObject::Call c, int idx, void **a)
         GoMemberInfo *memberInfo = valuePriv->typeInfo->members;
         for (int i = 0; i < valuePriv->typeInfo->membersLen; i++) {
             if (memberInfo->metaIndex == idx) {
-                qint64 mem;
-                void *result = &mem;
-                hookReadField(valuePriv->addr, memberInfo->memberIndex, result);
+                DataValue result;
+                hookReadField(valuePriv->addr, memberInfo->memberIndex, &result);
                 QVariant *out = reinterpret_cast<QVariant *>(a[0]);
-                switch (memberInfo->memberType) {
-                case DTString:
-                    *out = *(char **)result;
-                    break;
-                case DTBool:
-                    *out = *(qint32 *)result == 0 ? false : true;
-                    break;
-                case DTInt64:
-                    *out = *(qint64 *)result;
-                    break;
-                case DTInt32:
-                    *out = *(qint32 *)result;
-                    break;
-                case DTFloat64:
-                    *out = *(double *)result;
-                    break;
-                case DTFloat32:
-                    *out = *(float *)result;
-                    break;
-                default:
-                    Q_ASSERT_X(false, "assignment", "unsupported type");
-                    break;
-                }
+                unpackDataValue(&result, out);
                 return -1;
             }
             memberInfo++;

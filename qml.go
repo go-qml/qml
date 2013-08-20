@@ -99,8 +99,9 @@ func (c *Context) Set(name string, value interface{}) {
 	qname := C.newString(cname, cnamelen)
 	defer C.delString(qname)
 
-	dvalue := packDataValue(value)
-	C.contextSetProperty(c.addr, qname, dvalue)
+	var dvalue C.DataValue
+	packDataValue(value, &dvalue)
+	C.contextSetProperty(c.addr, qname, &dvalue)
 }
 
 func (c *Context) SetObject(value interface{}) {
@@ -168,35 +169,13 @@ func (o *Object) Get(property string) interface{} {
 // TODO What's a nice way to delete the component and created component objects?
 
 //export hookReadField
-func hookReadField(ptr unsafe.Pointer, memberIndex C.int, result unsafe.Pointer) {
-	ifacep := (*interface{})(ptr)
+func hookReadField(ifacep unsafe.Pointer, memberIndex C.int, result *C.DataValue) {
+	value := *(*interface{})(ifacep)
 	//fmt.Printf("QML requested member %d for Go's %T at %p.\n", memberIndex, *ifacep, ifacep)
-	field := reflect.ValueOf(*ifacep).Elem().Field(int(memberIndex))
+	field := reflect.ValueOf(value).Elem().Field(int(memberIndex))
 
-	switch field.Type().Kind() {
-	case reflect.String:
-		*(**C.char)(result) = C.CString(field.String()) // XXX This is leaking.
-	case reflect.Bool:
-		var b int32
-		if field.Bool() {
-			b = 1
-		}
-		*(*int32)(result) = b
-	case reflect.Int:
-		if !intIs64 {
-			*(*int32)(result) = int32(field.Int())
-			break
-		}
-		fallthrough
-	case reflect.Int64:
-		*(*int64)(result) = field.Int()
-	case reflect.Int32:
-		*(*int32)(result) = int32(field.Int())
-	case reflect.Float64:
-		*(*float64)(result) = field.Float()
-	case reflect.Float32:
-		*(*float32)(result) = float32(field.Float())
-	default:
-		panic("gqReadField got unsupported type: " + field.Type().Name())
-	}
+	// TODO Strings are being passed in an unsafe manner here. There is a
+	// small chance that the field is changed and the garbage collector run
+	// before C++ has chance to look at the data.
+	packDataValue(field.Interface(), result)
 }

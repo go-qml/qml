@@ -39,28 +39,7 @@ func init() {
 	}
 }
 
-func dataTypeOf(typ reflect.Type) C.DataType {
-	switch typ.Kind() {
-	case reflect.String:
-		return C.DTString
-	case reflect.Bool:
-		return C.DTBool
-	case reflect.Int:
-		return intDT
-	case reflect.Int64:
-		return C.DTInt64
-	case reflect.Int32:
-		return C.DTInt32
-	case reflect.Float32:
-		return C.DTFloat32
-	case reflect.Float64:
-		return C.DTFloat64
-	}
-	panic("Go type not supported yet: " + typ.Name())
-}
-
-func packDataValue(value interface{}) *C.DataValue {
-	var dvalue C.DataValue
+func packDataValue(value interface{}, dvalue *C.DataValue) {
 	datap := unsafe.Pointer(&dvalue.data)
 	switch value := value.(type) {
 	case string:
@@ -100,7 +79,6 @@ func packDataValue(value interface{}) *C.DataValue {
 		dvalue.dataType = C.DTObject
 		*(*unsafe.Pointer)(datap) = ref.valuep
 	}
-	return &dvalue
 }
 
 func unpackDataValue(dvalue *C.DataValue) interface{} {
@@ -126,6 +104,27 @@ func unpackDataValue(dvalue *C.DataValue) interface{} {
 	panic(fmt.Sprintf("unsupported data type: %d", dvalue.dataType))
 }
 
+func dataTypeOf(typ reflect.Type) C.DataType {
+	// Compare against the specific types rather than their kind.
+	// Custom types may have methods that must be supported.
+	switch typ {
+	case typeString:
+		return C.DTString
+	case typeBool:
+		return C.DTBool
+	case typeInt:
+		return intDT
+	case typeInt64:
+		return C.DTInt64
+	case typeInt32:
+		return C.DTInt32
+	case typeFloat32:
+		return C.DTFloat32
+	case typeFloat64:
+		return C.DTFloat64
+	}
+	panic("Go type not supported yet: " + typ.Name())
+}
 
 var typeInfoSize = C.size_t(unsafe.Sizeof(C.GoTypeInfo{}))
 var memberInfoSize = C.size_t(unsafe.Sizeof(C.GoMemberInfo{}))

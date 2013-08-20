@@ -11,6 +11,7 @@ typedef void GoAddr;
 
 typedef void QApplication_;
 typedef void QObject_;
+typedef void QVariant_;
 typedef void QString_;
 typedef void QQmlEngine_;
 typedef void QQmlContext_;
@@ -82,9 +83,12 @@ void delString(QString_ *s);
 
 GoValue_ *newValue(GoAddr *addr, GoTypeInfo *typeInfo);
 
+void packDataValue(QVariant_ *var, DataValue *result);
+void unpackDataValue(DataValue *value, QVariant_ *result);
+
 void installLogHandler();
 
-void hookReadField(GoAddr *addr, int memberIndex, void *result);
+void hookReadField(GoAddr *addr, int memberIndex, DataValue *result);
 void hookLogHandler(LogMessage *message);
 
 #ifdef __cplusplus

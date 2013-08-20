@@ -81,88 +81,10 @@ void contextSetProperty(QQmlContext_ *context, QString_ *name, DataValue *value)
 {
     const QString *qname = reinterpret_cast<QString *>(name);
     QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
+
     QVariant var;
-
-    switch (value->dataType) {
-    case DTString:
-        var = QString::fromUtf8(*(char **)value->data, value->len);
-        break;
-    case DTBool:
-        var = bool(*(char *)(value->data) != 0);
-        break;
-    case DTInt64:
-        var = *(qint64*)(value->data);
-        break;
-    case DTInt32:
-        var = *(qint32*)(value->data);
-        break;
-    case DTFloat64:
-        var = *(double*)(value->data);
-        break;
-    case DTFloat32:
-        var = *(float*)(value->data);
-        break;
-    case DTObject:
-        qcontext->setContextProperty(*qname, *(QObject**)(value->data));
-        return;
-    default:
-        qFatal("Unsupported data type: %d", value->dataType);
-        return;
-    }
-
+    unpackDataValue(value, &var);
     qcontext->setContextProperty(*qname, var);
-}
-
-static void packDataValue(QVariant *var, DataValue *value)
-{
-    // Some assumptions are made below regarding the size of types.
-    // There's apparently no better way to handle this since that's
-    // how the types with well defined sizes (qint64) are mapped to
-    // meta-types (QMetaType::LongLong).
-    switch ((int)var->type()) {
-    case QMetaType::QString:
-        {
-            value->dataType = DTString;
-            QByteArray ba = var->toByteArray();
-            *(char**)(value->data) = strdup(ba.constData());
-            value->len = ba.size();
-            break;
-        }
-    case QMetaType::Bool:
-        value->dataType = DTBool;
-        *(qint8*)(value->data) = (qint8)var->toInt();
-        break;
-    case QMetaType::LongLong:
-        value->dataType = DTInt64;
-        *(qint64*)(value->data) = var->toLongLong();
-        break;
-    case QMetaType::Int:
-        value->dataType = DTInt32;
-        *(qint32*)(value->data) = var->toInt();
-        break;
-    case QMetaType::Double:
-        value->dataType = DTFloat64;
-        *(double*)(value->data) = var->toDouble();
-        break;
-    case QMetaType::Float:
-        value->dataType = DTFloat32;
-        *(float*)(value->data) = var->toFloat();
-        break;
-    case QMetaType::QObjectStar:
-        {
-            QObject *qobject = var->value<QObject *>();
-            GoValue *govalue = dynamic_cast<GoValue *>(qobject);
-            if (govalue) {
-                value->dataType = DTGoAddr;
-                *(void **)(value->data) = govalue->addr();
-                break;
-            }
-        }
-        // fallthrough
-    default:
-        qFatal("Unsupported variant type: %d", var->type());
-        break;
-    }
 }
 
 void contextGetProperty(QQmlContext_ *context, QString_ *name, DataValue *value)
@@ -197,6 +119,91 @@ void delString(QString_ *s)
 QObject_ *newValue(GoAddr *addr, GoTypeInfo *typeInfo)
 {
     return new GoValue(addr, typeInfo);
+}
+
+void unpackDataValue(DataValue *value, QVariant_ *var)
+{
+    QVariant *qvar = reinterpret_cast<QVariant *>(var);
+    switch (value->dataType) {
+    case DTString:
+        *qvar = QString::fromUtf8(*(char **)value->data, value->len);
+        break;
+    case DTBool:
+        *qvar = bool(*(char *)(value->data) != 0);
+        break;
+    case DTInt64:
+        *qvar = *(qint64*)(value->data);
+        break;
+    case DTInt32:
+        *qvar = *(qint32*)(value->data);
+        break;
+    case DTFloat64:
+        *qvar = *(double*)(value->data);
+        break;
+    case DTFloat32:
+        *qvar = *(float*)(value->data);
+        break;
+    case DTObject:
+        qvar->setValue(*(QObject**)(value->data));
+        break;
+    default:
+        qFatal("Unsupported data type: %d", value->dataType);
+        break;
+    }
+}
+
+void packDataValue(QVariant_ *var, DataValue *value)
+{
+    QVariant *qvar = reinterpret_cast<QVariant *>(var);
+
+    // Some assumptions are made below regarding the size of types.
+    // There's apparently no better way to handle this since that's
+    // how the types with well defined sizes (qint64) are mapped to
+    // meta-types (QMetaType::LongLong).
+    switch (qvar->type()) {
+    case QMetaType::QString:
+        {
+            value->dataType = DTString;
+            QByteArray ba = qvar->toByteArray();
+            *(char**)(value->data) = strdup(ba.constData());
+            value->len = ba.size();
+            break;
+        }
+    case QMetaType::Bool:
+        value->dataType = DTBool;
+        *(qint8*)(value->data) = (qint8)qvar->toInt();
+        break;
+    case QMetaType::LongLong:
+        value->dataType = DTInt64;
+        *(qint64*)(value->data) = qvar->toLongLong();
+        break;
+    case QMetaType::Int:
+        value->dataType = DTInt32;
+        *(qint32*)(value->data) = qvar->toInt();
+        break;
+    case QMetaType::Double:
+        value->dataType = DTFloat64;
+        *(double*)(value->data) = qvar->toDouble();
+        break;
+    case QMetaType::Float:
+        value->dataType = DTFloat32;
+        *(float*)(value->data) = qvar->toFloat();
+        break;
+    case QMetaType::QObjectStar:
+        {
+            QObject *qobject = qvar->value<QObject *>();
+            GoValue *govalue = dynamic_cast<GoValue *>(qobject);
+            if (govalue) {
+                value->dataType = DTGoAddr;
+                *(void **)(value->data) = govalue->addr();
+                break;
+            }
+        }
+        // fallthrough
+    default:
+        qFatal("Unsupported variant type: %d", qvar->type());
+        break;
+    }
 }
 
 int gqRunSpike(GoAddr *addr, GoTypeInfo *typeInfo)
