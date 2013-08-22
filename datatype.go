@@ -73,6 +73,7 @@ func packDataValue(value interface{}, dvalue *C.DataValue) {
 		if !ok {
 			var value interface{} = value
 			ref.ifacep = &value
+			// Must run in GUI thread due to this call.
 			ref.valuep = C.newValue(unsafe.Pointer(ref.ifacep), typeInfo(value))
 			refs[value] = ref
 		}
@@ -86,6 +87,8 @@ func unpackDataValue(dvalue *C.DataValue) interface{} {
 	switch dvalue.dataType {
 	case C.DTString:
 		s := C.GoStringN(*(**C.char)(datap), dvalue.len)
+		// TODO If we move all unpackDataValue calls to the GUI thread,
+		// can we get rid of this allocation somehow?
 		C.free(unsafe.Pointer(*(**C.char)(datap)))
 		return s
 	case C.DTBool:

@@ -19,7 +19,6 @@ var _ = Suite(&S{})
 
 func (s *S) SetUpSuite(c *C) {
 	qml.Init(nil)
-	go qml.Run()
 }
 
 func (s *S) SetUpTest(c *C) {

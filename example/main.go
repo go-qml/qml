@@ -3,7 +3,6 @@ package main
 import (
 	"io/ioutil"
 	"launchpad.net/qml"
-	"time"
 )
 
 type Message struct {
@@ -30,11 +29,5 @@ func main() {
 	window := component.CreateWindow(engine.RootContext())
 	window.Show()
 
-	for i := 0; i < 10; i++ {
-		go time.Sleep(5)
-	}
-
-	time.Sleep(10)
-
-	qml.Run()
+	select{}
 }

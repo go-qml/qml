@@ -61,8 +61,9 @@ typedef struct {
     int line;
 } LogMessage;
 
-QApplication_ *newGuiApplication();
-void applicationExec(QApplication_ *app);
+void newGuiApplication();
+void applicationExec();
+void startIdleTimer();
 
 void *currentThread();
 void *appThread();
@@ -97,6 +98,7 @@ void installLogHandler();
 
 void hookReadField(GoAddr *addr, int memberIndex, DataValue *result);
 void hookLogHandler(LogMessage *message);
+void hookIdleTimer();
 
 #ifdef __cplusplus
 } // extern "C"

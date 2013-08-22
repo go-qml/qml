@@ -9,17 +9,17 @@
 
 #include <QDebug>
 
-QApplication_ *newGuiApplication()
+void newGuiApplication()
 {
     static char empty[1] = {0};
     static char *argv[] = {empty};
     static int argc = 1;
-    return new QGuiApplication(argc, argv);
+    new QGuiApplication(argc, argv);
 }
 
-void applicationExec(QApplication_ *app)
+void applicationExec()
 {
-    reinterpret_cast<QCoreApplication *>(app)->exec();
+    qApp->exec();
 }
 
 void *currentThread()
@@ -90,7 +90,6 @@ QQuickView_ *componentCreateView(QQmlComponent_ *component, QQmlContext_ *contex
     QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
 
     QObject *obj = qcomponent->create(qcontext);
-    qWarning() << qcontext->engine();
     QQuickView *view = new QQuickView(qcontext->engine(), 0);
     view->setContent(qcomponent->url(), qcomponent, obj);
     return view;
