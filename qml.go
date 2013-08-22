@@ -12,7 +12,9 @@ import "C"
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
+	"runtime"
 	"strings"
 	"unsafe"
 )
@@ -26,27 +28,33 @@ var initialized = false
 
 var qapp unsafe.Pointer
 
+func debugThreadId(where string) {
+	fmt.Printf("[%s] Thread: %p\n", where, C.currentThread())
+}
+
 // Init initializes the qml package with the provided parameters.
 // If the options parameter is nil, default options suitable for a
 // normal graphic application will be used.
 //
 // Init must be called only once, and before any other QML functionality is used.
 func Init(options *InitOptions) {
+	debugThreadId("Init")
 	if initialized {
 		panic("qml.Init called more than once")
 	}
 	initialized = true
+	qapp = C.newGuiApplication()
+	fmt.Printf("[%s] App Thread: %p\n", "Init", C.appThread())
 
-	// Must not be de-allocated according to QApp's docs.
-	argv := (**C.char)(C.malloc(ptrSize * 2))
-	*(**C.char)(unsafe.Pointer(uintptr(unsafe.Pointer(argv)) + uintptr(ptrSize * 0))) = C.CString("")
-	*(*uintptr)(unsafe.Pointer(uintptr(unsafe.Pointer(argv)) + uintptr(ptrSize * 1))) = 0
-
-	qapp = C.newGuiApplication(1, argv)
+	runtime.LockOSThread()
 }
 
 // Run runs the main QML event loop.
 func Run() {
+	debugThreadId("Run")
+	if C.currentThread() != C.appThread() {
+		panic("qml.Run must be called from the same goroutine Init was run on")
+	}
 	C.applicationExec(qapp);
 }
 
@@ -66,6 +74,7 @@ func (e *Engine) assertValid() {
 // The Close method must be called to release the resources
 // used by the engine when done using it.
 func NewEngine() *Engine {
+	debugThreadId("NewEngine")
 	return &Engine{C.newEngine(nil)}
 }
 
@@ -153,6 +162,10 @@ func (c *Component) Create(context *Context) *Object {
 	return &Object{C.componentCreate(c.addr, context.addr)}
 }
 
+func (c *Component) CreateWindow(context *Context) *Window {
+	return &Window{C.componentCreateView(c.addr, context.addr)}
+}
+
 type Object struct {
 	addr unsafe.Pointer
 }
@@ -166,10 +179,23 @@ func (o *Object) Get(property string) interface{} {
 	return unpackDataValue(&value)
 }
 
+//func NewWindow(engine *qml.Engine) {
+//	return &Window{C.newView(engine)}
+//}
+
+type Window struct {
+	addr unsafe.Pointer
+}
+
+func (w *Window) Show() {
+	C.viewShow(w.addr)
+}
+
 // TODO What's a nice way to delete the component and created component objects?
 
 //export hookReadField
 func hookReadField(ifacep unsafe.Pointer, memberIndex C.int, result *C.DataValue) {
+	debugThreadId("hookReadField")
 	value := *(*interface{})(ifacep)
 	//fmt.Printf("QML requested member %d for Go's %T at %p.\n", memberIndex, *ifacep, ifacep)
 	field := reflect.ValueOf(value).Elem().Field(int(memberIndex))

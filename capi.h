@@ -16,6 +16,7 @@ typedef void QString_;
 typedef void QQmlEngine_;
 typedef void QQmlContext_;
 typedef void QQmlComponent_;
+typedef void QQuickView_;
 typedef void QMessageLogContext_;
 typedef void GoValue_;
 
@@ -60,8 +61,11 @@ typedef struct {
     int line;
 } LogMessage;
 
-QApplication_ *newGuiApplication(int argc, char **argv);
+QApplication_ *newGuiApplication();
 void applicationExec(QApplication_ *app);
+
+void *currentThread();
+void *appThread();
 
 QQmlEngine_ *newEngine(QObject_ *parent);
 void delEngine(QQmlEngine_ *engine);
@@ -77,6 +81,9 @@ QQmlComponent_ *newComponent(QQmlEngine_ *engine, QObject_ *parent);
 QObject_ *componentCreate(QQmlComponent_ *component, QQmlContext_ *context);
 void componentSetData(QQmlComponent_ *component, const char *data, int dataLen, const char *url, int urlLen);
 char *componentErrorString(QQmlComponent_ *component);
+QQuickView_ *componentCreateView(QQmlComponent_ *component, QQmlContext_ *context);
+
+void viewShow(QQuickView_ *view);
 
 QString_ *newString(const char *data, int len);
 void delString(QString_ *s);

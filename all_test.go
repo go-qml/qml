@@ -5,6 +5,7 @@ import (
 	. "launchpad.net/gocheck"
 	"launchpad.net/qml"
 	"testing"
+	"time"
 )
 
 func Test(t *testing.T) { TestingT(t) }
@@ -157,4 +158,18 @@ func (s *S) TestComponentSetData(c *C) {
 
 	c.Assert(c.GetTestLog(), Matches, pattern)
 	c.Assert(obj.Get("width"), Equals, float64(N*2))
+}
+
+func (s *S) TestComponentCreateWindow(c *C) {
+	data := `
+		import QtQuick 2.0
+		Item { width: 300; height: 200; }
+	`
+	component := qml.NewComponent(s.engine)
+	component.SetData("file.qml", []byte(data))
+
+	window := component.CreateWindow(s.context)
+	window.Show()
+
+	time.Sleep(600e9)
 }

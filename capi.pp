@@ -9,14 +9,27 @@
 
 #include <QDebug>
 
-QApplication_ *newGuiApplication(int argc, char **argv)
+QApplication_ *newGuiApplication()
 {
+    static char empty[1] = {0};
+    static char *argv[] = {empty};
+    static int argc = 1;
     return new QGuiApplication(argc, argv);
 }
 
 void applicationExec(QApplication_ *app)
 {
     reinterpret_cast<QCoreApplication *>(app)->exec();
+}
+
+void *currentThread()
+{
+    return QThread::currentThread();
+}
+
+void *appThread()
+{
+    return QCoreApplication::instance()->thread();
 }
 
 QQmlEngine_ *newEngine(QObject_ *parent)
@@ -65,8 +78,27 @@ char *componentErrorString(QQmlComponent_ *component)
 
 QObject_ *componentCreate(QQmlComponent_ *component, QQmlContext_ *context)
 {
+    QQmlComponent *qcomponent = reinterpret_cast<QQmlComponent *>(component);
     QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
-    return reinterpret_cast<QQmlComponent *>(component)->create(qcontext);
+
+    return qcomponent->create(qcontext);
+}
+
+QQuickView_ *componentCreateView(QQmlComponent_ *component, QQmlContext_ *context)
+{
+    QQmlComponent *qcomponent = reinterpret_cast<QQmlComponent *>(component);
+    QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
+
+    QObject *obj = qcomponent->create(qcontext);
+    qWarning() << qcontext->engine();
+    QQuickView *view = new QQuickView(qcontext->engine(), 0);
+    view->setContent(qcomponent->url(), qcomponent, obj);
+    return view;
+}
+
+void viewShow(QQuickView_ *view)
+{
+    reinterpret_cast<QQuickView *>(view)->show();
 }
 
 void contextSetObject(QQmlContext_ *context, QObject_ *value)
