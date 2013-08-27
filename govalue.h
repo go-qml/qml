@@ -15,11 +15,13 @@ class GoValue : public QObject
     Q_OBJECT
 
 public:
-    GoValue(GoAddr *addr, GoTypeInfo *typeInfo);
+    GoValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject *parent);
 
     GoAddr *addr();
 
     static QMetaObject *metaObjectFor(GoTypeInfo *typeInfo);
+
+    virtual ~GoValue();
 
 private:
     Q_DECLARE_PRIVATE(GoValue)

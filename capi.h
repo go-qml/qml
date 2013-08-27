@@ -21,13 +21,17 @@ typedef void QMessageLogContext_;
 typedef void GoValue_;
 
 typedef enum {
-    DTUnknown = 0,
-    DTString  = 1,
-    DTBool    = 2,
-    DTInt64   = 3,
-    DTInt32   = 4,
-    DTFloat64 = 5,
-    DTFloat32 = 6,
+    DTUnknown = 0, // Has an unsupported type.
+    DTInvalid = 1, // Does not exist or similar.
+    DTAny     = 2, // Any of the following types. Used in type information, not in an actual DataValue.
+
+    DTString  = 10,
+    DTBool    = 11,
+    DTInt64   = 12,
+    DTInt32   = 13,
+    DTFloat64 = 14,
+    DTFloat32 = 15,
+
     DTGoAddr  = 100,
     DTObject  = 101
 } DataType;
@@ -63,6 +67,7 @@ typedef struct {
 
 void newGuiApplication();
 void applicationExec();
+void applicationFlushAll();
 void startIdleTimer();
 
 void *currentThread();
@@ -71,12 +76,16 @@ void *appThread();
 QQmlEngine_ *newEngine(QObject_ *parent);
 void delEngine(QQmlEngine_ *engine);
 QQmlContext_ *engineRootContext(QQmlEngine_ *engine);
+void engineSetOwnershipCPP(QQmlEngine_ *engine, QObject_ *object);
+void engineSetOwnershipJS(QQmlEngine_ *engine, QObject_ *object);
+void engineSetContextForObject(QQmlEngine_ *engine, QObject_ *object);
 
 void contextGetProperty(QQmlContext_ *context, QString_ *name, DataValue *value);
 void contextSetProperty(QQmlContext_ *context, QString_ *name, DataValue *value);
 void contextSetObject(QQmlContext_ *context, QObject_ *value);
 
 void objectGetProperty(QObject_ *object, const char *name, DataValue *value);
+void objectSetParent(QObject_ *object, QObject_ *parent);
 
 QQmlComponent_ *newComponent(QQmlEngine_ *engine, QObject_ *parent);
 QObject_ *componentCreate(QQmlComponent_ *component, QQmlContext_ *context);
@@ -85,20 +94,22 @@ char *componentErrorString(QQmlComponent_ *component);
 QQuickView_ *componentCreateView(QQmlComponent_ *component, QQmlContext_ *context);
 
 void viewShow(QQuickView_ *view);
+void viewHide(QQuickView_ *view);
 
 QString_ *newString(const char *data, int len);
 void delString(QString_ *s);
 
-GoValue_ *newValue(GoAddr *addr, GoTypeInfo *typeInfo);
+GoValue_ *newValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject_ *parent);
 
 void packDataValue(QVariant_ *var, DataValue *result);
 void unpackDataValue(DataValue *value, QVariant_ *result);
 
 void installLogHandler();
 
-void hookReadField(GoAddr *addr, int memberIndex, DataValue *result);
-void hookLogHandler(LogMessage *message);
 void hookIdleTimer();
+void hookLogHandler(LogMessage *message);
+void hookGoValueReadField(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, DataValue *result);
+void hookGoValueDestroyed(QQmlEngine_ *engine, GoAddr *addr);
 
 #ifdef __cplusplus
 } // extern "C"

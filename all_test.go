@@ -4,6 +4,7 @@ import (
 	"fmt"
 	. "launchpad.net/gocheck"
 	"launchpad.net/qml"
+	"runtime"
 	"testing"
 	"time"
 )
@@ -23,12 +24,28 @@ func (s *S) SetUpSuite(c *C) {
 
 func (s *S) SetUpTest(c *C) {
 	qml.SetLogger(c)
+	qml.SetStats(true)
+	qml.ResetStats()
 	s.engine = qml.NewEngine()
-	s.context = s.engine.RootContext()
+	s.context = s.engine.Context()
 }
 
 func (s *S) TearDownTest(c *C) {
-	s.engine.Close()
+	s.engine.Destroy()
+
+	retries := 3
+	for {
+		runtime.GC()
+		stats := qml.GetStats()
+		if stats.EnginesAlive == 0 && stats.ValuesAlive == 0 {
+			break
+		}
+		if retries == 0 {
+			panic(fmt.Sprintf("there are objects alive:\n%#v\n", stats))
+		}
+		retries--
+	}
+
 	qml.SetLogger(nil)
 }
 
@@ -41,6 +58,7 @@ type MyStruct struct {
 	Int32   int32
 	Float64 float64
 	Float32 float32
+	Any     interface{}
 }
 
 var intIs64 bool
@@ -50,10 +68,14 @@ func init() {
 	intIs64 = (i+1 > 0)
 }
 
-func (s *S) TestEngineClosedUse(c *C) {
-	s.engine.Close()
-	s.engine.Close()
-	c.Assert(s.engine.RootContext, PanicMatches, "engine already closed")
+func (s *S) TestEngineDestroyedUse(c *C) {
+	s.engine.Destroy()
+	s.engine.Destroy()
+	c.Assert(s.engine.Context, PanicMatches, "engine already destroyed")
+}
+
+func (s *S) TestContextGetMissing(c *C) {
+	c.Assert(s.context.Get("key"), Equals, nil)
 }
 
 func (s *S) TestContextSetGetString(c *C) {
@@ -103,6 +125,31 @@ func (s *S) TestContextSetGetGoValue(c *C) {
 	c.Assert(s.context.Get("key"), Equals, &value)
 }
 
+func (s *S) TestContextSetGoValueGetProperty(c *C) {
+	// This test will touch:
+	//
+	// - The processing of nesting
+	// - Field reading both from a pointer (outter MyStruct) and from a value (inner MyStruct)
+	// - Access to an interface{} field (Any)
+	// - Proper collection of a JS-owned GoValue wrapper (the result of accessing Any)
+	//
+	// When changing this test, ensure these tests are covered here or elsewhere.
+	value := &MyStruct{Any: MyStruct{String: "<string value>"}}
+	s.context.Set("key", &value)
+
+	data := `
+		import QtQuick 2.0
+		Item{ Component.onCompleted: console.log('string is', key.any.string); }
+	`
+
+	component, err := s.engine.Load(qml.String("file.qml", data))
+	c.Assert(err, IsNil)
+
+	_ = component.Create(s.context)
+
+	c.Assert(c.GetTestLog(), Matches, "(?s).*string is <string value>.*")
+}
+
 // TODO Test getting of non-existent.
 
 func (s *S) TestContextSetObject(c *C) {
@@ -133,8 +180,7 @@ func (s *S) TestContextSetObject(c *C) {
 }
 
 func (s *S) TestComponentSetDataError(c *C) {
-	component := qml.NewComponent(s.engine)
-	err := component.SetData("file.qml", []byte("Item{}"))
+	_, err := s.engine.Load(qml.String("file.qml", "Item{}"))
 	c.Assert(err, ErrorMatches, "file.qml:1 Item is not a type")
 }
 
@@ -145,9 +191,7 @@ func (s *S) TestComponentSetData(c *C) {
 		import QtQuick 2.0
 		Item { width: N*2; Component.onCompleted: console.log("N is", N) }
 	`
-
-	component := qml.NewComponent(s.engine)
-	err := component.SetData("file.qml", []byte(data))
+	component, err := s.engine.Load(qml.String("file.qml", data))
 	c.Assert(err, IsNil)
 
 	pattern := fmt.Sprintf(".* file.qml:3: N is %d\n.*", N)
@@ -164,11 +208,36 @@ func (s *S) TestComponentCreateWindow(c *C) {
 		import QtQuick 2.0
 		Item { width: 300; height: 200; }
 	`
-	component := qml.NewComponent(s.engine)
-	component.SetData("file.qml", []byte(data))
+	component, err := s.engine.Load(qml.String("file.qml", data))
+	c.Assert(err, IsNil)
 
+	// TODO: More checks here.
 	window := component.CreateWindow(s.context)
 	window.Show()
-
-	time.Sleep(600e9)
+	qml.FlushAll()
+	time.Sleep(1 * time.Second)
+	window.Hide()
 }
+
+//func (s *S) TestFoo(c *C) {
+//	value := MyStruct{String: "<string value>"}
+//	s.context.Set("a", &value)
+//	s.context.Set("b", &value)
+//
+//	data := `
+//		import QtQuick 2.0
+//		Item {
+//			Component.onCompleted: {
+//				console.log('TEST:', a === b);
+//				a = 42;
+//			}
+//		}
+//	`
+//
+//	component, err := s.engine.Load(qml.String("file.qml", data))
+//	c.Assert(err, IsNil)
+//	_ = component.Create(s.context)
+//
+//	c.Assert(s.context.Get("a"), IsNil)
+//	c.Assert(c.GetTestLog(), Equals, "")
+//}

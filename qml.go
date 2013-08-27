@@ -8,7 +8,9 @@ import "C"
 
 import (
 	"errors"
+	"io/ioutil"
 	"strings"
+	"sync/atomic"
 	"unsafe"
 )
 
@@ -17,18 +19,18 @@ type InitOptions struct {
 	// Reserved for coming options.
 }
 
-var initialized = false
+var initialized int32
 
 // Init initializes the qml package with the provided parameters.
 // If the options parameter is nil, default options suitable for a
 // normal graphic application will be used.
 //
-// Init must be called only once, and before any other QML functionality is used.
+// Init must be called only once, and before any other functionality
+// from the qml package is used.
 func Init(options *InitOptions) {
-	if initialized {
+	if !atomic.CompareAndSwapInt32(&initialized, 0, 1) {
 		panic("qml.Init called more than once")
 	}
-	initialized = true
 
 	go guiLoop()
 
@@ -39,62 +41,130 @@ func Init(options *InitOptions) {
 // Engine provides an environment for instantiating QML components.
 type Engine struct {
 	addr unsafe.Pointer
+
+	values map[interface{}]cppGoValue
+}
+
+var engines = make(map[unsafe.Pointer]*Engine)
+
+// NewEngine returns a new QML engine.
+//
+// The Destory method must be called to finalize the engine and release
+// any resources used.
+func NewEngine() *Engine {
+	engine := &Engine{values: make(map[interface{}]cppGoValue)}
+	gui(func() {
+		engine.addr = C.newEngine(nil)
+		engines[engine.addr] = engine
+		stats.enginesAlive(+1)
+	})
+	return engine
 }
 
 func (e *Engine) assertValid() {
 	if e.addr == nilPtr {
-		panic("engine already closed")
+		panic("engine already destroyed")
 	}
 }
 
-// NewEngine returns a new QML engine.
-//
-// The Close method must be called to release the resources
-// used by the engine when done using it.
-func NewEngine() *Engine {
-	var engine Engine
-	gui(func() {
-		engine.addr = C.newEngine(nil)
-	})
-	return &engine
-}
-
-// Close releases resources used by the engine. The engine must
-// not be used after calling it.
-func (e *Engine) Close() {
+// Destroy finalizes the engine and releases any resources used.
+// The engine must not be used after calling this method.
+func (e *Engine) Destroy() {
 	if e.addr != nilPtr {
 		gui(func() {
 			C.delEngine(e.addr)
+			// TODO Ensure this works correctly. Does it have to wait until
+			// cascading events are delivered? How can it possibly stay alive
+			// if its memory is going away?
+			//delete(engines, e.addr)
+			e.addr = nilPtr
+			stats.enginesAlive(-1)
 		})
-		e.addr = nilPtr;
 	}
 }
 
-func (e *Engine) RootContext() *Context {
+type Content interface {
+	Location() string
+	Data() ([]byte, error)
+}
+
+func String(location, qml string) Content {
+	return &content{location, []byte(qml), nil}
+}
+
+func File(path string) Content {
+	// TODO: Test this.
+	data, err := ioutil.ReadFile(path)
+	return &content{path, data, err}
+}
+
+type content struct {
+	location string
+	data     []byte
+	err      error
+}
+
+func (c *content) Location() string {
+	return c.location
+}
+
+func (c *content) Data() ([]byte, error) {
+	return c.data, c.err
+}
+
+// Load loads a new component with the provided QML content.
+//
+// For example:
+//
+//     component, err := engine.Load(qml.File("file.qml"))
+//
+// See qml.File and qml.String.
+func (e *Engine) Load(c Content) (*Component, error) {
+	data, err := c.Data()
+	if err != nil {
+		return nil, err
+	}
+	component, err := e.newComponent(c.Location(), data)
+	if err != nil {
+		// TODO: component.Delete()
+		return nil, err
+	}
+	return component, nil
+}
+
+// Context returns the engine's root context.
+func (e *Engine) Context() *Context {
 	e.assertValid()
-	var context Context
+	context := &Context{engine: e}
 	gui(func() {
 		context.addr = C.engineRootContext(e.addr)
 	})
-	return &context
+	return context
 }
 
 type Context struct {
 	addr unsafe.Pointer
+
+	engine *Engine
 }
 
-type reference struct {
-	ifacep *interface{}
-	valuep unsafe.Pointer
-}
-
-var refs = make(map[interface{}]reference)
-
+// Set makes the provided value available as a variable with the
+// given name for QML code executed within the c context.
+//
+// If value is a struct, its exported fields are also made accessible to
+// QML code as attributes of the named object. The attribute name in the
+// object has the same name of the Go field name, except for the first
+// letter which is lowercased. This is conventional and enforced by
+// the QML implementation.
+//
+// The engine will hold a reference to the provided value, so it will
+// not be garbage collected until the engine is destroyed, even if the
+// value is unused or changed.
 func (c *Context) Set(name string, value interface{}) {
 	cname, cnamelen := unsafeStringData(name)
 	gui(func() {
 		var dvalue C.DataValue
-		packDataValue(value, &dvalue)
+		packDataValue(value, &dvalue, c.engine, cppOwner)
 
 		qname := C.newString(cname, cnamelen)
 		defer C.delString(qname)
@@ -103,21 +173,22 @@ func (c *Context) Set(name string, value interface{}) {
 	})
 }
 
+// SetObject makes the exported fields of the provided value available as
+// variables for QML code executed within the c context. The variable names
+// will have the same name of the Go field names, except for the first
+// letter which is lowercased. This is conventional and enforced by
+// the QML implementation.
+//
+// The engine will hold a reference to the provided value, so it will
+// not be garbage collected until the engine is destroyed, even if the
+// value is unused or changed.
 func (c *Context) SetObject(value interface{}) {
-	// TODO This is leaking. Must figure how to decref the QObject when the context is done with it,
-	// so that we can decref it locally as well, and drop the map reference when it reaches zero.
-	// Must also lock refs.
 	gui(func() {
-		ref, ok := refs[value]
-		if !ok {
-			ref.ifacep = &value
-			ref.valuep = C.newValue(unsafe.Pointer(&value), typeInfo(value))
-			refs[value] = ref
-		}
-		C.contextSetObject(c.addr, ref.valuep)
+		C.contextSetObject(c.addr, wrapGoValue(c.engine, value, cppOwner))
 	})
 }
 
+// Get returns the context variable with the given name.
 func (c *Context) Get(name string) interface{} {
 	cname, cnamelen := unsafeStringData(name)
 
@@ -131,33 +202,31 @@ func (c *Context) Get(name string) interface{} {
 	return unpackDataValue(&dvalue)
 }
 
+// TODO Context.Spawn() => Context
+
 type Component struct {
 	addr unsafe.Pointer
 }
 
-// TODO What's a nice way to delete the component and created component objects?
-
-func NewComponent(engine *Engine) *Component {
+func (e *Engine) newComponent(location string, data []byte) (*Component, error) {
+	// TODO What's a nice way to delete the component and created component objects?
 	var component Component
-	gui(func() {
-		component.addr = C.newComponent(engine.addr, nilPtr)
-	})
-	return &component
-}
-
-func (c *Component) SetData(location string, data []byte) error {
+	var err error
 	cdata, cdatalen := unsafeBytesData(data)
 	cloc, cloclen := unsafeStringData(location)
-	var err error
 	gui(func() {
-		C.componentSetData(c.addr, cdata, cdatalen, cloc, cloclen)
-		message := C.componentErrorString(c.addr)
+		component.addr = C.newComponent(e.addr, nilPtr)
+		C.componentSetData(component.addr, cdata, cdatalen, cloc, cloclen)
+		message := C.componentErrorString(component.addr)
 		if message != nilCharPtr {
 			err = errors.New(strings.TrimRight(C.GoString(message), "\n"))
 			C.free(unsafe.Pointer(message))
 		}
 	})
-	return err
+	if err != nil {
+		return nil, err
+	}
+	return &component, nil
 }
 
 func (c *Component) Create(context *Context) *Object {
@@ -192,16 +261,21 @@ func (o *Object) Get(property string) interface{} {
 	return unpackDataValue(&value)
 }
 
-//func NewWindow(engine *qml.Engine) {
-//	return &Window{C.newView(engine)}
-//}
-
+// Window represents a QML window where components are rendered.
 type Window struct {
 	addr unsafe.Pointer
 }
 
+// Show exposes the window.
 func (w *Window) Show() {
 	gui(func() {
 		C.viewShow(w.addr)
+	})
+}
+
+// Hide hides the window.
+func (w *Window) Hide() {
+	gui(func() {
+		C.viewHide(w.addr)
 	})
 }

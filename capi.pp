@@ -22,6 +22,11 @@ void applicationExec()
     qApp->exec();
 }
 
+void applicationFlushAll()
+{
+    qApp->processEvents();
+}
+
 void *currentThread()
 {
     return QThread::currentThread();
@@ -46,6 +51,30 @@ void delEngine(QQmlEngine_ *engine)
 QQmlContext_ *engineRootContext(QQmlEngine_ *engine)
 {
     return reinterpret_cast<QQmlEngine *>(engine)->rootContext();
+}
+
+void engineSetContextForObject(QQmlEngine_ *engine, QObject_ *object)
+{
+    QQmlEngine *qengine = reinterpret_cast<QQmlEngine *>(engine);
+    QObject *qobject = reinterpret_cast<QObject *>(object);
+
+    QQmlEngine::setContextForObject(qobject, qengine->rootContext());
+}
+
+void engineSetOwnershipCPP(QQmlEngine_ *engine, QObject_ *object)
+{
+    QQmlEngine *qengine = reinterpret_cast<QQmlEngine *>(engine);
+    QObject *qobject = reinterpret_cast<QObject *>(object);
+
+    qengine->setObjectOwnership(qobject, QQmlEngine::CppOwnership);
+}
+
+void engineSetOwnershipJS(QQmlEngine_ *engine, QObject_ *object)
+{
+    QQmlEngine *qengine = reinterpret_cast<QQmlEngine *>(engine);
+    QObject *qobject = reinterpret_cast<QObject *>(object);
+
+    qengine->setObjectOwnership(qobject, QQmlEngine::JavaScriptOwnership);
 }
 
 QQmlComponent_ *newComponent(QQmlEngine_ *engine, QObject_ *parent)
@@ -100,10 +129,20 @@ void viewShow(QQuickView_ *view)
     reinterpret_cast<QQuickView *>(view)->show();
 }
 
+void viewHide(QQuickView_ *view)
+{
+    reinterpret_cast<QQuickView *>(view)->hide();
+}
+
 void contextSetObject(QQmlContext_ *context, QObject_ *value)
 {
     QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
     QObject *qvalue = reinterpret_cast<QObject *>(value);
+
+    // Give qvalue an engine reference if it doesn't yet have one.
+    if (!qmlEngine(qvalue)) {
+        QQmlEngine::setContextForObject(qvalue, qcontext->engine()->rootContext());
+    }
 
     qcontext->setContextObject(qvalue);
 }
@@ -115,6 +154,13 @@ void contextSetProperty(QQmlContext_ *context, QString_ *name, DataValue *value)
 
     QVariant var;
     unpackDataValue(value, &var);
+
+    // Give qvalue an engine reference if it doesn't yet have one .
+    QObject *obj = var.value<QObject *>();
+    if (obj && !qmlEngine(obj)) {
+        QQmlEngine::setContextForObject(obj, qcontext->engine()->rootContext());
+    }
+
     qcontext->setContextProperty(*qname, var);
 }
 
@@ -123,7 +169,9 @@ void contextGetProperty(QQmlContext_ *context, QString_ *name, DataValue *value)
     QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
     const QString *qname = reinterpret_cast<QString *>(name);
 
+    qDebug() << "BEFORE:";
     QVariant var = qcontext->contextProperty(*qname);
+    qDebug() << "AFTER:" << var;
     packDataValue(&var, value);
 }
 
@@ -133,6 +181,14 @@ void objectGetProperty(QObject_ *object, const char *name, DataValue *value)
     
     QVariant var = qobject->property(name);
     packDataValue(&var, value);
+}
+
+void objectSetParent(QObject_ *object, QObject_ *parent)
+{
+    QObject *qobject = reinterpret_cast<QObject *>(object);
+    QObject *qparent = reinterpret_cast<QObject *>(parent);
+
+    qobject->setParent(qparent);
 }
 
 QString_ *newString(const char *data, int len)
@@ -147,9 +203,10 @@ void delString(QString_ *s)
     delete reinterpret_cast<QString *>(s);
 }
 
-QObject_ *newValue(GoAddr *addr, GoTypeInfo *typeInfo)
+QObject_ *newValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject_ *parent)
 {
-    return new GoValue(addr, typeInfo);
+    QObject *qparent = reinterpret_cast<QObject *>(parent);
+    return new GoValue(addr, typeInfo, qparent);
 }
 
 void unpackDataValue(DataValue *value, QVariant_ *var)
@@ -192,6 +249,9 @@ void packDataValue(QVariant_ *var, DataValue *value)
     // how the types with well defined sizes (qint64) are mapped to
     // meta-types (QMetaType::LongLong).
     switch (qvar->type()) {
+    case QVariant::Invalid:
+        value->dataType = DTInvalid;
+        break;
     case QMetaType::QString:
         {
             value->dataType = DTString;
@@ -235,26 +295,6 @@ void packDataValue(QVariant_ *var, DataValue *value)
         qFatal("Unsupported variant type: %d", qvar->type());
         break;
     }
-}
-
-int gqRunSpike(GoAddr *addr, GoTypeInfo *typeInfo)
-{
-    int argc = 1;
-    const char *argv[] = {""};
-
-    QGuiApplication app(argc, (char **)argv);
-    QQuickView view;
-
-    GoValue value(addr, typeInfo);
-    view.rootContext()->setContextProperty("value", &value);
-
-    GoValueType<1>::init(typeInfo);
-    qmlRegisterType< GoValueType<1> >("GoTypes", 1, 0, typeInfo->typeName);
-
-    view.setSource(QUrl::fromLocalFile("spike.qml"));
-    view.show();
-
-    return app.exec();
 }
 
 void internalLogHandler(QtMsgType severity, const QMessageLogContext &context, const QString &text)

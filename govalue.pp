@@ -1,11 +1,12 @@
 
 #include <private/qmetaobjectbuilder_p.h>
 
+#include <QQmlEngine>
+#include <QtQml/qqml.h>
 #include <QDebug>
 
 #include "govalue.h"
 #include "capi.h"
-
 
 class GoValuePrivate;
 class GoValueMetaObject : public QAbstractDynamicMetaObject
@@ -50,7 +51,8 @@ int GoValueMetaObject::metaCall(QMetaObject::Call c, int idx, void **a)
         for (int i = 0; i < valuePriv->typeInfo->membersLen; i++) {
             if (memberInfo->metaIndex == idx) {
                 DataValue result;
-                hookReadField(valuePriv->addr, memberInfo->memberIndex, &result);
+                // TODO Cache qmlEngine's result for this value?
+                hookGoValueReadField(qmlEngine(value), valuePriv->addr, memberInfo->memberIndex, &result);
                 QVariant *out = reinterpret_cast<QVariant *>(a[0]);
                 unpackDataValue(&result, out);
                 return -1;
@@ -63,13 +65,19 @@ int GoValueMetaObject::metaCall(QMetaObject::Call c, int idx, void **a)
     return -1;
 }
 
-GoValue::GoValue(GoAddr *addr, GoTypeInfo *typeInfo)
-        : QObject(*(new GoValuePrivate()), 0)
+GoValue::GoValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject *parent)
+        : QObject(*(new GoValuePrivate()), parent)
 {
     Q_D(GoValue);
     d->addr = addr;
     d->typeInfo = typeInfo;
     d->valueMeta = new GoValueMetaObject(this, d, typeInfo);
+}
+
+GoValue::~GoValue()
+{
+    Q_D(GoValue);
+    hookGoValueDestroyed(qmlEngine(this), d->addr);
 }
 
 GoAddr *GoValue::addr()

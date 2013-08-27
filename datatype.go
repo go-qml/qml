@@ -17,16 +17,17 @@ var (
 
 	ptrSize = C.size_t(unsafe.Sizeof(uintptr(0)))
 
-	nilPtr = unsafe.Pointer(uintptr(0))
+	nilPtr     = unsafe.Pointer(uintptr(0))
 	nilCharPtr = (*C.char)(nilPtr)
 
-	typeString = reflect.TypeOf("")
-	typeBool = reflect.TypeOf(false)
-	typeInt = reflect.TypeOf(int(0))
-	typeInt64 = reflect.TypeOf(int64(0))
-	typeInt32 = reflect.TypeOf(int32(0))
+	typeString  = reflect.TypeOf("")
+	typeBool    = reflect.TypeOf(false)
+	typeInt     = reflect.TypeOf(int(0))
+	typeInt64   = reflect.TypeOf(int64(0))
+	typeInt32   = reflect.TypeOf(int32(0))
 	typeFloat64 = reflect.TypeOf(float64(0))
 	typeFloat32 = reflect.TypeOf(float32(0))
+	typeIface   = reflect.TypeOf(new(interface{})).Elem()
 )
 
 func init() {
@@ -39,7 +40,18 @@ func init() {
 	}
 }
 
-func packDataValue(value interface{}, dvalue *C.DataValue) {
+// packDataValue packs the provided Go value into a C.DataValue for
+// shiping into C++ land.
+//
+// For simple types (bool, int, etc) value is converted into a
+// native C++ value. For anything else, including cases when value
+// has a type that has an underlying simple type, the Go value itself
+// is encapsulated into a C++ wrapper so that field access and method
+// calls work.
+//
+// This must be run from the main GUI thread due to the cases where
+// calling wrapGoValue is necessary.
+func packDataValue(value interface{}, dvalue *C.DataValue, engine *Engine, owner valueOwner) {
 	datap := unsafe.Pointer(&dvalue.data)
 	switch value := value.(type) {
 	case string:
@@ -66,22 +78,12 @@ func packDataValue(value interface{}, dvalue *C.DataValue) {
 		dvalue.dataType = C.DTFloat32
 		*(*float32)(datap) = value
 	default:
-		// TODO This is leaking. Must figure how to decref the QObject when the context is done with it,
-		// so that we can decref it locally as well, and drop the map reference when it reaches zero.
-		// Must also lock refs.
-		ref, ok := refs[value]
-		if !ok {
-			var value interface{} = value
-			ref.ifacep = &value
-			// Must run in GUI thread due to this call.
-			ref.valuep = C.newValue(unsafe.Pointer(ref.ifacep), typeInfo(value))
-			refs[value] = ref
-		}
 		dvalue.dataType = C.DTObject
-		*(*unsafe.Pointer)(datap) = ref.valuep
+		*(*unsafe.Pointer)(datap) = wrapGoValue(engine, value, owner)
 	}
 }
 
+// unpackDataValue converts a value shipped by C++ into a native Go value.
 func unpackDataValue(dvalue *C.DataValue) interface{} {
 	datap := unsafe.Pointer(&dvalue.data)
 	switch dvalue.dataType {
@@ -103,6 +105,8 @@ func unpackDataValue(dvalue *C.DataValue) interface{} {
 		return *(*float32)(datap)
 	case C.DTGoAddr:
 		return **(**interface{})(datap)
+	case C.DTInvalid:
+		return nil
 	}
 	panic(fmt.Sprintf("unsupported data type: %d", dvalue.dataType))
 }
@@ -125,6 +129,8 @@ func dataTypeOf(typ reflect.Type) C.DataType {
 		return C.DTFloat32
 	case typeFloat64:
 		return C.DTFloat64
+	case typeIface:
+		return C.DTAny
 	}
 	panic("Go type not supported yet: " + typ.Name())
 }
@@ -182,22 +188,43 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	return typeInfo
 }
 
-func unsafeBytesData(b []byte) (*C.char, C.int) {
-	return *(**C.char)(unsafe.Pointer(&b)), C.int(len(b))
-}
-
-func unsafeStringData(s string) (*C.char, C.int) {
-	return *(**C.char)(unsafe.Pointer(&s)), C.int(len(s))
-}
-
 // unsafeString returns a Go string backed by C data.
 //
-// The returned string must be used only in the implementation
-// of the qml package, since its data cannot be relied upon.
+// If the C data is deallocated or moved, the string will be
+// invalid and will crash the program if used. As such, the
+// resulting string must only be used inside the implementation
+// of the qml package and while the life time of the C data
+// is guaranteed.
 func unsafeString(data *C.char, size C.int) string {
 	var s string
 	sh := (*reflect.StringHeader)(unsafe.Pointer(&s))
 	sh.Data = uintptr(unsafe.Pointer(data))
 	sh.Len = int(size)
 	return s
+}
+
+// unsafeStringData returns a C string backed by Go data. The C
+// string is NOT null-terminated, so its length must be taken
+// into account.
+//
+// If the s Go string is garbage collected, the returned C data
+// will be invalid and will crash the program if used. As such,
+// the resulting data must only be used inside the implementation
+// of the qml package and while the life time of the Go string
+// is guaranteed.
+func unsafeStringData(s string) (*C.char, C.int) {
+	return *(**C.char)(unsafe.Pointer(&s)), C.int(len(s))
+}
+
+// unsafeBytesData returns a C string backed by Go data. The C
+// string is NOT null-terminated, so its length must be taken
+// into account.
+//
+// If the array backing the b Go slice is garbage collected, the
+// returned C data will be invalid and will crash the program if
+// used. As such, the resulting data must only be used inside the
+// implementation of the qml package and while the life time of
+// the Go array is guaranteed.
+func unsafeBytesData(b []byte) (*C.char, C.int) {
+	return *(**C.char)(unsafe.Pointer(&b)), C.int(len(b))
 }

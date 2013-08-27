@@ -23,7 +23,7 @@ func main() {
 		panic(err)
 	}
 
-	context := engine.RootContext()
+	context := engine.Context()
 	context.Set("message", &Message{"Hello from Go!"})
 
 	window := component.CreateWindow(engine.RootContext())
