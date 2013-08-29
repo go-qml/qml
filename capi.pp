@@ -15,6 +15,9 @@ void newGuiApplication()
     static char *argv[] = {empty};
     static int argc = 1;
     new QGuiApplication(argc, argv);
+
+    // The event should never die.
+    qApp->setQuitOnLastWindowClosed(false);
 }
 
 void applicationExec()
@@ -40,12 +43,6 @@ void *appThread()
 QQmlEngine_ *newEngine(QObject_ *parent)
 {
     return new QQmlEngine(reinterpret_cast<QObject *>(parent));
-}
-
-void delEngine(QQmlEngine_ *engine)
-{
-    QQmlEngine *qengine = reinterpret_cast<QQmlEngine *>(engine);
-    delete qengine;
 }
 
 QQmlContext_ *engineRootContext(QQmlEngine_ *engine)
@@ -110,7 +107,8 @@ QObject_ *componentCreate(QQmlComponent_ *component, QQmlContext_ *context)
     QQmlComponent *qcomponent = reinterpret_cast<QQmlComponent *>(component);
     QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
 
-    return qcomponent->create(qcontext);
+    QObject *instance =  qcomponent->create(qcontext);
+    return instance;
 }
 
 QQuickView_ *componentCreateView(QQmlComponent_ *component, QQmlContext_ *context)
@@ -118,9 +116,9 @@ QQuickView_ *componentCreateView(QQmlComponent_ *component, QQmlContext_ *contex
     QQmlComponent *qcomponent = reinterpret_cast<QQmlComponent *>(component);
     QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
 
-    QObject *obj = qcomponent->create(qcontext);
+    QObject *instance = qcomponent->create(qcontext);
     QQuickView *view = new QQuickView(qcontext->engine(), 0);
-    view->setContent(qcomponent->url(), qcomponent, obj);
+    view->setContent(qcomponent->url(), qcomponent, instance);
     return view;
 }
 
@@ -132,6 +130,22 @@ void viewShow(QQuickView_ *view)
 void viewHide(QQuickView_ *view)
 {
     reinterpret_cast<QQuickView *>(view)->hide();
+}
+
+void viewReportHidden(QQuickView_ *view)
+{
+    QQuickView *qview = reinterpret_cast<QQuickView *>(view);
+    QObject::connect(qview, &QWindow::visibleChanged, [=](bool visible){
+        if (!visible) {
+            hookWindowHidden(view);
+        }
+    });
+}
+
+QObject_ *viewRootObject(QQuickView_ *view)
+{
+    QQuickView *qview = reinterpret_cast<QQuickView *>(view);
+    return qview->rootObject();
 }
 
 void contextSetObject(QQmlContext_ *context, QObject_ *value)
@@ -169,10 +183,13 @@ void contextGetProperty(QQmlContext_ *context, QString_ *name, DataValue *value)
     QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
     const QString *qname = reinterpret_cast<QString *>(name);
 
-    qDebug() << "BEFORE:";
     QVariant var = qcontext->contextProperty(*qname);
-    qDebug() << "AFTER:" << var;
     packDataValue(&var, value);
+}
+
+void delObject(QObject_ *object)
+{
+    reinterpret_cast<QObject *>(object)->deleteLater();
 }
 
 void objectGetProperty(QObject_ *object, const char *name, DataValue *value)
@@ -300,7 +317,7 @@ void packDataValue(QVariant_ *var, DataValue *value)
 void internalLogHandler(QtMsgType severity, const QMessageLogContext &context, const QString &text)
 {
     QByteArray textba = text.toUtf8();
-    LogMessage message = {severity, textba.constData(), textba.size(), context.file, strlen(context.file), context.line};
+    LogMessage message = {severity, textba.constData(), textba.size(), context.file, (int)strlen(context.file), context.line};
     hookLogHandler(&message);
 }
 

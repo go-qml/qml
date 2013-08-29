@@ -18,14 +18,8 @@ class IdleTimer : public QObject
 
     protected:
 
-    int c;
-
     void timerEvent(QTimerEvent *event)
     {
-        if (c == 100) {
-            qDebug() << "IdleTimer::timerEvent is in" << QThread::currentThread();
-        }
-        c++;
         // Might be worth sharing some synchronized flag to tell
         // whether there's work to do or not.
         hookIdleTimer();

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io/ioutil"
 	"launchpad.net/qml"
 )
 
@@ -10,15 +9,9 @@ type Message struct {
 }
 
 func main() {
-	data, err := ioutil.ReadFile("example.qml")
-	if err != nil {
-		panic(err)
-	}
-
 	qml.Init(nil)
 	engine := qml.NewEngine()
-	component := qml.NewComponent(engine)
-	err = component.SetData("example.qml", data)
+	component, err := engine.Load(qml.File("example.qml"))
 	if err != nil {
 		panic(err)
 	}
@@ -26,8 +19,7 @@ func main() {
 	context := engine.Context()
 	context.Set("message", &Message{"Hello from Go!"})
 
-	window := component.CreateWindow(engine.RootContext())
+	window := component.CreateWindow(nil)
 	window.Show()
-
-	select{}
+	window.Wait()
 }

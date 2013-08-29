@@ -2,6 +2,7 @@
 #define CAPI_H
 
 #include <stdint.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -74,7 +75,6 @@ void *currentThread();
 void *appThread();
 
 QQmlEngine_ *newEngine(QObject_ *parent);
-void delEngine(QQmlEngine_ *engine);
 QQmlContext_ *engineRootContext(QQmlEngine_ *engine);
 void engineSetOwnershipCPP(QQmlEngine_ *engine, QObject_ *object);
 void engineSetOwnershipJS(QQmlEngine_ *engine, QObject_ *object);
@@ -84,17 +84,20 @@ void contextGetProperty(QQmlContext_ *context, QString_ *name, DataValue *value)
 void contextSetProperty(QQmlContext_ *context, QString_ *name, DataValue *value);
 void contextSetObject(QQmlContext_ *context, QObject_ *value);
 
+void delObject(QObject_ *object);
 void objectGetProperty(QObject_ *object, const char *name, DataValue *value);
 void objectSetParent(QObject_ *object, QObject_ *parent);
 
 QQmlComponent_ *newComponent(QQmlEngine_ *engine, QObject_ *parent);
-QObject_ *componentCreate(QQmlComponent_ *component, QQmlContext_ *context);
 void componentSetData(QQmlComponent_ *component, const char *data, int dataLen, const char *url, int urlLen);
 char *componentErrorString(QQmlComponent_ *component);
+QObject_ *componentCreate(QQmlComponent_ *component, QQmlContext_ *context);
 QQuickView_ *componentCreateView(QQmlComponent_ *component, QQmlContext_ *context);
 
 void viewShow(QQuickView_ *view);
 void viewHide(QQuickView_ *view);
+void viewReportHidden(QQuickView_ *view);
+QObject_ *viewRootObject(QQuickView_ *view);
 
 QString_ *newString(const char *data, int len);
 void delString(QString_ *s);
@@ -110,6 +113,7 @@ void hookIdleTimer();
 void hookLogHandler(LogMessage *message);
 void hookGoValueReadField(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, DataValue *result);
 void hookGoValueDestroyed(QQmlEngine_ *engine, GoAddr *addr);
+void hookWindowHidden(QObject_ *addr);
 
 #ifdef __cplusplus
 } // extern "C"

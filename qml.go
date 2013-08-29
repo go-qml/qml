@@ -10,6 +10,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"unsafe"
 )
@@ -72,7 +73,7 @@ func (e *Engine) assertValid() {
 func (e *Engine) Destroy() {
 	if e.addr != nilPtr {
 		gui(func() {
-			C.delEngine(e.addr)
+			C.delObject(e.addr)
 			// TODO Ensure this works correctly. Does it have to wait until
 			// cascading events are delivered? How can it possibly stay alive
 			// if its memory is going away?
@@ -161,6 +162,7 @@ type Context struct {
 // not be garbage collected until the engine is destroyed, even if the
 // value is unused or changed.
 func (c *Context) Set(name string, value interface{}) {
+	// TODO Rename to SetVar, to allow commonObject to be embeded if necessary?
 	cname, cnamelen := unsafeStringData(name)
 	gui(func() {
 		var dvalue C.DataValue
@@ -205,15 +207,16 @@ func (c *Context) Get(name string) interface{} {
 // TODO Context.Spawn() => Context
 
 type Component struct {
-	addr unsafe.Pointer
+	addr   unsafe.Pointer
+	engine *Engine
 }
 
 func (e *Engine) newComponent(location string, data []byte) (*Component, error) {
 	// TODO What's a nice way to delete the component and created component objects?
-	var component Component
-	var err error
 	cdata, cdatalen := unsafeBytesData(data)
 	cloc, cloclen := unsafeStringData(location)
+	component := &Component{engine: e}
+	var err error
 	gui(func() {
 		component.addr = C.newComponent(e.addr, nilPtr)
 		C.componentSetData(component.addr, cdata, cdatalen, cloc, cloclen)
@@ -226,11 +229,10 @@ func (e *Engine) newComponent(location string, data []byte) (*Component, error) 
 	if err != nil {
 		return nil, err
 	}
-	return &component, nil
+	return component, nil
 }
 
 func (c *Component) Create(context *Context) *Object {
-	// TODO Destroy object.
 	var object Object
 	gui(func() {
 		object.addr = C.componentCreate(c.addr, context.addr)
@@ -238,7 +240,19 @@ func (c *Component) Create(context *Context) *Object {
 	return &object
 }
 
+// CreateWindow creates a new instance of the c component running under
+// the provided context, and creates a new window for the component
+// instance to render its content into.
+//
+// If the provided context is nil, the engine's root context is used.
+//
+// If the returned window is not destroyed explicitly, it will be
+// destroyed when the engine behind the used context is.
 func (c *Component) CreateWindow(context *Context) *Window {
+	if context == nil {
+		// TODO Test this.
+		context = c.engine.Context()
+	}
 	var window Window
 	gui(func() {
 		window.addr = C.componentCreateView(c.addr, context.addr)
@@ -246,11 +260,15 @@ func (c *Component) CreateWindow(context *Context) *Window {
 	return &window
 }
 
-type Object struct {
+type commonObject struct {
 	addr unsafe.Pointer
 }
 
-func (o *Object) Get(property string) interface{} {
+type Object struct {
+	commonObject
+}
+
+func (o *commonObject) Get(property string) interface{} {
 	cproperty := C.CString(property)
 	defer C.free(unsafe.Pointer(cproperty))
 
@@ -261,9 +279,20 @@ func (o *Object) Get(property string) interface{} {
 	return unpackDataValue(&value)
 }
 
+// Destroy finalizes the value and releases any resources used.
+// The value must not be used after calling this method.
+func (o *commonObject) Destroy() {
+	// TODO Must protect against destroyment when object isn't owned.
+	gui(func() {
+		if o.addr != nilPtr {
+			C.delObject(o.addr)
+		}
+	})
+}
+
 // Window represents a QML window where components are rendered.
 type Window struct {
-	addr unsafe.Pointer
+	commonObject
 }
 
 // Show exposes the window.
@@ -278,4 +307,41 @@ func (w *Window) Hide() {
 	gui(func() {
 		C.viewHide(w.addr)
 	})
+}
+
+// Root returns the root component instance being rendered in the window.
+func (w *Window) Root() *Object {
+	// XXX Test this.
+	var object Object
+	gui(func() {
+		object.addr = C.viewRootObject(w.addr)
+	})
+	return &object
+}
+
+// Wait blocks the current goroutine until the window is closed.
+func (w *Window) Wait() {
+	// XXX Test this.
+	var m sync.Mutex
+	m.Lock()
+	gui(func() {
+		// TODO Must be able to wait for the same Window from multiple goroutines.
+		// type foo { m sync.Mutex; next *foo }
+		waitingWindows[w.addr] = &m
+		// TODO Rename to viewConnectHidden
+		C.viewReportHidden(w.addr)
+	})
+	m.Lock()
+}
+
+var waitingWindows = make(map[unsafe.Pointer]*sync.Mutex)
+
+//export hookWindowHidden
+func hookWindowHidden(addr unsafe.Pointer) {
+	m, ok := waitingWindows[addr]
+	if !ok {
+		panic("window is not waiting")
+	}
+	delete(waitingWindows, addr)
+	m.Unlock()
 }

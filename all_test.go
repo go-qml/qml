@@ -6,7 +6,6 @@ import (
 	"launchpad.net/qml"
 	"runtime"
 	"testing"
-	"time"
 )
 
 func Test(t *testing.T) { TestingT(t) }
@@ -145,7 +144,8 @@ func (s *S) TestContextSetGoValueGetProperty(c *C) {
 	component, err := s.engine.Load(qml.String("file.qml", data))
 	c.Assert(err, IsNil)
 
-	_ = component.Create(s.context)
+	obj := component.Create(s.context)
+	obj.Destroy()
 
 	c.Assert(c.GetTestLog(), Matches, "(?s).*string is <string value>.*")
 }
@@ -211,11 +211,10 @@ func (s *S) TestComponentCreateWindow(c *C) {
 	component, err := s.engine.Load(qml.String("file.qml", data))
 	c.Assert(err, IsNil)
 
-	// TODO: More checks here.
+	// TODO How to test this more effectively?
 	window := component.CreateWindow(s.context)
 	window.Show()
 	qml.FlushAll()
-	time.Sleep(1 * time.Second)
 	window.Hide()
 }
 

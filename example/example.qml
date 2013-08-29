@@ -2,12 +2,15 @@ import QtQuick 2.0
 //import GoTypes 1.0
 
 Rectangle {
+
+  signal sent(string s)
+
   width: 300; height: 150
   Text {
     id: text
     x: 0
     y: 0
-    text: "Go says: " + message.text
+    text: "Go says: " //+ message.text
     //MyStruct {
     //	//foo: "text"
     //}

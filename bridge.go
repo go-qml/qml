@@ -1,6 +1,7 @@
 package qml
 
 // #cgo CPPFLAGS: -I/usr/include/qt5/QtCore/5.0.2/QtCore
+// #cgo CXXFLAGS: -std=c++11
 // #cgo pkg-config: Qt5Core Qt5Widgets Qt5Quick
 // #cgo LDFLAGS: -lstdc++
 //
