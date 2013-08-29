@@ -327,9 +327,9 @@ func (w *Window) Wait() {
 	gui(func() {
 		// TODO Must be able to wait for the same Window from multiple goroutines.
 		// type foo { m sync.Mutex; next *foo }
+		// TODO If the window is not visible, must return immediately.
 		waitingWindows[w.addr] = &m
-		// TODO Rename to viewConnectHidden
-		C.viewReportHidden(w.addr)
+		C.viewConnectHidden(w.addr)
 	})
 	m.Lock()
 }

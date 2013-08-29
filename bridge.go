@@ -2,7 +2,7 @@ package qml
 
 // #cgo CPPFLAGS: -I/usr/include/qt5/QtCore/5.0.2/QtCore
 // #cgo CXXFLAGS: -std=c++11
-// #cgo pkg-config: Qt5Core Qt5Widgets Qt5Quick
+// #cgo pkg-config: Qt5Core Qt5Widgets Qt5Quick glib-2.0
 // #cgo LDFLAGS: -lstdc++
 //
 // #include "capi.h"
@@ -13,24 +13,33 @@ import (
 	"fmt"
 	"reflect"
 	"runtime"
+	"sync/atomic"
 	"unsafe"
 )
+
+var hookWaiting C.int
 
 // guiLoop runs the main GUI thread event loop in C++ land.
 func guiLoop() {
 	runtime.LockOSThread()
 	C.newGuiApplication()
-	C.startIdleTimer()
+	C.startIdleTimer(&hookWaiting)
 	C.applicationExec()
 }
 
 var guiFunc = make(chan func())
-var guiDone = make(chan struct{}, 1)
+var guiDone = make(chan struct{})
 var guiLock = 0
 
 // gui runs f in the main GUI thread and waits for f to return.
 func gui(f func()) {
+	// Tell Qt we're waiting for the idle hook to be called.
+	atomic.AddInt32((*int32)(unsafe.Pointer(&hookWaiting)), 1)
+
+	// Send f to be executed by the idle hook in the main GUI thread.
 	guiFunc <- f
+
+	// Wait until f is done executing.
 	<-guiDone
 }
 
@@ -41,12 +50,13 @@ func gui(f func()) {
 // It's safe to use qml functionality while holding a lock, as
 // long as the requests made do not depend on follow up QML
 // events to be processed before returning. If that happens, the
-// problem will be observed as an application freeze.
+// problem will be observed as the application freezing.
 //
 // The Lock function is reentrant. That means it may be called
 // multiple times, and QML activities will only be resumed after
 // Unlock is called a matching number of times.
 func Lock() {
+	// TODO Better testing for this.
 	gui(func() {
 		guiLock++
 	})
@@ -56,21 +66,23 @@ func Lock() {
 func Unlock() {
 	gui(func() {
 		if guiLock == 0 {
-			panic("qml.Unlock called without lock held")
+			panic("qml.Unlock called without lock being held")
 		}
 		guiLock--
 	})
 }
 
-// FlushAll synchornously flushes all pending QML activities.
+// FlushAll synchronously flushes all pending QML activities.
 func FlushAll() {
+	// TODO Better testing for this.
 	gui(func() {
 		C.applicationFlushAll()
 	})
 }
 
 // hookIdleTimer is run once per iteration of the Qt event loop,
-// within the main GUI thread.
+// within the main GUI thread, but only if at least one goroutine
+// has atomically incremented hookWaiting.
 //
 //export hookIdleTimer
 func hookIdleTimer() {
@@ -87,6 +99,7 @@ func hookIdleTimer() {
 		}
 		f()
 		guiDone <- struct{}{}
+		atomic.AddInt32((*int32)(unsafe.Pointer(&hookWaiting)), -1)
 	}
 }
 
@@ -104,8 +117,8 @@ const (
 	jsOwner
 )
 
-// wrapGoValue creates a new GoValue object in C++ land wrapping that
-// wraps the Go value contained in the given interface.
+// wrapGoValue creates a new GoValue object in C++ land wrapping
+// the Go value contained in the given interface.
 //
 // This must be run from the main GUI thread.
 func wrapGoValue(engine *Engine, value interface{}, owner valueOwner) (valuep unsafe.Pointer) {
@@ -146,11 +159,11 @@ func hookGoValueDestroyed(enginep unsafe.Pointer, ifacep unsafe.Pointer) {
 	if engine == nil {
 		panic("unknown engine pointer; who created it?")
 	}
-	if _, ok := engine.values[value]; !ok {
-		// TODO This can probably be dropped.
-		panic("deleting unknown value")
-	}
+	before := len(engine.values)
 	delete(engine.values, value)
+	if len(engine.values) == before {
+		panic("unknown value was destroyed")
+	}
 	stats.valuesAlive(-1)
 }
 
@@ -161,9 +174,9 @@ func hookGoValueReadField(enginep unsafe.Pointer, ifacep unsafe.Pointer, memberI
 
 	if engine == nil {
 		if enginep == nilPtr {
-			panic("nil engine pointer; who created the object!?")
+			panic("nil engine pointer; who created the object?")
 		} else {
-			panic("unknown engine pointer; who created it!?")
+			panic("unknown engine pointer; who created the engine?")
 		}
 	}
 
@@ -174,7 +187,7 @@ func hookGoValueReadField(enginep unsafe.Pointer, ifacep unsafe.Pointer, memberI
 	field := v.Field(int(memberIndex))
 
 	// TODO Strings are being passed in an unsafe manner here. There is a
-	// small chance that the field is changed and the garbage collector run
+	// small chance that the field is changed and the garbage collector is run
 	// before C++ has a chance to look at the data. We can solve this problem
 	// by queuing up values in a stack, and cleaning the stack when the
 	// idle timer fires next.

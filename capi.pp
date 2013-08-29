@@ -132,7 +132,7 @@ void viewHide(QQuickView_ *view)
     reinterpret_cast<QQuickView *>(view)->hide();
 }
 
-void viewReportHidden(QQuickView_ *view)
+void viewConnectHidden(QQuickView_ *view)
 {
     QQuickView *qview = reinterpret_cast<QQuickView *>(view);
     QObject::connect(qview, &QWindow::visibleChanged, [=](bool visible){
@@ -189,7 +189,11 @@ void contextGetProperty(QQmlContext_ *context, QString_ *name, DataValue *value)
 
 void delObject(QObject_ *object)
 {
-    reinterpret_cast<QObject *>(object)->deleteLater();
+    delete reinterpret_cast<QObject *>(object);
+
+    // That looks handy, but doesn't work well. Often objects will stay undeleted
+    // for whatever reason and break the tests on the leak prevention.
+    //reinterpret_cast<QObject *>(object)->deleteLater();
 }
 
 void objectGetProperty(QObject_ *object, const char *name, DataValue *value)

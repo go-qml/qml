@@ -4,15 +4,22 @@
 
 #include "capi.h"
 
+extern "C" {
+
+int g_atomic_int_get(const volatile int *value);
+
+}
+
 class IdleTimer : public QObject
 {
     Q_OBJECT
 
     public:
 
-    static void start()
+    static void start(int *hookWaiting)
     {
         static IdleTimer singleton;
+        singleton.hookWaiting = hookWaiting;
         singleton.timer.start(0, &singleton);
     }
 
@@ -20,19 +27,21 @@ class IdleTimer : public QObject
 
     void timerEvent(QTimerEvent *event)
     {
-        // Might be worth sharing some synchronized flag to tell
-        // whether there's work to do or not.
-        hookIdleTimer();
+        if (g_atomic_int_get(hookWaiting) > 0) {
+            hookIdleTimer();
+        }
     }
 
     private:
 
+    int *hookWaiting;
+
     QBasicTimer timer;    
 };
 
-void startIdleTimer()
+void startIdleTimer(int *hookWaiting)
 {
-    IdleTimer::start();
+    IdleTimer::start(hookWaiting);
 }
 
 // vim:ts=4:sw=4:et:ft=cpp

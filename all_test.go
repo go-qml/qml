@@ -6,12 +6,13 @@ import (
 	"launchpad.net/qml"
 	"runtime"
 	"testing"
+	"time"
 )
 
 func Test(t *testing.T) { TestingT(t) }
 
 type S struct {
-	engine *qml.Engine
+	engine  *qml.Engine
 	context *qml.Context
 }
 
@@ -25,6 +26,12 @@ func (s *S) SetUpTest(c *C) {
 	qml.SetLogger(c)
 	qml.SetStats(true)
 	qml.ResetStats()
+
+	stats := qml.GetStats()
+	if stats.EnginesAlive > 0 || stats.ValuesAlive > 0 {
+		panic(fmt.Sprintf("Test started with values alive: %#v\n", stats))
+	}
+
 	s.engine = qml.NewEngine()
 	s.context = s.engine.Context()
 }
@@ -32,8 +39,9 @@ func (s *S) SetUpTest(c *C) {
 func (s *S) TearDownTest(c *C) {
 	s.engine.Destroy()
 
-	retries := 3
+	retries := 30 // Three seconds top.
 	for {
+		qml.FlushAll()
 		runtime.GC()
 		stats := qml.GetStats()
 		if stats.EnginesAlive == 0 && stats.ValuesAlive == 0 {
@@ -43,6 +51,10 @@ func (s *S) TearDownTest(c *C) {
 			panic(fmt.Sprintf("there are objects alive:\n%#v\n", stats))
 		}
 		retries--
+		time.Sleep(100 * time.Millisecond)
+		if retries%10 == 0 {
+			c.Logf("There are still objects alive; waiting for them to die: %#v\n", stats)
+		}
 	}
 
 	qml.SetLogger(nil)
@@ -214,7 +226,8 @@ func (s *S) TestComponentCreateWindow(c *C) {
 	// TODO How to test this more effectively?
 	window := component.CreateWindow(s.context)
 	window.Show()
-	qml.FlushAll()
+	// Qt doesn't hide the Window if we call it too quickly. :-(
+	time.Sleep(100 * time.Millisecond)
 	window.Hide()
 }
 

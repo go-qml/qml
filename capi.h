@@ -69,7 +69,7 @@ typedef struct {
 void newGuiApplication();
 void applicationExec();
 void applicationFlushAll();
-void startIdleTimer();
+void startIdleTimer(int *hookWaiting);
 
 void *currentThread();
 void *appThread();
@@ -96,7 +96,7 @@ QQuickView_ *componentCreateView(QQmlComponent_ *component, QQmlContext_ *contex
 
 void viewShow(QQuickView_ *view);
 void viewHide(QQuickView_ *view);
-void viewReportHidden(QQuickView_ *view);
+void viewConnectHidden(QQuickView_ *view);
 QObject_ *viewRootObject(QQuickView_ *view);
 
 QString_ *newString(const char *data, int len);
