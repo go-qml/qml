@@ -104,7 +104,7 @@ func unpackDataValue(dvalue *C.DataValue) interface{} {
 	case C.DTFloat32:
 		return *(*float32)(datap)
 	case C.DTGoAddr:
-		return **(**interface{})(datap)
+		return (*(**valueFold)(datap)).gvalue
 	case C.DTInvalid:
 		return nil
 	}

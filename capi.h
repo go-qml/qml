@@ -107,12 +107,15 @@ GoValue_ *newValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject_ *parent);
 void packDataValue(QVariant_ *var, DataValue *result);
 void unpackDataValue(DataValue *value, QVariant_ *result);
 
+void registerType(char *location, int major, int minor, char *name, GoTypeInfo *typeInfo, void *typeData);
+
 void installLogHandler();
 
 void hookIdleTimer();
 void hookLogHandler(LogMessage *message);
 void hookGoValueReadField(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, DataValue *result);
 void hookGoValueDestroyed(QQmlEngine_ *engine, GoAddr *addr);
+GoAddr *hookGoValueTypeNew(GoValue_ *value, void *typeData);
 void hookWindowHidden(QObject_ *addr);
 
 #ifdef __cplusplus

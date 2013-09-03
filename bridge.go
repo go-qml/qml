@@ -10,7 +10,6 @@ package qml
 import "C"
 
 import (
-	"fmt"
 	"reflect"
 	"runtime"
 	"sync/atomic"
@@ -103,9 +102,10 @@ func hookIdleTimer() {
 	}
 }
 
-type cppGoValue struct {
-	ifacep *interface{}
-	valuep unsafe.Pointer
+type valueFold struct {
+	engine *Engine
+	gvalue interface{}
+	cvalue unsafe.Pointer
 	owner  valueOwner
 }
 
@@ -121,66 +121,98 @@ const (
 // the Go value contained in the given interface.
 //
 // This must be run from the main GUI thread.
-func wrapGoValue(engine *Engine, value interface{}, owner valueOwner) (valuep unsafe.Pointer) {
-	gv, ok := engine.values[value]
+func wrapGoValue(engine *Engine, gvalue interface{}, owner valueOwner) (cvalue unsafe.Pointer) {
+	fold, ok := engine.values[gvalue]
 	if !ok {
 		parent := nilPtr
 		if owner == cppOwner {
 			parent = engine.addr
 		}
-		// Define a local copy rather than using &value directly, to
-		// avoid forcing value's off-stack allocation unnecessarily.
-		iface := value
-		gv.ifacep = &iface
-		gv.valuep = C.newValue(unsafe.Pointer(&iface), typeInfo(value), parent)
-		gv.owner = owner
-		engine.values[value] = gv
+		fold = &valueFold{
+			engine: engine,
+			gvalue: gvalue,
+			owner:  owner,
+		}
+		fold.cvalue = C.newValue(unsafe.Pointer(fold), typeInfo(gvalue), parent)
+		engine.values[gvalue] = fold
 		stats.valuesAlive(+1)
-		C.engineSetContextForObject(engine.addr, gv.valuep);
+		C.engineSetContextForObject(engine.addr, fold.cvalue)
 		switch owner {
 		case cppOwner:
-			C.engineSetOwnershipCPP(engine.addr, gv.valuep)
+			C.engineSetOwnershipCPP(engine.addr, fold.cvalue)
 		case jsOwner:
-			C.engineSetOwnershipJS(engine.addr, gv.valuep)
+			C.engineSetOwnershipJS(engine.addr, fold.cvalue)
 		}
-	} else if owner == cppOwner && gv.owner != cppOwner {
-		gv.owner = cppOwner
-		C.engineSetOwnershipCPP(engine.addr, gv.valuep)
-		C.objectSetParent(gv.valuep, engine.addr)
+	} else if owner == cppOwner && fold.owner != cppOwner {
+		fold.owner = cppOwner
+		C.engineSetOwnershipCPP(engine.addr, fold.cvalue)
+		C.objectSetParent(fold.cvalue, engine.addr)
 	}
-	return gv.valuep
+	return fold.cvalue
+}
+
+var enginePending = make(map[*valueFold]bool)
+
+//export hookGoValueTypeNew
+func hookGoValueTypeNew(cvalue unsafe.Pointer, typep unsafe.Pointer) (foldp unsafe.Pointer) {
+	fold := &valueFold{
+		gvalue: (*TypeInfo)(typep).New(),
+		cvalue: cvalue,
+		owner:  jsOwner,
+	}
+	enginePending[fold] = true
+	stats.valuesAlive(+1)
+	return unsafe.Pointer(fold)
 }
 
 //export hookGoValueDestroyed
-func hookGoValueDestroyed(enginep unsafe.Pointer, ifacep unsafe.Pointer) {
-	fmt.Println("GoValue destroyed!")
-	engine := engines[enginep]
-	value := *(*interface{})(ifacep)
+func hookGoValueDestroyed(enginep unsafe.Pointer, foldp unsafe.Pointer) {
+	fold := (*valueFold)(foldp)
+	engine := fold.engine
 	if engine == nil {
-		panic("unknown engine pointer; who created it?")
-	}
-	before := len(engine.values)
-	delete(engine.values, value)
-	if len(engine.values) == before {
-		panic("unknown value was destroyed")
+		before := len(enginePending)
+		delete(enginePending, fold)
+		if len(enginePending) == before {
+			panic("destroying value without an associated engine and unknown to the pending engine set; who created the value?")
+		}
+	} else if engines[engine.addr] == nil {
+		// Must never do that. The engine holds memory references that C++ depends on.
+		panic("engine was released from global list while its values were still alive")
+	} else {
+		before := len(engine.values)
+		delete(engine.values, fold.gvalue)
+		if len(engine.values) == before {
+			panic("destroying value that knows about the engine, but the engine doesn't know about the value; who cleared the engine?")
+		}
+		if engine.destroyed && len(engine.values) == 0 {
+			delete(engines, engine.addr)
+		}
 	}
 	stats.valuesAlive(-1)
 }
 
 //export hookGoValueReadField
-func hookGoValueReadField(enginep unsafe.Pointer, ifacep unsafe.Pointer, memberIndex C.int, result *C.DataValue) {
-	engine := engines[enginep]
-	value := *(*interface{})(ifacep)
+func hookGoValueReadField(enginep unsafe.Pointer, foldp unsafe.Pointer, memberIndex C.int, result *C.DataValue) {
+	fold := (*valueFold)(foldp)
 
-	if engine == nil {
+	if fold.engine == nil {
 		if enginep == nilPtr {
-			panic("nil engine pointer; who created the object?")
-		} else {
+			panic("reading field from value without an engine pointer; who created the value?")
+		}
+		engine := engines[enginep]
+		if engine == nil {
 			panic("unknown engine pointer; who created the engine?")
+		}
+		fold.engine = engine
+		engine.values[fold.gvalue] = fold
+		before := len(enginePending)
+		delete(enginePending, fold)
+		if len(enginePending) == before {
+			panic("value had no engine, but is not in the pending engine set; who created the value?")
 		}
 	}
 
-	v := reflect.ValueOf(value)
+	v := reflect.ValueOf(fold.gvalue)
 	for v.Type().Kind() == reflect.Ptr {
 		v = v.Elem()
 	}
@@ -191,5 +223,5 @@ func hookGoValueReadField(enginep unsafe.Pointer, ifacep unsafe.Pointer, memberI
 	// before C++ has a chance to look at the data. We can solve this problem
 	// by queuing up values in a stack, and cleaning the stack when the
 	// idle timer fires next.
-	packDataValue(field.Interface(), result, engine, jsOwner)
+	packDataValue(field.Interface(), result, fold.engine, jsOwner)
 }

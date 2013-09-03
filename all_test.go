@@ -162,8 +162,6 @@ func (s *S) TestContextSetGoValueGetProperty(c *C) {
 	c.Assert(c.GetTestLog(), Matches, "(?s).*string is <string value>.*")
 }
 
-// TODO Test getting of non-existent.
-
 func (s *S) TestContextSetObject(c *C) {
 	s.context.SetObject(&MyStruct{
 		String:  "<string value>",
@@ -231,25 +229,82 @@ func (s *S) TestComponentCreateWindow(c *C) {
 	window.Hide()
 }
 
-//func (s *S) TestFoo(c *C) {
-//	value := MyStruct{String: "<string value>"}
-//	s.context.Set("a", &value)
-//	s.context.Set("b", &value)
+func (s *S) TestObjectIdentity(c *C) {
+	value := MyStruct{String: "<string value>"}
+	s.context.Set("a", &value)
+	s.context.Set("b", &value)
+
+	data := `
+		import QtQuick 2.0
+		Item {
+			Component.onCompleted: {
+				console.log('Identical:', a === b);
+			}
+		}
+	`
+
+	component, err := s.engine.Load(qml.String("file.qml", data))
+	c.Assert(err, IsNil)
+	component.Create(s.context).Destroy()
+
+	c.Assert(c.GetTestLog(), Matches, "(?s).*Identical: true.*")
+}
+
+type TypeInfo struct {
+	value interface{}
+}
+
+func (t *TypeInfo) New() interface{} {
+	return t.value
+}
+
+func (s *S) TestRegisterType(c *C) {
+	value := &MyStruct{String: "new type works!"}
+	info := qml.TypeInfo{
+		Location: "TestTypes",
+		Major:    4,
+		Minor:    2,
+		Name:     "MyType",
+		New:      func() interface{} { return value },
+	}
+	err := qml.RegisterType(&info)
+	c.Assert(err, IsNil)
+
+	data := `
+		import QtQuick 2.0
+		import TestTypes 4.2
+		MyType {
+			Component.onCompleted: {
+				console.log('Value says:', string)
+			}
+		}
+	`
+	component, err := s.engine.Load(qml.String("file.qml", data))
+	c.Assert(err, IsNil)
+
+	object := component.Create(s.context)
+	defer object.Destroy()
+
+	c.Assert(c.GetTestLog(), Matches, "(?s).*Value says: new type works!.*")
+}
+
+//func (s *S) TestRegisterType(c *C) {
+//	typeInfo := TypeInfo{}
+//
+//	qml.RegisterType("TestTypes", 1, 0, "MyType", &typeInfo)
 //
 //	data := `
-//		import QtQuick 2.0
-//		Item {
-//			Component.onCompleted: {
-//				console.log('TEST:', a === b);
-//				a = 42;
-//			}
-//		}
+//		import TestTypes 1.0
+//		MyType { int: 300; string: "hey"; }
 //	`
-//
 //	component, err := s.engine.Load(qml.String("file.qml", data))
 //	c.Assert(err, IsNil)
-//	_ = component.Create(s.context)
 //
-//	c.Assert(s.context.Get("a"), IsNil)
-//	c.Assert(c.GetTestLog(), Equals, "")
+//	value := &MyStruct{}
+//	typeInfo.value = value
+//
+//	component.Create(s.context).Destroy()
+//
+//	c.Assert(value.String, Equals, "hey")
+//	c.Assert(value.Int, Equals, 300)
 //}

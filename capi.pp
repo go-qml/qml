@@ -230,6 +230,12 @@ QObject_ *newValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject_ *parent)
     return new GoValue(addr, typeInfo, qparent);
 }
 
+void registerType(char *location, int major, int minor, char *name, GoTypeInfo *typeInfo, void *typeData)
+{
+    GoValueType<1>::init(typeInfo, typeData);
+    qmlRegisterType< GoValueType<1> >(location, major, minor, name);
+}
+
 void unpackDataValue(DataValue *value, QVariant_ *var)
 {
     QVariant *qvar = reinterpret_cast<QVariant *>(var);

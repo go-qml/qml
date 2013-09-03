@@ -7,14 +7,18 @@ template <int N>
 class GoValueType : public GoValue
 {
 public:
-    GoValueType() : GoValue(0, typeInfo) {};
 
-    static void init(GoTypeInfo *info)
+    GoValueType()
+        : GoValue(hookGoValueTypeNew(this, typeData), typeInfo, 0) {};
+
+    static void init(GoTypeInfo *info, void *data)
     {
         typeInfo = info;
-        static_cast<QMetaObject &>(staticMetaObject) = *GoValueType::metaObjectFor(typeInfo);
+        typeData = data;
+        static_cast<QMetaObject &>(staticMetaObject) = *GoValue::metaObjectFor(typeInfo);
     };
 
+    static void *typeData;
     static GoTypeInfo *typeInfo;
     static QMetaObject staticMetaObject;
 };

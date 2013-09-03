@@ -8,6 +8,7 @@ import "C"
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"strings"
 	"sync"
@@ -41,9 +42,9 @@ func Init(options *InitOptions) {
 
 // Engine provides an environment for instantiating QML components.
 type Engine struct {
-	addr unsafe.Pointer
-
-	values map[interface{}]cppGoValue
+	addr      unsafe.Pointer
+	values    map[interface{}]*valueFold
+	destroyed bool
 }
 
 var engines = make(map[unsafe.Pointer]*Engine)
@@ -53,7 +54,7 @@ var engines = make(map[unsafe.Pointer]*Engine)
 // The Destory method must be called to finalize the engine and release
 // any resources used.
 func NewEngine() *Engine {
-	engine := &Engine{values: make(map[interface{}]cppGoValue)}
+	engine := &Engine{values: make(map[interface{}]*valueFold)}
 	gui(func() {
 		engine.addr = C.newEngine(nil)
 		engines[engine.addr] = engine
@@ -63,7 +64,7 @@ func NewEngine() *Engine {
 }
 
 func (e *Engine) assertValid() {
-	if e.addr == nilPtr {
+	if e.destroyed {
 		panic("engine already destroyed")
 	}
 }
@@ -71,15 +72,19 @@ func (e *Engine) assertValid() {
 // Destroy finalizes the engine and releases any resources used.
 // The engine must not be used after calling this method.
 func (e *Engine) Destroy() {
-	if e.addr != nilPtr {
+	if !e.destroyed {
 		gui(func() {
-			C.delObject(e.addr)
-			// TODO Ensure this works correctly. Does it have to wait until
-			// cascading events are delivered? How can it possibly stay alive
-			// if its memory is going away?
-			//delete(engines, e.addr)
-			e.addr = nilPtr
-			stats.enginesAlive(-1)
+			if !e.destroyed {
+				e.destroyed = true
+				C.delObject(e.addr)
+				if len(e.values) == 0 {
+					delete(engines, e.addr)
+				} else {
+					// The engine reference keeps those values alive.
+					// The last value destroyed will clear it.
+				}
+				stats.enginesAlive(-1)
+			}
 		})
 	}
 }
@@ -344,4 +349,41 @@ func hookWindowHidden(addr unsafe.Pointer) {
 	}
 	delete(waitingWindows, addr)
 	m.Unlock()
+}
+
+// TODO Rename the other typeInfo to typeData.
+
+type TypeInfo struct {
+	Location     string
+	Major, Minor int
+
+	Name string
+	New  func() interface{}
+}
+
+var types []*TypeInfo
+
+func RegisterType(info *TypeInfo) error {
+	// Copy and hold a reference to the info data.
+	localInfo := *info
+
+	// TODO Validate info fields.
+
+	var err error
+	gui(func() {
+		sample := info.New()
+		if sample == nil {
+			err = fmt.Errorf("TypeInfo.New for type %q returned nil", info.Name)
+			return
+		}
+
+		cloc := C.CString(localInfo.Location)
+		cname := C.CString(localInfo.Name)
+		C.registerType(cloc, C.int(localInfo.Major), C.int(localInfo.Minor), cname, typeInfo(sample), unsafe.Pointer(&localInfo))
+		// TODO Check if qmlRegisterType keeps a reference to those.
+		//C.free(unsafe.Pointer(cloc))
+		//C.free(unsafe.Pointer(cname))
+		types = append(types, &localInfo)
+	})
+	return err
 }
