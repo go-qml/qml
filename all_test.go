@@ -250,18 +250,18 @@ func (s *S) TestObjectIdentity(c *C) {
 	c.Assert(c.GetTestLog(), Matches, "(?s).*Identical: true.*")
 }
 
-type TypeInfo struct {
+type testSpec struct {
 	value interface{}
 }
 
-func (t *TypeInfo) New() interface{} {
+func (t *testSpec) New() interface{} {
 	return t.value
 }
 
 func (s *S) TestRegisterType(c *C) {
 	value := &MyStruct{String: "new type works!"}
-	info := qml.TypeInfo{
-		Location: "TestTypes",
+	info := qml.TypeSpec{
+		Location: "GoTest",
 		Major:    4,
 		Minor:    2,
 		Name:     "MyType",
@@ -272,7 +272,7 @@ func (s *S) TestRegisterType(c *C) {
 
 	data := `
 		import QtQuick 2.0
-		import TestTypes 4.2
+		import GoTest 4.2
 		MyType {
 			Component.onCompleted: {
 				console.log('Value says:', string)
@@ -289,12 +289,12 @@ func (s *S) TestRegisterType(c *C) {
 }
 
 //func (s *S) TestRegisterType(c *C) {
-//	typeInfo := TypeInfo{}
+//	spec := testSpec{}
 //
-//	qml.RegisterType("TestTypes", 1, 0, "MyType", &typeInfo)
+//	qml.RegisterType("GoTest", 1, 0, "MyType", &spec)
 //
 //	data := `
-//		import TestTypes 1.0
+//		import GoTest 1.0
 //		MyType { int: 300; string: "hey"; }
 //	`
 //	component, err := s.engine.Load(qml.String("file.qml", data))

@@ -154,9 +154,9 @@ func wrapGoValue(engine *Engine, gvalue interface{}, owner valueOwner) (cvalue u
 var enginePending = make(map[*valueFold]bool)
 
 //export hookGoValueTypeNew
-func hookGoValueTypeNew(cvalue unsafe.Pointer, typep unsafe.Pointer) (foldp unsafe.Pointer) {
+func hookGoValueTypeNew(cvalue unsafe.Pointer, specp unsafe.Pointer) (foldp unsafe.Pointer) {
 	fold := &valueFold{
-		gvalue: (*TypeInfo)(typep).New(),
+		gvalue: (*TypeSpec)(specp).New(),
 		cvalue: cvalue,
 		owner:  jsOwner,
 	}

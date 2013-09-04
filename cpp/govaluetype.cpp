@@ -3,7 +3,7 @@
 #define DEFINE_GOVALUETYPE(N) \
     template<> QMetaObject GoValueType<N>::staticMetaObject = QMetaObject(); \
     template<> GoTypeInfo *GoValueType<N>::typeInfo = 0; \
-    template<> void *GoValueType<N>::typeData = 0;
+    template<> GoTypeSpec_ *GoValueType<N>::typeSpec = 0;
 
 DEFINE_GOVALUETYPE(1);
 

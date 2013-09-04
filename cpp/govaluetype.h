@@ -9,16 +9,16 @@ class GoValueType : public GoValue
 public:
 
     GoValueType()
-        : GoValue(hookGoValueTypeNew(this, typeData), typeInfo, 0) {};
+        : GoValue(hookGoValueTypeNew(this, typeSpec), typeInfo, 0) {};
 
-    static void init(GoTypeInfo *info, void *data)
+    static void init(GoTypeInfo *info, GoTypeSpec_ *spec)
     {
         typeInfo = info;
-        typeData = data;
+        typeSpec = spec;
         static_cast<QMetaObject &>(staticMetaObject) = *GoValue::metaObjectFor(typeInfo);
     };
 
-    static void *typeData;
+    static GoTypeSpec_ *typeSpec;
     static GoTypeInfo *typeInfo;
     static QMetaObject staticMetaObject;
 };

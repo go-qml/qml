@@ -51,8 +51,8 @@ var engines = make(map[unsafe.Pointer]*Engine)
 
 // NewEngine returns a new QML engine.
 //
-// The Destory method must be called to finalize the engine and release
-// any resources used.
+// The Destory method must be called to finalize the engine and
+// release any resources used.
 func NewEngine() *Engine {
 	engine := &Engine{values: make(map[interface{}]*valueFold)}
 	gui(func() {
@@ -71,6 +71,8 @@ func (e *Engine) assertValid() {
 
 // Destroy finalizes the engine and releases any resources used.
 // The engine must not be used after calling this method.
+//
+// It is safe to call Destroy more than once.
 func (e *Engine) Destroy() {
 	if !e.destroyed {
 		gui(func() {
@@ -351,9 +353,7 @@ func hookWindowHidden(addr unsafe.Pointer) {
 	m.Unlock()
 }
 
-// TODO Rename the other typeInfo to typeData.
-
-type TypeInfo struct {
+type TypeSpec struct {
 	Location     string
 	Major, Minor int
 
@@ -361,19 +361,19 @@ type TypeInfo struct {
 	New  func() interface{}
 }
 
-var types []*TypeInfo
+var types []*TypeSpec
 
-func RegisterType(info *TypeInfo) error {
+func RegisterType(info *TypeSpec) error {
 	// Copy and hold a reference to the info data.
 	localInfo := *info
 
-	// TODO Validate info fields.
+	// TODO Validate localInfo fields.
 
 	var err error
 	gui(func() {
 		sample := info.New()
 		if sample == nil {
-			err = fmt.Errorf("TypeInfo.New for type %q returned nil", info.Name)
+			err = fmt.Errorf("TypeSpec.New for type %q returned nil", info.Name)
 			return
 		}
 
@@ -385,5 +385,7 @@ func RegisterType(info *TypeInfo) error {
 		//C.free(unsafe.Pointer(cname))
 		types = append(types, &localInfo)
 	})
+
+	// TODO Are there really no errors possible from qmlRegisterType?
 	return err
 }

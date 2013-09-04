@@ -230,9 +230,9 @@ QObject_ *newValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject_ *parent)
     return new GoValue(addr, typeInfo, qparent);
 }
 
-void registerType(char *location, int major, int minor, char *name, GoTypeInfo *typeInfo, void *typeData)
+void registerType(char *location, int major, int minor, char *name, GoTypeInfo *info, GoTypeSpec_ *spec)
 {
-    GoValueType<1>::init(typeInfo, typeData);
+    GoValueType<1>::init(info, spec);
     qmlRegisterType< GoValueType<1> >(location, major, minor, name);
 }
 

@@ -8,8 +8,6 @@
 extern "C" {
 #endif
 
-typedef void GoAddr;
-
 typedef void QApplication_;
 typedef void QObject_;
 typedef void QVariant_;
@@ -20,6 +18,8 @@ typedef void QQmlComponent_;
 typedef void QQuickView_;
 typedef void QMessageLogContext_;
 typedef void GoValue_;
+typedef void GoAddr;
+typedef void GoTypeSpec_;
 
 typedef enum {
     DTUnknown = 0, // Has an unsupported type.
@@ -107,7 +107,7 @@ GoValue_ *newValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject_ *parent);
 void packDataValue(QVariant_ *var, DataValue *result);
 void unpackDataValue(DataValue *value, QVariant_ *result);
 
-void registerType(char *location, int major, int minor, char *name, GoTypeInfo *typeInfo, void *typeData);
+void registerType(char *location, int major, int minor, char *name, GoTypeInfo *typeInfo, GoTypeSpec_ *spec);
 
 void installLogHandler();
 
@@ -115,7 +115,7 @@ void hookIdleTimer();
 void hookLogHandler(LogMessage *message);
 void hookGoValueReadField(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, DataValue *result);
 void hookGoValueDestroyed(QQmlEngine_ *engine, GoAddr *addr);
-GoAddr *hookGoValueTypeNew(GoValue_ *value, void *typeData);
+GoAddr *hookGoValueTypeNew(GoValue_ *value, GoTypeSpec_ *spec);
 void hookWindowHidden(QObject_ *addr);
 
 #ifdef __cplusplus
