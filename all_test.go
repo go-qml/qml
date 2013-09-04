@@ -61,15 +61,15 @@ func (s *S) TearDownTest(c *C) {
 }
 
 type MyStruct struct {
-	String  string
-	True    bool
-	False   bool
-	Int     int
-	Int64   int64
-	Int32   int32
-	Float64 float64
-	Float32 float32
-	Any     interface{}
+	StringValue  string
+	TrueValue    bool
+	FalseValue   bool
+	IntValue     int
+	Int64Value   int64
+	Int32Value   int32
+	Float64Value float64
+	Float32Value float32
+	AnyValue     interface{}
 }
 
 var intIs64 bool
@@ -145,12 +145,12 @@ func (s *S) TestContextSetGoValueGetProperty(c *C) {
 	// - Proper collection of a JS-owned GoValue wrapper (the result of accessing Any)
 	//
 	// When changing this test, ensure these tests are covered here or elsewhere.
-	value := &MyStruct{Any: MyStruct{String: "<string value>"}}
+	value := &MyStruct{AnyValue: MyStruct{StringValue: "<string content>"}}
 	s.context.Set("key", &value)
 
 	data := `
 		import QtQuick 2.0
-		Item{ Component.onCompleted: console.log('string is', key.any.string); }
+		Item{ Component.onCompleted: console.log('string is', key.anyValue.stringValue); }
 	`
 
 	component, err := s.engine.Load(qml.String("file.qml", data))
@@ -159,33 +159,33 @@ func (s *S) TestContextSetGoValueGetProperty(c *C) {
 	obj := component.Create(s.context)
 	obj.Destroy()
 
-	c.Assert(c.GetTestLog(), Matches, "(?s).*string is <string value>.*")
+	c.Assert(c.GetTestLog(), Matches, "(?s).*string is <string content>.*")
 }
 
 func (s *S) TestContextSetObject(c *C) {
 	s.context.SetObject(&MyStruct{
-		String:  "<string value>",
-		True:    true,
-		False:   false,
-		Int:     42,
-		Int64:   42,
-		Int32:   42,
-		Float64: 4.2,
-		Float32: 4.2,
+		StringValue:  "<string content>",
+		TrueValue:    true,
+		FalseValue:   false,
+		IntValue:     42,
+		Int64Value:   42,
+		Int32Value:   42,
+		Float64Value: 4.2,
+		Float32Value: 4.2,
 	})
 
-	c.Assert(s.context.Get("string"), Equals, "<string value>")
-	c.Assert(s.context.Get("true"), Equals, true)
-	c.Assert(s.context.Get("false"), Equals, false)
-	c.Assert(s.context.Get("int64"), Equals, int64(42))
-	c.Assert(s.context.Get("int32"), Equals, int32(42))
-	c.Assert(s.context.Get("float64"), Equals, float64(4.2))
-	c.Assert(s.context.Get("float32"), Equals, float32(4.2))
+	c.Assert(s.context.Get("stringValue"), Equals, "<string content>")
+	c.Assert(s.context.Get("trueValue"), Equals, true)
+	c.Assert(s.context.Get("falseValue"), Equals, false)
+	c.Assert(s.context.Get("int64Value"), Equals, int64(42))
+	c.Assert(s.context.Get("int32Value"), Equals, int32(42))
+	c.Assert(s.context.Get("float64Value"), Equals, float64(4.2))
+	c.Assert(s.context.Get("float32Value"), Equals, float32(4.2))
 
 	if intIs64 {
-		c.Assert(s.context.Get("int"), Equals, int64(42))
+		c.Assert(s.context.Get("intValue"), Equals, int64(42))
 	} else {
-		c.Assert(s.context.Get("int"), Equals, int32(42))
+		c.Assert(s.context.Get("intValue"), Equals, int32(42))
 	}
 }
 
@@ -230,7 +230,7 @@ func (s *S) TestComponentCreateWindow(c *C) {
 }
 
 func (s *S) TestObjectIdentity(c *C) {
-	value := MyStruct{String: "<string value>"}
+	value := MyStruct{StringValue: "<string content>"}
 	s.context.Set("a", &value)
 	s.context.Set("b", &value)
 
@@ -250,24 +250,16 @@ func (s *S) TestObjectIdentity(c *C) {
 	c.Assert(c.GetTestLog(), Matches, "(?s).*Identical: true.*")
 }
 
-type testSpec struct {
-	value interface{}
-}
-
-func (t *testSpec) New() interface{} {
-	return t.value
-}
-
 func (s *S) TestRegisterType(c *C) {
-	value := &MyStruct{String: "new type works!"}
-	info := qml.TypeSpec{
+	value := &MyStruct{StringValue: "new type works!"}
+	spec := qml.TypeSpec{
 		Location: "GoTest",
 		Major:    4,
 		Minor:    2,
 		Name:     "MyType",
 		New:      func() interface{} { return value },
 	}
-	err := qml.RegisterType(&info)
+	err := qml.RegisterType(&spec)
 	c.Assert(err, IsNil)
 
 	data := `
@@ -275,7 +267,7 @@ func (s *S) TestRegisterType(c *C) {
 		import GoTest 4.2
 		MyType {
 			Component.onCompleted: {
-				console.log('Value says:', string)
+				console.log('Value says:', stringValue)
 			}
 		}
 	`
@@ -288,23 +280,60 @@ func (s *S) TestRegisterType(c *C) {
 	c.Assert(c.GetTestLog(), Matches, "(?s).*Value says: new type works!.*")
 }
 
-//func (s *S) TestRegisterType(c *C) {
-//	spec := testSpec{}
-//
-//	qml.RegisterType("GoTest", 1, 0, "MyType", &spec)
-//
-//	data := `
-//		import GoTest 1.0
-//		MyType { int: 300; string: "hey"; }
-//	`
-//	component, err := s.engine.Load(qml.String("file.qml", data))
-//	c.Assert(err, IsNil)
-//
-//	value := &MyStruct{}
-//	typeInfo.value = value
-//
-//	component.Create(s.context).Destroy()
-//
-//	c.Assert(value.String, Equals, "hey")
-//	c.Assert(value.Int, Equals, 300)
-//}
+func (s *S) TestRegisterTypeWriteProperty(c *C) {
+	value := &MyStruct{}
+	spec := qml.TypeSpec{
+		Location: "GoTest",
+		Major:    4,
+		Minor:    2,
+		Name:     "MyType",
+		New:      func() interface{} { return value },
+	}
+	qml.RegisterType(&spec)
+
+	data := `
+		import GoTest 4.2
+		MyType { 
+			intValue: 300
+			stringValue: "hey"
+		}
+	`
+	component, err := s.engine.Load(qml.String("file.qml", data))
+	c.Assert(err, IsNil)
+
+	object := component.Create(s.context)
+	defer object.Destroy()
+
+	c.Assert(value.StringValue, Equals, "hey")
+	c.Assert(value.IntValue, Equals, 300)
+}
+
+func (s *S) TestRegisterSingleton(c *C) {
+	value := &MyStruct{StringValue: "singleton works!"}
+	spec := qml.TypeSpec{
+		Location: "GoTest",
+		Major:    4,
+		Minor:    2,
+		Name:     "MyType",
+		New:      func() interface{} { return value },
+	}
+	err := qml.RegisterSingleton(&spec)
+	c.Assert(err, IsNil)
+
+	data := `
+		import QtQuick 2.0
+		import GoTest 4.2
+		Item {
+			Component.onCompleted: {
+				console.log('Value says:', MyType.stringValue)
+			}
+		}
+	`
+	component, err := s.engine.Load(qml.String("file.qml", data))
+	c.Assert(err, IsNil)
+
+	object := component.Create(s.context)
+	defer object.Destroy()
+
+	c.Assert(c.GetTestLog(), Matches, "(?s).*Value says: singleton works!.*")
+}

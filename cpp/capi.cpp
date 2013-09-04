@@ -230,8 +230,25 @@ QObject_ *newValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject_ *parent)
     return new GoValue(addr, typeInfo, qparent);
 }
 
+template<int N>
+void registerSingletonN(char *location, int major, int minor, char *name, GoTypeInfo *info, GoTypeSpec_ *spec) {
+    GoValueType<N>::init(info, spec);
+    qmlRegisterSingletonType< GoValueType<N> >(location, major, minor, name, [](QQmlEngine *qmlEngine, QJSEngine *jsEngine) -> QObject* {
+        QObject *singleton = new GoValueType<N>();
+        QQmlEngine::setContextForObject(singleton, qmlEngine->rootContext());
+        return singleton;
+    });
+}
+
+void registerSingleton(char *location, int major, int minor, char *name, GoTypeInfo *info, GoTypeSpec_ *spec)
+{
+    // TODO Must increment the number and use different types per call.
+    registerSingletonN<1>(location, major, minor, name, info, spec);
+}
+
 void registerType(char *location, int major, int minor, char *name, GoTypeInfo *info, GoTypeSpec_ *spec)
 {
+    // TODO Must increment the number and use different types per call.
     GoValueType<1>::init(info, spec);
     qmlRegisterType< GoValueType<1> >(location, major, minor, name);
 }

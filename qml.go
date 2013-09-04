@@ -363,27 +363,56 @@ type TypeSpec struct {
 
 var types []*TypeSpec
 
-func RegisterType(info *TypeSpec) error {
-	// Copy and hold a reference to the info data.
-	localInfo := *info
+func RegisterType(spec *TypeSpec) error {
+	// Copy and hold a reference to the spec data.
+	localSpec := *spec
 
-	// TODO Validate localInfo fields.
+	// TODO Validate localSpec fields.
 
 	var err error
 	gui(func() {
-		sample := info.New()
+		sample := spec.New()
 		if sample == nil {
-			err = fmt.Errorf("TypeSpec.New for type %q returned nil", info.Name)
+			err = fmt.Errorf("TypeSpec.New for type %q returned nil", spec.Name)
 			return
 		}
 
-		cloc := C.CString(localInfo.Location)
-		cname := C.CString(localInfo.Name)
-		C.registerType(cloc, C.int(localInfo.Major), C.int(localInfo.Minor), cname, typeInfo(sample), unsafe.Pointer(&localInfo))
+		cloc := C.CString(localSpec.Location)
+		cname := C.CString(localSpec.Name)
+		C.registerType(cloc, C.int(localSpec.Major), C.int(localSpec.Minor), cname, typeInfo(sample), unsafe.Pointer(&localSpec))
 		// TODO Check if qmlRegisterType keeps a reference to those.
 		//C.free(unsafe.Pointer(cloc))
 		//C.free(unsafe.Pointer(cname))
-		types = append(types, &localInfo)
+		types = append(types, &localSpec)
+	})
+
+	// TODO Are there really no errors possible from qmlRegisterType?
+	return err
+}
+
+// TODO Put logic in RegisterType and RegisterSingle in a single internal function.
+
+func RegisterSingleton(spec *TypeSpec) error {
+	// Copy and hold a reference to the spec data.
+	localSpec := *spec
+
+	// TODO Validate localSpec fields.
+
+	var err error
+	gui(func() {
+		sample := spec.New()
+		if sample == nil {
+			err = fmt.Errorf("TypeSpec.New for type %q returned nil", spec.Name)
+			return
+		}
+
+		cloc := C.CString(localSpec.Location)
+		cname := C.CString(localSpec.Name)
+		C.registerSingleton(cloc, C.int(localSpec.Major), C.int(localSpec.Minor), cname, typeInfo(sample), unsafe.Pointer(&localSpec))
+		// TODO Check if qmlRegisterType keeps a reference to those.
+		//C.free(unsafe.Pointer(cloc))
+		//C.free(unsafe.Pointer(cname))
+		types = append(types, &localSpec)
 	})
 
 	// TODO Are there really no errors possible from qmlRegisterType?

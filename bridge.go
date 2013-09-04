@@ -225,3 +225,43 @@ func hookGoValueReadField(enginep unsafe.Pointer, foldp unsafe.Pointer, memberIn
 	// idle timer fires next.
 	packDataValue(field.Interface(), result, fold.engine, jsOwner)
 }
+
+//export hookGoValueWriteField
+func hookGoValueWriteField(enginep unsafe.Pointer, foldp unsafe.Pointer, memberIndex C.int, dvalue *C.DataValue) {
+	fold := (*valueFold)(foldp)
+
+	if fold.engine == nil {
+		if enginep == nilPtr {
+			panic("reading field from value without an engine pointer; who created the value?")
+		}
+		engine := engines[enginep]
+		if engine == nil {
+			panic("unknown engine pointer; who created the engine?")
+		}
+		fold.engine = engine
+		engine.values[fold.gvalue] = fold
+		before := len(enginePending)
+		delete(enginePending, fold)
+		if len(enginePending) == before {
+			panic("value had no engine, but is not in the pending engine set; who created the value?")
+		}
+	}
+
+	v := reflect.ValueOf(fold.gvalue)
+	for v.Type().Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	field := v.Field(int(memberIndex))
+
+	// TODO Put the above in a function and share with Read.
+
+	value := unpackDataValue(dvalue)
+
+	// TODO What to do if it fails?
+	convertAndSet(field, reflect.ValueOf(value))
+}
+
+func convertAndSet(to, from reflect.Value) {
+	// TODO Catch the panic and error out.
+	to.Set(from.Convert(to.Type()))
+}

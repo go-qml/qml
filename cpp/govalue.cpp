@@ -43,24 +43,31 @@ GoValueMetaObject::GoValueMetaObject(GoValue *value_, GoValuePrivate *valuePriv_
 
 int GoValueMetaObject::metaCall(QMetaObject::Call c, int idx, void **a)
 {
-    Q_UNUSED(c);
-    Q_UNUSED(a);
-    qDebug() << "Got metaCall for" << idx << " - Reading: " << (c == QMetaObject::ReadProperty);
-    if (c == QMetaObject::ReadProperty) {
+    switch (c) {
+    case QMetaObject::ReadProperty:
+    case QMetaObject::WriteProperty:
         GoMemberInfo *memberInfo = valuePriv->typeInfo->members;
         for (int i = 0; i < valuePriv->typeInfo->membersLen; i++) {
             if (memberInfo->metaIndex == idx) {
-                DataValue result;
-                // TODO Cache qmlEngine's result for this value?
-                hookGoValueReadField(qmlEngine(value), valuePriv->addr, memberInfo->memberIndex, &result);
-                QVariant *out = reinterpret_cast<QVariant *>(a[0]);
-                unpackDataValue(&result, out);
+                // TODO Cache the qmlEngine call result?
+                if (c == QMetaObject::ReadProperty) {
+                    DataValue result;
+                    hookGoValueReadField(qmlEngine(value), valuePriv->addr, memberInfo->memberIndex, &result);
+                    QVariant *out = reinterpret_cast<QVariant *>(a[0]);
+                    unpackDataValue(&result, out);
+                } else {
+                    DataValue assignValue;
+                    QVariant *in = reinterpret_cast<QVariant *>(a[0]);
+                    packDataValue(in, &assignValue);
+                    hookGoValueWriteField(qmlEngine(value), valuePriv->addr, memberInfo->memberIndex, &assignValue);
+                }
                 return -1;
             }
             memberInfo++;
         }
         QMetaProperty prop = property(idx);
         qWarning() << "Property" << prop.name() << "not found!?";
+        break;
     }
     return -1;
 }
