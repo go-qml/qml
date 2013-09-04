@@ -4,5 +4,4 @@
 #include "cpp/govaluetype.cpp"
 #include "cpp/idletimer.cpp"
 
-#include "cpp/moc_govalue.cpp"
-#include "cpp/moc_idletimer.cpp"
+#include "cpp/moc_all.cpp"
