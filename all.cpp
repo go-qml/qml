@@ -1,9 +1,8 @@
 
-// This is ugly, but significantly reduces the build time.
+#include "cpp/capi.cpp"
+#include "cpp/govalue.cpp"
+#include "cpp/govaluetype.cpp"
+#include "cpp/idletimer.cpp"
 
-#include "govalue.pp"
-#include "moc_govalue.pp"
-#include "govaluetype.pp"
-#include "idletimer.pp"
-#include "moc_idletimer.pp"
-#include "capi.pp"
+#include "cpp/moc_govalue.cpp"
+#include "cpp/moc_idletimer.cpp"
