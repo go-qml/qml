@@ -364,35 +364,14 @@ type TypeSpec struct {
 var types []*TypeSpec
 
 func RegisterType(spec *TypeSpec) error {
-	// Copy and hold a reference to the spec data.
-	localSpec := *spec
-
-	// TODO Validate localSpec fields.
-
-	var err error
-	gui(func() {
-		sample := spec.New()
-		if sample == nil {
-			err = fmt.Errorf("TypeSpec.New for type %q returned nil", spec.Name)
-			return
-		}
-
-		cloc := C.CString(localSpec.Location)
-		cname := C.CString(localSpec.Name)
-		C.registerType(cloc, C.int(localSpec.Major), C.int(localSpec.Minor), cname, typeInfo(sample), unsafe.Pointer(&localSpec))
-		// TODO Check if qmlRegisterType keeps a reference to those.
-		//C.free(unsafe.Pointer(cloc))
-		//C.free(unsafe.Pointer(cname))
-		types = append(types, &localSpec)
-	})
-
-	// TODO Are there really no errors possible from qmlRegisterType?
-	return err
+	return registerType(spec, false)
 }
 
-// TODO Put logic in RegisterType and RegisterSingle in a single internal function.
-
 func RegisterSingleton(spec *TypeSpec) error {
+	return registerType(spec, true)
+}
+
+func registerType(spec *TypeSpec, singleton bool) error {
 	// Copy and hold a reference to the spec data.
 	localSpec := *spec
 
@@ -408,7 +387,11 @@ func RegisterSingleton(spec *TypeSpec) error {
 
 		cloc := C.CString(localSpec.Location)
 		cname := C.CString(localSpec.Name)
-		C.registerSingleton(cloc, C.int(localSpec.Major), C.int(localSpec.Minor), cname, typeInfo(sample), unsafe.Pointer(&localSpec))
+		if singleton {
+			C.registerSingleton(cloc, C.int(localSpec.Major), C.int(localSpec.Minor), cname, typeInfo(sample), unsafe.Pointer(&localSpec))
+		} else {
+			C.registerType(cloc, C.int(localSpec.Major), C.int(localSpec.Minor), cname, typeInfo(sample), unsafe.Pointer(&localSpec))
+		}
 		// TODO Check if qmlRegisterType keeps a reference to those.
 		//C.free(unsafe.Pointer(cloc))
 		//C.free(unsafe.Pointer(cname))

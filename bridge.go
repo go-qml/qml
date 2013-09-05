@@ -193,30 +193,8 @@ func hookGoValueDestroyed(enginep unsafe.Pointer, foldp unsafe.Pointer) {
 
 //export hookGoValueReadField
 func hookGoValueReadField(enginep unsafe.Pointer, foldp unsafe.Pointer, memberIndex C.int, result *C.DataValue) {
+	field := foldField(enginep, foldp, memberIndex)
 	fold := (*valueFold)(foldp)
-
-	if fold.engine == nil {
-		if enginep == nilPtr {
-			panic("reading field from value without an engine pointer; who created the value?")
-		}
-		engine := engines[enginep]
-		if engine == nil {
-			panic("unknown engine pointer; who created the engine?")
-		}
-		fold.engine = engine
-		engine.values[fold.gvalue] = fold
-		before := len(enginePending)
-		delete(enginePending, fold)
-		if len(enginePending) == before {
-			panic("value had no engine, but is not in the pending engine set; who created the value?")
-		}
-	}
-
-	v := reflect.ValueOf(fold.gvalue)
-	for v.Type().Kind() == reflect.Ptr {
-		v = v.Elem()
-	}
-	field := v.Field(int(memberIndex))
 
 	// TODO Strings are being passed in an unsafe manner here. There is a
 	// small chance that the field is changed and the garbage collector is run
@@ -228,11 +206,24 @@ func hookGoValueReadField(enginep unsafe.Pointer, foldp unsafe.Pointer, memberIn
 
 //export hookGoValueWriteField
 func hookGoValueWriteField(enginep unsafe.Pointer, foldp unsafe.Pointer, memberIndex C.int, dvalue *C.DataValue) {
+	field := foldField(enginep, foldp, memberIndex)
+	value := unpackDataValue(dvalue)
+
+	// TODO What to do if it fails?
+	convertAndSet(field, reflect.ValueOf(value))
+}
+
+func convertAndSet(to, from reflect.Value) {
+	// TODO Catch the panic and error out.
+	to.Set(from.Convert(to.Type()))
+}
+
+func foldField(enginep unsafe.Pointer, foldp unsafe.Pointer, memberIndex C.int) reflect.Value {
 	fold := (*valueFold)(foldp)
 
 	if fold.engine == nil {
 		if enginep == nilPtr {
-			panic("reading field from value without an engine pointer; who created the value?")
+			panic("accessing field from value without an engine pointer; who created the value?")
 		}
 		engine := engines[enginep]
 		if engine == nil {
@@ -251,17 +242,6 @@ func hookGoValueWriteField(enginep unsafe.Pointer, foldp unsafe.Pointer, memberI
 	for v.Type().Kind() == reflect.Ptr {
 		v = v.Elem()
 	}
-	field := v.Field(int(memberIndex))
-
-	// TODO Put the above in a function and share with Read.
-
-	value := unpackDataValue(dvalue)
-
-	// TODO What to do if it fails?
-	convertAndSet(field, reflect.ValueOf(value))
+	return v.Field(int(memberIndex))
 }
 
-func convertAndSet(to, from reflect.Value) {
-	// TODO Catch the panic and error out.
-	to.Set(from.Convert(to.Type()))
-}
