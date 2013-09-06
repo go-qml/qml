@@ -24,7 +24,6 @@ typedef void GoTypeSpec_;
 typedef enum {
     DTUnknown = 0, // Has an unsupported type.
     DTInvalid = 1, // Does not exist or similar.
-    DTAny     = 2, // Any of the following types. Used in type information, not in an actual DataValue.
 
     DTString  = 10,
     DTBool    = 11,
@@ -34,7 +33,11 @@ typedef enum {
     DTFloat32 = 15,
 
     DTGoAddr  = 100,
-    DTObject  = 101
+    DTObject  = 101,
+
+    // Used in type information, not in an actual data value.
+    DTAny     = 201, // Can hold any of the above types.
+    DTMethod  = 202,
 } DataType;
 
 typedef struct {
@@ -115,7 +118,8 @@ void installLogHandler();
 void hookIdleTimer();
 void hookLogHandler(LogMessage *message);
 void hookGoValueReadField(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, DataValue *result);
-void hookGoValueWriteField(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, DataValue *result);
+void hookGoValueWriteField(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, DataValue *assign);
+void hookGoValueCallMethod(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, DataValue *result);
 void hookGoValueDestroyed(QQmlEngine_ *engine, GoAddr *addr);
 GoAddr *hookGoValueTypeNew(GoValue_ *value, GoTypeSpec_ *spec);
 void hookWindowHidden(QObject_ *addr);

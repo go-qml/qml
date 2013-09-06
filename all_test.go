@@ -60,7 +60,7 @@ func (s *S) TearDownTest(c *C) {
 	qml.SetLogger(nil)
 }
 
-type MyStruct struct {
+type testStruct struct {
 	StringValue  string
 	TrueValue    bool
 	FalseValue   bool
@@ -72,11 +72,20 @@ type MyStruct struct {
 	AnyValue     interface{}
 }
 
-var intIs64 bool
+func (ts *testStruct) StringMethod() string {
+	return ts.StringValue
+}
 
-func init() {
+func intIs64() bool {
 	var i int = 1<<31 - 1
-	intIs64 = (i+1 > 0)
+	return i+1 > 0
+}
+
+func intNN(i int) interface{} {
+	if intIs64() {
+		return int64(i)
+	}
+	return int32(i)
 }
 
 func (s *S) TestEngineDestroyedUse(c *C) {
@@ -85,67 +94,46 @@ func (s *S) TestEngineDestroyedUse(c *C) {
 	c.Assert(s.engine.Context, PanicMatches, "engine already destroyed")
 }
 
-func (s *S) TestContextGetMissing(c *C) {
-	c.Assert(s.context.Get("key"), Equals, nil)
+var same = "<same>"
+
+var getSetTests = []struct{ set, get interface{} }{
+	{"value", same},
+	{true, same},
+	{false, same},
+	{int64(42), same},
+	{int32(42), same},
+	{float64(42), same},
+	{float32(42), same},
+	{new(testStruct), same},
+	{42, intNN(42)},
 }
 
-func (s *S) TestContextSetGetString(c *C) {
-	s.context.Set("key", "value")
-	c.Assert(s.context.Get("key"), Equals, "value")
-}
-
-func (s *S) TestContextSetGetBool(c *C) {
-	s.context.Set("bool", true)
-	c.Assert(s.context.Get("bool"), Equals, true)
-	s.context.Set("bool", false)
-	c.Assert(s.context.Get("bool"), Equals, false)
-}
-
-func (s *S) TestContextSetGetInt64(c *C) {
-	s.context.Set("key", int64(42))
-	c.Assert(s.context.Get("key"), Equals, int64(42))
-}
-
-func (s *S) TestContextSetGetInt32(c *C) {
-	s.context.Set("key", int32(42))
-	c.Assert(s.context.Get("key"), Equals, int32(42))
-}
-
-func (s *S) TestContextSetGetInt(c *C) {
-	s.context.Set("key", 42)
-	if intIs64 {
-		c.Assert(s.context.Get("key"), Equals, int64(42))
-	} else {
-		c.Assert(s.context.Get("key"), Equals, int32(42))
+func (s *S) TestContextGetSet(c *C) {
+	for i, t := range getSetTests {
+		want := t.get
+		if t.get == same {
+			want = t.set
+		}
+		s.context.Set("key", t.set)
+		c.Assert(s.context.Get("key"), Equals, want,
+			Commentf("entry %d is {%v (%T), %v (%T)}", i, t.set, t.set, t.get, t.get))
 	}
 }
 
-func (s *S) TestContextSetGetFloat64(c *C) {
-	s.context.Set("key", float64(42))
-	c.Assert(s.context.Get("key"), Equals, float64(42))
-}
-
-func (s *S) TestContextSetGetFloat32(c *C) {
-	s.context.Set("key", float32(42))
-	c.Assert(s.context.Get("key"), Equals, float32(42))
-}
-
-func (s *S) TestContextSetGetGoValue(c *C) {
-	var value MyStruct
-	s.context.Set("key", &value)
-	c.Assert(s.context.Get("key"), Equals, &value)
+func (s *S) TestContextGetMissing(c *C) {
+	c.Assert(s.context.Get("key"), Equals, nil)
 }
 
 func (s *S) TestContextSetGoValueGetProperty(c *C) {
 	// This test will touch:
 	//
 	// - The processing of nesting
-	// - Field reading both from a pointer (outter MyStruct) and from a value (inner MyStruct)
+	// - Field reading both from a pointer (outter testStruct) and from a value (inner testStruct)
 	// - Access to an interface{} field (Any)
 	// - Proper collection of a JS-owned GoValue wrapper (the result of accessing Any)
 	//
 	// When changing this test, ensure these tests are covered here or elsewhere.
-	value := &MyStruct{AnyValue: MyStruct{StringValue: "<string content>"}}
+	value := &testStruct{AnyValue: testStruct{StringValue: "<string content>"}}
 	s.context.Set("key", &value)
 
 	data := `
@@ -163,7 +151,7 @@ func (s *S) TestContextSetGoValueGetProperty(c *C) {
 }
 
 func (s *S) TestContextSetObject(c *C) {
-	s.context.SetObject(&MyStruct{
+	s.context.SetObject(&testStruct{
 		StringValue:  "<string content>",
 		TrueValue:    true,
 		FalseValue:   false,
@@ -177,16 +165,11 @@ func (s *S) TestContextSetObject(c *C) {
 	c.Assert(s.context.Get("stringValue"), Equals, "<string content>")
 	c.Assert(s.context.Get("trueValue"), Equals, true)
 	c.Assert(s.context.Get("falseValue"), Equals, false)
+	c.Assert(s.context.Get("intValue"), Equals, intNN(42))
 	c.Assert(s.context.Get("int64Value"), Equals, int64(42))
 	c.Assert(s.context.Get("int32Value"), Equals, int32(42))
 	c.Assert(s.context.Get("float64Value"), Equals, float64(4.2))
 	c.Assert(s.context.Get("float32Value"), Equals, float32(4.2))
-
-	if intIs64 {
-		c.Assert(s.context.Get("intValue"), Equals, int64(42))
-	} else {
-		c.Assert(s.context.Get("intValue"), Equals, int32(42))
-	}
 }
 
 func (s *S) TestComponentSetDataError(c *C) {
@@ -230,7 +213,7 @@ func (s *S) TestComponentCreateWindow(c *C) {
 }
 
 func (s *S) TestObjectIdentity(c *C) {
-	value := MyStruct{StringValue: "<string content>"}
+	value := testStruct{StringValue: "<string content>"}
 	s.context.Set("a", &value)
 	s.context.Set("b", &value)
 
@@ -251,7 +234,7 @@ func (s *S) TestObjectIdentity(c *C) {
 }
 
 func (s *S) TestRegisterType(c *C) {
-	value := &MyStruct{StringValue: "new type works!"}
+	value := &testStruct{StringValue: "new type works!"}
 	spec := qml.TypeSpec{
 		Location: "GoTest",
 		Major:    4,
@@ -281,7 +264,7 @@ func (s *S) TestRegisterType(c *C) {
 }
 
 func (s *S) TestRegisterTypeWriteProperty(c *C) {
-	value := &MyStruct{}
+	value := &testStruct{}
 	spec := qml.TypeSpec{
 		Location: "GoTest",
 		Major:    4,
@@ -309,7 +292,7 @@ func (s *S) TestRegisterTypeWriteProperty(c *C) {
 }
 
 func (s *S) TestRegisterSingleton(c *C) {
-	value := &MyStruct{StringValue: "singleton works!"}
+	value := &testStruct{StringValue: "singleton works!"}
 	spec := qml.TypeSpec{
 		Location: "GoTest",
 		Major:    4,
@@ -336,4 +319,24 @@ func (s *S) TestRegisterSingleton(c *C) {
 	defer object.Destroy()
 
 	c.Assert(c.GetTestLog(), Matches, "(?s).*Value says: singleton works!.*")
+}
+
+// TODO De-dup some of these tests into a table.
+
+func (s *S) TestMethodCall(c *C) {
+	value := &testStruct{StringValue: "<string content>"}
+	s.context.Set("key", value)
+
+	data := `
+		import QtQuick 2.0
+		Item{ Component.onCompleted: console.log('string is', key.stringMethod()); }
+	`
+
+	component, err := s.engine.Load(qml.String("file.qml", data))
+	c.Assert(err, IsNil)
+
+	obj := component.Create(s.context)
+	obj.Destroy()
+
+	c.Assert(c.GetTestLog(), Matches, "(?s).*string is <string content>.*")
 }

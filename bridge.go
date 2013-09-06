@@ -122,6 +122,8 @@ const (
 //
 // This must be run from the main GUI thread.
 func wrapGoValue(engine *Engine, gvalue interface{}, owner valueOwner) (cvalue unsafe.Pointer) {
+	// TODO Return an error if gvalue is a non-basic type and not a pointer.
+	//      Pointer-to-pointer is also not okay.
 	fold, ok := engine.values[gvalue]
 	if !ok {
 		parent := nilPtr
@@ -192,25 +194,34 @@ func hookGoValueDestroyed(enginep unsafe.Pointer, foldp unsafe.Pointer) {
 }
 
 //export hookGoValueReadField
-func hookGoValueReadField(enginep unsafe.Pointer, foldp unsafe.Pointer, memberIndex C.int, result *C.DataValue) {
-	field := foldField(enginep, foldp, memberIndex)
-	fold := (*valueFold)(foldp)
+func hookGoValueReadField(enginep unsafe.Pointer, foldp unsafe.Pointer, memberIndex C.int, resultdv *C.DataValue) {
+	fold := ensureEngine(enginep, foldp)
+	v := reflect.ValueOf(fold.gvalue)
+	for v.Type().Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	field := v.Field(int(memberIndex))
 
 	// TODO Strings are being passed in an unsafe manner here. There is a
 	// small chance that the field is changed and the garbage collector is run
 	// before C++ has a chance to look at the data. We can solve this problem
 	// by queuing up values in a stack, and cleaning the stack when the
 	// idle timer fires next.
-	packDataValue(field.Interface(), result, fold.engine, jsOwner)
+	packDataValue(field.Interface(), resultdv, fold.engine, jsOwner)
 }
 
 //export hookGoValueWriteField
-func hookGoValueWriteField(enginep unsafe.Pointer, foldp unsafe.Pointer, memberIndex C.int, dvalue *C.DataValue) {
-	field := foldField(enginep, foldp, memberIndex)
-	value := unpackDataValue(dvalue)
+func hookGoValueWriteField(enginep unsafe.Pointer, foldp unsafe.Pointer, memberIndex C.int, assigndv *C.DataValue) {
+	fold := ensureEngine(enginep, foldp)
+	v := reflect.ValueOf(fold.gvalue)
+	for v.Type().Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	field := v.Field(int(memberIndex))
+	assign := unpackDataValue(assigndv)
 
 	// TODO What to do if it fails?
-	convertAndSet(field, reflect.ValueOf(value))
+	convertAndSet(field, reflect.ValueOf(assign))
 }
 
 func convertAndSet(to, from reflect.Value) {
@@ -218,9 +229,26 @@ func convertAndSet(to, from reflect.Value) {
 	to.Set(from.Convert(to.Type()))
 }
 
-func foldField(enginep unsafe.Pointer, foldp unsafe.Pointer, memberIndex C.int) reflect.Value {
-	fold := (*valueFold)(foldp)
+//export hookGoValueCallMethod
+func hookGoValueCallMethod(enginep unsafe.Pointer, foldp unsafe.Pointer, memberIndex C.int, resultdv *C.DataValue) {
+	fold := ensureEngine(enginep, foldp)
+	v := reflect.ValueOf(fold.gvalue)
 
+	// TODO Must ensure that v is necessarily a pointer here.
+
+	method := v.Method(int(memberIndex))
+
+	// TODO Unhardcode this.
+	result := method.Call(nil)
+	if len(result) != 1 || result[0].Type() != typeString {
+		panic("result must be a string for now")
+	}
+
+	packDataValue(result[0].Interface(), resultdv, fold.engine, jsOwner)
+}
+
+func ensureEngine(enginep unsafe.Pointer, foldp unsafe.Pointer) *valueFold {
+	fold := (*valueFold)(foldp)
 	if fold.engine == nil {
 		if enginep == nilPtr {
 			panic("accessing field from value without an engine pointer; who created the value?")
@@ -237,11 +265,5 @@ func foldField(enginep unsafe.Pointer, foldp unsafe.Pointer, memberIndex C.int) 
 			panic("value had no engine, but is not in the pending engine set; who created the value?")
 		}
 	}
-
-	v := reflect.ValueOf(fold.gvalue)
-	for v.Type().Kind() == reflect.Ptr {
-		v = v.Elem()
-	}
-	return v.Field(int(memberIndex))
+	return fold
 }
-

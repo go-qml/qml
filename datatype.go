@@ -139,6 +139,8 @@ var typeInfoSize = C.size_t(unsafe.Sizeof(C.GoTypeInfo{}))
 var memberInfoSize = C.size_t(unsafe.Sizeof(C.GoMemberInfo{}))
 
 func typeInfo(v interface{}) *C.GoTypeInfo {
+	// TODO Cache the type info.
+
 	vt := reflect.TypeOf(v)
 	for vt.Kind() == reflect.Ptr {
 		vt = vt.Elem()
@@ -147,12 +149,19 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	typeInfo := (*C.GoTypeInfo)(C.malloc(typeInfoSize))
 	typeInfo.typeName = C.CString(vt.Name())
 
+	// TODO Only do that if it's a struct?
+	vtptr := reflect.PtrTo(vt)
+
 	numField := vt.NumField()
+	numMethod := vtptr.NumMethod()
 
 	// struct { FooBar T; Baz T } => "fooBar\0baz\0"
 	namesLen := 0
 	for i := 0; i < numField; i++ {
-		namesLen += len(vt.Field(i).Name)
+		namesLen += len(vt.Field(i).Name) + 1
+	}
+	for i := 0; i < numMethod; i++ {
+		namesLen += len(vtptr.Method(i).Name) + 1
 	}
 	names := make([]byte, 0, namesLen)
 	for i := 0; i < numField; i++ {
@@ -167,12 +176,28 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 		}
 		names = append(names, 0)
 	}
+	for i := 0; i < numMethod; i++ {
+		name := vtptr.Method(i).Name
+		for i, rune := range name {
+			if i == 0 {
+				names = append(names, string(unicode.ToLower(rune))...)
+			} else {
+				names = append(names, name[i:]...)
+				break
+			}
+		}
+		names = append(names, 0)
+	}
+	if len(names) != namesLen {
+		panic("pre-allocated buffer size was wrong")
+	}
 	typeInfo.memberNames = C.CString(string(names))
 
 	// Assemble information on members.
+	membersLen := numField + numMethod
 	membersi := uintptr(0)
 	mnamesi := uintptr(0)
-	members := uintptr(C.malloc(memberInfoSize*C.size_t(numField) + 1))
+	members := uintptr(C.malloc(memberInfoSize*C.size_t(membersLen)))
 	mnames := uintptr(unsafe.Pointer(typeInfo.memberNames))
 	for i := 0; i < numField; i++ {
 		field := vt.Field(i)
@@ -183,8 +208,21 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 		membersi += 1
 		mnamesi += uintptr(len(field.Name)) + 1
 	}
+	for i := 0; i < numMethod; i++ {
+		method := vtptr.Method(i)
+		memberInfo := (*C.GoMemberInfo)(unsafe.Pointer(members + (uintptr(memberInfoSize) * membersi)))
+		memberInfo.memberName = (*C.char)(unsafe.Pointer(mnames + mnamesi))
+		// TODO Sort out the parameter and result typing strategy.
+		memberInfo.memberType = C.DTMethod
+		memberInfo.memberIndex = C.int(i)
+		membersi += 1
+		mnamesi += uintptr(len(method.Name)) + 1
+	}
 	typeInfo.members = (*C.GoMemberInfo)(unsafe.Pointer(members))
-	typeInfo.membersLen = C.int(membersi)
+	typeInfo.membersLen = C.int(membersLen)
+	if int(membersi) != membersLen {
+		panic("used more space than allocated for member names")
+	}
 	return typeInfo
 }
 
