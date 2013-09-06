@@ -55,9 +55,13 @@ typedef struct {
 
 typedef struct {
     char *typeName;
-    GoMemberInfo *members;
-    char *memberNames;
+    GoMemberInfo *fields;
+    GoMemberInfo *methods;
+    GoMemberInfo *members; // fields + methods
+    int fieldsLen;
+    int methodsLen;
     int membersLen;
+    char *memberNames;
 } GoTypeInfo;
 
 typedef struct {

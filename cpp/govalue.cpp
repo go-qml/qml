@@ -51,9 +51,9 @@ int GoValueMetaObject::metaCall(QMetaObject::Call c, int idx, void **a)
             if (idx < propertyOffset()) {
                 return value->qt_metacall(c, idx, a);
             }
-            GoMemberInfo *memberInfo = valuePriv->typeInfo->members;
-            for (int i = 0; i < valuePriv->typeInfo->membersLen; i++) {
-                if (memberInfo->metaIndex == idx && memberInfo->memberType != DTMethod) {
+            GoMemberInfo *memberInfo = valuePriv->typeInfo->fields;
+            for (int i = 0; i < valuePriv->typeInfo->fieldsLen; i++) {
+                if (memberInfo->metaIndex == idx) {
                     // TODO Cache the qmlEngine call result?
                     if (c == QMetaObject::ReadProperty) {
                         DataValue result;
@@ -80,9 +80,9 @@ int GoValueMetaObject::metaCall(QMetaObject::Call c, int idx, void **a)
             if (idx < methodOffset()) {
                 return value->qt_metacall(c, idx, a);
             }
-            GoMemberInfo *memberInfo = valuePriv->typeInfo->members;
-            for (int i = 0; i < valuePriv->typeInfo->membersLen; i++) {
-                if (memberInfo->metaIndex == idx && memberInfo->memberType == DTMethod) {
+            GoMemberInfo *memberInfo = valuePriv->typeInfo->methods;
+            for (int i = 0; i < valuePriv->typeInfo->methodsLen; i++) {
+                if (memberInfo->metaIndex == idx) {
                     // TODO Cache the qmlEngine call result?
                     DataValue result;
                     hookGoValueCallMethod(qmlEngine(value), valuePriv->addr, memberInfo->memberIndex, &result);
@@ -128,42 +128,42 @@ QMetaObject *GoValue::metaObjectFor(GoTypeInfo *typeInfo)
     mob.setClassName(typeInfo->typeName);
     mob.setFlags(QMetaObjectBuilder::DynamicMetaObject);
 
-    GoMemberInfo *memberInfo = typeInfo->members;
-    int memberIndex = 0;
-
+    GoMemberInfo *memberInfo;
+    
+    memberInfo = typeInfo->fields;
     int relativePropertyIndex = mob.propertyCount();
-    while (memberIndex < typeInfo->membersLen && memberInfo->memberType != DTMethod) {
+    for (int i = 0; i < typeInfo->fieldsLen; i++) {
         mob.addSignal("__" + QByteArray::number(relativePropertyIndex) + "()");
         QMetaPropertyBuilder propb = mob.addProperty(memberInfo->memberName, "QVariant", relativePropertyIndex);
         propb.setWritable(true);
         memberInfo->metaIndex = relativePropertyIndex;
         memberInfo++;
-        memberIndex++;
         relativePropertyIndex++;
     }
 
+    memberInfo = typeInfo->methods;
     int relativeMethodIndex = mob.methodCount();
-    while (memberIndex < typeInfo->membersLen && memberInfo->memberType == DTMethod) {
+    for (int i = 0; i < typeInfo->methodsLen; i++) {
         // TODO Unhardcode this.
         QMetaMethodBuilder methb = mob.addMethod("stringMethod()", "QString");
         memberInfo->metaIndex = relativeMethodIndex;
         memberInfo++;
-        memberIndex++;
         relativeMethodIndex++;
     }
 
     QMetaObject *mo = mob.toMetaObject();
 
     // Turn the relative indexes into absolute indexes.
-    memberInfo = typeInfo->members;
+    memberInfo = typeInfo->fields;
     int propertyOffset = mo->propertyOffset();
+    for (int i = 0; i < typeInfo->fieldsLen; i++) {
+        memberInfo->metaIndex += propertyOffset;
+        memberInfo++;
+    }
+    memberInfo = typeInfo->methods;
     int methodOffset = mo->methodOffset();
-    for (int i = 0; i < typeInfo->membersLen; i++) {
-        if (memberInfo->memberType == DTMethod) {
-            memberInfo->metaIndex += methodOffset;
-        } else {
-            memberInfo->metaIndex += propertyOffset;
-        }
+    for (int i = 0; i < typeInfo->methodsLen; i++) {
+        memberInfo->metaIndex += methodOffset;
         memberInfo++;
     }
 

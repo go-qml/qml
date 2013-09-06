@@ -201,7 +201,7 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	mnames := uintptr(unsafe.Pointer(typeInfo.memberNames))
 	for i := 0; i < numField; i++ {
 		field := vt.Field(i)
-		memberInfo := (*C.GoMemberInfo)(unsafe.Pointer(members + (uintptr(memberInfoSize) * membersi)))
+		memberInfo := (*C.GoMemberInfo)(unsafe.Pointer(members + uintptr(memberInfoSize) * membersi))
 		memberInfo.memberName = (*C.char)(unsafe.Pointer(mnames + mnamesi))
 		memberInfo.memberType = dataTypeOf(field.Type)
 		memberInfo.memberIndex = C.int(i)
@@ -210,7 +210,7 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	}
 	for i := 0; i < numMethod; i++ {
 		method := vtptr.Method(i)
-		memberInfo := (*C.GoMemberInfo)(unsafe.Pointer(members + (uintptr(memberInfoSize) * membersi)))
+		memberInfo := (*C.GoMemberInfo)(unsafe.Pointer(members + uintptr(memberInfoSize) * membersi))
 		memberInfo.memberName = (*C.char)(unsafe.Pointer(mnames + mnamesi))
 		// TODO Sort out the parameter and result typing strategy.
 		memberInfo.memberType = C.DTMethod
@@ -220,6 +220,12 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	}
 	typeInfo.members = (*C.GoMemberInfo)(unsafe.Pointer(members))
 	typeInfo.membersLen = C.int(membersLen)
+
+	typeInfo.fields = typeInfo.members
+	typeInfo.fieldsLen = C.int(numField)
+	typeInfo.methods = (*C.GoMemberInfo)(unsafe.Pointer(members + uintptr(memberInfoSize) * uintptr(numField)))
+	typeInfo.methodsLen = C.int(numMethod)
+
 	if int(membersi) != membersLen {
 		panic("used more space than allocated for member names")
 	}
