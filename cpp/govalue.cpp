@@ -123,6 +123,10 @@ GoAddr *GoValue::addr()
 
 QMetaObject *GoValue::metaObjectFor(GoTypeInfo *typeInfo)
 {
+    if (typeInfo->metaObject) {
+            return reinterpret_cast<QMetaObject *>(typeInfo->metaObject);
+    }
+
     QMetaObjectBuilder mob;
     mob.setSuperClass(&QObject::staticMetaObject);
     mob.setClassName(typeInfo->typeName);
@@ -167,8 +171,7 @@ QMetaObject *GoValue::metaObjectFor(GoTypeInfo *typeInfo)
         memberInfo++;
     }
 
-    // TODO Cache mo inside typeInfo.
-
+    typeInfo->metaObject = mo;
     return mo;
 }
 

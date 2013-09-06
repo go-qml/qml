@@ -138,16 +138,22 @@ func dataTypeOf(typ reflect.Type) C.DataType {
 var typeInfoSize = C.size_t(unsafe.Sizeof(C.GoTypeInfo{}))
 var memberInfoSize = C.size_t(unsafe.Sizeof(C.GoMemberInfo{}))
 
-func typeInfo(v interface{}) *C.GoTypeInfo {
-	// TODO Cache the type info.
+var typeInfoCache = make(map[reflect.Type]*C.GoTypeInfo)
 
+func typeInfo(v interface{}) *C.GoTypeInfo {
 	vt := reflect.TypeOf(v)
 	for vt.Kind() == reflect.Ptr {
 		vt = vt.Elem()
 	}
 
-	typeInfo := (*C.GoTypeInfo)(C.malloc(typeInfoSize))
+	typeInfo := typeInfoCache[vt]
+	if typeInfo != nil {
+		return typeInfo
+	}
+
+	typeInfo = (*C.GoTypeInfo)(C.malloc(typeInfoSize))
 	typeInfo.typeName = C.CString(vt.Name())
+	typeInfo.metaObject = nilPtr
 
 	// TODO Only do that if it's a struct?
 	vtptr := reflect.PtrTo(vt)
@@ -229,6 +235,8 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	if int(membersi) != membersLen {
 		panic("used more space than allocated for member names")
 	}
+
+	typeInfoCache[vt] = typeInfo
 	return typeInfo
 }
 

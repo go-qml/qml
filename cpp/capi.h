@@ -9,6 +9,7 @@ extern "C" {
 #endif
 
 typedef void QApplication_;
+typedef void QMetaObject_;
 typedef void QObject_;
 typedef void QVariant_;
 typedef void QString_;
@@ -62,6 +63,8 @@ typedef struct {
     int methodsLen;
     int membersLen;
     char *memberNames;
+
+    QMetaObject_ *metaObject;
 } GoTypeInfo;
 
 typedef struct {
