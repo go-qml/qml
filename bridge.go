@@ -71,8 +71,8 @@ func Unlock() {
 	})
 }
 
-// FlushAll synchronously flushes all pending QML activities.
-func FlushAll() {
+// Flush synchronously flushes all pending QML activities.
+func Flush() {
 	// TODO Better testing for this.
 	gui(func() {
 		C.applicationFlushAll()

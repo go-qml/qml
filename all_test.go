@@ -42,7 +42,7 @@ func (s *S) TearDownTest(c *C) {
 
 	retries := 30 // Three seconds top.
 	for {
-		qml.FlushAll()
+		qml.Flush()
 		runtime.GC()
 		stats := qml.GetStats()
 		if stats.EnginesAlive == 0 && stats.ValuesAlive == 0 {
@@ -347,16 +347,16 @@ func (s *S) TestNotify(c *C) {
 
 	value.StringValue = "<new value>"
 
-	qml.FlushAll()
+	qml.Flush()
 
 	c.Assert(strings.Contains(c.GetTestLog(), "<old value>"), Equals, false)
 	c.Assert(strings.Contains(c.GetTestLog(), "<new value>"), Equals, false)
 
 	qml.Notify(value, "StringValue")
-	qml.FlushAll()
+	qml.Flush()
 
 	c.Assert(strings.Contains(c.GetTestLog(), "<old value>"), Equals, false)
-	c.Assert(strings.Contains(c.GetTestLog(), "<new value>"), Equals, true)
+	c.Assert(strings.Contains(c.GetTestLog(), "String value is now <new value>"), Equals, true)
 }
 
 // TODO De-dup some of these tests into a table.
