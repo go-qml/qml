@@ -274,7 +274,7 @@ type Object struct {
 	commonObject
 }
 
-func (o *commonObject) Get(property string) interface{} {
+func (o *commonObject) Value(property string) interface{} {
 	cproperty := C.CString(property)
 	defer C.free(unsafe.Pointer(cproperty))
 

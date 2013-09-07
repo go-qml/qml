@@ -199,7 +199,7 @@ func (s *S) TestComponentSetData(c *C) {
 	obj := component.Create(s.context)
 
 	c.Assert(c.GetTestLog(), Matches, pattern)
-	c.Assert(obj.Get("width"), Equals, float64(N*2))
+	c.Assert(obj.Value("width"), Equals, float64(N*2))
 }
 
 func (s *S) TestComponentCreateWindow(c *C) {
