@@ -17,7 +17,7 @@ func main() {
 	}
 
 	context := engine.Context()
-	context.Set("message", &Message{"Hello from Go!"})
+	context.SetVar("message", &Message{"Hello from Go!"})
 
 	window := component.CreateWindow(nil)
 	window.Show()

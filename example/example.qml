@@ -10,7 +10,7 @@ Rectangle {
     id: text
     x: 0
     y: 0
-    text: "Go says: " //+ message.text
+    text: "Go says: " + message.text
     //MyStruct {
     //	//foo: "text"
     //}

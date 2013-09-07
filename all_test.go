@@ -120,14 +120,14 @@ func (s *S) TestContextGetSet(c *C) {
 		if t.get == same {
 			want = t.set
 		}
-		s.context.Set("key", t.set)
-		c.Assert(s.context.Get("key"), Equals, want,
+		s.context.SetVar("key", t.set)
+		c.Assert(s.context.Var("key"), Equals, want,
 			Commentf("entry %d is {%v (%T), %v (%T)}", i, t.set, t.set, t.get, t.get))
 	}
 }
 
 func (s *S) TestContextGetMissing(c *C) {
-	c.Assert(s.context.Get("missing"), Equals, nil)
+	c.Assert(s.context.Var("missing"), Equals, nil)
 }
 
 func (s *S) TestContextSetGoValueGetProperty(c *C) {
@@ -140,7 +140,7 @@ func (s *S) TestContextSetGoValueGetProperty(c *C) {
 	//
 	// When changing this test, ensure these tests are covered here or elsewhere.
 	value := &testStruct{AnyValue: testStruct{StringValue: "<string content>"}}
-	s.context.Set("value", &value)
+	s.context.SetVar("value", &value)
 
 	data := `
 		import QtQuick 2.0
@@ -157,7 +157,7 @@ func (s *S) TestContextSetGoValueGetProperty(c *C) {
 }
 
 func (s *S) TestContextSetObject(c *C) {
-	s.context.SetObject(&testStruct{
+	s.context.SetVars(&testStruct{
 		StringValue:  "<string content>",
 		TrueValue:    true,
 		FalseValue:   false,
@@ -168,14 +168,14 @@ func (s *S) TestContextSetObject(c *C) {
 		Float32Value: 4.2,
 	})
 
-	c.Assert(s.context.Get("stringValue"), Equals, "<string content>")
-	c.Assert(s.context.Get("trueValue"), Equals, true)
-	c.Assert(s.context.Get("falseValue"), Equals, false)
-	c.Assert(s.context.Get("intValue"), Equals, intNN(42))
-	c.Assert(s.context.Get("int64Value"), Equals, int64(42))
-	c.Assert(s.context.Get("int32Value"), Equals, int32(42))
-	c.Assert(s.context.Get("float64Value"), Equals, float64(4.2))
-	c.Assert(s.context.Get("float32Value"), Equals, float32(4.2))
+	c.Assert(s.context.Var("stringValue"), Equals, "<string content>")
+	c.Assert(s.context.Var("trueValue"), Equals, true)
+	c.Assert(s.context.Var("falseValue"), Equals, false)
+	c.Assert(s.context.Var("intValue"), Equals, intNN(42))
+	c.Assert(s.context.Var("int64Value"), Equals, int64(42))
+	c.Assert(s.context.Var("int32Value"), Equals, int32(42))
+	c.Assert(s.context.Var("float64Value"), Equals, float64(4.2))
+	c.Assert(s.context.Var("float32Value"), Equals, float32(4.2))
 }
 
 func (s *S) TestComponentSetDataError(c *C) {
@@ -185,7 +185,7 @@ func (s *S) TestComponentSetDataError(c *C) {
 
 func (s *S) TestComponentSetData(c *C) {
 	const N = 42
-	s.context.Set("N", N)
+	s.context.SetVar("N", N)
 	data := `
 		import QtQuick 2.0
 		Item { width: N*2; Component.onCompleted: console.log("N is", N) }
@@ -220,8 +220,8 @@ func (s *S) TestComponentCreateWindow(c *C) {
 
 func (s *S) TestObjectIdentity(c *C) {
 	value := testStruct{StringValue: "<string content>"}
-	s.context.Set("a", &value)
-	s.context.Set("b", &value)
+	s.context.SetVar("a", &value)
+	s.context.SetVar("b", &value)
 
 	data := `
 		import QtQuick 2.0
@@ -366,7 +366,7 @@ func (s *S) TestChanged(c *C) {
 
 func (s *S) TestMethodCall(c *C) {
 	value := &testStruct{StringValue: "<string content>"}
-	s.context.Set("value", value)
+	s.context.SetVar("value", value)
 
 	data := `
 		import QtQuick 2.0
@@ -388,7 +388,7 @@ func (s *S) TestMethodCall(c *C) {
 
 func (s *S) TestConnectQmlSignalToGoMethod(c *C) {
 	value := &testStruct{StringValue: "<string content>"}
-	s.context.Set("value", value)
+	s.context.SetVar("value", value)
 
 	data := `
 		import QtQuick 2.0

@@ -156,7 +156,7 @@ type Context struct {
 	engine *Engine
 }
 
-// Set makes the provided value available as a variable with the
+// SetVar makes the provided value available as a variable with the
 // given name for QML code executed within the c context.
 //
 // If value is a struct, its exported fields are also made accessible to
@@ -168,8 +168,7 @@ type Context struct {
 // The engine will hold a reference to the provided value, so it will
 // not be garbage collected until the engine is destroyed, even if the
 // value is unused or changed.
-func (c *Context) Set(name string, value interface{}) {
-	// TODO Rename to SetVar, to allow commonObject to be embeded if necessary?
+func (c *Context) SetVar(name string, value interface{}) {
 	cname, cnamelen := unsafeStringData(name)
 	gui(func() {
 		var dvalue C.DataValue
@@ -182,7 +181,7 @@ func (c *Context) Set(name string, value interface{}) {
 	})
 }
 
-// SetObject makes the exported fields of the provided value available as
+// SetVars makes the exported fields of the provided value available as
 // variables for QML code executed within the c context. The variable names
 // will have the same name of the Go field names, except for the first
 // letter which is lowercased. This is conventional and enforced by
@@ -191,14 +190,14 @@ func (c *Context) Set(name string, value interface{}) {
 // The engine will hold a reference to the provided value, so it will
 // not be garbage collected until the engine is destroyed, even if the
 // value is unused or changed.
-func (c *Context) SetObject(value interface{}) {
+func (c *Context) SetVars(value interface{}) {
 	gui(func() {
 		C.contextSetObject(c.addr, wrapGoValue(c.engine, value, cppOwner))
 	})
 }
 
-// Get returns the context variable with the given name.
-func (c *Context) Get(name string) interface{} {
+// Var returns the context variable with the given name.
+func (c *Context) Var(name string) interface{} {
 	cname, cnamelen := unsafeStringData(name)
 
 	var dvalue C.DataValue
