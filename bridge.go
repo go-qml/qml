@@ -79,7 +79,7 @@ func Flush() {
 	})
 }
 
-func Notify(value interface{}, field string) {
+func Changed(value, fieldAddr interface{}) {
 
 	// TODO Must notify all engines, not one of them.
 
@@ -90,37 +90,38 @@ func Notify(value interface{}, field string) {
 			break
 		}
 	}
-
 	if fold == nil {
-
 		for f, _ := range enginePending {
 			if f.gvalue == value {
 				fold = f
 				break
 			}
 		}
-
 		if fold == nil {
 			// TODO Perhaps return an error instead.
 			panic("value is not known")
 		}
 	}
 
-	// TODO Can probably use the field address for notify, as in:
-	//          Notify(&value, &value.field)
-	//      And do it in O(1).
-	vt := reflect.ValueOf(value).Type()
-	for vt.Kind() == reflect.Ptr {
-		vt = vt.Elem()
+	valuev := reflect.ValueOf(value)
+	fieldv := reflect.ValueOf(fieldAddr)
+	for valuev.Kind() == reflect.Ptr {
+		valuev = valuev.Elem()
 	}
-	numField := vt.NumField()
-	for i := 0; i < numField; i++ {
-		if vt.Field(i).Name == field {
-			gui(func() {
-				C.goValueActivate(fold.cvalue, C.int(i))
-			})
-		}
+	for fieldv.Kind() == reflect.Ptr {
+		fieldv = fieldv.Elem()
 	}
+	if fieldv.Type().Size() == 0 {
+		panic("cannot report changes on zero-sized fields")
+	}
+	offset := fieldv.UnsafeAddr() - valuev.UnsafeAddr()
+	if !(0 <= offset && offset < valuev.Type().Size()) {
+		panic("provided field is not a member of the given value")
+	}
+
+	gui(func() {
+		C.goValueActivate(fold.cvalue, typeInfo(value), C.int(offset))
+	})
 }
 
 // hookIdleTimer is run once per iteration of the Qt event loop,

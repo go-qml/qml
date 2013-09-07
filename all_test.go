@@ -77,6 +77,11 @@ func (ts *testStruct) StringMethod() string {
 	return ts.StringValue
 }
 
+func (ts *testStruct) PresetString() string {
+	ts.StringValue = "<preset value>"
+	return ts.StringValue
+}
+
 func intIs64() bool {
 	var i int = 1<<31 - 1
 	return i+1 > 0
@@ -122,7 +127,7 @@ func (s *S) TestContextGetSet(c *C) {
 }
 
 func (s *S) TestContextGetMissing(c *C) {
-	c.Assert(s.context.Get("key"), Equals, nil)
+	c.Assert(s.context.Get("missing"), Equals, nil)
 }
 
 func (s *S) TestContextSetGoValueGetProperty(c *C) {
@@ -135,11 +140,11 @@ func (s *S) TestContextSetGoValueGetProperty(c *C) {
 	//
 	// When changing this test, ensure these tests are covered here or elsewhere.
 	value := &testStruct{AnyValue: testStruct{StringValue: "<string content>"}}
-	s.context.Set("key", &value)
+	s.context.Set("value", &value)
 
 	data := `
 		import QtQuick 2.0
-		Item{ Component.onCompleted: console.log('string is', key.anyValue.stringValue); }
+		Item{ Component.onCompleted: console.log('string is', value.anyValue.stringValue); }
 	`
 
 	component, err := s.engine.Load(qml.String("file.qml", data))
@@ -322,20 +327,20 @@ func (s *S) TestRegisterSingleton(c *C) {
 	c.Assert(c.GetTestLog(), Matches, "(?s).*Value says: singleton works!.*")
 }
 
-func (s *S) TestNotify(c *C) {
+func (s *S) TestChanged(c *C) {
 	value := &testStruct{StringValue: "<old value>"}
 	spec := qml.TypeSpec{
 		Location: "GoTest",
 		Major:    4,
 		Minor:    2,
-		Name:     "NotifyType",
+		Name:     "ChangedType",
 		New:      func() interface{} { return value },
 	}
 	qml.RegisterType(&spec)
 
 	data := `
 		import GoTest 4.2
-		NotifyType { 
+		ChangedType { 
 			onStringValueChanged: console.log("String value is now", stringValue)
 		}
 	`
@@ -352,22 +357,20 @@ func (s *S) TestNotify(c *C) {
 	c.Assert(strings.Contains(c.GetTestLog(), "<old value>"), Equals, false)
 	c.Assert(strings.Contains(c.GetTestLog(), "<new value>"), Equals, false)
 
-	qml.Notify(value, "StringValue")
+	qml.Changed(value, &value.StringValue)
 	qml.Flush()
 
 	c.Assert(strings.Contains(c.GetTestLog(), "<old value>"), Equals, false)
 	c.Assert(strings.Contains(c.GetTestLog(), "String value is now <new value>"), Equals, true)
 }
 
-// TODO De-dup some of these tests into a table.
-
 func (s *S) TestMethodCall(c *C) {
 	value := &testStruct{StringValue: "<string content>"}
-	s.context.Set("key", value)
+	s.context.Set("value", value)
 
 	data := `
 		import QtQuick 2.0
-		Item { Component.onCompleted: console.log('string is', key.stringMethod()); }
+		Item { Component.onCompleted: console.log('string is', value.stringMethod()); }
 	`
 
 	component, err := s.engine.Load(qml.String("file.qml", data))
@@ -377,4 +380,34 @@ func (s *S) TestMethodCall(c *C) {
 	obj.Destroy()
 
 	c.Assert(c.GetTestLog(), Matches, "(?s).*string is <string content>.*")
+}
+
+// TODO presetString is a weird test method, but allows moving forward without
+//      methods fully implemented. Change it to something more reasonable once
+//      methods work properly.
+
+func (s *S) TestConnectQmlSignalToGoMethod(c *C) {
+	value := &testStruct{StringValue: "<string content>"}
+	s.context.Set("value", value)
+
+	data := `
+		import QtQuick 2.0
+		Item {
+			id: item
+			signal testSignal()
+			Component.onCompleted: {
+				item.testSignal.connect(value.presetString)
+				item.testSignal()
+			}
+		}
+	`
+
+	component, err := s.engine.Load(qml.String("file.qml", data))
+	c.Assert(err, IsNil)
+
+	obj := component.Create(s.context)
+	obj.Destroy()
+
+	// TODO Not yet working. Fix method signature and parameter support.
+	//c.Assert(value.StringValue, Equals, "<preset value>")
 }

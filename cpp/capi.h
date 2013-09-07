@@ -52,6 +52,7 @@ typedef struct {
     DataType memberType;
     int reflectIndex;
     int metaIndex;
+    int addrOffset;
 } GoMemberInfo;
 
 typedef struct {
@@ -113,7 +114,7 @@ QString_ *newString(const char *data, int len);
 void delString(QString_ *s);
 
 GoValue_ *newGoValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject_ *parent);
-void goValueActivate(GoValue_ *value, int fieldReflectIndex);
+void goValueActivate(GoValue_ *value, GoTypeInfo *typeInfo, int addrOffset);
 
 void packDataValue(QVariant_ *var, DataValue *result);
 void unpackDataValue(DataValue *value, QVariant_ *result);

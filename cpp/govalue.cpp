@@ -43,6 +43,7 @@ GoValueMetaObject::GoValueMetaObject(GoValue *value_, GoValuePrivate *valuePriv_
 
 int GoValueMetaObject::metaCall(QMetaObject::Call c, int idx, void **a)
 {
+    qWarning() << "metaCall:" << c << idx;
     switch (c) {
     case QMetaObject::ReadProperty:
     case QMetaObject::WriteProperty:
@@ -123,7 +124,6 @@ GoAddr *GoValue::addr()
 
 void GoValue::activate(int fieldReflectIndex) {
     Q_D(GoValue);
-    qDebug() << "Activating:" << fieldReflectIndex;
 
     // Go fields have an absolute index of (propertyOffset + fieldReflectIndex),
     // while Go methods have (methodOffset + fieldCount + methodReflectIndex),

@@ -230,9 +230,18 @@ GoValue_ *newGoValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject_ *parent)
     return new GoValue(addr, typeInfo, qparent);
 }
 
-void goValueActivate(GoValue_ *value, int fieldReflectIndex)
+void goValueActivate(GoValue_ *value, GoTypeInfo *typeInfo, int addrOffset)
 {
-    reinterpret_cast<GoValue *>(value)->activate(fieldReflectIndex);
+    GoMemberInfo *fieldInfo = typeInfo->fields;
+    for (int i = 0; i < typeInfo->fieldsLen; i++) {
+        if (fieldInfo->addrOffset == addrOffset) {
+            reinterpret_cast<GoValue *>(value)->activate(fieldInfo->reflectIndex);
+            return;
+        }
+        fieldInfo++;
+    }
+
+    // TODO Return an error; probably an unexported field.
 }
 
 template<int N>
