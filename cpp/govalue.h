@@ -19,6 +19,8 @@ public:
 
     GoAddr *addr();
 
+    void activate(int propIndex);
+
     static QMetaObject *metaObjectFor(GoTypeInfo *typeInfo);
 
     virtual ~GoValue();

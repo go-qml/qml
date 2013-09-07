@@ -224,10 +224,15 @@ void delString(QString_ *s)
     delete reinterpret_cast<QString *>(s);
 }
 
-QObject_ *newValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject_ *parent)
+GoValue_ *newGoValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject_ *parent)
 {
     QObject *qparent = reinterpret_cast<QObject *>(parent);
     return new GoValue(addr, typeInfo, qparent);
+}
+
+void goValueActivate(GoValue_ *value, int fieldReflectIndex)
+{
+    reinterpret_cast<GoValue *>(value)->activate(fieldReflectIndex);
 }
 
 template<int N>

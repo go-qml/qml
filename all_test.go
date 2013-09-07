@@ -5,6 +5,7 @@ import (
 	. "launchpad.net/gocheck"
 	"launchpad.net/qml"
 	"runtime"
+	"strings"
 	"testing"
 	"time"
 )
@@ -269,14 +270,14 @@ func (s *S) TestRegisterTypeWriteProperty(c *C) {
 		Location: "GoTest",
 		Major:    4,
 		Minor:    2,
-		Name:     "MyType",
+		Name:     "NewType",
 		New:      func() interface{} { return value },
 	}
 	qml.RegisterType(&spec)
 
 	data := `
 		import GoTest 4.2
-		MyType { 
+		NewType { 
 			intValue: 300
 			stringValue: "hey"
 		}
@@ -297,7 +298,7 @@ func (s *S) TestRegisterSingleton(c *C) {
 		Location: "GoTest",
 		Major:    4,
 		Minor:    2,
-		Name:     "MyType",
+		Name:     "SingletonType",
 		New:      func() interface{} { return value },
 	}
 	err := qml.RegisterSingleton(&spec)
@@ -308,7 +309,7 @@ func (s *S) TestRegisterSingleton(c *C) {
 		import GoTest 4.2
 		Item {
 			Component.onCompleted: {
-				console.log('Value says:', MyType.stringValue)
+				console.log('Value says:', SingletonType.stringValue)
 			}
 		}
 	`
@@ -321,6 +322,43 @@ func (s *S) TestRegisterSingleton(c *C) {
 	c.Assert(c.GetTestLog(), Matches, "(?s).*Value says: singleton works!.*")
 }
 
+func (s *S) TestNotify(c *C) {
+	value := &testStruct{StringValue: "<old value>"}
+	spec := qml.TypeSpec{
+		Location: "GoTest",
+		Major:    4,
+		Minor:    2,
+		Name:     "NotifyType",
+		New:      func() interface{} { return value },
+	}
+	qml.RegisterType(&spec)
+
+	data := `
+		import GoTest 4.2
+		NotifyType { 
+			onStringValueChanged: console.log("String value is now", stringValue)
+		}
+	`
+	component, err := s.engine.Load(qml.String("file.qml", data))
+	c.Assert(err, IsNil)
+
+	object := component.Create(s.context)
+	defer object.Destroy()
+
+	value.StringValue = "<new value>"
+
+	qml.FlushAll()
+
+	c.Assert(strings.Contains(c.GetTestLog(), "<old value>"), Equals, false)
+	c.Assert(strings.Contains(c.GetTestLog(), "<new value>"), Equals, false)
+
+	qml.Notify(value, "StringValue")
+	qml.FlushAll()
+
+	c.Assert(strings.Contains(c.GetTestLog(), "<old value>"), Equals, false)
+	c.Assert(strings.Contains(c.GetTestLog(), "<new value>"), Equals, true)
+}
+
 // TODO De-dup some of these tests into a table.
 
 func (s *S) TestMethodCall(c *C) {
@@ -329,7 +367,7 @@ func (s *S) TestMethodCall(c *C) {
 
 	data := `
 		import QtQuick 2.0
-		Item{ Component.onCompleted: console.log('string is', key.stringMethod()); }
+		Item { Component.onCompleted: console.log('string is', key.stringMethod()); }
 	`
 
 	component, err := s.engine.Load(qml.String("file.qml", data))

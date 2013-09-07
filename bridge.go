@@ -79,6 +79,50 @@ func FlushAll() {
 	})
 }
 
+func Notify(value interface{}, field string) {
+
+	// TODO Must notify all engines, not one of them.
+
+	// TODO Must access engine.values in a non-racy way.
+	var fold *valueFold
+	for _, engine := range engines {
+		if fold = engine.values[value]; fold != nil {
+			break
+		}
+	}
+
+	if fold == nil {
+
+		for f, _ := range enginePending {
+			if f.gvalue == value {
+				fold = f
+				break
+			}
+		}
+
+		if fold == nil {
+			// TODO Perhaps return an error instead.
+			panic("value is not known")
+		}
+	}
+
+	// TODO Can probably use the field address for notify, as in:
+	//          Notify(&value, &value.field)
+	//      And do it in O(1).
+	vt := reflect.ValueOf(value).Type()
+	for vt.Kind() == reflect.Ptr {
+		vt = vt.Elem()
+	}
+	numField := vt.NumField()
+	for i := 0; i < numField; i++ {
+		if vt.Field(i).Name == field {
+			gui(func() {
+				C.goValueActivate(fold.cvalue, C.int(i))
+			})
+		}
+	}
+}
+
 // hookIdleTimer is run once per iteration of the Qt event loop,
 // within the main GUI thread, but only if at least one goroutine
 // has atomically incremented hookWaiting.
@@ -135,7 +179,7 @@ func wrapGoValue(engine *Engine, gvalue interface{}, owner valueOwner) (cvalue u
 			gvalue: gvalue,
 			owner:  owner,
 		}
-		fold.cvalue = C.newValue(unsafe.Pointer(fold), typeInfo(gvalue), parent)
+		fold.cvalue = C.newGoValue(unsafe.Pointer(fold), typeInfo(gvalue), parent)
 		engine.values[gvalue] = fold
 		stats.valuesAlive(+1)
 		C.engineSetContextForObject(engine.addr, fold.cvalue)
@@ -194,13 +238,13 @@ func hookGoValueDestroyed(enginep unsafe.Pointer, foldp unsafe.Pointer) {
 }
 
 //export hookGoValueReadField
-func hookGoValueReadField(enginep unsafe.Pointer, foldp unsafe.Pointer, memberIndex C.int, resultdv *C.DataValue) {
+func hookGoValueReadField(enginep unsafe.Pointer, foldp unsafe.Pointer, reflectIndex C.int, resultdv *C.DataValue) {
 	fold := ensureEngine(enginep, foldp)
 	v := reflect.ValueOf(fold.gvalue)
 	for v.Type().Kind() == reflect.Ptr {
 		v = v.Elem()
 	}
-	field := v.Field(int(memberIndex))
+	field := v.Field(int(reflectIndex))
 
 	// TODO Strings are being passed in an unsafe manner here. There is a
 	// small chance that the field is changed and the garbage collector is run
@@ -211,13 +255,13 @@ func hookGoValueReadField(enginep unsafe.Pointer, foldp unsafe.Pointer, memberIn
 }
 
 //export hookGoValueWriteField
-func hookGoValueWriteField(enginep unsafe.Pointer, foldp unsafe.Pointer, memberIndex C.int, assigndv *C.DataValue) {
+func hookGoValueWriteField(enginep unsafe.Pointer, foldp unsafe.Pointer, reflectIndex C.int, assigndv *C.DataValue) {
 	fold := ensureEngine(enginep, foldp)
 	v := reflect.ValueOf(fold.gvalue)
 	for v.Type().Kind() == reflect.Ptr {
 		v = v.Elem()
 	}
-	field := v.Field(int(memberIndex))
+	field := v.Field(int(reflectIndex))
 	assign := unpackDataValue(assigndv)
 
 	// TODO What to do if it fails?
@@ -230,13 +274,13 @@ func convertAndSet(to, from reflect.Value) {
 }
 
 //export hookGoValueCallMethod
-func hookGoValueCallMethod(enginep unsafe.Pointer, foldp unsafe.Pointer, memberIndex C.int, resultdv *C.DataValue) {
+func hookGoValueCallMethod(enginep unsafe.Pointer, foldp unsafe.Pointer, reflectIndex C.int, resultdv *C.DataValue) {
 	fold := ensureEngine(enginep, foldp)
 	v := reflect.ValueOf(fold.gvalue)
 
 	// TODO Must ensure that v is necessarily a pointer here.
 
-	method := v.Method(int(memberIndex))
+	method := v.Method(int(reflectIndex))
 
 	// TODO Unhardcode this.
 	result := method.Call(nil)

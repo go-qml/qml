@@ -57,14 +57,14 @@ int GoValueMetaObject::metaCall(QMetaObject::Call c, int idx, void **a)
                     // TODO Cache the qmlEngine call result?
                     if (c == QMetaObject::ReadProperty) {
                         DataValue result;
-                        hookGoValueReadField(qmlEngine(value), valuePriv->addr, memberInfo->memberIndex, &result);
+                        hookGoValueReadField(qmlEngine(value), valuePriv->addr, memberInfo->reflectIndex, &result);
                         QVariant *out = reinterpret_cast<QVariant *>(a[0]);
                         unpackDataValue(&result, out);
                     } else {
                         DataValue assign;
                         QVariant *in = reinterpret_cast<QVariant *>(a[0]);
                         packDataValue(in, &assign);
-                        hookGoValueWriteField(qmlEngine(value), valuePriv->addr, memberInfo->memberIndex, &assign);
+                        hookGoValueWriteField(qmlEngine(value), valuePriv->addr, memberInfo->reflectIndex, &assign);
                     }
                     return -1;
                 }
@@ -85,7 +85,7 @@ int GoValueMetaObject::metaCall(QMetaObject::Call c, int idx, void **a)
                 if (memberInfo->metaIndex == idx) {
                     // TODO Cache the qmlEngine call result?
                     DataValue result;
-                    hookGoValueCallMethod(qmlEngine(value), valuePriv->addr, memberInfo->memberIndex, &result);
+                    hookGoValueCallMethod(qmlEngine(value), valuePriv->addr, memberInfo->reflectIndex, &result);
                     QVariant *out = reinterpret_cast<QVariant *>(a[0]);
                     unpackDataValue(&result, out);
                     return -1;
@@ -121,6 +121,18 @@ GoAddr *GoValue::addr()
     return d->addr;
 }
 
+void GoValue::activate(int fieldReflectIndex) {
+    Q_D(GoValue);
+    qDebug() << "Activating:" << fieldReflectIndex;
+
+    // Go fields have an absolute index of (propertyOffset + fieldReflectIndex),
+    // while Go methods have (methodOffset + fieldCount + methodReflectIndex),
+    // because properties are added first, and each property gets its own signal
+    // method at that time. This means the first fieldCount methods are in fact
+    // the signals of the respective properties.
+    d->valueMeta->activate(this, d->valueMeta->methodOffset() + fieldReflectIndex, 0);
+}
+
 QMetaObject *GoValue::metaObjectFor(GoTypeInfo *typeInfo)
 {
     if (typeInfo->metaObject) {
@@ -135,14 +147,14 @@ QMetaObject *GoValue::metaObjectFor(GoTypeInfo *typeInfo)
     GoMemberInfo *memberInfo;
     
     memberInfo = typeInfo->fields;
-    int relativePropertyIndex = mob.propertyCount();
+    int relativePropIndex = mob.propertyCount();
     for (int i = 0; i < typeInfo->fieldsLen; i++) {
-        mob.addSignal("__" + QByteArray::number(relativePropertyIndex) + "()");
-        QMetaPropertyBuilder propb = mob.addProperty(memberInfo->memberName, "QVariant", relativePropertyIndex);
+        mob.addSignal("__" + QByteArray::number(relativePropIndex) + "()");
+        QMetaPropertyBuilder propb = mob.addProperty(memberInfo->memberName, "QVariant", relativePropIndex);
         propb.setWritable(true);
-        memberInfo->metaIndex = relativePropertyIndex;
+        memberInfo->metaIndex = relativePropIndex;
         memberInfo++;
-        relativePropertyIndex++;
+        relativePropIndex++;
     }
 
     memberInfo = typeInfo->methods;
@@ -159,9 +171,9 @@ QMetaObject *GoValue::metaObjectFor(GoTypeInfo *typeInfo)
 
     // Turn the relative indexes into absolute indexes.
     memberInfo = typeInfo->fields;
-    int propertyOffset = mo->propertyOffset();
+    int propOffset = mo->propertyOffset();
     for (int i = 0; i < typeInfo->fieldsLen; i++) {
-        memberInfo->metaIndex += propertyOffset;
+        memberInfo->metaIndex += propOffset;
         memberInfo++;
     }
     memberInfo = typeInfo->methods;

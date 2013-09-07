@@ -210,7 +210,7 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 		memberInfo := (*C.GoMemberInfo)(unsafe.Pointer(members + uintptr(memberInfoSize) * membersi))
 		memberInfo.memberName = (*C.char)(unsafe.Pointer(mnames + mnamesi))
 		memberInfo.memberType = dataTypeOf(field.Type)
-		memberInfo.memberIndex = C.int(i)
+		memberInfo.reflectIndex = C.int(i)
 		membersi += 1
 		mnamesi += uintptr(len(field.Name)) + 1
 	}
@@ -220,7 +220,7 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 		memberInfo.memberName = (*C.char)(unsafe.Pointer(mnames + mnamesi))
 		// TODO Sort out the parameter and result typing strategy.
 		memberInfo.memberType = C.DTMethod
-		memberInfo.memberIndex = C.int(i)
+		memberInfo.reflectIndex = C.int(i)
 		membersi += 1
 		mnamesi += uintptr(len(method.Name)) + 1
 	}
