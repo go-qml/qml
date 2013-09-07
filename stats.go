@@ -39,7 +39,7 @@ func ResetStats() {
 
 type Stats struct {
 	EnginesAlive int
-	ValuesAlive int
+	ValuesAlive  int
 }
 
 func (stats *Stats) enginesAlive(delta int) {

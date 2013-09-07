@@ -109,7 +109,7 @@ func (l wrappedStdLogger) QmlOutput(msg LogMessage) error {
 }
 
 type logMessage struct {
-	c *C.LogMessage 
+	c *C.LogMessage
 
 	// invalid flags that cmsg points to unreliable memory,
 	// since the log hook has already returned.

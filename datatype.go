@@ -203,11 +203,11 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	membersLen := numField + numMethod
 	membersi := uintptr(0)
 	mnamesi := uintptr(0)
-	members := uintptr(C.malloc(memberInfoSize*C.size_t(membersLen)))
+	members := uintptr(C.malloc(memberInfoSize * C.size_t(membersLen)))
 	mnames := uintptr(unsafe.Pointer(typeInfo.memberNames))
 	for i := 0; i < numField; i++ {
 		field := vt.Field(i)
-		memberInfo := (*C.GoMemberInfo)(unsafe.Pointer(members + uintptr(memberInfoSize) * membersi))
+		memberInfo := (*C.GoMemberInfo)(unsafe.Pointer(members + uintptr(memberInfoSize)*membersi))
 		memberInfo.memberName = (*C.char)(unsafe.Pointer(mnames + mnamesi))
 		memberInfo.memberType = dataTypeOf(field.Type)
 		memberInfo.reflectIndex = C.int(i)
@@ -216,7 +216,7 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	}
 	for i := 0; i < numMethod; i++ {
 		method := vtptr.Method(i)
-		memberInfo := (*C.GoMemberInfo)(unsafe.Pointer(members + uintptr(memberInfoSize) * membersi))
+		memberInfo := (*C.GoMemberInfo)(unsafe.Pointer(members + uintptr(memberInfoSize)*membersi))
 		memberInfo.memberName = (*C.char)(unsafe.Pointer(mnames + mnamesi))
 		// TODO Sort out the parameter and result typing strategy.
 		memberInfo.memberType = C.DTMethod
@@ -229,7 +229,7 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 
 	typeInfo.fields = typeInfo.members
 	typeInfo.fieldsLen = C.int(numField)
-	typeInfo.methods = (*C.GoMemberInfo)(unsafe.Pointer(members + uintptr(memberInfoSize) * uintptr(numField)))
+	typeInfo.methods = (*C.GoMemberInfo)(unsafe.Pointer(members + uintptr(memberInfoSize)*uintptr(numField)))
 	typeInfo.methodsLen = C.int(numMethod)
 
 	if int(membersi) != membersLen {
