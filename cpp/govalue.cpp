@@ -48,14 +48,13 @@ int GoValueMetaObject::metaCall(QMetaObject::Call c, int idx, void **a)
     case QMetaObject::ReadProperty:
     case QMetaObject::WriteProperty:
         {
-            // TODO cache propertyOffset()
+            // TODO Cache propertyOffset, methodOffset, and qmlEngine results?
             if (idx < propertyOffset()) {
                 return value->qt_metacall(c, idx, a);
             }
             GoMemberInfo *memberInfo = valuePriv->typeInfo->fields;
             for (int i = 0; i < valuePriv->typeInfo->fieldsLen; i++) {
                 if (memberInfo->metaIndex == idx) {
-                    // TODO Cache the qmlEngine call result?
                     if (c == QMetaObject::ReadProperty) {
                         DataValue result;
                         hookGoValueReadField(qmlEngine(value), valuePriv->addr, memberInfo->reflectIndex, &result);
@@ -77,18 +76,21 @@ int GoValueMetaObject::metaCall(QMetaObject::Call c, int idx, void **a)
         }
     case QMetaObject::InvokeMetaMethod:
         {
-            // TODO cache methodOffset()
             if (idx < methodOffset()) {
                 return value->qt_metacall(c, idx, a);
             }
             GoMemberInfo *memberInfo = valuePriv->typeInfo->methods;
             for (int i = 0; i < valuePriv->typeInfo->methodsLen; i++) {
                 if (memberInfo->metaIndex == idx) {
-                    // TODO Cache the qmlEngine call result?
-                    DataValue result;
-                    hookGoValueCallMethod(qmlEngine(value), valuePriv->addr, memberInfo->reflectIndex, &result);
-                    QVariant *out = reinterpret_cast<QVariant *>(a[0]);
-                    unpackDataValue(&result, out);
+                    // args[0] is the result if any.
+                    DataValue args[MaximumParamCount];
+                    for (int i = 1; i < memberInfo->numIn+1; i++) {
+                        packDataValue(reinterpret_cast<QVariant *>(a[i]), &args[i]);
+                    }
+                    hookGoValueCallMethod(qmlEngine(value), valuePriv->addr, memberInfo->reflectIndex, args);
+                    if (memberInfo->numOut > 0) {
+                        unpackDataValue(&args[0], reinterpret_cast<QVariant *>(a[0]));
+                    }
                     return -1;
                 }
                 memberInfo++;
@@ -124,6 +126,11 @@ GoAddr *GoValue::addr()
 
 void GoValue::activate(int fieldReflectIndex) {
     Q_D(GoValue);
+
+    // TODO This is actually broken. reflectIndex may contain holes.
+    // Can still use it, but must first find the metaIndex for the corresponding
+    // reflectIndex, compute the relative index, and then do what follows with the
+    // relative index.
 
     // Go fields have an absolute index of (propertyOffset + fieldReflectIndex),
     // while Go methods have (methodOffset + fieldCount + methodReflectIndex),

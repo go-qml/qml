@@ -231,8 +231,9 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 		memberInfo.resultSignature = C.CString(result)
 		// TODO Sort out methods with a variable number of arguments.
 		// TODO Sort out methods with more than one result.
-		memberInfo.argsIn = C.int(method.Type.NumIn()-1)
-		memberInfo.argsOut = C.int(method.Type.NumOut())
+		// It's called while bound, so drop the receiver.
+		memberInfo.numIn = C.int(method.Type.NumIn()-1)
+		memberInfo.numOut = C.int(method.Type.NumOut())
 		membersi += 1
 		mnamesi += uintptr(len(method.Name)) + 1
 	}
@@ -265,9 +266,7 @@ func methodQtSignature(method reflect.Method) (signature, result string) {
 	buf.WriteByte('(')
 	n := method.Type.NumIn()
 	for i := 1; i < n; i++ {
-		// TODO What would be the benefits of using more typing information here?
-		//      Connections would be checked at connect time; what else?
-		if i > 0 {
+		if i > 1 {
 			buf.WriteByte(',')
 		}
 		buf.WriteString("QVariant")
@@ -275,7 +274,7 @@ func methodQtSignature(method reflect.Method) (signature, result string) {
 	buf.WriteByte(')')
 	signature = buf.String()
 
-	// TODO Implement zero and multiple returns.
+	// TODO Implement multiple returns.
 	if method.Type.NumOut() > 1 {
 		panic("unfinished implementation: methods can only have zero or one return value")
 	}

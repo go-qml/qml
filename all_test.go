@@ -77,9 +77,10 @@ func (ts *testStruct) StringMethod() string {
 	return ts.StringValue
 }
 
-func (ts *testStruct) PresetString() string {
-	ts.StringValue = "<preset value>"
-	return ts.StringValue
+func (ts *testStruct) ChangeString(new string) (old string) {
+	old = ts.StringValue
+	ts.StringValue = new
+	return
 }
 
 func intIs64() bool {
@@ -370,34 +371,9 @@ func (s *S) TestMethodCall(c *C) {
 
 	data := `
 		import QtQuick 2.0
-		Item { Component.onCompleted: console.log('string is', value.stringMethod()); }
-	`
-
-	component, err := s.engine.Load(qml.String("file.qml", data))
-	c.Assert(err, IsNil)
-
-	inst := component.Create(s.context)
-	inst.Destroy()
-
-	c.Assert(c.GetTestLog(), Matches, "(?s).*string is <string content>.*")
-}
-
-// TODO presetString is a weird test method, but allows moving forward without
-//      methods fully implemented. Change it to something more reasonable once
-//      methods work properly.
-
-func (s *S) TestConnectQmlSignalToGoMethod(c *C) {
-	value := &testStruct{StringValue: "<string content>"}
-	s.context.SetVar("value", value)
-
-	data := `
-		import QtQuick 2.0
 		Item {
-			id: item
-			signal testSignal()
 			Component.onCompleted: {
-				item.testSignal.connect(value.presetString)
-				item.testSignal()
+				console.log("string was", value.changeString("<new content>"));
 			}
 		}
 	`
@@ -408,5 +384,31 @@ func (s *S) TestConnectQmlSignalToGoMethod(c *C) {
 	inst := component.Create(s.context)
 	inst.Destroy()
 
-	c.Assert(value.StringValue, Equals, "<preset value>")
+	c.Assert(c.GetTestLog(), Matches, "(?s).*string was <string content>.*")
+	c.Assert(value.StringValue, Equals, "<new content>")
+}
+
+func (s *S) TestConnectQmlSignalToGoMethod(c *C) {
+	value := &testStruct{StringValue: "<string content>"}
+	s.context.SetVar("value", value)
+
+	data := `
+		import QtQuick 2.0
+		Item {
+			id: item
+			signal testSignal(string s)
+			Component.onCompleted: {
+				item.testSignal.connect(value.changeString)
+				item.testSignal("<new content>")
+			}
+		}
+	`
+
+	component, err := s.engine.Load(qml.String("file.qml", data))
+	c.Assert(err, IsNil)
+
+	inst := component.Create(s.context)
+	inst.Destroy()
+
+	c.Assert(value.StringValue, Equals, "<new content>")
 }

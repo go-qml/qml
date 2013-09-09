@@ -274,8 +274,10 @@ func convertAndSet(to, from reflect.Value) {
 	to.Set(from.Convert(to.Type()))
 }
 
+var dataValueSize = uintptr(unsafe.Sizeof(C.DataValue{}))
+
 //export hookGoValueCallMethod
-func hookGoValueCallMethod(enginep unsafe.Pointer, foldp unsafe.Pointer, reflectIndex C.int, resultdv *C.DataValue) {
+func hookGoValueCallMethod(enginep unsafe.Pointer, foldp unsafe.Pointer, reflectIndex C.int, args *C.DataValue) {
 	fold := ensureEngine(enginep, foldp)
 	v := reflect.ValueOf(fold.gvalue)
 
@@ -283,13 +285,24 @@ func hookGoValueCallMethod(enginep unsafe.Pointer, foldp unsafe.Pointer, reflect
 
 	method := v.Method(int(reflectIndex))
 
+	// TODO Ensure methods with more parameters than this are not registered.
+	var params [C.MaximumParamCount-1]reflect.Value
+
+	numIn := uintptr(method.Type().NumIn())
+	for i := uintptr(0); i < numIn; i++ {
+		// TODO Type checking to avoid explosions (or catch the explosion)
+		paramdv := (*C.DataValue)(unsafe.Pointer(uintptr(unsafe.Pointer(args)) + (i+1) * dataValueSize))
+		params[i] = reflect.ValueOf(unpackDataValue(paramdv))
+	}
+
+	result := method.Call(params[:numIn])
+
 	// TODO Unhardcode this.
-	result := method.Call(nil)
 	if len(result) != 1 || result[0].Type() != typeString {
 		panic("result must be a string for now")
 	}
 
-	packDataValue(result[0].Interface(), resultdv, fold.engine, jsOwner)
+	packDataValue(result[0].Interface(), args, fold.engine, jsOwner)
 }
 
 func ensureEngine(enginep unsafe.Pointer, foldp unsafe.Pointer) *valueFold {

@@ -8,6 +8,9 @@
 extern "C" {
 #endif
 
+// It's surprising that this constant is privately defined within qmetaobject.cpp.
+enum { MaximumParamCount = 11 }; // Up to 10 arguments + 1 return value
+
 typedef void QApplication_;
 typedef void QMetaObject_;
 typedef void QObject_;
@@ -55,8 +58,8 @@ typedef struct {
     int addrOffset;
     char *methodSignature;
     char *resultSignature;
-    int argsIn;
-    int argsOut;
+    int numIn;
+    int numOut;
 } GoMemberInfo;
 
 typedef struct {
