@@ -238,8 +238,8 @@ func (e *Engine) newComponent(location string, data []byte) (*Component, error) 
 	return component, nil
 }
 
-func (c *Component) Create(context *Context) *Object {
-	var object Object
+func (c *Component) Create(context *Context) *Value {
+	var object Value
 	gui(func() {
 		object.addr = C.componentCreate(c.addr, context.addr)
 	})
@@ -270,17 +270,17 @@ type commonObject struct {
 	addr unsafe.Pointer
 }
 
-type Object struct {
+type Value struct {
 	commonObject
 }
 
-func (o *commonObject) Value(property string) interface{} {
-	cproperty := C.CString(property)
-	defer C.free(unsafe.Pointer(cproperty))
+func (o *commonObject) Field(name string) interface{} {
+	cname := C.CString(name)
+	defer C.free(unsafe.Pointer(cname))
 
 	var value C.DataValue
 	gui(func() {
-		C.objectGetProperty(o.addr, cproperty, &value)
+		C.objectGetProperty(o.addr, cname, &value)
 	})
 	return unpackDataValue(&value)
 }
@@ -316,9 +316,9 @@ func (w *Window) Hide() {
 }
 
 // Root returns the root component instance being rendered in the window.
-func (w *Window) Root() *Object {
+func (w *Window) Root() *Value {
 	// XXX Test this.
-	var object Object
+	var object Value
 	gui(func() {
 		object.addr = C.viewRootObject(w.addr)
 	})

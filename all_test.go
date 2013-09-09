@@ -150,8 +150,8 @@ func (s *S) TestContextSetGoValueGetProperty(c *C) {
 	component, err := s.engine.Load(qml.String("file.qml", data))
 	c.Assert(err, IsNil)
 
-	obj := component.Create(s.context)
-	obj.Destroy()
+	inst := component.Create(s.context)
+	inst.Destroy()
 
 	c.Assert(c.GetTestLog(), Matches, "(?s).*string is <string content>.*")
 }
@@ -196,10 +196,10 @@ func (s *S) TestComponentSetData(c *C) {
 	pattern := fmt.Sprintf(".* file.qml:3: N is %d\n.*", N)
 	c.Assert(c.GetTestLog(), Not(Matches), pattern)
 
-	obj := component.Create(s.context)
+	inst := component.Create(s.context)
 
 	c.Assert(c.GetTestLog(), Matches, pattern)
-	c.Assert(obj.Value("width"), Equals, float64(N*2))
+	c.Assert(inst.Field("width"), Equals, float64(N*2))
 }
 
 func (s *S) TestComponentCreateWindow(c *C) {
@@ -263,8 +263,8 @@ func (s *S) TestRegisterType(c *C) {
 	component, err := s.engine.Load(qml.String("file.qml", data))
 	c.Assert(err, IsNil)
 
-	object := component.Create(s.context)
-	defer object.Destroy()
+	inst := component.Create(s.context)
+	defer inst.Destroy()
 
 	c.Assert(c.GetTestLog(), Matches, "(?s).*Value says: new type works!.*")
 }
@@ -290,8 +290,8 @@ func (s *S) TestRegisterTypeWriteProperty(c *C) {
 	component, err := s.engine.Load(qml.String("file.qml", data))
 	c.Assert(err, IsNil)
 
-	object := component.Create(s.context)
-	defer object.Destroy()
+	inst := component.Create(s.context)
+	defer inst.Destroy()
 
 	c.Assert(value.StringValue, Equals, "hey")
 	c.Assert(value.IntValue, Equals, 300)
@@ -321,8 +321,8 @@ func (s *S) TestRegisterSingleton(c *C) {
 	component, err := s.engine.Load(qml.String("file.qml", data))
 	c.Assert(err, IsNil)
 
-	object := component.Create(s.context)
-	defer object.Destroy()
+	inst := component.Create(s.context)
+	defer inst.Destroy()
 
 	c.Assert(c.GetTestLog(), Matches, "(?s).*Value says: singleton works!.*")
 }
@@ -347,8 +347,8 @@ func (s *S) TestChanged(c *C) {
 	component, err := s.engine.Load(qml.String("file.qml", data))
 	c.Assert(err, IsNil)
 
-	object := component.Create(s.context)
-	defer object.Destroy()
+	inst := component.Create(s.context)
+	defer inst.Destroy()
 
 	value.StringValue = "<new value>"
 
@@ -376,8 +376,8 @@ func (s *S) TestMethodCall(c *C) {
 	component, err := s.engine.Load(qml.String("file.qml", data))
 	c.Assert(err, IsNil)
 
-	obj := component.Create(s.context)
-	obj.Destroy()
+	inst := component.Create(s.context)
+	inst.Destroy()
 
 	c.Assert(c.GetTestLog(), Matches, "(?s).*string is <string content>.*")
 }
@@ -405,8 +405,8 @@ func (s *S) TestConnectQmlSignalToGoMethod(c *C) {
 	component, err := s.engine.Load(qml.String("file.qml", data))
 	c.Assert(err, IsNil)
 
-	obj := component.Create(s.context)
-	obj.Destroy()
+	inst := component.Create(s.context)
+	inst.Destroy()
 
 	// TODO Not yet working. Fix method signature and parameter support.
 	//c.Assert(value.StringValue, Equals, "<preset value>")
