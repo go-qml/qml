@@ -408,6 +408,5 @@ func (s *S) TestConnectQmlSignalToGoMethod(c *C) {
 	inst := component.Create(s.context)
 	inst.Destroy()
 
-	// TODO Not yet working. Fix method signature and parameter support.
-	//c.Assert(value.StringValue, Equals, "<preset value>")
+	c.Assert(value.StringValue, Equals, "<preset value>")
 }

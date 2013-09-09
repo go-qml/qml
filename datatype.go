@@ -5,6 +5,7 @@ package qml
 import "C"
 
 import (
+	"bytes"
 	"fmt"
 	"reflect"
 	"unicode"
@@ -217,12 +218,21 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	}
 	for i := 0; i < numMethod; i++ {
 		method := vtptr.Method(i)
+		// TODO Split methods and fields in different types? The commonalities seem minimal.
 		memberInfo := (*C.GoMemberInfo)(unsafe.Pointer(members + uintptr(memberInfoSize)*membersi))
 		memberInfo.memberName = (*C.char)(unsafe.Pointer(mnames + mnamesi))
 		// TODO Sort out the parameter and result typing strategy.
 		memberInfo.memberType = C.DTMethod
 		memberInfo.reflectIndex = C.int(i)
 		memberInfo.addrOffset = 0
+		signature, result := methodQtSignature(method)
+		// TODO The signature data might be embedded in the same array as the member names.
+		memberInfo.methodSignature = C.CString(signature)
+		memberInfo.resultSignature = C.CString(result)
+		// TODO Sort out methods with a variable number of arguments.
+		// TODO Sort out methods with more than one result.
+		memberInfo.argsIn = C.int(method.Type.NumIn()-1)
+		memberInfo.argsOut = C.int(method.Type.NumOut())
 		membersi += 1
 		mnamesi += uintptr(len(method.Name)) + 1
 	}
@@ -240,6 +250,40 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 
 	typeInfoCache[vt] = typeInfo
 	return typeInfo
+}
+
+func methodQtSignature(method reflect.Method) (signature, result string) {
+	var buf bytes.Buffer
+	for i, rune := range method.Name {
+		if i == 0 {
+			buf.WriteRune(unicode.ToLower(rune))
+		} else {
+			buf.WriteString(method.Name[i:])
+			break
+		}
+	}
+	buf.WriteByte('(')
+	n := method.Type.NumIn()
+	for i := 1; i < n; i++ {
+		// TODO What would be the benefits of using more typing information here?
+		//      Connections would be checked at connect time; what else?
+		if i > 0 {
+			buf.WriteByte(',')
+		}
+		buf.WriteString("QVariant")
+	}
+	buf.WriteByte(')')
+	signature = buf.String()
+
+	// TODO Implement zero and multiple returns.
+	if method.Type.NumOut() > 1 {
+		panic("unfinished implementation: methods can only have zero or one return value")
+	}
+	if method.Type.NumOut() == 1 {
+		result = "QVariant"
+	}
+
+	return
 }
 
 // unsafeString returns a Go string backed by C data.

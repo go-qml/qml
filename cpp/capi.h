@@ -53,6 +53,10 @@ typedef struct {
     int reflectIndex;
     int metaIndex;
     int addrOffset;
+    char *methodSignature;
+    char *resultSignature;
+    int argsIn;
+    int argsOut;
 } GoMemberInfo;
 
 typedef struct {
