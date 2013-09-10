@@ -43,7 +43,6 @@ GoValueMetaObject::GoValueMetaObject(GoValue *value_, GoValuePrivate *valuePriv_
 
 int GoValueMetaObject::metaCall(QMetaObject::Call c, int idx, void **a)
 {
-    qWarning() << "metaCall:" << c << idx;
     switch (c) {
     case QMetaObject::ReadProperty:
     case QMetaObject::WriteProperty:

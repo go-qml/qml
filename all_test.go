@@ -1,9 +1,11 @@
 package qml_test
 
 import (
+	"flag"
 	"fmt"
 	. "launchpad.net/gocheck"
 	"launchpad.net/qml"
+	"regexp"
 	"runtime"
 	"strings"
 	"testing"
@@ -61,10 +63,9 @@ func (s *S) TearDownTest(c *C) {
 	qml.SetLogger(nil)
 }
 
-type testStruct struct {
+type TestType struct {
 	StringValue  string
-	TrueValue    bool
-	FalseValue   bool
+	BoolValue    bool
 	IntValue     int
 	Int64Value   int64
 	Int32Value   int32
@@ -73,11 +74,11 @@ type testStruct struct {
 	AnyValue     interface{}
 }
 
-func (ts *testStruct) StringMethod() string {
+func (ts *TestType) StringMethod() string {
 	return ts.StringValue
 }
 
-func (ts *testStruct) ChangeString(new string) (old string) {
+func (ts *TestType) ChangeString(new string) (old string) {
 	old = ts.StringValue
 	ts.StringValue = new
 	return
@@ -111,7 +112,7 @@ var getSetTests = []struct{ set, get interface{} }{
 	{int32(42), same},
 	{float64(42), same},
 	{float32(42), same},
-	{new(testStruct), same},
+	{new(TestType), same},
 	{42, intNN(42)},
 }
 
@@ -131,37 +132,10 @@ func (s *S) TestContextGetMissing(c *C) {
 	c.Assert(s.context.Var("missing"), Equals, nil)
 }
 
-func (s *S) TestContextSetGoValueGetProperty(c *C) {
-	// This test will touch:
-	//
-	// - The processing of nesting
-	// - Field reading both from a pointer (outter testStruct) and from a value (inner testStruct)
-	// - Access to an interface{} field (Any)
-	// - Proper collection of a JS-owned GoValue wrapper (the result of accessing Any)
-	//
-	// When changing this test, ensure these tests are covered here or elsewhere.
-	value := &testStruct{AnyValue: testStruct{StringValue: "<string content>"}}
-	s.context.SetVar("value", &value)
-
-	data := `
-		import QtQuick 2.0
-		Item{ Component.onCompleted: console.log('string is', value.anyValue.stringValue); }
-	`
-
-	component, err := s.engine.Load(qml.String("file.qml", data))
-	c.Assert(err, IsNil)
-
-	inst := component.Create(s.context)
-	inst.Destroy()
-
-	c.Assert(c.GetTestLog(), Matches, "(?s).*string is <string content>.*")
-}
-
-func (s *S) TestContextSetObject(c *C) {
-	s.context.SetVars(&testStruct{
+func (s *S) TestContextSetVars(c *C) {
+	s.context.SetVars(&TestType{
 		StringValue:  "<string content>",
-		TrueValue:    true,
-		FalseValue:   false,
+		BoolValue:    true,
 		IntValue:     42,
 		Int64Value:   42,
 		Int32Value:   42,
@@ -170,8 +144,7 @@ func (s *S) TestContextSetObject(c *C) {
 	})
 
 	c.Assert(s.context.Var("stringValue"), Equals, "<string content>")
-	c.Assert(s.context.Var("trueValue"), Equals, true)
-	c.Assert(s.context.Var("falseValue"), Equals, false)
+	c.Assert(s.context.Var("boolValue"), Equals, true)
 	c.Assert(s.context.Var("intValue"), Equals, intNN(42))
 	c.Assert(s.context.Var("int64Value"), Equals, int64(42))
 	c.Assert(s.context.Var("int32Value"), Equals, int32(42))
@@ -182,25 +155,6 @@ func (s *S) TestContextSetObject(c *C) {
 func (s *S) TestComponentSetDataError(c *C) {
 	_, err := s.engine.Load(qml.String("file.qml", "Item{}"))
 	c.Assert(err, ErrorMatches, "file.qml:1 Item is not a type")
-}
-
-func (s *S) TestComponentSetData(c *C) {
-	const N = 42
-	s.context.SetVar("N", N)
-	data := `
-		import QtQuick 2.0
-		Item { width: N*2; Component.onCompleted: console.log("N is", N) }
-	`
-	component, err := s.engine.Load(qml.String("file.qml", data))
-	c.Assert(err, IsNil)
-
-	pattern := fmt.Sprintf(".* file.qml:3: N is %d\n.*", N)
-	c.Assert(c.GetTestLog(), Not(Matches), pattern)
-
-	inst := component.Create(s.context)
-
-	c.Assert(c.GetTestLog(), Matches, pattern)
-	c.Assert(inst.Field("width"), Equals, float64(N*2))
 }
 
 func (s *S) TestComponentCreateWindow(c *C) {
@@ -219,196 +173,324 @@ func (s *S) TestComponentCreateWindow(c *C) {
 	window.Hide()
 }
 
-func (s *S) TestObjectIdentity(c *C) {
-	value := testStruct{StringValue: "<string content>"}
-	s.context.SetVar("a", &value)
-	s.context.SetVar("b", &value)
-
-	data := `
-		import QtQuick 2.0
-		Item {
-			Component.onCompleted: {
-				console.log('Identical:', a === b);
-			}
-		}
-	`
-
-	component, err := s.engine.Load(qml.String("file.qml", data))
-	c.Assert(err, IsNil)
-	component.Create(s.context).Destroy()
-
-	c.Assert(c.GetTestLog(), Matches, "(?s).*Identical: true.*")
+type TestData struct {
+	*C
+	engine    *qml.Engine
+	context   *qml.Context
+	component *qml.Component
+	compinst  *qml.Value
+	value     *TestType
 }
 
-func (s *S) TestRegisterType(c *C) {
-	value := &testStruct{StringValue: "new type works!"}
-	spec := qml.TypeSpec{
+var tests = []struct {
+	Summary string
+	Value   TestType
+
+	Init func(d *TestData)
+
+	// The QML provided is run with the initial state above, and
+	// then checks are made to ensure the provided state is found.
+	QML      string
+	QMLLog   string
+	QMLValue TestType
+
+	// The function provided is run with the post-QML state above,
+	// and then checks are made to ensure the provided state is found.
+	Done      func(d *TestData)
+	DoneLog   string
+	DoneValue TestType
+}{
+	{
+		Summary: "Setting and reading of context variables",
+		Value:   TestType{StringValue: "<content>", IntValue: 42},
+		QML: `
+			Item {
+				Component.onCompleted: {
+					console.log("String is", value.stringValue)
+					console.log("Int is", value.intValue)
+				}
+			}
+		`,
+		QMLLog: "String is <content>.*Int is 42",
+	},
+	{
+		Summary: "Reading of nested field via a value (not pointer) in an interface",
+		Value:   TestType{AnyValue: TestType{StringValue: "<content>"}},
+		QML: `
+			Item {
+				Component.onCompleted: console.log("String is", value.anyValue.stringValue)
+			}
+		`,
+		QMLLog: "String is <content>",
+	},
+	{
+		Summary: "Reading of component instance fields",
+		QML:     "Item { width: 300; height: 200 }",
+		Done:   func(d *TestData) {
+			d.Check(d.compinst.Field("width"), Equals, float64(300))
+			d.Check(d.compinst.Field("height"), Equals, float64(200))
+		},
+	},
+	{
+		Summary: "Identical values remain identical when possible",
+		Init: func(d *TestData) {
+			d.context.SetVar("a", d.value)
+			d.context.SetVar("b", d.value)
+		},
+		QML: `
+			Item {
+				Component.onCompleted: console.log('Identical:', a === b);
+			}
+		`,
+		QMLLog: "Identical: true",
+	},
+	{
+		Summary: "Register Go type",
+		Value:   TestType{StringValue: "<content>"},
+		QML: `
+			import GoTest 4.2
+			GoType { 
+				Component.onCompleted: console.log("String is", stringValue)
+			}
+		`,
+		QMLLog: "String is <content>",
+	},
+	{
+		Summary: "Write Go type property",
+		QML: `
+			import GoTest 4.2
+			GoType { 
+				stringValue: "<new>"
+				intValue: 300
+			}
+		`,
+		QMLValue: TestType{StringValue: "<new>", IntValue: 300},
+	},
+	{
+		Summary: "Singleton type registration",
+		Value:   TestType{StringValue: "<content>"},
+		QML: `
+			import GoTest 4.2
+			Item { 
+				Component.onCompleted: console.log("String is", GoSingleton.stringValue)
+			}
+		`,
+		QMLLog: "String is <content>",
+	},
+	{
+		Summary: "qml.Changed triggers a QML slot",
+		Value:   TestType{StringValue: "<old content>"},
+
+		QML: `
+			import GoTest 4.2
+			GoType { 
+				onStringValueChanged: console.log("String is", stringValue)
+			}
+		`,
+		QMLLog:   "!String is",
+		QMLValue: TestType{StringValue: "<old content>"},
+
+		Done: func(d *TestData) {
+			d.value.StringValue = "<new content>"
+			qml.Changed(d.value, &d.value.StringValue)
+		},
+		DoneLog:   "String is <new content>",
+		DoneValue: TestType{StringValue: "<new content>"},
+	},
+	{
+		Summary: "qml.Changed must not trigger on the wrong field",
+		Value:   TestType{StringValue: "<old content>"},
+		QML: `
+			import GoTest 4.2
+			GoType { 
+				onStringValueChanged: console.log("String is", stringValue)
+			}
+		`,
+		Done: func(d *TestData) {
+			d.value.StringValue = "<new content>"
+			qml.Changed(d.value, &d.value.IntValue)
+		},
+		DoneLog: "!String is",
+	},
+	{
+		Summary: "qml.Changed triggers multiple wrappers of the same value",
+		Value:   TestType{StringValue: "<old>"},
+		Init: func(d *TestData) {
+			d.context.SetVar("v1", d.value)
+			d.context.SetVar("v2", d.value)
+			d.context.SetVar("v3", d.value)
+		},
+
+		QML: `
+			import GoTest 4.2
+			Item {
+				property var p1: GoType { onStringValueChanged: console.log("p1 has", stringValue) }
+				property var p2: GoType { onStringValueChanged: console.log("p2 has", stringValue) }
+				property var p3: GoType { onStringValueChanged: console.log("p3 has", stringValue) }
+				Connections { target: v1; onStringValueChanged: console.log("v1 has", v1.stringValue) }
+				Connections { target: v2; onStringValueChanged: console.log("v2 has", v2.stringValue) }
+				Connections { target: v3; onStringValueChanged: console.log("v3 has", v3.stringValue) }
+			}
+		`,
+		QMLLog:   "![pv][123] has <old>",
+		QMLValue: TestType{StringValue: "<old>"},
+
+		Done: func(d *TestData) {
+			d.value.StringValue = "<new>"
+			qml.Changed(d.value, &d.value.StringValue)
+		},
+		// Why are v3-v1 reversed? Is QML registering connections in reversed order?
+		DoneLog: "v3 has <new>.*v2 has <new>.*v1 has <new>.*p1 has <new>.*p2 has <new>.*p3 has <new>.*",
+	},
+	{
+		Summary: "Call a Go method from QML",
+		Value:   TestType{StringValue: "<old content>"},
+		QML: `
+			Item {
+				Component.onCompleted: console.log("String was", value.changeString("<new content>"));
+			}
+		`,
+		QMLLog:   "String was <old content>",
+		QMLValue: TestType{StringValue: "<new content>"},
+	},
+	{
+		Summary: "Connect a QML signal to a Go method",
+		Value:   TestType{StringValue: "<old content>"},
+		QML: `
+			Item {
+				id: item
+				signal testSignal(string s)
+				Component.onCompleted: {
+					item.testSignal.connect(value.changeString)
+					item.testSignal("<new content>")
+				}
+			}
+		`,
+		QMLValue: TestType{StringValue: "<new content>"},
+	}}
+
+var tablef = flag.String("tablef", "", "if provided, TestTable only runs tests with a summary matching the regexp")
+
+func (s *S) TestTable(c *C) {
+	var goTypeValue *TestType = &TestType{}
+
+	typeSpec := qml.TypeSpec{
 		Location: "GoTest",
 		Major:    4,
 		Minor:    2,
-		Name:     "MyType",
-		New:      func() interface{} { return value },
+		Name:     "GoType",
+		New:      func() interface{} { return goTypeValue },
 	}
-	err := qml.RegisterType(&spec)
+	err := qml.RegisterType(&typeSpec)
 	c.Assert(err, IsNil)
 
-	data := `
-		import QtQuick 2.0
-		import GoTest 4.2
-		MyType {
-			Component.onCompleted: {
-				console.log('Value says:', stringValue)
-			}
-		}
-	`
-	component, err := s.engine.Load(qml.String("file.qml", data))
-	c.Assert(err, IsNil)
-
-	inst := component.Create(s.context)
-	defer inst.Destroy()
-
-	c.Assert(c.GetTestLog(), Matches, "(?s).*Value says: new type works!.*")
-}
-
-func (s *S) TestRegisterTypeWriteProperty(c *C) {
-	value := &testStruct{}
-	spec := qml.TypeSpec{
+	singletonSpec := qml.TypeSpec{
 		Location: "GoTest",
 		Major:    4,
 		Minor:    2,
-		Name:     "NewType",
-		New:      func() interface{} { return value },
+		Name:     "GoSingleton",
+		New:      func() interface{} { return goTypeValue },
 	}
-	qml.RegisterType(&spec)
+	err = qml.RegisterSingleton(&singletonSpec)
+	c.Assert(err, IsNil)
 
-	data := `
-		import GoTest 4.2
-		NewType { 
-			intValue: 300
-			stringValue: "hey"
+	filter := regexp.MustCompile("")
+	if tablef != nil {
+		filter = regexp.MustCompile(*tablef)
+	}
+
+	for i := range tests {
+		s.TearDownTest(c)
+		t := &tests[i]
+		header := fmt.Sprintf("----- Running table test %d: %s -----", i, t.Summary)
+		if !filter.MatchString(header) {
+			continue
 		}
-	`
-	component, err := s.engine.Load(qml.String("file.qml", data))
-	c.Assert(err, IsNil)
+		c.Log(header)
+		s.SetUpTest(c)
 
-	inst := component.Create(s.context)
-	defer inst.Destroy()
+		value := t.Value
+		goTypeValue = &value
+		s.context.SetVar("value", &value)
 
-	c.Assert(value.StringValue, Equals, "hey")
-	c.Assert(value.IntValue, Equals, 300)
-}
+		testData := TestData{
+			C:       c,
+			value:   &value,
+			engine:  s.engine,
+			context: s.context,
+		}
 
-func (s *S) TestRegisterSingleton(c *C) {
-	value := &testStruct{StringValue: "singleton works!"}
-	spec := qml.TypeSpec{
-		Location: "GoTest",
-		Major:    4,
-		Minor:    2,
-		Name:     "SingletonType",
-		New:      func() interface{} { return value },
-	}
-	err := qml.RegisterSingleton(&spec)
-	c.Assert(err, IsNil)
-
-	data := `
-		import QtQuick 2.0
-		import GoTest 4.2
-		Item {
-			Component.onCompleted: {
-				console.log('Value says:', SingletonType.stringValue)
+		if t.Init != nil {
+			t.Init(&testData)
+			if c.Failed() {
+				c.FailNow()
 			}
 		}
-	`
-	component, err := s.engine.Load(qml.String("file.qml", data))
-	c.Assert(err, IsNil)
 
-	inst := component.Create(s.context)
-	defer inst.Destroy()
+		component, err := s.engine.Load(qml.String("file.qml", "import QtQuick 2.0\n"+strings.TrimSpace(t.QML)))
+		c.Assert(err, IsNil)
 
-	c.Assert(c.GetTestLog(), Matches, "(?s).*Value says: singleton works!.*")
-}
+		logMark := c.GetTestLog()
 
-func (s *S) TestChanged(c *C) {
-	value := &testStruct{StringValue: "<old value>"}
-	spec := qml.TypeSpec{
-		Location: "GoTest",
-		Major:    4,
-		Minor:    2,
-		Name:     "ChangedType",
-		New:      func() interface{} { return value },
+		// The component instance is destroyed before the loop ends below.
+		compinst := component.Create(s.context)
+
+		testData.component = component
+		testData.compinst = compinst
+
+		if t.QMLLog != "" {
+			logged := c.GetTestLog()[len(logMark):]
+			if t.QMLLog[0] == '!' {
+				c.Check(logged, Not(Matches), "(?s).*"+t.QMLLog[1:]+".*")
+			} else {
+				c.Check(logged, Matches, "(?s).*"+t.QMLLog+".*")
+			}
+		}
+
+		if t.QMLValue != (TestType{}) {
+			c.Check(value.StringValue, Equals, t.QMLValue.StringValue)
+			c.Check(value.BoolValue, Equals, t.QMLValue.BoolValue)
+			c.Check(value.IntValue, Equals, t.QMLValue.IntValue)
+			c.Check(value.Int64Value, Equals, t.QMLValue.Int64Value)
+			c.Check(value.Int32Value, Equals, t.QMLValue.Int32Value)
+			c.Check(value.Float64Value, Equals, t.QMLValue.Float64Value)
+			c.Check(value.Float32Value, Equals, t.QMLValue.Float32Value)
+			c.Check(value.AnyValue, Equals, t.QMLValue.AnyValue)
+		}
+
+		if !c.Failed() {
+			logMark := c.GetTestLog()
+
+			if t.Done != nil {
+				t.Done(&testData)
+				qml.Flush()
+			}
+
+			if t.DoneLog != "" {
+				logged := c.GetTestLog()[len(logMark):]
+				if t.DoneLog[0] == '!' {
+					c.Check(logged, Not(Matches), "(?s).*"+t.DoneLog[1:]+".*")
+				} else {
+					c.Check(logged, Matches, "(?s).*"+t.DoneLog+".*")
+				}
+			}
+
+			if t.DoneValue != (TestType{}) {
+				c.Check(value.StringValue, Equals, t.DoneValue.StringValue)
+				c.Check(value.BoolValue, Equals, t.DoneValue.BoolValue)
+				c.Check(value.IntValue, Equals, t.DoneValue.IntValue)
+				c.Check(value.Int64Value, Equals, t.DoneValue.Int64Value)
+				c.Check(value.Int32Value, Equals, t.DoneValue.Int32Value)
+				c.Check(value.Float64Value, Equals, t.DoneValue.Float64Value)
+				c.Check(value.Float32Value, Equals, t.DoneValue.Float32Value)
+				c.Check(value.AnyValue, Equals, t.DoneValue.AnyValue)
+			}
+		}
+
+		compinst.Destroy()
+
+		if c.Failed() {
+			c.FailNow() // So relevant logs are at the bottom.
+		}
 	}
-	qml.RegisterType(&spec)
-
-	data := `
-		import GoTest 4.2
-		ChangedType { 
-			onStringValueChanged: console.log("String value is now", stringValue)
-		}
-	`
-	component, err := s.engine.Load(qml.String("file.qml", data))
-	c.Assert(err, IsNil)
-
-	inst := component.Create(s.context)
-	defer inst.Destroy()
-
-	value.StringValue = "<new value>"
-
-	qml.Flush()
-
-	c.Assert(strings.Contains(c.GetTestLog(), "<old value>"), Equals, false)
-	c.Assert(strings.Contains(c.GetTestLog(), "<new value>"), Equals, false)
-
-	qml.Changed(value, &value.StringValue)
-	qml.Flush()
-
-	c.Assert(strings.Contains(c.GetTestLog(), "<old value>"), Equals, false)
-	c.Assert(strings.Contains(c.GetTestLog(), "String value is now <new value>"), Equals, true)
-}
-
-func (s *S) TestMethodCall(c *C) {
-	value := &testStruct{StringValue: "<string content>"}
-	s.context.SetVar("value", value)
-
-	data := `
-		import QtQuick 2.0
-		Item {
-			Component.onCompleted: {
-				console.log("string was", value.changeString("<new content>"));
-			}
-		}
-	`
-
-	component, err := s.engine.Load(qml.String("file.qml", data))
-	c.Assert(err, IsNil)
-
-	inst := component.Create(s.context)
-	inst.Destroy()
-
-	c.Assert(c.GetTestLog(), Matches, "(?s).*string was <string content>.*")
-	c.Assert(value.StringValue, Equals, "<new content>")
-}
-
-func (s *S) TestConnectQmlSignalToGoMethod(c *C) {
-	value := &testStruct{StringValue: "<string content>"}
-	s.context.SetVar("value", value)
-
-	data := `
-		import QtQuick 2.0
-		Item {
-			id: item
-			signal testSignal(string s)
-			Component.onCompleted: {
-				item.testSignal.connect(value.changeString)
-				item.testSignal("<new content>")
-			}
-		}
-	`
-
-	component, err := s.engine.Load(qml.String("file.qml", data))
-	c.Assert(err, IsNil)
-
-	inst := component.Create(s.context)
-	inst.Destroy()
-
-	c.Assert(value.StringValue, Equals, "<new content>")
 }

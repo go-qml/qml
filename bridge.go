@@ -10,6 +10,7 @@ package qml
 import "C"
 
 import (
+	"fmt"
 	"reflect"
 	"runtime"
 	"sync/atomic"
@@ -80,29 +81,6 @@ func Flush() {
 }
 
 func Changed(value, fieldAddr interface{}) {
-
-	// TODO Must notify all engines, not one of them.
-
-	// TODO Must access engine.values in a non-racy way.
-	var fold *valueFold
-	for _, engine := range engines {
-		if fold = engine.values[value]; fold != nil {
-			break
-		}
-	}
-	if fold == nil {
-		for f, _ := range enginePending {
-			if f.gvalue == value {
-				fold = f
-				break
-			}
-		}
-		if fold == nil {
-			// TODO Perhaps return an error instead.
-			panic("value is not known")
-		}
-	}
-
 	valuev := reflect.ValueOf(value)
 	fieldv := reflect.ValueOf(fieldAddr)
 	for valuev.Kind() == reflect.Ptr {
@@ -119,9 +97,32 @@ func Changed(value, fieldAddr interface{}) {
 		panic("provided field is not a member of the given value")
 	}
 
+	found := false
 	gui(func() {
-		C.goValueActivate(fold.cvalue, typeInfo(value), C.int(offset))
+		tinfo := typeInfo(value)
+		for _, engine := range engines {
+			fold := engine.values[value]
+			for fold != nil {
+				found = true
+				C.goValueActivate(fold.cvalue, tinfo, C.int(offset))
+				fold = fold.next
+			}
+			// TODO typeNew might also be a linked list keyed by the gvalue.
+			//      This would prevent the iteration and the deferrals.
+			for fold, _ = range typeNew {
+				if fold.gvalue == value {
+					found = true
+					// Activate these later so they don't get recursively moved
+					// out of typeNew while the iteration is still happening.
+					defer C.goValueActivate(fold.cvalue, tinfo, C.int(offset))
+				}
+			}
+		}
 	})
+	if !found {
+		// TODO Perhaps return an error instead.
+		panic("value is not known")
+	}
 }
 
 // hookIdleTimer is run once per iteration of the Qt event loop,
@@ -151,14 +152,15 @@ type valueFold struct {
 	engine *Engine
 	gvalue interface{}
 	cvalue unsafe.Pointer
+	prev   *valueFold
+	next   *valueFold
 	owner  valueOwner
 }
 
-type valueOwner int
+type valueOwner uint8
 
 const (
-	anyOwner = iota
-	cppOwner
+	cppOwner = 1 << iota
 	jsOwner
 )
 
@@ -169,36 +171,50 @@ const (
 func wrapGoValue(engine *Engine, gvalue interface{}, owner valueOwner) (cvalue unsafe.Pointer) {
 	// TODO Return an error if gvalue is a non-basic type and not a pointer.
 	//      Pointer-to-pointer is also not okay.
-	fold, ok := engine.values[gvalue]
-	if !ok {
-		parent := nilPtr
-		if owner == cppOwner {
-			parent = engine.addr
-		}
-		fold = &valueFold{
-			engine: engine,
-			gvalue: gvalue,
-			owner:  owner,
-		}
-		fold.cvalue = C.newGoValue(unsafe.Pointer(fold), typeInfo(gvalue), parent)
+	prev, ok := engine.values[gvalue]
+	if ok && (prev.owner == owner || owner != cppOwner) {
+		return prev.cvalue
+	}
+
+	parent := nilPtr
+	if owner == cppOwner {
+		parent = engine.addr
+	}
+	fold := &valueFold{
+		engine: engine,
+		gvalue: gvalue,
+		owner:  owner,
+	}
+	fold.cvalue = C.newGoValue(unsafe.Pointer(fold), typeInfo(gvalue), parent)
+	if prev != nil {
+		prev.next = fold
+		fold.prev = prev
+	} else {
 		engine.values[gvalue] = fold
-		stats.valuesAlive(+1)
-		C.engineSetContextForObject(engine.addr, fold.cvalue)
-		switch owner {
-		case cppOwner:
-			C.engineSetOwnershipCPP(engine.addr, fold.cvalue)
-		case jsOwner:
-			C.engineSetOwnershipJS(engine.addr, fold.cvalue)
-		}
-	} else if owner == cppOwner && fold.owner != cppOwner {
-		fold.owner = cppOwner
+	}
+	stats.valuesAlive(+1)
+	C.engineSetContextForObject(engine.addr, fold.cvalue)
+	switch owner {
+	case cppOwner:
 		C.engineSetOwnershipCPP(engine.addr, fold.cvalue)
-		C.objectSetParent(fold.cvalue, engine.addr)
+	case jsOwner:
+		C.engineSetOwnershipJS(engine.addr, fold.cvalue)
 	}
 	return fold.cvalue
 }
 
-var enginePending = make(map[*valueFold]bool)
+// typeNew holds fold values that are created by registered types.
+// These values are special in two senses: first, they don't have a
+// reference to an engine before they are used in a context that can
+// set the reference; second, these values always hold a new cvalue,
+// because they are created as a side-effect of the registered type
+// being instantiated (it's too late to reuse an existent cvalue).
+//
+// For these reasons, typeNew holds the fold for these values until
+// their engine is known, and once it's known they may have to be
+// added to the linked list, since mulitple references for the same
+// gvalue may occur.
+var typeNew = make(map[*valueFold]bool)
 
 //export hookGoValueTypeNew
 func hookGoValueTypeNew(cvalue unsafe.Pointer, specp unsafe.Pointer) (foldp unsafe.Pointer) {
@@ -207,7 +223,7 @@ func hookGoValueTypeNew(cvalue unsafe.Pointer, specp unsafe.Pointer) (foldp unsa
 		cvalue: cvalue,
 		owner:  jsOwner,
 	}
-	enginePending[fold] = true
+	typeNew[fold] = true
 	stats.valuesAlive(+1)
 	return unsafe.Pointer(fold)
 }
@@ -217,29 +233,44 @@ func hookGoValueDestroyed(enginep unsafe.Pointer, foldp unsafe.Pointer) {
 	fold := (*valueFold)(foldp)
 	engine := fold.engine
 	if engine == nil {
-		before := len(enginePending)
-		delete(enginePending, fold)
-		if len(enginePending) == before {
-			panic("destroying value without an associated engine and unknown to the pending engine set; who created the value?")
+		before := len(typeNew)
+		delete(typeNew, fold)
+		if len(typeNew) == before {
+			panic("destroying value without an associated engine; who created the value?")
 		}
 	} else if engines[engine.addr] == nil {
 		// Must never do that. The engine holds memory references that C++ depends on.
-		panic("engine was released from global list while its values were still alive")
+		panic(fmt.Sprintf("engine %p was released from global list while its values were still alive", engine.addr))
 	} else {
-		before := len(engine.values)
-		delete(engine.values, fold.gvalue)
-		if len(engine.values) == before {
-			panic("destroying value that knows about the engine, but the engine doesn't know about the value; who cleared the engine?")
-		}
-		if engine.destroyed && len(engine.values) == 0 {
-			delete(engines, engine.addr)
+		switch {
+		case fold.prev != nil:
+			fold.prev.next = fold.next
+			if fold.next != nil {
+				fold.next.prev = fold.prev
+			}
+		case fold.next != nil:
+			fold.next.prev = fold.prev
+			if fold.prev != nil {
+				fold.prev.next = fold.next
+			} else {
+				fold.engine.values[fold.gvalue] = fold.next
+			}
+		default:
+			before := len(engine.values)
+			delete(engine.values, fold.gvalue)
+			if len(engine.values) == before {
+				panic("destroying value that knows about the engine, but the engine doesn't know about the value; who cleared the engine?")
+			}
+			if engine.destroyed && len(engine.values) == 0 {
+				delete(engines, engine.addr)
+			}
 		}
 	}
 	stats.valuesAlive(-1)
 }
 
 //export hookGoValueReadField
-func hookGoValueReadField(enginep unsafe.Pointer, foldp unsafe.Pointer, reflectIndex C.int, resultdv *C.DataValue) {
+func hookGoValueReadField(enginep, foldp unsafe.Pointer, reflectIndex C.int, resultdv *C.DataValue) {
 	fold := ensureEngine(enginep, foldp)
 	v := reflect.ValueOf(fold.gvalue)
 	for v.Type().Kind() == reflect.Ptr {
@@ -256,7 +287,7 @@ func hookGoValueReadField(enginep unsafe.Pointer, foldp unsafe.Pointer, reflectI
 }
 
 //export hookGoValueWriteField
-func hookGoValueWriteField(enginep unsafe.Pointer, foldp unsafe.Pointer, reflectIndex C.int, assigndv *C.DataValue) {
+func hookGoValueWriteField(enginep, foldp unsafe.Pointer, reflectIndex C.int, assigndv *C.DataValue) {
 	fold := ensureEngine(enginep, foldp)
 	v := reflect.ValueOf(fold.gvalue)
 	for v.Type().Kind() == reflect.Ptr {
@@ -277,7 +308,7 @@ func convertAndSet(to, from reflect.Value) {
 var dataValueSize = uintptr(unsafe.Sizeof(C.DataValue{}))
 
 //export hookGoValueCallMethod
-func hookGoValueCallMethod(enginep unsafe.Pointer, foldp unsafe.Pointer, reflectIndex C.int, args *C.DataValue) {
+func hookGoValueCallMethod(enginep, foldp unsafe.Pointer, reflectIndex C.int, args *C.DataValue) {
 	fold := ensureEngine(enginep, foldp)
 	v := reflect.ValueOf(fold.gvalue)
 
@@ -305,23 +336,34 @@ func hookGoValueCallMethod(enginep unsafe.Pointer, foldp unsafe.Pointer, reflect
 	packDataValue(result[0].Interface(), args, fold.engine, jsOwner)
 }
 
-func ensureEngine(enginep unsafe.Pointer, foldp unsafe.Pointer) *valueFold {
+func ensureEngine(enginep, foldp unsafe.Pointer) *valueFold {
 	fold := (*valueFold)(foldp)
-	if fold.engine == nil {
-		if enginep == nilPtr {
-			panic("accessing field from value without an engine pointer; who created the value?")
+	if fold.engine != nil {
+		return fold
+	}
+
+	if enginep == nilPtr {
+		panic("accessing value without an engine pointer; who created the value?")
+	}
+	engine := engines[enginep]
+	if engine == nil {
+		panic("unknown engine pointer; who created the engine?")
+	}
+	fold.engine = engine
+	prev := engine.values[fold.gvalue]
+	if prev != nil {
+		for prev.next != nil {
+			prev = prev.next
 		}
-		engine := engines[enginep]
-		if engine == nil {
-			panic("unknown engine pointer; who created the engine?")
-		}
-		fold.engine = engine
+		prev.next = fold
+		fold.prev = prev
+	} else {
 		engine.values[fold.gvalue] = fold
-		before := len(enginePending)
-		delete(enginePending, fold)
-		if len(enginePending) == before {
-			panic("value had no engine, but is not in the pending engine set; who created the value?")
-		}
+	}
+	before := len(typeNew)
+	delete(typeNew, fold)
+	if len(typeNew) == before {
+		panic("value had no engine, but was not created by a registered type; who created the value?")
 	}
 	return fold
 }
