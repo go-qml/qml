@@ -235,7 +235,7 @@ void goValueActivate(GoValue_ *value, GoTypeInfo *typeInfo, int addrOffset)
     GoMemberInfo *fieldInfo = typeInfo->fields;
     for (int i = 0; i < typeInfo->fieldsLen; i++) {
         if (fieldInfo->addrOffset == addrOffset) {
-            reinterpret_cast<GoValue *>(value)->activate(fieldInfo->reflectIndex);
+            reinterpret_cast<GoValue *>(value)->activate(fieldInfo->metaIndex);
             return;
         }
         fieldInfo++;

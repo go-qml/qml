@@ -123,20 +123,13 @@ GoAddr *GoValue::addr()
     return d->addr;
 }
 
-void GoValue::activate(int fieldReflectIndex) {
+void GoValue::activate(int propIndex) {
     Q_D(GoValue);
 
-    // TODO This is actually broken. reflectIndex may contain holes.
-    // Can still use it, but must first find the metaIndex for the corresponding
-    // reflectIndex, compute the relative index, and then do what follows with the
-    // relative index.
-
-    // Go fields have an absolute index of (propertyOffset + fieldReflectIndex),
-    // while Go methods have (methodOffset + fieldCount + methodReflectIndex),
-    // because properties are added first, and each property gets its own signal
-    // method at that time. This means the first fieldCount methods are in fact
-    // the signals of the respective properties.
-    d->valueMeta->activate(this, d->valueMeta->methodOffset() + fieldReflectIndex, 0);
+    // Properties are added first, so the first fieldLen methods are in
+    // fact the signals of the respective properties.
+    int relativeIndex = propIndex - d->valueMeta->propertyOffset();
+    d->valueMeta->activate(this, d->valueMeta->methodOffset() + relativeIndex, 0);
 }
 
 QMetaObject *GoValue::metaObjectFor(GoTypeInfo *typeInfo)

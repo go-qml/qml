@@ -64,6 +64,8 @@ func (s *S) TearDownTest(c *C) {
 }
 
 type TestType struct {
+	private bool // Besides being private, also adds a gap in the reflect field index.
+
 	StringValue  string
 	BoolValue    bool
 	IntValue     int
@@ -138,7 +140,7 @@ func (s *S) TestContextGetMissing(c *C) {
 
 func (s *S) TestContextSetVars(c *C) {
 	s.context.SetVars(&TestType{
-		StringValue:  "<string content>",
+		StringValue:  "<content>",
 		BoolValue:    true,
 		IntValue:     42,
 		Int64Value:   42,
@@ -147,7 +149,7 @@ func (s *S) TestContextSetVars(c *C) {
 		Float32Value: 4.2,
 	})
 
-	c.Assert(s.context.Var("stringValue"), Equals, "<string content>")
+	c.Assert(s.context.Var("stringValue"), Equals, "<content>")
 	c.Assert(s.context.Var("boolValue"), Equals, true)
 	c.Assert(s.context.Var("intValue"), Equals, intNN(42))
 	c.Assert(s.context.Var("int64Value"), Equals, int64(42))
@@ -220,20 +222,22 @@ var tests = []struct {
 	{
 		Summary: "Reading of nested field via a value (not pointer) in an interface",
 		Value:   TestType{AnyValue: TestType{StringValue: "<content>"}},
-		QML: `
-			Item {
-				Component.onCompleted: console.log("String is", value.anyValue.stringValue)
-			}
-		`,
-		QMLLog: "String is <content>",
+		QML:     `Item { Component.onCompleted: console.log("String is", value.anyValue.stringValue) }`,
+		QMLLog:  "String is <content>",
 	},
 	{
 		Summary: "Reading of component instance fields",
 		QML:     "Item { width: 300; height: 200 }",
-		Done:   func(d *TestData) {
+		Done: func(d *TestData) {
 			d.Check(d.compinst.Field("width"), Equals, float64(300))
 			d.Check(d.compinst.Field("height"), Equals, float64(200))
 		},
+	},
+	{
+		Summary: "No access to private fields",
+		Value:   TestType{private: true},
+		QML:     `Item { Component.onCompleted: console.log("Private is", value.private); }`,
+		QMLLog:  "Private is undefined",
 	},
 	{
 		Summary: "Identical values remain identical when possible",
@@ -241,11 +245,7 @@ var tests = []struct {
 			d.context.SetVar("a", d.value)
 			d.context.SetVar("b", d.value)
 		},
-		QML: `
-			Item {
-				Component.onCompleted: console.log('Identical:', a === b);
-			}
-		`,
+		QML:    `Item { Component.onCompleted: console.log('Identical:', a === b); }`,
 		QMLLog: "Identical: true",
 	},
 	{
@@ -253,9 +253,7 @@ var tests = []struct {
 		Value:   TestType{StringValue: "<content>"},
 		QML: `
 			import GoTest 4.2
-			GoType { 
-				Component.onCompleted: console.log("String is", stringValue)
-			}
+			GoType { Component.onCompleted: console.log("String is", stringValue) }
 		`,
 		QMLLog: "String is <content>",
 	},
@@ -263,10 +261,7 @@ var tests = []struct {
 		Summary: "Write Go type property",
 		QML: `
 			import GoTest 4.2
-			GoType { 
-				stringValue: "<new>"
-				intValue: 300
-			}
+			GoType { stringValue: "<new>"; intValue: 300 }
 		`,
 		QMLValue: TestType{StringValue: "<new>", IntValue: 300},
 	},
@@ -275,43 +270,37 @@ var tests = []struct {
 		Value:   TestType{StringValue: "<content>"},
 		QML: `
 			import GoTest 4.2
-			Item { 
-				Component.onCompleted: console.log("String is", GoSingleton.stringValue)
-			}
+			Item { Component.onCompleted: console.log("String is", GoSingleton.stringValue) }
 		`,
 		QMLLog: "String is <content>",
 	},
 	{
 		Summary: "qml.Changed triggers a QML slot",
-		Value:   TestType{StringValue: "<old content>"},
+		Value:   TestType{StringValue: "<old>"},
 
 		QML: `
 			import GoTest 4.2
-			GoType { 
-				onStringValueChanged: console.log("String is", stringValue)
-			}
+			GoType { onStringValueChanged: console.log("String is", stringValue) }
 		`,
 		QMLLog:   "!String is",
-		QMLValue: TestType{StringValue: "<old content>"},
+		QMLValue: TestType{StringValue: "<old>"},
 
 		Done: func(d *TestData) {
-			d.value.StringValue = "<new content>"
+			d.value.StringValue = "<new>"
 			qml.Changed(d.value, &d.value.StringValue)
 		},
-		DoneLog:   "String is <new content>",
-		DoneValue: TestType{StringValue: "<new content>"},
+		DoneLog:   "String is <new>",
+		DoneValue: TestType{StringValue: "<new>"},
 	},
 	{
 		Summary: "qml.Changed must not trigger on the wrong field",
-		Value:   TestType{StringValue: "<old content>"},
+		Value:   TestType{StringValue: "<old>"},
 		QML: `
 			import GoTest 4.2
-			GoType { 
-				onStringValueChanged: console.log("String is", stringValue)
-			}
+			GoType { onStringValueChanged: console.log("String is", stringValue) }
 		`,
 		Done: func(d *TestData) {
-			d.value.StringValue = "<new content>"
+			d.value.StringValue = "<new>"
 			qml.Changed(d.value, &d.value.IntValue)
 		},
 		DoneLog: "!String is",
@@ -349,9 +338,7 @@ var tests = []struct {
 	{
 		Summary: "qml.Changed updates bindings",
 		Value:   TestType{StringValue: "<old>"},
-		QML: `
-			Item { property string s: "String is " + value.stringValue }
-		`,
+		QML:     `Item { property string s: "String is " + value.stringValue }`,
 		Done: func(d *TestData) {
 			d.value.StringValue = "<new>"
 			qml.Changed(d.value, &d.value.StringValue)
@@ -359,20 +346,16 @@ var tests = []struct {
 		},
 	},
 	{
-		Summary: "Call a Go method without arguments or result",
-		Value:   TestType{IntValue: 42},
-		QML: `
-			Item { Component.onCompleted: console.log("Undefined is", value.incrementInt()); }
-		`,
+		Summary:  "Call a Go method without arguments or result",
+		Value:    TestType{IntValue: 42},
+		QML:      `Item { Component.onCompleted: console.log("Undefined is", value.incrementInt()); }`,
 		QMLLog:   "Undefined is undefined",
 		QMLValue: TestType{IntValue: 43},
 	},
 	{
-		Summary: "Call a Go method with one argument and one result",
-		Value:   TestType{StringValue: "<old>"},
-		QML: `
-			Item { Component.onCompleted: console.log("String was", value.changeString("<new>")); }
-		`,
+		Summary:  "Call a Go method with one argument and one result",
+		Value:    TestType{StringValue: "<old>"},
+		QML:      `Item { Component.onCompleted: console.log("String was", value.changeString("<new>")); }`,
 		QMLLog:   "String was <old>",
 		QMLValue: TestType{StringValue: "<new>"},
 	},

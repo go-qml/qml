@@ -160,19 +160,29 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	vtptr := reflect.PtrTo(vt)
 
 	numField := vt.NumField()
+	prvField := 0
 	numMethod := vtptr.NumMethod()
 
 	// struct { FooBar T; Baz T } => "fooBar\0baz\0"
 	namesLen := 0
 	for i := 0; i < numField; i++ {
-		namesLen += len(vt.Field(i).Name) + 1
+		field := vt.Field(i)
+		if field.PkgPath != "" {
+			prvField++ // not exported
+			continue
+		}
+		namesLen += len(field.Name) + 1
 	}
 	for i := 0; i < numMethod; i++ {
 		namesLen += len(vtptr.Method(i).Name) + 1
 	}
 	names := make([]byte, 0, namesLen)
 	for i := 0; i < numField; i++ {
-		name := vt.Field(i).Name
+		field := vt.Field(i)
+		if field.PkgPath != "" {
+			continue // not exported
+		}
+		name := field.Name
 		for i, rune := range name {
 			if i == 0 {
 				names = append(names, string(unicode.ToLower(rune))...)
@@ -201,13 +211,16 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	typeInfo.memberNames = C.CString(string(names))
 
 	// Assemble information on members.
-	membersLen := numField + numMethod
+	membersLen := numField - prvField + numMethod
 	membersi := uintptr(0)
 	mnamesi := uintptr(0)
 	members := uintptr(C.malloc(memberInfoSize * C.size_t(membersLen)))
 	mnames := uintptr(unsafe.Pointer(typeInfo.memberNames))
 	for i := 0; i < numField; i++ {
 		field := vt.Field(i)
+		if field.PkgPath != "" {
+			continue // not exported
+		}
 		memberInfo := (*C.GoMemberInfo)(unsafe.Pointer(members + uintptr(memberInfoSize)*membersi))
 		memberInfo.memberName = (*C.char)(unsafe.Pointer(mnames + mnamesi))
 		memberInfo.memberType = dataTypeOf(field.Type)
@@ -221,7 +234,6 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 		// TODO Split methods and fields in different types? The commonalities seem minimal.
 		memberInfo := (*C.GoMemberInfo)(unsafe.Pointer(members + uintptr(memberInfoSize)*membersi))
 		memberInfo.memberName = (*C.char)(unsafe.Pointer(mnames + mnamesi))
-		// TODO Sort out the parameter and result typing strategy.
 		memberInfo.memberType = C.DTMethod
 		memberInfo.reflectIndex = C.int(i)
 		memberInfo.addrOffset = 0
@@ -241,12 +253,18 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	typeInfo.membersLen = C.int(membersLen)
 
 	typeInfo.fields = typeInfo.members
-	typeInfo.fieldsLen = C.int(numField)
-	typeInfo.methods = (*C.GoMemberInfo)(unsafe.Pointer(members + uintptr(memberInfoSize)*uintptr(numField)))
+	typeInfo.fieldsLen = C.int(numField - prvField)
+	typeInfo.methods = (*C.GoMemberInfo)(unsafe.Pointer(members + uintptr(memberInfoSize)*uintptr(typeInfo.fieldsLen)))
 	typeInfo.methodsLen = C.int(numMethod)
 
 	if int(membersi) != membersLen {
 		panic("used more space than allocated for member names")
+	}
+	if int(mnamesi) != namesLen {
+		panic("allocated buffer doesn't match used space")
+	}
+	if typeInfo.fieldsLen + typeInfo.methodsLen != typeInfo.membersLen {
+		panic("lengths are inconsistent")
 	}
 
 	typeInfoCache[vt] = typeInfo
