@@ -347,6 +347,18 @@ var tests = []struct {
 		DoneLog: "v3 has <new>.*v2 has <new>.*v1 has <new>.*p1 has <new>.*p2 has <new>.*p3 has <new>.*",
 	},
 	{
+		Summary: "qml.Changed updates bindings",
+		Value:   TestType{StringValue: "<old>"},
+		QML: `
+			Item { property string s: "String is " + value.stringValue }
+		`,
+		Done: func(d *TestData) {
+			d.value.StringValue = "<new>"
+			qml.Changed(d.value, &d.value.StringValue)
+			d.Check(d.compinst.Field("s"), Equals, "String is <new>")
+		},
+	},
+	{
 		Summary: "Call a Go method without arguments or result",
 		Value:   TestType{IntValue: 42},
 		QML: `
@@ -474,7 +486,6 @@ func (s *S) TestTable(c *C) {
 
 			if t.Done != nil {
 				t.Done(&testData)
-				qml.Flush()
 			}
 
 			if t.DoneLog != "" {
