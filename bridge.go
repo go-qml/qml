@@ -329,11 +329,12 @@ func hookGoValueCallMethod(enginep, foldp unsafe.Pointer, reflectIndex C.int, ar
 	result := method.Call(params[:numIn])
 
 	// TODO Unhardcode this.
-	if len(result) != 1 || result[0].Type() != typeString {
-		panic("result must be a string for now")
+	if len(result) > 1 {
+		panic("can only handle methods with zero or one result values for now")
 	}
-
-	packDataValue(result[0].Interface(), args, fold.engine, jsOwner)
+	if len(result) == 1 {
+		packDataValue(result[0].Interface(), args, fold.engine, jsOwner)
+	}
 }
 
 func ensureEngine(enginep, foldp unsafe.Pointer) *valueFold {

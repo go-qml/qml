@@ -84,6 +84,10 @@ func (ts *TestType) ChangeString(new string) (old string) {
 	return
 }
 
+func (ts *TestType) IncrementInt() {
+	ts.IntValue++
+}
+
 func intIs64() bool {
 	var i int = 1<<31 - 1
 	return i+1 > 0
@@ -343,30 +347,37 @@ var tests = []struct {
 		DoneLog: "v3 has <new>.*v2 has <new>.*v1 has <new>.*p1 has <new>.*p2 has <new>.*p3 has <new>.*",
 	},
 	{
-		Summary: "Call a Go method from QML",
-		Value:   TestType{StringValue: "<old content>"},
+		Summary: "Call a Go method without arguments or result",
+		Value:   TestType{IntValue: 42},
 		QML: `
-			Item {
-				Component.onCompleted: console.log("String was", value.changeString("<new content>"));
-			}
+			Item { Component.onCompleted: console.log("Undefined is", value.incrementInt()); }
 		`,
-		QMLLog:   "String was <old content>",
-		QMLValue: TestType{StringValue: "<new content>"},
+		QMLLog:   "Undefined is undefined",
+		QMLValue: TestType{IntValue: 43},
+	},
+	{
+		Summary: "Call a Go method with one argument and one result",
+		Value:   TestType{StringValue: "<old>"},
+		QML: `
+			Item { Component.onCompleted: console.log("String was", value.changeString("<new>")); }
+		`,
+		QMLLog:   "String was <old>",
+		QMLValue: TestType{StringValue: "<new>"},
 	},
 	{
 		Summary: "Connect a QML signal to a Go method",
-		Value:   TestType{StringValue: "<old content>"},
+		Value:   TestType{StringValue: "<old>"},
 		QML: `
 			Item {
 				id: item
 				signal testSignal(string s)
 				Component.onCompleted: {
 					item.testSignal.connect(value.changeString)
-					item.testSignal("<new content>")
+					item.testSignal("<new>")
 				}
 			}
 		`,
-		QMLValue: TestType{StringValue: "<new content>"},
+		QMLValue: TestType{StringValue: "<new>"},
 	}}
 
 var tablef = flag.String("tablef", "", "if provided, TestTable only runs tests with a summary matching the regexp")

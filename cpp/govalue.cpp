@@ -166,7 +166,11 @@ QMetaObject *GoValue::metaObjectFor(GoTypeInfo *typeInfo)
     memberInfo = typeInfo->methods;
     int relativeMethodIndex = mob.methodCount();
     for (int i = 0; i < typeInfo->methodsLen; i++) {
-        QMetaMethodBuilder methb = mob.addMethod(memberInfo->methodSignature, memberInfo->resultSignature);
+        if (*memberInfo->resultSignature) {
+            mob.addMethod(memberInfo->methodSignature, memberInfo->resultSignature);
+        } else {
+            mob.addMethod(memberInfo->methodSignature);
+        }
         memberInfo->metaIndex = relativeMethodIndex;
         memberInfo++;
         relativeMethodIndex++;
