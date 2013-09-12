@@ -285,6 +285,16 @@ func (o *commonObject) Field(name string) interface{} {
 	return unpackDataValue(&value)
 }
 
+func (o *commonObject) Call(method string) {
+	// TODO Support parameters and result.
+	gui(func() {
+		// TODO Do not allocate this string every time.
+		name := C.CString(method)
+		defer C.free(unsafe.Pointer(name))
+		C.objectInvoke(o.addr, name)
+	})
+}
+
 // Destroy finalizes the value and releases any resources used.
 // The value must not be used after calling this method.
 func (o *commonObject) Destroy() {

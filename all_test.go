@@ -375,8 +375,8 @@ var tests = []struct {
 		QMLValue: TestType{StringValue: "<new>"},
 	},
 	{
-		Summary:  "Call a Go method with multiple results",
-		QML:      `
+		Summary: "Call a Go method with multiple results",
+		QML: `
 			Item {
 				Component.onCompleted: {
 					var r = value.mod(42, 4);
@@ -384,11 +384,11 @@ var tests = []struct {
 				}
 			}
 		`,
-		QMLLog:   `mod is 2 and err is undefined`,
+		QMLLog: `mod is 2 and err is undefined`,
 	},
 	{
-		Summary:  "Call a Go method that returns an error",
-		QML:      `
+		Summary: "Call a Go method that returns an error",
+		QML: `
 			Item {
 				Component.onCompleted: {
 					var r = value.mod(0, 0);
@@ -396,7 +396,7 @@ var tests = []struct {
 				}
 			}
 		`,
-		QMLLog:   `err is <division by zero>`,
+		QMLLog: `err is <division by zero>`,
 	},
 	{
 		Summary: "Connect a QML signal to a Go method",
@@ -412,7 +412,14 @@ var tests = []struct {
 			}
 		`,
 		QMLValue: TestType{StringValue: "<new>"},
-	}}
+	},
+	{
+		Summary: "Call a QML method from Go",
+		QML:     `Item { function f() { console.log("f was called") } }`,
+		Done:    func(d *TestData) { d.compinst.Call("f") },
+		DoneLog: "f was called",
+	},
+}
 
 var tablef = flag.String("tablef", "", "if provided, TestTable only runs tests with a summary matching the regexp")
 
