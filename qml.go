@@ -285,14 +285,17 @@ func (o *commonObject) Field(name string) interface{} {
 	return unpackDataValue(&value)
 }
 
-func (o *commonObject) Call(method string) {
-	// TODO Support parameters and result.
+func (o *commonObject) Call(method string) interface{} {
+	// TODO Parameter support.
+	// TODO What about errors?
+	var result C.DataValue
 	gui(func() {
 		// TODO Do not allocate this string every time.
 		name := C.CString(method)
 		defer C.free(unsafe.Pointer(name))
-		C.objectInvoke(o.addr, name)
+		C.objectInvoke(o.addr, name, &result)
 	})
+	return unpackDataValue(&result)
 }
 
 // Destroy finalizes the value and releases any resources used.

@@ -107,7 +107,7 @@ void contextSetObject(QQmlContext_ *context, QObject_ *value);
 void delObject(QObject_ *object);
 void objectGetProperty(QObject_ *object, const char *name, DataValue *value);
 void objectSetParent(QObject_ *object, QObject_ *parent);
-void objectInvoke(QObject_ *object, const char *method);
+void objectInvoke(QObject_ *object, const char *method, DataValue *result);
 
 QQmlComponent_ *newComponent(QQmlEngine_ *engine, QObject_ *parent);
 void componentSetData(QQmlComponent_ *component, const char *data, int dataLen, const char *url, int urlLen);

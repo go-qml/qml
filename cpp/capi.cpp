@@ -204,13 +204,14 @@ void objectGetProperty(QObject_ *object, const char *name, DataValue *value)
     packDataValue(&var, value);
 }
 
-void objectInvoke(QObject_ *object, const char *method)
+void objectInvoke(QObject_ *object, const char *method, DataValue *resultdv)
 {
     QObject *qobject = reinterpret_cast<QObject *>(object);
 
-    // TODO Support parameters and result.
+    // TODO Parameter support.
     QVariant result;
     QMetaObject::invokeMethod(qobject, method, Qt::DirectConnection, Q_RETURN_ARG(QVariant, result));
+    packDataValue(&result, resultdv);
 }
 
 void objectSetParent(QObject_ *object, QObject_ *parent)

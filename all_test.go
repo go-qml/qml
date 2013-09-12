@@ -415,8 +415,8 @@ var tests = []struct {
 	},
 	{
 		Summary: "Call a QML method from Go",
-		QML:     `Item { function f() { console.log("f was called") } }`,
-		Done:    func(d *TestData) { d.compinst.Call("f") },
+		QML:     `Item { function f() { console.log("f was called"); return "<result>"; } }`,
+		Done:    func(d *TestData) { d.Check(d.compinst.Call("f"), Equals, "<result>") },
 		DoneLog: "f was called",
 	},
 }
