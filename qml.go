@@ -356,6 +356,7 @@ type TypeSpec struct {
 	Location     string
 	Major, Minor int
 
+	// TODO Consider refactoring this type into ModuleSpec for the above + []TypeSpec for the below
 	Name string
 	New  func() interface{}
 }
