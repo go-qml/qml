@@ -54,6 +54,10 @@ func init() {
 // calling wrapGoValue is necessary.
 func packDataValue(value interface{}, dvalue *C.DataValue, engine *Engine, owner valueOwner) {
 	datap := unsafe.Pointer(&dvalue.data)
+	if value == nil {
+		dvalue.dataType = C.DTInvalid
+		return
+	}
 	switch value := value.(type) {
 	case string:
 		dvalue.dataType = C.DTString
@@ -292,14 +296,14 @@ func methodQtSignature(method reflect.Method) (signature, result string) {
 	buf.WriteByte(')')
 	signature = buf.String()
 
-	// TODO Implement multiple returns.
-	if method.Type.NumOut() > 1 {
-		panic("unfinished implementation: methods can only have zero or one return value")
-	}
-	if method.Type.NumOut() == 1 {
+	switch method.Type.NumOut() {
+	case 0:
+		// keep it as ""
+	case 1:
 		result = "QVariant"
+	default:
+		result = "QVariantList"
 	}
-
 	return
 }
 

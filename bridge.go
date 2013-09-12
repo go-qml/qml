@@ -307,6 +307,8 @@ func convertAndSet(to, from reflect.Value) {
 
 var dataValueSize = uintptr(unsafe.Sizeof(C.DataValue{}))
 
+var resultList [10]C.DataValue
+
 //export hookGoValueCallMethod
 func hookGoValueCallMethod(enginep, foldp unsafe.Pointer, reflectIndex C.int, args *C.DataValue) {
 	fold := ensureEngine(enginep, foldp)
@@ -328,12 +330,17 @@ func hookGoValueCallMethod(enginep, foldp unsafe.Pointer, reflectIndex C.int, ar
 
 	result := method.Call(params[:numIn])
 
-	// TODO Unhardcode this.
-	if len(result) > 1 {
-		panic("can only handle methods with zero or one result values for now")
-	}
 	if len(result) == 1 {
 		packDataValue(result[0].Interface(), args, fold.engine, jsOwner)
+	} else if len(result) > 1 {
+		if len(result) > len(resultList) {
+			panic("function has too many results")
+		}
+		for i, v := range result {
+			packDataValue(v.Interface(), &resultList[i], fold.engine, jsOwner)
+		}
+		args.dataType = C.DTList
+		*(*unsafe.Pointer)(unsafe.Pointer(&args.data)) = C.newVariantList(&resultList[0], C.int(len(result)))
 	}
 }
 

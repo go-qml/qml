@@ -289,8 +289,18 @@ void unpackDataValue(DataValue *value, QVariant_ *var)
     case DTFloat32:
         *qvar = *(float*)(value->data);
         break;
+    case DTList:
+        *qvar = **(QVariantList**)(value->data);
+        delete *(QVariantList**)(value->data);
+        break;
     case DTObject:
         qvar->setValue(*(QObject**)(value->data));
+        break;
+    case DTInvalid:
+        // null would be more natural, but an invalid variant means
+        // it has proper semantics when dealing with non-qml qt code.
+        //qvar->setValue(QJSValue(QJSValue::NullValue));
+        qvar->clear();
         break;
     default:
         qFatal("Unsupported data type: %d", value->dataType);
@@ -353,6 +363,18 @@ void packDataValue(QVariant_ *var, DataValue *value)
         qFatal("Unsupported variant type: %d", qvar->type());
         break;
     }
+}
+
+QVariantList_ *newVariantList(DataValue *list, int len)
+{
+    QVariantList *vlist = new QVariantList();
+    vlist->reserve(len);
+    for (int i = 0; i < len; i++) {
+        QVariant var;
+        unpackDataValue(&list[i], &var);
+        vlist->append(var);
+    }
+    return vlist;
 }
 
 void internalLogHandler(QtMsgType severity, const QMessageLogContext &context, const QString &text)

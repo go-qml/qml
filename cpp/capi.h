@@ -15,6 +15,7 @@ typedef void QApplication_;
 typedef void QMetaObject_;
 typedef void QObject_;
 typedef void QVariant_;
+typedef void QVariantList_;
 typedef void QString_;
 typedef void QQmlEngine_;
 typedef void QQmlContext_;
@@ -38,6 +39,7 @@ typedef enum {
 
     DTGoAddr  = 100,
     DTObject  = 101,
+    DTList    = 102,
 
     // Used in type information, not in an actual data value.
     DTAny     = 201, // Can hold any of the above types.
@@ -125,6 +127,8 @@ void goValueActivate(GoValue_ *value, GoTypeInfo *typeInfo, int addrOffset);
 
 void packDataValue(QVariant_ *var, DataValue *result);
 void unpackDataValue(DataValue *value, QVariant_ *result);
+
+QVariantList_ *newVariantList(DataValue *list, int len);
 
 void registerType(char *location, int major, int minor, char *name, GoTypeInfo *typeInfo, GoTypeSpec_ *spec);
 void registerSingleton(char *location, int major, int minor, char *name, GoTypeInfo *typeInfo, GoTypeSpec_ *spec);

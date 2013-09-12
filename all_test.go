@@ -80,6 +80,13 @@ func (ts *TestType) StringMethod() string {
 	return ts.StringValue
 }
 
+func (ts *TestType) Mod(dividend, divisor int32) (int32, error) {
+	if divisor == 0 {
+		return 0, fmt.Errorf("<division by zero>")
+	}
+	return dividend % divisor, nil
+}
+
 func (ts *TestType) ChangeString(new string) (old string) {
 	old = ts.StringValue
 	ts.StringValue = new
@@ -119,6 +126,7 @@ var getSetTests = []struct{ set, get interface{} }{
 	{float64(42), same},
 	{float32(42), same},
 	{new(TestType), same},
+	{nil, same},
 	{42, intNN(42)},
 }
 
@@ -139,7 +147,7 @@ func (s *S) TestContextGetMissing(c *C) {
 }
 
 func (s *S) TestContextSetVars(c *C) {
-	s.context.SetVars(&TestType{
+	vars := TestType{
 		StringValue:  "<content>",
 		BoolValue:    true,
 		IntValue:     42,
@@ -147,7 +155,9 @@ func (s *S) TestContextSetVars(c *C) {
 		Int32Value:   42,
 		Float64Value: 4.2,
 		Float32Value: 4.2,
-	})
+		AnyValue:     nil,
+	}
+	s.context.SetVars(&vars)
 
 	c.Assert(s.context.Var("stringValue"), Equals, "<content>")
 	c.Assert(s.context.Var("boolValue"), Equals, true)
@@ -156,6 +166,10 @@ func (s *S) TestContextSetVars(c *C) {
 	c.Assert(s.context.Var("int32Value"), Equals, int32(42))
 	c.Assert(s.context.Var("float64Value"), Equals, float64(4.2))
 	c.Assert(s.context.Var("float32Value"), Equals, float32(4.2))
+	c.Assert(s.context.Var("anyValue"), Equals, nil)
+
+	vars.AnyValue = 42
+	c.Assert(s.context.Var("anyValue"), Equals, intNN(42))
 }
 
 func (s *S) TestComponentSetDataError(c *C) {
@@ -214,10 +228,11 @@ var tests = []struct {
 				Component.onCompleted: {
 					console.log("String is", value.stringValue)
 					console.log("Int is", value.intValue)
+					console.log("Any is", value.anyValue)
 				}
 			}
 		`,
-		QMLLog: "String is <content>.*Int is 42",
+		QMLLog: "String is <content>.*Int is 42.*Any is undefined",
 	},
 	{
 		Summary: "Reading of nested field via a value (not pointer) in an interface",
@@ -358,6 +373,30 @@ var tests = []struct {
 		QML:      `Item { Component.onCompleted: console.log("String was", value.changeString("<new>")); }`,
 		QMLLog:   "String was <old>",
 		QMLValue: TestType{StringValue: "<new>"},
+	},
+	{
+		Summary:  "Call a Go method with multiple results",
+		QML:      `
+			Item {
+				Component.onCompleted: {
+					var r = value.mod(42, 4);
+					console.log("mod is", r[0], "and err is", r[1]);
+				}
+			}
+		`,
+		QMLLog:   `mod is 2 and err is undefined`,
+	},
+	{
+		Summary:  "Call a Go method that returns an error",
+		QML:      `
+			Item {
+				Component.onCompleted: {
+					var r = value.mod(0, 0);
+					console.log("err is", r[1].error());
+				}
+			}
+		`,
+		QMLLog:   `err is <division by zero>`,
 	},
 	{
 		Summary: "Connect a QML signal to a Go method",
