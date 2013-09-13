@@ -143,17 +143,16 @@ func (e *Engine) Load(c Content) (*Component, error) {
 // Context returns the engine's root context.
 func (e *Engine) Context() *Context {
 	e.assertValid()
-	context := &Context{engine: e}
+	var context Context
+	context.engine = e
 	gui(func() {
 		context.addr = C.engineRootContext(e.addr)
 	})
-	return context
+	return &context
 }
 
 type Context struct {
-	addr unsafe.Pointer
-
-	engine *Engine
+	commonObject
 }
 
 // SetVar makes the provided value available as a variable with the
@@ -239,11 +238,12 @@ func (e *Engine) newComponent(location string, data []byte) (*Component, error) 
 }
 
 func (c *Component) Create(context *Context) *Value {
-	var object Value
+	var value Value
+	value.engine = c.engine
 	gui(func() {
-		object.addr = C.componentCreate(c.addr, context.addr)
+		value.addr = C.componentCreate(c.addr, context.addr)
 	})
-	return &object
+	return &value
 }
 
 // CreateWindow creates a new instance of the c component running under
@@ -260,6 +260,7 @@ func (c *Component) CreateWindow(context *Context) *Window {
 		context = c.engine.Context()
 	}
 	var window Window
+	window.engine = c.engine
 	gui(func() {
 		window.addr = C.componentCreateView(c.addr, context.addr)
 	})
@@ -267,8 +268,11 @@ func (c *Component) CreateWindow(context *Context) *Window {
 }
 
 type commonObject struct {
-	addr unsafe.Pointer
+	addr   unsafe.Pointer
+	engine *Engine
 }
+
+// TODO engine.ValueOf(&value) => *Value for the Go value
 
 type Value struct {
 	commonObject
@@ -278,22 +282,28 @@ func (o *commonObject) Field(name string) interface{} {
 	cname := C.CString(name)
 	defer C.free(unsafe.Pointer(cname))
 
-	var value C.DataValue
+	var dvalue C.DataValue
 	gui(func() {
-		C.objectGetProperty(o.addr, cname, &value)
+		C.objectGetProperty(o.addr, cname, &dvalue)
 	})
-	return unpackDataValue(&value)
+	return unpackDataValue(&dvalue)
 }
 
-func (o *commonObject) Call(method string) interface{} {
-	// TODO Parameter support.
-	// TODO What about errors?
+func (o *commonObject) Call(method string, params ...interface{}) interface{} {
+	// TODO Return errors.
+	if len(params) > len(dataValueArray) {
+		panic("too many parameters")
+	}
 	var result C.DataValue
 	gui(func() {
 		// TODO Do not allocate this string every time.
 		name := C.CString(method)
 		defer C.free(unsafe.Pointer(name))
-		C.objectInvoke(o.addr, name, &result)
+		for i, param := range params {
+			packDataValue(param, &dataValueArray[i], o.engine, jsOwner)
+		}
+		// TODO Check the bool result and return an error.
+		C.objectInvoke(o.addr, name, &result, &dataValueArray[0], C.int(len(params)))
 	})
 	return unpackDataValue(&result)
 }

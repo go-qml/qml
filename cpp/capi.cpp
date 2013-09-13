@@ -204,13 +204,22 @@ void objectGetProperty(QObject_ *object, const char *name, DataValue *value)
     packDataValue(&var, value);
 }
 
-void objectInvoke(QObject_ *object, const char *method, DataValue *resultdv)
+void objectInvoke(QObject_ *object, const char *method, DataValue *resultdv, DataValue *paramsdv, int paramsLen)
 {
     QObject *qobject = reinterpret_cast<QObject *>(object);
 
-    // TODO Parameter support.
     QVariant result;
-    QMetaObject::invokeMethod(qobject, method, Qt::DirectConnection, Q_RETURN_ARG(QVariant, result));
+    QVariant param[MaximumParamCount-1];
+    QGenericArgument arg[MaximumParamCount-1];
+    for (int i = 0; i < paramsLen; i++) {
+        unpackDataValue(&paramsdv[i], &param[i]);
+        arg[i] = Q_ARG(QVariant, param[i]);
+    }
+    if (paramsLen > 10) {
+        qFatal("fix the parameter dispatching");
+    }
+    QMetaObject::invokeMethod(qobject, method, Qt::DirectConnection, 
+            Q_RETURN_ARG(QVariant, result), arg[0], arg[1], arg[2], arg[3], arg[4], arg[5], arg[6], arg[7], arg[8], arg[9]);
     packDataValue(&result, resultdv);
 }
 

@@ -169,6 +169,7 @@ const (
 //
 // This must be run from the main GUI thread.
 func wrapGoValue(engine *Engine, gvalue interface{}, owner valueOwner) (cvalue unsafe.Pointer) {
+
 	// TODO Return an error if gvalue is a non-basic type and not a pointer.
 	//      Pointer-to-pointer is also not okay.
 	prev, ok := engine.values[gvalue]
@@ -305,9 +306,10 @@ func convertAndSet(to, from reflect.Value) {
 	to.Set(from.Convert(to.Type()))
 }
 
-var dataValueSize = uintptr(unsafe.Sizeof(C.DataValue{}))
-
-var resultList [10]C.DataValue
+var (
+	dataValueSize  = uintptr(unsafe.Sizeof(C.DataValue{}))
+	dataValueArray [C.MaximumParamCount-1]C.DataValue
+)
 
 //export hookGoValueCallMethod
 func hookGoValueCallMethod(enginep, foldp unsafe.Pointer, reflectIndex C.int, args *C.DataValue) {
@@ -319,12 +321,12 @@ func hookGoValueCallMethod(enginep, foldp unsafe.Pointer, reflectIndex C.int, ar
 	method := v.Method(int(reflectIndex))
 
 	// TODO Ensure methods with more parameters than this are not registered.
-	var params [C.MaximumParamCount-1]reflect.Value
+	var params [C.MaximumParamCount - 1]reflect.Value
 
 	numIn := uintptr(method.Type().NumIn())
 	for i := uintptr(0); i < numIn; i++ {
 		// TODO Type checking to avoid explosions (or catch the explosion)
-		paramdv := (*C.DataValue)(unsafe.Pointer(uintptr(unsafe.Pointer(args)) + (i+1) * dataValueSize))
+		paramdv := (*C.DataValue)(unsafe.Pointer(uintptr(unsafe.Pointer(args)) + (i+1)*dataValueSize))
 		params[i] = reflect.ValueOf(unpackDataValue(paramdv))
 	}
 
@@ -333,14 +335,14 @@ func hookGoValueCallMethod(enginep, foldp unsafe.Pointer, reflectIndex C.int, ar
 	if len(result) == 1 {
 		packDataValue(result[0].Interface(), args, fold.engine, jsOwner)
 	} else if len(result) > 1 {
-		if len(result) > len(resultList) {
+		if len(result) > len(dataValueArray) {
 			panic("function has too many results")
 		}
 		for i, v := range result {
-			packDataValue(v.Interface(), &resultList[i], fold.engine, jsOwner)
+			packDataValue(v.Interface(), &dataValueArray[i], fold.engine, jsOwner)
 		}
 		args.dataType = C.DTList
-		*(*unsafe.Pointer)(unsafe.Pointer(&args.data)) = C.newVariantList(&resultList[0], C.int(len(result)))
+		*(*unsafe.Pointer)(unsafe.Pointer(&args.data)) = C.newVariantList(&dataValueArray[0], C.int(len(result)))
 	}
 }
 

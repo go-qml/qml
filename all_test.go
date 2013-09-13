@@ -414,10 +414,41 @@ var tests = []struct {
 		QMLValue: TestType{StringValue: "<new>"},
 	},
 	{
-		Summary: "Call a QML method from Go",
-		QML:     `Item { function f() { console.log("f was called"); return "<result>"; } }`,
-		Done:    func(d *TestData) { d.Check(d.compinst.Call("f"), Equals, "<result>") },
+		Summary: "Call a QML method with no result or parameters from Go",
+		QML:     `Item { function f() { console.log("f was called"); } }`,
+		Done:    func(d *TestData) { d.Check(d.compinst.Call("f"), Equals, nil) },
 		DoneLog: "f was called",
+	},
+	{
+		Summary: "Call a QML method with result and parameters from Go",
+		QML:     `Item { function add(a, b) { return a+b; } }`,
+		Done:    func(d *TestData) { d.Check(d.compinst.Call("add", 1, 2), Equals, int32(3)) },
+	},
+	{
+		Summary: "Call a QML method with a custom type",
+		Value:   TestType{StringValue: "<content>"},
+		QML:     `Item { function log(value) { console.log("String is", value.stringValue) } }`,
+		Done:    func(d *TestData) { d.compinst.Call("log", d.value) },
+		DoneLog: "String is <content>",
+	},
+	{
+		Summary: "Call a QML method that holds a custom type past the return point",
+		QML:     `
+			Item {
+				property var held
+				function hold(v) { held = v; gc(); gc(); }
+				function log()   { console.log("String is", held.stringValue) }
+			}`,
+		Done:    func(d *TestData) {
+			value := TestType{StringValue: "<content>"}
+			stats := qml.GetStats()
+			d.compinst.Call("hold", &value)
+			d.Assert(qml.GetStats().ValuesAlive, Equals, stats.ValuesAlive+1)
+			d.compinst.Call("log")
+			d.compinst.Call("hold", nil)
+			d.Assert(qml.GetStats().ValuesAlive, Equals, stats.ValuesAlive)
+		},
+		DoneLog: "String is <content>",
 	},
 }
 

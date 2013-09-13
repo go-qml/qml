@@ -9,6 +9,7 @@ extern "C" {
 #endif
 
 // It's surprising that this constant is privately defined within qmetaobject.cpp.
+// Must fix the objectInvoke function if this is changed.
 enum { MaximumParamCount = 11 }; // Up to 10 arguments + 1 return value
 
 typedef void QApplication_;
@@ -107,7 +108,7 @@ void contextSetObject(QQmlContext_ *context, QObject_ *value);
 void delObject(QObject_ *object);
 void objectGetProperty(QObject_ *object, const char *name, DataValue *value);
 void objectSetParent(QObject_ *object, QObject_ *parent);
-void objectInvoke(QObject_ *object, const char *method, DataValue *result);
+void objectInvoke(QObject_ *object, const char *method, DataValue *result, DataValue *params, int paramsLen);
 
 QQmlComponent_ *newComponent(QQmlEngine_ *engine, QObject_ *parent);
 void componentSetData(QQmlComponent_ *component, const char *data, int dataLen, const char *url, int urlLen);
