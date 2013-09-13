@@ -289,21 +289,31 @@ func (o *commonObject) Field(name string) interface{} {
 	return unpackDataValue(&dvalue)
 }
 
+func (o *commonObject) SetField(name string, value interface{}) {
+	cname := C.CString(name)
+	defer C.free(unsafe.Pointer(cname))
+	gui(func() {
+		var dvalue C.DataValue
+		packDataValue(value, &dvalue, o.engine, cppOwner)
+		// TODO Handle the return value.
+		C.objectSetProperty(o.addr, cname, &dvalue)
+	})
+}
+
 func (o *commonObject) Call(method string, params ...interface{}) interface{} {
 	// TODO Return errors.
 	if len(params) > len(dataValueArray) {
 		panic("too many parameters")
 	}
+	cmethod := C.CString(method)
+	defer C.free(unsafe.Pointer(cmethod))
 	var result C.DataValue
 	gui(func() {
-		// TODO Do not allocate this string every time.
-		name := C.CString(method)
-		defer C.free(unsafe.Pointer(name))
 		for i, param := range params {
 			packDataValue(param, &dataValueArray[i], o.engine, jsOwner)
 		}
 		// TODO Check the bool result and return an error.
-		C.objectInvoke(o.addr, name, &result, &dataValueArray[0], C.int(len(params)))
+		C.objectInvoke(o.addr, cmethod, &result, &dataValueArray[0], C.int(len(params)))
 	})
 	return unpackDataValue(&result)
 }

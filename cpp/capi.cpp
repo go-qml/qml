@@ -173,7 +173,7 @@ void contextSetProperty(QQmlContext_ *context, QString_ *name, DataValue *value)
     // Give qvalue an engine reference if it doesn't yet have one .
     QObject *obj = var.value<QObject *>();
     if (obj && !qmlEngine(obj)) {
-        QQmlEngine::setContextForObject(obj, qcontext->engine()->rootContext());
+        QQmlEngine::setContextForObject(obj, qcontext);
     }
 
     qcontext->setContextProperty(*qname, var);
@@ -203,6 +203,24 @@ void objectGetProperty(QObject_ *object, const char *name, DataValue *value)
     
     QVariant var = qobject->property(name);
     packDataValue(&var, value);
+}
+
+void objectSetProperty(QObject_ *object, const char *name, DataValue *value)
+{
+    QObject *qobject = reinterpret_cast<QObject *>(object);
+    QVariant var;
+    unpackDataValue(value, &var);
+
+    // Give qvalue an engine reference if it doesn't yet have one.
+    QObject *obj = var.value<QObject *>();
+    if (obj && !qmlEngine(obj)) {
+        QQmlContext *context = qmlContext(qobject);
+        if (context) {
+            QQmlEngine::setContextForObject(obj, context);
+        }
+    }
+
+    qobject->setProperty(name, var);
 }
 
 void objectInvoke(QObject_ *object, const char *method, DataValue *resultdv, DataValue *paramsdv, int paramsLen)

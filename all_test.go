@@ -241,7 +241,7 @@ var tests = []struct {
 		QMLLog:  "String is <content>",
 	},
 	{
-		Summary: "Reading of component instance fields",
+		Summary: "Reading of value fields",
 		QML:     "Item { width: 300; height: 200 }",
 		Done: func(d *TestData) {
 			d.Check(d.compinst.Field("width"), Equals, float64(300))
@@ -253,6 +253,25 @@ var tests = []struct {
 		Value:   TestType{private: true},
 		QML:     `Item { Component.onCompleted: console.log("Private is", value.private); }`,
 		QMLLog:  "Private is undefined",
+	},
+	{
+		Summary: "Setting of value fields",
+		QML: `
+			Item {
+				property var obj: null
+
+				onObjChanged:     console.log("String is", obj.stringValue)
+				onWidthChanged:   console.log("Width is", width)
+				onHeightChanged:  console.log("Height is", height)
+			}
+		`,
+		Done: func(d *TestData) {
+			value := TestType{StringValue: "<content>"}
+			d.compinst.SetField("obj", &value)
+			d.compinst.SetField("width", 300)
+			d.compinst.SetField("height", 200)
+		},
+		DoneLog: "String is <content>.*Width is 300.*Height is 200",
 	},
 	{
 		Summary: "Identical values remain identical when possible",
@@ -433,13 +452,13 @@ var tests = []struct {
 	},
 	{
 		Summary: "Call a QML method that holds a custom type past the return point",
-		QML:     `
+		QML: `
 			Item {
 				property var held
 				function hold(v) { held = v; gc(); gc(); }
 				function log()   { console.log("String is", held.stringValue) }
 			}`,
-		Done:    func(d *TestData) {
+		Done: func(d *TestData) {
 			value := TestType{StringValue: "<content>"}
 			stats := qml.GetStats()
 			d.compinst.Call("hold", &value)
