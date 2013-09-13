@@ -206,7 +206,7 @@ func (c *Context) Var(name string) interface{} {
 
 		C.contextGetProperty(c.addr, qname, &dvalue)
 	})
-	return unpackDataValue(&dvalue)
+	return unpackDataValue(&dvalue, c.engine)
 }
 
 // TODO Context.Spawn() => Context
@@ -286,7 +286,7 @@ func (o *commonObject) Field(name string) interface{} {
 	gui(func() {
 		C.objectGetProperty(o.addr, cname, &dvalue)
 	})
-	return unpackDataValue(&dvalue)
+	return unpackDataValue(&dvalue, o.engine)
 }
 
 func (o *commonObject) SetField(name string, value interface{}) {
@@ -298,6 +298,21 @@ func (o *commonObject) SetField(name string, value interface{}) {
 		// TODO Handle the return value.
 		C.objectSetProperty(o.addr, cname, &dvalue)
 	})
+}
+
+func (o *commonObject) MustFind(name string) *Value {
+	cname, cnamelen := unsafeStringData(name)
+	var dvalue C.DataValue
+	gui(func() {
+		qname := C.newString(cname, cnamelen)
+		defer C.delString(qname)
+		C.objectFindChild(o.addr, qname, &dvalue)
+	})
+	value, ok := unpackDataValue(&dvalue, o.engine).(*Value)
+	if !ok {
+		panic(fmt.Sprintf("cannot find child %q", name))
+	}
+	return value
 }
 
 func (o *commonObject) Call(method string, params ...interface{}) interface{} {
@@ -315,7 +330,7 @@ func (o *commonObject) Call(method string, params ...interface{}) interface{} {
 		// TODO Check the bool result and return an error.
 		C.objectInvoke(o.addr, cmethod, &result, &dataValueArray[0], C.int(len(params)))
 	})
-	return unpackDataValue(&result)
+	return unpackDataValue(&result, o.engine)
 }
 
 // Destroy finalizes the value and releases any resources used.

@@ -179,13 +179,13 @@ void contextSetProperty(QQmlContext_ *context, QString_ *name, DataValue *value)
     qcontext->setContextProperty(*qname, var);
 }
 
-void contextGetProperty(QQmlContext_ *context, QString_ *name, DataValue *value)
+void contextGetProperty(QQmlContext_ *context, QString_ *name, DataValue *result)
 {
     QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
     const QString *qname = reinterpret_cast<QString *>(name);
 
     QVariant var = qcontext->contextProperty(*qname);
-    packDataValue(&var, value);
+    packDataValue(&var, result);
 }
 
 void delObject(QObject_ *object)
@@ -240,6 +240,19 @@ void objectInvoke(QObject_ *object, const char *method, DataValue *resultdv, Dat
     QMetaObject::invokeMethod(qobject, method, Qt::DirectConnection, 
             Q_RETURN_ARG(QVariant, result), arg[0], arg[1], arg[2], arg[3], arg[4], arg[5], arg[6], arg[7], arg[8], arg[9]);
     packDataValue(&result, resultdv);
+}
+
+void objectFindChild(QObject_ *object, QString_ *name, DataValue *resultdv)
+{
+    QObject *qobject = reinterpret_cast<QObject *>(object);
+    QString *qname = reinterpret_cast<QString *>(name);
+    
+    QVariant var;
+    QObject *result = qobject->findChild<QObject *>(*qname);
+    if (result) {
+        var.setValue(result);
+    }
+    packDataValue(&var, resultdv);
 }
 
 void objectSetParent(QObject_ *object, QObject_ *parent)
@@ -393,8 +406,11 @@ void packDataValue(QVariant_ *var, DataValue *value)
             if (govalue) {
                 value->dataType = DTGoAddr;
                 *(void **)(value->data) = govalue->addr();
-                break;
+            } else {
+                value->dataType = DTObject;
+                *(void **)(value->data) = qobject;
             }
+            break;
         }
         // fallthrough
     default:

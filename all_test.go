@@ -283,6 +283,15 @@ var tests = []struct {
 		QMLLog: "Identical: true",
 	},
 	{
+		Summary: "Find a child",
+		QML:     `Item { Item { objectName: "subitem"; property string s: "<found>" } }`,
+		Done:    func(d *TestData) {
+			value := d.compinst.MustFind("subitem")
+			d.Check(value.Field("s"), Equals, "<found>")
+			d.Check(func() { d.compinst.MustFind("foo") }, Panics, `cannot find child "foo"`)
+		},
+	},
+	{
 		Summary: "Register Go type",
 		Value:   TestType{StringValue: "<content>"},
 		QML: `

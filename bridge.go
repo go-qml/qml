@@ -295,7 +295,7 @@ func hookGoValueWriteField(enginep, foldp unsafe.Pointer, reflectIndex C.int, as
 		v = v.Elem()
 	}
 	field := v.Field(int(reflectIndex))
-	assign := unpackDataValue(assigndv)
+	assign := unpackDataValue(assigndv, fold.engine)
 
 	// TODO What to do if it fails?
 	convertAndSet(field, reflect.ValueOf(assign))
@@ -327,7 +327,7 @@ func hookGoValueCallMethod(enginep, foldp unsafe.Pointer, reflectIndex C.int, ar
 	for i := uintptr(0); i < numIn; i++ {
 		// TODO Type checking to avoid explosions (or catch the explosion)
 		paramdv := (*C.DataValue)(unsafe.Pointer(uintptr(unsafe.Pointer(args)) + (i+1)*dataValueSize))
-		params[i] = reflect.ValueOf(unpackDataValue(paramdv))
+		params[i] = reflect.ValueOf(unpackDataValue(paramdv, fold.engine))
 	}
 
 	result := method.Call(params[:numIn])

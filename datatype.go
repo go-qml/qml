@@ -92,7 +92,7 @@ func packDataValue(value interface{}, dvalue *C.DataValue, engine *Engine, owner
 //
 // HEADS UP: This is considered safe to be run out of the main GUI thread.
 //           If that changes, fix the call sites.
-func unpackDataValue(dvalue *C.DataValue) interface{} {
+func unpackDataValue(dvalue *C.DataValue, engine *Engine) interface{} {
 	datap := unsafe.Pointer(&dvalue.data)
 	switch dvalue.dataType {
 	case C.DTString:
@@ -115,6 +115,11 @@ func unpackDataValue(dvalue *C.DataValue) interface{} {
 		return (*(**valueFold)(datap)).gvalue
 	case C.DTInvalid:
 		return nil
+	case C.DTObject:
+		return &Value{commonObject{
+			engine: engine,
+			addr:   (*(*unsafe.Pointer)(datap)),
+		}}
 	}
 	panic(fmt.Sprintf("unsupported data type: %d", dvalue.dataType))
 }
