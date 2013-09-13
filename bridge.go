@@ -23,16 +23,8 @@ var hookWaiting C.int
 func guiLoop() {
 	runtime.LockOSThread()
 	C.newGuiApplication()
-	guiLock++
-	hookIdleTimer()
-	println("Should not run for now:")
 	C.startIdleTimer(&hookWaiting)
 	C.applicationExec()
-}
-
-func Run() {
-	println("Unlocking")
-	Unlock()
 }
 
 var guiFunc = make(chan func())
