@@ -29,6 +29,7 @@ var (
 	typeFloat64 = reflect.TypeOf(float64(0))
 	typeFloat32 = reflect.TypeOf(float32(0))
 	typeIface   = reflect.TypeOf(new(interface{})).Elem()
+	typeValue   = reflect.TypeOf(Value{})
 )
 
 func init() {
@@ -144,6 +145,10 @@ func dataTypeOf(typ reflect.Type) C.DataType {
 		return C.DTFloat64
 	case typeIface:
 		return C.DTAny
+	// TODO Test this and understand how to handle pointers properly
+	//      (the above should work with pointers too):
+	case typeValue, reflect.TypeOf(&Value{}):
+		return C.DTObject
 	}
 	panic("Go type not supported yet: " + typ.Name())
 }

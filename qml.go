@@ -4,6 +4,7 @@ package qml
 //
 // #include "capi.h"
 //
+// void hack(void *engine, void *component);
 import "C"
 
 import (
@@ -23,6 +24,12 @@ type InitOptions struct {
 
 var initialized int32
 
+func Hack(engine *Engine, component *Component) {
+	gui(func() {
+		C.hack(engine.addr, component.addr)
+	})
+}
+
 // Init initializes the qml package with the provided parameters.
 // If the options parameter is nil, default options suitable for a
 // normal graphic application will be used.
@@ -34,6 +41,7 @@ func Init(options *InitOptions) {
 		panic("qml.Init called more than once")
 	}
 
+	fmt.Println("main() thread:", C.currentThread())
 	go guiLoop()
 
 	// Wait for app to be created and event loop to be running.
@@ -56,10 +64,12 @@ var engines = make(map[unsafe.Pointer]*Engine)
 func NewEngine() *Engine {
 	engine := &Engine{values: make(map[interface{}]*valueFold)}
 	gui(func() {
+		fmt.Println("NewEngine thread:", C.currentThread())
 		engine.addr = C.newEngine(nil)
 		engines[engine.addr] = engine
 		stats.enginesAlive(+1)
 	})
+	fmt.Println("main() thread:", C.currentThread())
 	return engine
 }
 
@@ -132,12 +142,7 @@ func (e *Engine) Load(c Content) (*Component, error) {
 	if err != nil {
 		return nil, err
 	}
-	component, err := e.newComponent(c.Location(), data)
-	if err != nil {
-		// TODO: component.Delete()
-		return nil, err
-	}
-	return component, nil
+	return e.newComponent(c.Location(), data)
 }
 
 // Context returns the engine's root context.
@@ -224,12 +229,15 @@ func (e *Engine) newComponent(location string, data []byte) (*Component, error) 
 	var err error
 	gui(func() {
 		component.addr = C.newComponent(e.addr, nilPtr)
-		C.componentSetData(component.addr, cdata, cdatalen, cloc, cloclen)
-		message := C.componentErrorString(component.addr)
-		if message != nilCharPtr {
-			err = errors.New(strings.TrimRight(C.GoString(message), "\n"))
-			C.free(unsafe.Pointer(message))
-		}
+		_, _, _, _ = cdata, cdatalen, cloc, cloclen
+		_ = errors.New
+		_ = strings.Split
+		//C.componentSetData(component.addr, cdata, cdatalen, cloc, cloclen)
+		//message := C.componentErrorString(component.addr)
+		//if message != nilCharPtr {
+		//	err = errors.New(strings.TrimRight(C.GoString(message), "\n"))
+		//	C.free(unsafe.Pointer(message))
+		//}
 	})
 	if err != nil {
 		return nil, err
