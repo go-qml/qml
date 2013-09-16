@@ -82,6 +82,9 @@ func packDataValue(value interface{}, dvalue *C.DataValue, engine *Engine, owner
 	case float32:
 		dvalue.dataType = C.DTFloat32
 		*(*float32)(datap) = value
+	case *Value:
+		dvalue.dataType = C.DTObject
+		*(*unsafe.Pointer)(datap) = value.addr
 	default:
 		dvalue.dataType = C.DTObject
 		*(*unsafe.Pointer)(datap) = wrapGoValue(engine, value, owner)

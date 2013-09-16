@@ -491,7 +491,7 @@ var tests = []struct {
 	},
 	{
 		Summary: "Call a QML method that returns a QML object",
-		QML:     `
+		QML: `
 			Item {
 				property var custom: Rectangle { width: 300; }
 				function f() { return custom }
@@ -528,13 +528,13 @@ var tests = []struct {
 			err = ioutil.WriteFile("test.gif", data, 0644)
 			d.Assert(err, IsNil)
 		},
-		QML: `Image { source: "test.gif"; Component.onCompleted: console.log("Ready:", status == Image.Ready) }`,
+		QML:    `Image { source: "test.gif"; Component.onCompleted: console.log("Ready:", status == Image.Ready) }`,
 		QMLLog: "Ready: true",
-		Done: func(d *TestData) { os.Remove("test.gif") },
+		Done:   func(d *TestData) { os.Remove("test.gif") },
 	},
 	{
 		Summary: "Test that window.Root works",
-		QML: `Rectangle { width: 300; height: 200; function inc(x) { return x+1 } }`,
+		QML:     `Rectangle { width: 300; height: 200; function inc(x) { return x+1 } }`,
 		Done: func(d *TestData) {
 			win := d.component.CreateWindow(nil)
 			root := win.Root()
@@ -543,7 +543,12 @@ var tests = []struct {
 			d.Check(root.Call("inc", 42), Equals, int32(43))
 			root.Destroy()
 		},
-
+	},
+	{
+		Summary: "Pass a *Value back into a method",
+		QML:     `Rectangle { width: 300; function log(r) { console.log("Width is", r.width) } }`,
+		Done:    func(d *TestData) { d.compinst.Call("log", d.compinst) },
+		DoneLog: "Width is 300",
 	},
 }
 
