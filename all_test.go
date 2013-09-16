@@ -256,6 +256,14 @@ var tests = []struct {
 		},
 	},
 	{
+		Summary: "Read an object field",
+		QML:     "Item { property var obj: Rectangle { width: 300; height: 200 } }",
+		Done: func(d *TestData) {
+			d.Check(d.compinst.Field("obj").(*qml.Value).Field("width"), Equals, float64(300))
+			d.Check(d.compinst.Field("obj").(*qml.Value).Field("height"), Equals, float64(200))
+		},
+	},
+	{
 		Summary: "No access to private fields",
 		Value:   TestType{private: true},
 		QML:     `Item { Component.onCompleted: console.log("Private is", value.private); }`,
@@ -480,6 +488,18 @@ var tests = []struct {
 		QML:     `Item { function log(value) { console.log("String is", value.stringValue) } }`,
 		Done:    func(d *TestData) { d.compinst.Call("log", d.value) },
 		DoneLog: "String is <content>",
+	},
+	{
+		Summary: "Call a QML method that returns a QML object",
+		QML:     `
+			Item {
+				property var custom: Rectangle { width: 300; }
+				function f() { return custom }
+			}
+		`,
+		Done: func(d *TestData) {
+			d.Check(d.compinst.Call("f").(*qml.Value).Field("width"), Equals, float64(300))
+		},
 	},
 	{
 		Summary: "Call a QML method that holds a custom type past the return point",
