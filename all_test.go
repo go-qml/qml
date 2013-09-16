@@ -93,6 +93,10 @@ func (ts *TestType) ChangeString(new string) (old string) {
 	return
 }
 
+func (ts *TestType) NotifyStringChanged() {
+	qml.Changed(ts, &ts.StringValue)
+}
+
 func (ts *TestType) IncrementInt() {
 	ts.IntValue++
 }
@@ -285,7 +289,7 @@ var tests = []struct {
 	{
 		Summary: "Find a child",
 		QML:     `Item { Item { objectName: "subitem"; property string s: "<found>" } }`,
-		Done:    func(d *TestData) {
+		Done: func(d *TestData) {
 			value := d.compinst.MustFind("subitem")
 			d.Check(value.Field("s"), Equals, "<found>")
 			d.Check(func() { d.compinst.MustFind("foo") }, Panics, `cannot find child "foo"`)
@@ -425,6 +429,21 @@ var tests = []struct {
 			}
 		`,
 		QMLLog: `err is <division by zero>`,
+	},
+	{
+		Summary: "Call a Go method that recurses back into the GUI thread",
+		QML: `
+			Item {
+				Connections {
+					target: value
+					onStringValueChanged: console.log("Notification arrived")
+				}
+				Component.onCompleted: {
+					value.notifyStringChanged()
+				}
+			}
+		`,
+		QMLLog: "Notification arrived",
 	},
 	{
 		Summary: "Connect a QML signal to a Go method",

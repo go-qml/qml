@@ -11,8 +11,10 @@ import "C"
 
 import (
 	"fmt"
+	"launchpad.net/qml/tref"
 	"reflect"
 	"runtime"
+	"sync"
 	"sync/atomic"
 	"unsafe"
 )
@@ -22,17 +24,29 @@ var hookWaiting C.int
 // guiLoop runs the main GUI thread event loop in C++ land.
 func guiLoop() {
 	runtime.LockOSThread()
+	guiLoopRef = tref.Ref()
+	guiLoopReady.Unlock()
 	C.newGuiApplication()
 	C.startIdleTimer(&hookWaiting)
 	C.applicationExec()
 }
 
-var guiFunc = make(chan func())
-var guiDone = make(chan struct{})
-var guiLock = 0
+var (
+	guiFunc      = make(chan func())
+	guiDone      = make(chan struct{})
+	guiLock      = 0
+	guiLoopReady sync.Mutex
+	guiLoopRef   uintptr
+)
 
 // gui runs f in the main GUI thread and waits for f to return.
 func gui(f func()) {
+	if tref.Ref() == guiLoopRef {
+		// Already within the GUI thread. Attempting to wait would deadlock.
+		f()
+		return
+	}
+
 	// Tell Qt we're waiting for the idle hook to be called.
 	atomic.AddInt32((*int32)(unsafe.Pointer(&hookWaiting)), 1)
 
@@ -308,7 +322,7 @@ func convertAndSet(to, from reflect.Value) {
 
 var (
 	dataValueSize  = uintptr(unsafe.Sizeof(C.DataValue{}))
-	dataValueArray [C.MaximumParamCount-1]C.DataValue
+	dataValueArray [C.MaximumParamCount - 1]C.DataValue
 )
 
 //export hookGoValueCallMethod

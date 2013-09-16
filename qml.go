@@ -34,10 +34,9 @@ func Init(options *InitOptions) {
 		panic("qml.Init called more than once")
 	}
 
+	guiLoopReady.Lock()
 	go guiLoop()
-
-	// Wait for app to be created and event loop to be running.
-	gui(func() {})
+	guiLoopReady.Lock()
 }
 
 // Engine provides an environment for instantiating QML components.
