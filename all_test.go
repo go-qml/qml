@@ -532,6 +532,19 @@ var tests = []struct {
 		QMLLog: "Ready: true",
 		Done: func(d *TestData) { os.Remove("test.gif") },
 	},
+	{
+		Summary: "Test that window.Root works",
+		QML: `Rectangle { width: 300; height: 200; function inc(x) { return x+1 } }`,
+		Done: func(d *TestData) {
+			win := d.component.CreateWindow(nil)
+			root := win.Root()
+			d.Check(root.Field("width"), Equals, float64(300))
+			d.Check(root.Field("height"), Equals, float64(200))
+			d.Check(root.Call("inc", 42), Equals, int32(43))
+			root.Destroy()
+		},
+
+	},
 }
 
 var tablef = flag.String("tablef", "", "if provided, TestTable only runs tests with a summary matching the regexp")

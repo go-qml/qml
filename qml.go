@@ -314,7 +314,7 @@ func (o *commonObject) MustFind(name string) *Value {
 }
 
 func (o *commonObject) Call(method string, params ...interface{}) interface{} {
-	// TODO Return errors.
+	// TODO Check the bool result of invokeError and return an error.
 	if len(params) > len(dataValueArray) {
 		panic("too many parameters")
 	}
@@ -325,7 +325,6 @@ func (o *commonObject) Call(method string, params ...interface{}) interface{} {
 		for i, param := range params {
 			packDataValue(param, &dataValueArray[i], o.engine, jsOwner)
 		}
-		// TODO Check the bool result and return an error.
 		C.objectInvoke(o.addr, cmethod, &result, &dataValueArray[0], C.int(len(params)))
 	})
 	return unpackDataValue(&result, o.engine)
@@ -365,11 +364,12 @@ func (w *Window) Hide() {
 // Root returns the root component instance being rendered in the window.
 func (w *Window) Root() *Value {
 	// XXX Test this.
-	var object Value
+	var value Value
+	value.engine = w.engine
 	gui(func() {
-		object.addr = C.viewRootObject(w.addr)
+		value.addr = C.viewRootObject(w.addr)
 	})
-	return &object
+	return &value
 }
 
 // Wait blocks the current goroutine until the window is closed.
