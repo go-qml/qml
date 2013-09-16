@@ -107,8 +107,7 @@ QObject_ *componentCreate(QQmlComponent_ *component, QQmlContext_ *context)
     QQmlComponent *qcomponent = reinterpret_cast<QQmlComponent *>(component);
     QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
 
-    QObject *instance =  qcomponent->create(qcontext);
-    return instance;
+    return qcomponent->create(qcontext);
 }
 
 QQuickView_ *componentCreateView(QQmlComponent_ *component, QQmlContext_ *context)

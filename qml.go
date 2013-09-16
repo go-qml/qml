@@ -131,12 +131,11 @@ func (e *Engine) Load(c Content) (*Component, error) {
 	if err != nil {
 		return nil, err
 	}
-	component, err := e.newComponent(c.Location(), data)
-	if err != nil {
-		// TODO: component.Delete()
-		return nil, err
+	loc := c.Location()
+	if colon, slash := strings.Index(loc, ":"), strings.Index(loc, "/"); slash <= colon {
+		loc = "file:" + loc
 	}
-	return component, nil
+	return e.newComponent(loc, data)
 }
 
 // Context returns the engine's root context.
@@ -339,6 +338,7 @@ func (o *commonObject) Destroy() {
 	gui(func() {
 		if o.addr != nilPtr {
 			C.delObject(o.addr)
+			o.addr = nilPtr
 		}
 	})
 }

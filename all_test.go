@@ -1,10 +1,13 @@
 package qml_test
 
 import (
+	"encoding/base64"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	. "launchpad.net/gocheck"
 	"launchpad.net/qml"
+	"os"
 	"regexp"
 	"runtime"
 	"strings"
@@ -178,7 +181,7 @@ func (s *S) TestContextSetVars(c *C) {
 
 func (s *S) TestComponentSetDataError(c *C) {
 	_, err := s.engine.Load(qml.String("file.qml", "Item{}"))
-	c.Assert(err, ErrorMatches, "file.qml:1 Item is not a type")
+	c.Assert(err, ErrorMatches, "file:file.qml:1 Item is not a type")
 }
 
 func (s *S) TestComponentCreateWindow(c *C) {
@@ -497,6 +500,18 @@ var tests = []struct {
 		},
 		DoneLog: "String is <content>",
 	},
+	{
+		Summary: "Ensure URL of provided file is correct by loading a local file",
+		Init: func(d *TestData) {
+			data, err := base64.StdEncoding.DecodeString("R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==")
+			d.Assert(err, IsNil)
+			err = ioutil.WriteFile("test.gif", data, 0644)
+			d.Assert(err, IsNil)
+		},
+		QML: `Image { source: "test.gif"; Component.onCompleted: console.log("Ready:", status == Image.Ready) }`,
+		QMLLog: "Ready: true",
+		Done: func(d *TestData) { os.Remove("test.gif") },
+	},
 }
 
 var tablef = flag.String("tablef", "", "if provided, TestTable only runs tests with a summary matching the regexp")
@@ -562,8 +577,10 @@ func (s *S) TestTable(c *C) {
 
 		logMark := c.GetTestLog()
 
-		// The component instance is destroyed before the loop ends below.
+		// The component instance is destroyed before the loop ends below,
+		// but do a defer to ensure it will be destroyed if the test fails.
 		compinst := component.Create(s.context)
+		defer compinst.Destroy()
 
 		testData.component = component
 		testData.compinst = compinst
