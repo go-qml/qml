@@ -334,6 +334,20 @@ func (o *commonObject) Call(method string, params ...interface{}) interface{} {
 	return unpackDataValue(&result, o.engine)
 }
 
+func (o *commonObject) Create(context *Context) *Value {
+	// TODO Fail if o does not represent a component.
+	var value Value
+	value.engine = o.engine
+	gui(func() {
+		ctxaddr := nilPtr
+		if context != nil {
+			ctxaddr = context.addr
+		}
+		value.addr = C.componentCreate(o.addr, ctxaddr)
+	})
+	return &value
+}
+
 // Destroy finalizes the value and releases any resources used.
 // The value must not be used after calling this method.
 func (o *commonObject) Destroy() {

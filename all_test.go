@@ -558,6 +558,14 @@ var tests = []struct {
 		Done:    func(d *TestData) { d.compinst.Call("log", d.compinst) },
 		DoneLog: "Width is 300",
 	},
+	{
+		Summary: "Create a QML-defined component in Go",
+		QML:     `Item { property var comp: Component { Rectangle { width: 300 } } }`,
+		Done:    func(d *TestData) {
+			rect := d.compinst.Field("comp").(*qml.Value).Create(nil)
+			d.Assert(rect.Field("width"), Equals, float64(300))
+		},
+	},
 }
 
 var tablef = flag.String("tablef", "", "if provided, TestTable only runs tests with a summary matching the regexp")

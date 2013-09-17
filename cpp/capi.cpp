@@ -107,6 +107,9 @@ QObject_ *componentCreate(QQmlComponent_ *component, QQmlContext_ *context)
     QQmlComponent *qcomponent = reinterpret_cast<QQmlComponent *>(component);
     QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
 
+    if (!qcontext) {
+        qcontext = qmlContext(qcomponent);
+    }
     return qcomponent->create(qcontext);
 }
 
