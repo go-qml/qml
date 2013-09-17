@@ -77,6 +77,7 @@ type TestType struct {
 	Float64Value float64
 	Float32Value float32
 	AnyValue     interface{}
+	ValueValue   *qml.Value
 }
 
 func (ts *TestType) StringMethod() string {
@@ -154,6 +155,10 @@ func (s *S) TestContextGetMissing(c *C) {
 }
 
 func (s *S) TestContextSetVars(c *C) {
+	component, err := s.engine.Load(qml.String("file.qml", "import QtQuick 2.0\nItem { width: 42 }"))
+	c.Assert(err, IsNil)
+	compinst := component.Create(nil)
+
 	vars := TestType{
 		StringValue:  "<content>",
 		BoolValue:    true,
@@ -163,6 +168,7 @@ func (s *S) TestContextSetVars(c *C) {
 		Float64Value: 4.2,
 		Float32Value: 4.2,
 		AnyValue:     nil,
+		ValueValue:   compinst,
 	}
 	s.context.SetVars(&vars)
 
@@ -177,6 +183,8 @@ func (s *S) TestContextSetVars(c *C) {
 
 	vars.AnyValue = 42
 	c.Assert(s.context.Var("anyValue"), Equals, intNN(42))
+
+	c.Assert(s.context.Var("valueValue").(*qml.Value).Field("width"), Equals, float64(42))
 }
 
 func (s *S) TestComponentSetDataError(c *C) {
@@ -193,7 +201,7 @@ func (s *S) TestComponentCreateWindow(c *C) {
 	c.Assert(err, IsNil)
 
 	// TODO How to test this more effectively?
-	window := component.CreateWindow(s.context)
+	window := component.CreateWindow(nil)
 	window.Show()
 	// Qt doesn't hide the Window if we call it too quickly. :-(
 	time.Sleep(100 * time.Millisecond)
@@ -617,7 +625,7 @@ func (s *S) TestTable(c *C) {
 
 		// The component instance is destroyed before the loop ends below,
 		// but do a defer to ensure it will be destroyed if the test fails.
-		compinst := component.Create(s.context)
+		compinst := component.Create(nil)
 		defer compinst.Destroy()
 
 		testData.component = component

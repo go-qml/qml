@@ -239,7 +239,11 @@ func (c *Component) Create(context *Context) *Value {
 	var value Value
 	value.engine = c.engine
 	gui(func() {
-		value.addr = C.componentCreate(c.addr, context.addr)
+		ctxaddr := nilPtr
+		if context != nil {
+			ctxaddr = context.addr
+		}
+		value.addr = C.componentCreate(c.addr, ctxaddr)
 	})
 	return &value
 }
@@ -253,14 +257,14 @@ func (c *Component) Create(context *Context) *Value {
 // If the returned window is not destroyed explicitly, it will be
 // destroyed when the engine behind the used context is.
 func (c *Component) CreateWindow(context *Context) *Window {
-	if context == nil {
-		// TODO Test this.
-		context = c.engine.Context()
-	}
 	var window Window
 	window.engine = c.engine
 	gui(func() {
-		window.addr = C.componentCreateView(c.addr, context.addr)
+		ctxaddr := nilPtr
+		if context != nil {
+			ctxaddr = context.addr
+		}
+		window.addr = C.componentCreateView(c.addr, ctxaddr)
 	})
 	return &window
 }

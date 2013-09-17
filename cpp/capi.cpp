@@ -116,7 +116,7 @@ QQuickView_ *componentCreateView(QQmlComponent_ *component, QQmlContext_ *contex
     QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
 
     QObject *instance = qcomponent->create(qcontext);
-    QQuickView *view = new QQuickView(qcontext->engine(), 0);
+    QQuickView *view = new QQuickView(qmlEngine(qcomponent), 0);
     view->setContent(qcomponent->url(), qcomponent, instance);
     view->setResizeMode(QQuickView::SizeRootObjectToView);
     return view;

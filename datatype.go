@@ -148,7 +148,7 @@ func dataTypeOf(typ reflect.Type) C.DataType {
 	case typeIface:
 		return C.DTAny
 	}
-	panic("Go type not supported yet: " + typ.Name())
+	return C.DTObject
 }
 
 var typeInfoSize = C.size_t(unsafe.Sizeof(C.GoTypeInfo{}))
