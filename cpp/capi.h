@@ -106,11 +106,13 @@ void contextSetProperty(QQmlContext_ *context, QString_ *name, DataValue *value)
 void contextSetObject(QQmlContext_ *context, QObject_ *value);
 
 void delObject(QObject_ *object);
+void delObjectLater(QObject_ *object);
 void objectGetProperty(QObject_ *object, const char *name, DataValue *result);
 void objectSetProperty(QObject_ *object, const char *name, DataValue *value);
 void objectSetParent(QObject_ *object, QObject_ *parent);
 void objectInvoke(QObject_ *object, const char *method, DataValue *result, DataValue *params, int paramsLen);
 void objectFindChild(QObject_ *object, QString_ *name, DataValue *result);
+QQmlContext_ *objectContext(QObject_ *object);
 
 QQmlComponent_ *newComponent(QQmlEngine_ *engine, QObject_ *parent);
 void componentSetData(QQmlComponent_ *component, const char *data, int dataLen, const char *url, int urlLen);

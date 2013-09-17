@@ -77,7 +77,7 @@ func (e *Engine) Destroy() {
 		gui(func() {
 			if !e.destroyed {
 				e.destroyed = true
-				C.delObject(e.addr)
+				C.delObjectLater(e.addr)
 				if len(e.values) == 0 {
 					delete(engines, e.addr)
 				} else {
@@ -354,7 +354,7 @@ func (o *commonObject) Destroy() {
 	// TODO Must protect against destroyment when object isn't owned.
 	gui(func() {
 		if o.addr != nilPtr {
-			C.delObject(o.addr)
+			C.delObjectLater(o.addr)
 			o.addr = nilPtr
 		}
 	})

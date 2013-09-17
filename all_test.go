@@ -47,7 +47,11 @@ func (s *S) TearDownTest(c *C) {
 
 	retries := 30 // Three seconds top.
 	for {
-		qml.Flush()
+		// Do not call qml.Flush here. It creates a nested event loop that
+		// that attempts to process the deferred object deletes and cannot,
+		// because deferred deletes are only processed at the same loop level.
+		// So it *reposts* the deferred deletion event, in practice *preventing*
+		// these objects from being deleted.
 		runtime.GC()
 		stats := qml.GetStats()
 		if stats.EnginesAlive == 0 && stats.ValuesAlive == 0 {

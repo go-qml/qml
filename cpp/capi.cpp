@@ -193,10 +193,11 @@ void contextGetProperty(QQmlContext_ *context, QString_ *name, DataValue *result
 void delObject(QObject_ *object)
 {
     delete reinterpret_cast<QObject *>(object);
+}
 
-    // That looks handy, but doesn't work well. Often objects will stay undeleted
-    // for whatever reason and break the tests on the leak prevention.
-    //reinterpret_cast<QObject *>(object)->deleteLater();
+void delObjectLater(QObject_ *object)
+{
+    reinterpret_cast<QObject *>(object)->deleteLater();
 }
 
 void objectGetProperty(QObject_ *object, const char *name, DataValue *value)
