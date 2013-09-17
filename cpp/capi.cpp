@@ -240,8 +240,14 @@ void objectInvoke(QObject_ *object, const char *method, DataValue *resultdv, Dat
     if (paramsLen > 10) {
         qFatal("fix the parameter dispatching");
     }
-    QMetaObject::invokeMethod(qobject, method, Qt::DirectConnection, 
-            Q_RETURN_ARG(QVariant, result), arg[0], arg[1], arg[2], arg[3], arg[4], arg[5], arg[6], arg[7], arg[8], arg[9]);
+    bool ok = QMetaObject::invokeMethod(qobject, method, Qt::DirectConnection, 
+            Q_RETURN_ARG(QVariant, result),
+            arg[0], arg[1], arg[2], arg[3], arg[4], arg[5], arg[6], arg[7], arg[8], arg[9]);
+    if (!ok) {
+        // TODO Find out how to tell if a result is available or not without calling it twice.
+        ok = QMetaObject::invokeMethod(qobject, method, Qt::DirectConnection, 
+            arg[0], arg[1], arg[2], arg[3], arg[4], arg[5], arg[6], arg[7], arg[8], arg[9]);
+    }
     packDataValue(&result, resultdv);
 }
 
@@ -264,6 +270,11 @@ void objectSetParent(QObject_ *object, QObject_ *parent)
     QObject *qparent = reinterpret_cast<QObject *>(parent);
 
     qobject->setParent(qparent);
+}
+
+QQmlContext_ *objectContext(QObject_ *object)
+{
+    return qmlContext(reinterpret_cast<QObject *>(object));
 }
 
 QString_ *newString(const char *data, int len)

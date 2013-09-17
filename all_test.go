@@ -570,6 +570,17 @@ var tests = []struct {
 			d.Assert(rect.Field("width"), Equals, float64(300))
 		},
 	},
+	{
+		Summary: "Call a Qt method that has no result",
+		QML:     `Item { Component.onDestruction: console.log("item destroyed") }`,
+		Done: func(d *TestData) {
+			// Create a local instance to avoid double-destroying it.
+			compinst := d.component.Create(nil)
+			compinst.Call("deleteLater")
+			time.Sleep(100 * time.Millisecond)
+		},
+		DoneLog: "item destroyed",
+	},
 }
 
 var tablef = flag.String("tablef", "", "if provided, TestTable only runs tests with a summary matching the regexp")
