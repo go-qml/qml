@@ -1,4 +1,3 @@
-package qml
 // Package qml offers graphical QML application support for the Go language.
 //
 // Warning
@@ -12,6 +11,8 @@ package qml
 // in a pretty good state, so it shall not take too long.
 //
 // See http://github.com/niemeyer/qml for details.
+//
+package qml
 
 // #include <stdlib.h>
 //
