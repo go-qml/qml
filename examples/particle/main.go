@@ -9,7 +9,7 @@ import (
 func main() {
 	qml.Init(nil)
 	engine := qml.NewEngine()
-	component, err := engine.Load(qml.File("particle.qml"))
+	component, err := engine.LoadFile("particle.qml")
 	if err != nil {
 		panic(err)
 	}

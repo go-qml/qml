@@ -322,7 +322,12 @@ func hookGoValueWriteField(enginep, foldp unsafe.Pointer, reflectIndex C.int, as
 }
 
 func convertAndSet(to, from reflect.Value) {
-	// TODO Catch the panic and error out.
+	defer func() {
+		if v := recover(); v != nil {
+			// TODO This should be an error. Test and fix.
+			panic("FIXME attempted to set a field with the wrong type; this should be an error")
+		}
+	}()
 	to.Set(from.Convert(to.Type()))
 }
 
@@ -347,6 +352,7 @@ func hookGoValueCallMethod(enginep, foldp unsafe.Pointer, reflectIndex C.int, ar
 
 	numIn := uintptr(method.Type().NumIn())
 	for i := uintptr(0); i < numIn; i++ {
+		// TODO Convert the arguments when possible (int32 => int, etc).
 		// TODO Type checking to avoid explosions (or catch the explosion)
 		paramdv := (*C.DataValue)(unsafe.Pointer(uintptr(unsafe.Pointer(args)) + (i+1)*dataValueSize))
 		params[i] = reflect.ValueOf(unpackDataValue(paramdv, fold.engine))

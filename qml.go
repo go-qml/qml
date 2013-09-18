@@ -1,3 +1,15 @@
+// Package qml offers graphical QML application support for the Go language.
+//
+// Warning
+//
+// This package is in an alpha stage, and still in heavy development. APIs will
+// change, and things will break.
+//
+// At this time only contributors and developers that are willing to track the
+// development closely are encouraged to use it.
+//
+// See https://www.youtube.com/watch?v=FVQlMrPa7lI for a quick introduction.
+//
 package qml
 
 // #include <stdlib.h>
@@ -9,7 +21,9 @@ import "C"
 import (
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"os"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -90,72 +104,77 @@ func (e *Engine) Destroy() {
 	}
 }
 
-type Content interface {
-	Location() string
-	Data() ([]byte, error)
-}
-
-func String(location, qml string) Content {
-	return &content{location, []byte(qml), nil}
-}
-
-func File(path string) Content {
-	// TODO Test this.
-	data, err := ioutil.ReadFile(path)
-	return &content{path, data, err}
-}
-
-type content struct {
-	location string
-	data     []byte
-	err      error
-}
-
-func (c *content) Location() string {
-	return c.location
-}
-
-func (c *content) Data() ([]byte, error) {
-	return c.data, c.err
-}
-
-// Load loads a new component with the provided QML content.
-//
-// For example:
-//
-//     component, err := engine.Load(qml.File("file.qml"))
-//
-// See qml.File and qml.String.
-func (e *Engine) Load(c Content) (*Component, error) {
-	data, err := c.Data()
+// Load loads a new component with the provided location and with the
+// content read from r. The location informs the resource name for
+// logged messages, and its path is used to locate any other resources
+// referenced by the QML content.
+func (e *Engine) Load(location string, r io.Reader) (*Component, error) {
+	data, err := ioutil.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}
-	loc := c.Location()
-	if colon, slash := strings.Index(loc, ":"), strings.Index(loc, "/"); slash <= colon {
-		loc = "file:" + loc
+	if colon, slash := strings.Index(location, ":"), strings.Index(location, "/"); slash <= colon {
+		location = "file:" + location
 	}
-	return e.newComponent(loc, data)
+
+	cdata, cdatalen := unsafeBytesData(data)
+	cloc, cloclen := unsafeStringData(location)
+	component := &Component{Object{engine: e}}
+	gui(func() {
+		// TODO The component's parent should probably be the engine.
+		component.obj.addr = C.newComponent(e.addr, nilPtr)
+		C.componentSetData(component.obj.addr, cdata, cdatalen, cloc, cloclen)
+		message := C.componentErrorString(component.obj.addr)
+		if message != nilCharPtr {
+			err = errors.New(strings.TrimRight(C.GoString(message), "\n"))
+			C.free(unsafe.Pointer(message))
+		}
+	})
+	if err != nil {
+		return nil, err
+	}
+	return component, nil
 }
 
-// TODO Load(location, reader), LoadString(location, str), and LoadFile(location)
+// Load loads a component from the provided QML file.
+// Resources referenced by the QML content will be resolved relative to its path.
+func (e *Engine) LoadFile(path string) (*Component, error) {
+	// TODO Test this.
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	return e.Load(path, f)
+}
+
+// LoadString loads a component from the provided QML string.
+// The location informs the resource name for logged messages, and its
+// path is used to locate any other resources referenced by the QML content.
+func (e *Engine) LoadString(location, qml string) (*Component, error) {
+	return e.Load(location, strings.NewReader(qml))
+}
 
 // Context returns the engine's root context.
 func (e *Engine) Context() *Context {
 	e.assertValid()
-	var context Context
-	context.engine = e
+	var ctx Context
+	ctx.obj.engine = e
 	gui(func() {
-		context.addr = C.engineRootContext(e.addr)
+		ctx.obj.addr = C.engineRootContext(e.addr)
 	})
-	return &context
+	return &ctx
 }
 
 // Context represents a QML context that can hold variables visible
 // to logic running within it.
 type Context struct {
-	commonObject
+	obj Object
 }
+
+// TODO Consider whether to expose the methods of Object directly
+//      on Context and Window by embedding it, or whether to have an
+//      AsObject method that returns it.
 
 // SetVar makes the provided value available as a variable with the
 // given name for QML code executed within the c context.
@@ -169,16 +188,16 @@ type Context struct {
 // The engine will hold a reference to the provided value, so it will
 // not be garbage collected until the engine is destroyed, even if the
 // value is unused or changed.
-func (c *Context) SetVar(name string, value interface{}) {
+func (ctx *Context) SetVar(name string, value interface{}) {
 	cname, cnamelen := unsafeStringData(name)
 	gui(func() {
 		var dvalue C.DataValue
-		packDataValue(value, &dvalue, c.engine, cppOwner)
+		packDataValue(value, &dvalue, ctx.obj.engine, cppOwner)
 
 		qname := C.newString(cname, cnamelen)
 		defer C.delString(qname)
 
-		C.contextSetProperty(c.addr, qname, &dvalue)
+		C.contextSetProperty(ctx.obj.addr, qname, &dvalue)
 	})
 }
 
@@ -191,14 +210,14 @@ func (c *Context) SetVar(name string, value interface{}) {
 // The engine will hold a reference to the provided value, so it will
 // not be garbage collected until the engine is destroyed, even if the
 // value is unused or changed.
-func (c *Context) SetVars(value interface{}) {
+func (ctx *Context) SetVars(value interface{}) {
 	gui(func() {
-		C.contextSetObject(c.addr, wrapGoValue(c.engine, value, cppOwner))
+		C.contextSetObject(ctx.obj.addr, wrapGoValue(ctx.obj.engine, value, cppOwner))
 	})
 }
 
 // Var returns the context variable with the given name.
-func (c *Context) Var(name string) interface{} {
+func (ctx *Context) Var(name string) interface{} {
 	cname, cnamelen := unsafeStringData(name)
 
 	var dvalue C.DataValue
@@ -206,54 +225,32 @@ func (c *Context) Var(name string) interface{} {
 		qname := C.newString(cname, cnamelen)
 		defer C.delString(qname)
 
-		C.contextGetProperty(c.addr, qname, &dvalue)
+		C.contextGetProperty(ctx.obj.addr, qname, &dvalue)
 	})
-	return unpackDataValue(&dvalue, c.engine)
+	return unpackDataValue(&dvalue, ctx.obj.engine)
 }
 
 // TODO Context.Spawn() => Context
 
 type Component struct {
-	addr   unsafe.Pointer
-	engine *Engine
-}
-
-func (e *Engine) newComponent(location string, data []byte) (*Component, error) {
-	// TODO What's a nice way to delete the component and created component objects?
-	cdata, cdatalen := unsafeBytesData(data)
-	cloc, cloclen := unsafeStringData(location)
-	component := &Component{engine: e}
-	var err error
-	gui(func() {
-		component.addr = C.newComponent(e.addr, nilPtr)
-		C.componentSetData(component.addr, cdata, cdatalen, cloc, cloclen)
-		message := C.componentErrorString(component.addr)
-		if message != nilCharPtr {
-			err = errors.New(strings.TrimRight(C.GoString(message), "\n"))
-			C.free(unsafe.Pointer(message))
-		}
-	})
-	if err != nil {
-		return nil, err
-	}
-	return component, nil
+	obj Object
 }
 
 // TODO Drop Component. We should be able to use a plain qml.Object for these features,
 //      and it makes sense to do so given that components may be defined in QML as well.
 
 // Create creates an instance of the component.
-func (c *Component) Create(context *Context) *Object {
-	var object Object
-	object.engine = c.engine
+func (c *Component) Create(ctx *Context) *Object {
+	var obj Object
+	obj.engine = c.obj.engine
 	gui(func() {
 		ctxaddr := nilPtr
-		if context != nil {
-			ctxaddr = context.addr
+		if ctx != nil {
+			ctxaddr = ctx.obj.addr
 		}
-		object.addr = C.componentCreate(c.addr, ctxaddr)
+		obj.addr = C.componentCreate(c.obj.addr, ctxaddr)
 	})
-	return &object
+	return &obj
 }
 
 // CreateWindow creates a new instance of the c component running under
@@ -264,32 +261,28 @@ func (c *Component) Create(context *Context) *Object {
 //
 // If the returned window is not destroyed explicitly, it will be
 // destroyed when the engine behind the used context is.
-func (c *Component) CreateWindow(context *Context) *Window {
-	var window Window
-	window.engine = c.engine
+func (c *Component) CreateWindow(ctx *Context) *Window {
+	var win Window
+	win.obj.engine = c.obj.engine
 	gui(func() {
 		ctxaddr := nilPtr
-		if context != nil {
-			ctxaddr = context.addr
+		if ctx != nil {
+			ctxaddr = ctx.obj.addr
 		}
-		window.addr = C.componentCreateView(c.addr, ctxaddr)
+		win.obj.addr = C.componentCreateView(c.obj.addr, ctxaddr)
 	})
-	return &window
-}
-
-type commonObject struct {
-	addr   unsafe.Pointer
-	engine *Engine
+	return &win
 }
 
 // TODO engine.ObjectOf(&value) => *Object for the Go value
 
 type Object struct {
-	commonObject
+	addr   unsafe.Pointer
+	engine *Engine
 }
 
 // Set changes the value of property.
-func (obj *commonObject) Set(property string, value interface{}) error {
+func (obj *Object) Set(property string, value interface{}) error {
 	cproperty := C.CString(property)
 	defer C.free(unsafe.Pointer(cproperty))
 	gui(func() {
@@ -304,7 +297,7 @@ func (obj *commonObject) Set(property string, value interface{}) error {
 // Property returns the current value for a property of the object.
 // If the property type is known, type-specific methods such as Int
 // and String are more convenient to use.
-func (obj *commonObject) Property(name string) interface{} {
+func (obj *Object) Property(name string) interface{} {
 	// TODO Return an ok bool indicating whether the property was found.
 	cname := C.CString(name)
 	defer C.free(unsafe.Pointer(cname))
@@ -318,7 +311,7 @@ func (obj *commonObject) Property(name string) interface{} {
 
 // Int returns the int value of the given property.
 // The call panics if the property value cannot be represented as an int.
-func (obj *commonObject) Int(property string) int {
+func (obj *Object) Int(property string) int {
 	switch value := obj.Property(property).(type) {
 	case int:
 		return value
@@ -339,7 +332,7 @@ func (obj *commonObject) Int(property string) int {
 
 // String returns the string value of the given property.
 // The call panics if the property value is not a string.
-func (obj *commonObject) String(property string) string {
+func (obj *Object) String(property string) string {
 	s, ok := obj.Property(property).(string)
 	if !ok {
 		panic(fmt.Sprintf("value of property %q is not a string: %v", property, s))
@@ -351,7 +344,7 @@ func (obj *commonObject) String(property string) string {
 
 // Object returns the *qml.Object value of the given property.
 // The call panics if the property value is not a *qml.Object.
-func (obj *commonObject) Object(property string) *Object {
+func (obj *Object) Object(property string) *Object {
 	object, ok := obj.Property(property).(*Object)
 	if !ok {
 		panic(fmt.Sprintf("value of property %q is not a *qml.Object: %v", property, object))
@@ -362,7 +355,7 @@ func (obj *commonObject) Object(property string) *Object {
 // ObjectByName returns the *qml.Object value of the descendant object that
 // was defined with the objectName property set to the provided value.
 // The call panics if the object is not found.
-func (obj *commonObject) ObjectByName(objectName string) *Object {
+func (obj *Object) ObjectByName(objectName string) *Object {
 	cname, cnamelen := unsafeStringData(objectName)
 	var dvalue C.DataValue
 	gui(func() {
@@ -385,7 +378,7 @@ func (obj *commonObject) ObjectByName(objectName string) *Object {
 
 // Call calls the given object method with the provided parameters.
 // It panics if the method does not exist.
-func (obj *commonObject) Call(method string, params ...interface{}) interface{} {
+func (obj *Object) Call(method string, params ...interface{}) interface{} {
 	if len(params) > len(dataValueArray) {
 		panic("too many parameters")
 	}
@@ -404,23 +397,25 @@ func (obj *commonObject) Call(method string, params ...interface{}) interface{} 
 	return unpackDataValue(&result, obj.engine)
 }
 
-func (obj *commonObject) Create(context *Context) *Object {
+func (obj *Object) Create(ctx *Context) *Object {
 	// TODO Implement C.objectIsComponent and panic if it returns false.
-	var value Object
-	value.engine = obj.engine
+	var root Object
+	root.engine = obj.engine
 	gui(func() {
 		ctxaddr := nilPtr
-		if context != nil {
-			ctxaddr = context.addr
+		if ctx != nil {
+			ctxaddr = ctx.obj.addr
 		}
-		value.addr = C.componentCreate(obj.addr, ctxaddr)
+		root.addr = C.componentCreate(obj.addr, ctxaddr)
 	})
-	return &value
+	return &root
 }
 
 // Destroy finalizes the value and releases any resources used.
 // The value must not be used after calling this method.
-func (obj *commonObject) Destroy() {
+func (obj *Object) Destroy() {
+	// TODO We might hook into the destroyed signal, and prevent this object
+	//      from being used in post-destruction crash-prone ways.
 	gui(func() {
 		if obj.addr != nilPtr {
 			C.delObjectLater(obj.addr)
@@ -429,52 +424,57 @@ func (obj *commonObject) Destroy() {
 	})
 }
 
-// TODO commonObject.Connect(name, func(...) {})
+// TODO Object.Connect(name, func(...) {})
 
 // TODO Signal emitting support for go values.
 
 // Window represents a QML window where components are rendered.
 type Window struct {
-	commonObject
+	obj Object
 }
 
 // Show exposes the window.
-func (w *Window) Show() {
+func (win *Window) Show() {
 	gui(func() {
-		C.viewShow(w.addr)
+		C.viewShow(win.obj.addr)
 	})
 }
 
 // Hide hides the window.
-func (w *Window) Hide() {
+func (win *Window) Hide() {
 	gui(func() {
-		C.viewHide(w.addr)
+		C.viewHide(win.obj.addr)
 	})
 }
 
 // Root returns the root object being rendered in the window.
-func (w *Window) Root() *Object {
-	var object Object
-	object.engine = w.engine
+func (win *Window) Root() *Object {
+	var obj Object
+	obj.engine = win.obj.engine
 	gui(func() {
-		object.addr = C.viewRootObject(w.addr)
+		obj.addr = C.viewRootObject(win.obj.addr)
 	})
-	return &object
+	return &obj
 }
 
 // Wait blocks the current goroutine until the window is closed.
-func (w *Window) Wait() {
+func (win *Window) Wait() {
 	// XXX Test this.
 	var m sync.Mutex
 	m.Lock()
 	gui(func() {
 		// TODO Must be able to wait for the same Window from multiple goroutines.
-		// type foo { m sync.Mutex; next *foo }
 		// TODO If the window is not visible, must return immediately.
-		waitingWindows[w.addr] = &m
-		C.viewConnectHidden(w.addr)
+		waitingWindows[win.obj.addr] = &m
+		C.viewConnectHidden(win.obj.addr)
 	})
 	m.Lock()
+}
+
+// Destroy destroys the window.
+// The window should not be used after this method is called.
+func (win *Window) Destroy() {
+	win.obj.Destroy()
 }
 
 var waitingWindows = make(map[unsafe.Pointer]*sync.Mutex)

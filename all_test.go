@@ -159,7 +159,7 @@ func (s *S) TestContextGetMissing(c *C) {
 }
 
 func (s *S) TestContextSetVars(c *C) {
-	component, err := s.engine.Load(qml.String("file.qml", "import QtQuick 2.0\nItem { width: 42 }"))
+	component, err := s.engine.LoadString("file.qml", "import QtQuick 2.0\nItem { width: 42 }")
 	c.Assert(err, IsNil)
 	compinst := component.Create(nil)
 
@@ -192,7 +192,7 @@ func (s *S) TestContextSetVars(c *C) {
 }
 
 func (s *S) TestComponentSetDataError(c *C) {
-	_, err := s.engine.Load(qml.String("file.qml", "Item{}"))
+	_, err := s.engine.LoadString("file.qml", "Item{}")
 	c.Assert(err, ErrorMatches, "file:file.qml:1 Item is not a type")
 }
 
@@ -201,7 +201,7 @@ func (s *S) TestComponentCreateWindow(c *C) {
 		import QtQuick 2.0
 		Item { width: 300; height: 200; }
 	`
-	component, err := s.engine.Load(qml.String("file.qml", data))
+	component, err := s.engine.LoadString("file.qml", data)
 	c.Assert(err, IsNil)
 
 	// TODO How to test this more effectively?
@@ -646,7 +646,7 @@ func (s *S) TestTable(c *C) {
 			}
 		}
 
-		component, err := s.engine.Load(qml.String("file.qml", "import QtQuick 2.0\n"+strings.TrimSpace(t.QML)))
+		component, err := s.engine.LoadString("file.qml", "import QtQuick 2.0\n"+strings.TrimSpace(t.QML))
 		c.Assert(err, IsNil)
 
 		logMark := c.GetTestLog()

@@ -119,10 +119,10 @@ func unpackDataValue(dvalue *C.DataValue, engine *Engine) interface{} {
 	case C.DTInvalid:
 		return nil
 	case C.DTObject:
-		return &Object{commonObject{
+		return &Object{
 			engine: engine,
 			addr:   (*(*unsafe.Pointer)(datap)),
-		}}
+		}
 	}
 	panic(fmt.Sprintf("unsupported data type: %d", dvalue.dataType))
 }
