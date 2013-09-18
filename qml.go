@@ -1,3 +1,4 @@
+package qml
 // Package qml offers graphical QML application support for the Go language.
 //
 // Warning
