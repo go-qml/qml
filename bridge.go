@@ -94,6 +94,12 @@ func Flush() {
 	})
 }
 
+// Changed notifies all QML bindings that the given field value has changed.
+//
+// For example:
+//
+//     qml.Changed(&value, &value.Field)
+//
 func Changed(value, fieldAddr interface{}) {
 	valuev := reflect.ValueOf(value)
 	fieldv := reflect.ValueOf(fieldAddr)
@@ -311,7 +317,7 @@ func hookGoValueWriteField(enginep, foldp unsafe.Pointer, reflectIndex C.int, as
 	field := v.Field(int(reflectIndex))
 	assign := unpackDataValue(assigndv, fold.engine)
 
-	// TODO What to do if it fails?
+	// TODO Return false to the call site if it fails. That's how Qt seems to handle it internally.
 	convertAndSet(field, reflect.ValueOf(assign))
 }
 
@@ -330,7 +336,9 @@ func hookGoValueCallMethod(enginep, foldp unsafe.Pointer, reflectIndex C.int, ar
 	fold := ensureEngine(enginep, foldp)
 	v := reflect.ValueOf(fold.gvalue)
 
-	// TODO Must ensure that v is necessarily a pointer here.
+	// TODO Must assert that v is necessarily a pointer here, but we shouldn't have to manipulate
+	//      gvalue here for that. This should happen in a sensible place in the wrapping functions
+	//      that can still error out to the user in due time.
 
 	method := v.Method(int(reflectIndex))
 

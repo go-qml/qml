@@ -82,7 +82,7 @@ func packDataValue(value interface{}, dvalue *C.DataValue, engine *Engine, owner
 	case float32:
 		dvalue.dataType = C.DTFloat32
 		*(*float32)(datap) = value
-	case *Value:
+	case *Object:
 		dvalue.dataType = C.DTObject
 		*(*unsafe.Pointer)(datap) = value.addr
 	default:
@@ -119,7 +119,7 @@ func unpackDataValue(dvalue *C.DataValue, engine *Engine) interface{} {
 	case C.DTInvalid:
 		return nil
 	case C.DTObject:
-		return &Value{commonObject{
+		return &Object{commonObject{
 			engine: engine,
 			addr:   (*(*unsafe.Pointer)(datap)),
 		}}
@@ -240,13 +240,12 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 		memberInfo.memberName = (*C.char)(unsafe.Pointer(mnames + mnamesi))
 		memberInfo.memberType = dataTypeOf(field.Type)
 		memberInfo.reflectIndex = C.int(i)
-		memberInfo.addrOffset = C.int(field.Offset);
+		memberInfo.addrOffset = C.int(field.Offset)
 		membersi += 1
 		mnamesi += uintptr(len(field.Name)) + 1
 	}
 	for i := 0; i < numMethod; i++ {
 		method := vtptr.Method(i)
-		// TODO Split methods and fields in different types? The commonalities seem minimal.
 		memberInfo := (*C.GoMemberInfo)(unsafe.Pointer(members + uintptr(memberInfoSize)*membersi))
 		memberInfo.memberName = (*C.char)(unsafe.Pointer(mnames + mnamesi))
 		memberInfo.memberType = C.DTMethod
@@ -259,7 +258,7 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 		// TODO Sort out methods with a variable number of arguments.
 		// TODO Sort out methods with more than one result.
 		// It's called while bound, so drop the receiver.
-		memberInfo.numIn = C.int(method.Type.NumIn()-1)
+		memberInfo.numIn = C.int(method.Type.NumIn() - 1)
 		memberInfo.numOut = C.int(method.Type.NumOut())
 		membersi += 1
 		mnamesi += uintptr(len(method.Name)) + 1
@@ -278,7 +277,7 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	if int(mnamesi) != namesLen {
 		panic("allocated buffer doesn't match used space")
 	}
-	if typeInfo.fieldsLen + typeInfo.methodsLen != typeInfo.membersLen {
+	if typeInfo.fieldsLen+typeInfo.methodsLen != typeInfo.membersLen {
 		panic("lengths are inconsistent")
 	}
 

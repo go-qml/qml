@@ -7,4 +7,6 @@
 
 DEFINE_GOVALUETYPE(1);
 
+// TODO Define N of these.
+
 // vim:sw=4:st=4:et:ft=cpp

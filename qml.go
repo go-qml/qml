@@ -100,7 +100,7 @@ func String(location, qml string) Content {
 }
 
 func File(path string) Content {
-	// TODO: Test this.
+	// TODO Test this.
 	data, err := ioutil.ReadFile(path)
 	return &content{path, data, err}
 }
@@ -138,6 +138,8 @@ func (e *Engine) Load(c Content) (*Component, error) {
 	return e.newComponent(loc, data)
 }
 
+// TODO Load(location, reader), LoadString(location, str), and LoadFile(location)
+
 // Context returns the engine's root context.
 func (e *Engine) Context() *Context {
 	e.assertValid()
@@ -149,6 +151,8 @@ func (e *Engine) Context() *Context {
 	return &context
 }
 
+// Context represents a QML context that can hold variables visible
+// to logic running within it.
 type Context struct {
 	commonObject
 }
@@ -235,17 +239,21 @@ func (e *Engine) newComponent(location string, data []byte) (*Component, error) 
 	return component, nil
 }
 
-func (c *Component) Create(context *Context) *Value {
-	var value Value
-	value.engine = c.engine
+// TODO Drop Component. We should be able to use a plain qml.Object for these features,
+//      and it makes sense to do so given that components may be defined in QML as well.
+
+// Create creates an instance of the component.
+func (c *Component) Create(context *Context) *Object {
+	var object Object
+	object.engine = c.engine
 	gui(func() {
 		ctxaddr := nilPtr
 		if context != nil {
 			ctxaddr = context.addr
 		}
-		value.addr = C.componentCreate(c.addr, ctxaddr)
+		object.addr = C.componentCreate(c.addr, ctxaddr)
 	})
-	return &value
+	return &object
 }
 
 // CreateWindow creates a new instance of the c component running under
@@ -274,51 +282,110 @@ type commonObject struct {
 	engine *Engine
 }
 
-// TODO engine.ValueOf(&value) => *Value for the Go value
+// TODO engine.ObjectOf(&value) => *Object for the Go value
 
-type Value struct {
+type Object struct {
 	commonObject
 }
 
-func (o *commonObject) Field(name string) interface{} {
+// Set changes the value of property.
+func (obj *commonObject) Set(property string, value interface{}) error {
+	cproperty := C.CString(property)
+	defer C.free(unsafe.Pointer(cproperty))
+	gui(func() {
+		var dvalue C.DataValue
+		packDataValue(value, &dvalue, obj.engine, cppOwner)
+		C.objectSetProperty(obj.addr, cproperty, &dvalue)
+	})
+	// TODO Return an error if the value cannot be set.
+	return nil
+}
+
+// Property returns the current value for a property of the object.
+// If the property type is known, type-specific methods such as Int
+// and String are more convenient to use.
+func (obj *commonObject) Property(name string) interface{} {
+	// TODO Return an ok bool indicating whether the property was found.
 	cname := C.CString(name)
 	defer C.free(unsafe.Pointer(cname))
 
 	var dvalue C.DataValue
 	gui(func() {
-		C.objectGetProperty(o.addr, cname, &dvalue)
+		C.objectGetProperty(obj.addr, cname, &dvalue)
 	})
-	return unpackDataValue(&dvalue, o.engine)
+	return unpackDataValue(&dvalue, obj.engine)
 }
 
-func (o *commonObject) SetField(name string, value interface{}) {
-	cname := C.CString(name)
-	defer C.free(unsafe.Pointer(cname))
-	gui(func() {
-		var dvalue C.DataValue
-		packDataValue(value, &dvalue, o.engine, cppOwner)
-		// TODO Handle the return value.
-		C.objectSetProperty(o.addr, cname, &dvalue)
-	})
+// Int returns the int value of the given property.
+// The call panics if the property value cannot be represented as an int.
+func (obj *commonObject) Int(property string) int {
+	switch value := obj.Property(property).(type) {
+	case int:
+		return value
+	case int32:
+		return int(value)
+	case int64:
+		if int64(int(value)) != value {
+			panic(fmt.Sprintf("value of property %q is too large for int: %v", property, value))
+		}
+		return int(value)
+	case float64:
+		// May truncate, but seems a bit too much computing to validate these all the time.
+		return int(value)
+	default:
+		panic(fmt.Sprintf("value of property %q cannot be represented as an int: %v", property, value))
+	}
 }
 
-func (o *commonObject) MustFind(name string) *Value {
-	cname, cnamelen := unsafeStringData(name)
+// String returns the string value of the given property.
+// The call panics if the property value is not a string.
+func (obj *commonObject) String(property string) string {
+	s, ok := obj.Property(property).(string)
+	if !ok {
+		panic(fmt.Sprintf("value of property %q is not a string: %v", property, s))
+	}
+	return s
+}
+
+// TODO More type-specific methods: int64, float64, etc
+
+// Object returns the *qml.Object value of the given property.
+// The call panics if the property value is not a *qml.Object.
+func (obj *commonObject) Object(property string) *Object {
+	object, ok := obj.Property(property).(*Object)
+	if !ok {
+		panic(fmt.Sprintf("value of property %q is not a *qml.Object: %v", property, object))
+	}
+	return object
+}
+
+// ObjectByName returns the *qml.Object value of the descendant object that
+// was defined with the objectName property set to the provided value.
+// The call panics if the object is not found.
+func (obj *commonObject) ObjectByName(objectName string) *Object {
+	cname, cnamelen := unsafeStringData(objectName)
 	var dvalue C.DataValue
 	gui(func() {
 		qname := C.newString(cname, cnamelen)
 		defer C.delString(qname)
-		C.objectFindChild(o.addr, qname, &dvalue)
+		C.objectFindChild(obj.addr, qname, &dvalue)
 	})
-	value, ok := unpackDataValue(&dvalue, o.engine).(*Value)
+	object, ok := unpackDataValue(&dvalue, obj.engine).(*Object)
 	if !ok {
-		panic(fmt.Sprintf("cannot find child %q", name))
+		panic(fmt.Sprintf("cannot find descendant with objectName == %q", objectName))
 	}
-	return value
+	return object
 }
 
-func (o *commonObject) Call(method string, params ...interface{}) interface{} {
-	// TODO Check the bool result of invokeError and return an error.
+// TODO Consider using a Result wrapper type to be used by the Object.Call,
+//      Object.Property, and Context.Var methods. It would offer methods such as
+//      Int, and String, to facilitate converting (rather than just type-asserting)
+//      results to the desired types, in a way equivalent to what Object currently
+//      does for properties.
+
+// Call calls the given object method with the provided parameters.
+// It panics if the method does not exist.
+func (obj *commonObject) Call(method string, params ...interface{}) interface{} {
 	if len(params) > len(dataValueArray) {
 		panic("too many parameters")
 	}
@@ -327,38 +394,44 @@ func (o *commonObject) Call(method string, params ...interface{}) interface{} {
 	var result C.DataValue
 	gui(func() {
 		for i, param := range params {
-			packDataValue(param, &dataValueArray[i], o.engine, jsOwner)
+			packDataValue(param, &dataValueArray[i], obj.engine, jsOwner)
 		}
-		C.objectInvoke(o.addr, cmethod, &result, &dataValueArray[0], C.int(len(params)))
+		// TODO Panic if the underlying invokation returns false.
+		// TODO Is there any other actual error other than existence that can be observed?
+		//      If so, this method needs an error result too.
+		C.objectInvoke(obj.addr, cmethod, &result, &dataValueArray[0], C.int(len(params)))
 	})
-	return unpackDataValue(&result, o.engine)
+	return unpackDataValue(&result, obj.engine)
 }
 
-func (o *commonObject) Create(context *Context) *Value {
-	// TODO Fail if o does not represent a component.
-	var value Value
-	value.engine = o.engine
+func (obj *commonObject) Create(context *Context) *Object {
+	// TODO Implement C.objectIsComponent and panic if it returns false.
+	var value Object
+	value.engine = obj.engine
 	gui(func() {
 		ctxaddr := nilPtr
 		if context != nil {
 			ctxaddr = context.addr
 		}
-		value.addr = C.componentCreate(o.addr, ctxaddr)
+		value.addr = C.componentCreate(obj.addr, ctxaddr)
 	})
 	return &value
 }
 
 // Destroy finalizes the value and releases any resources used.
 // The value must not be used after calling this method.
-func (o *commonObject) Destroy() {
-	// TODO Must protect against destroyment when object isn't owned.
+func (obj *commonObject) Destroy() {
 	gui(func() {
-		if o.addr != nilPtr {
-			C.delObjectLater(o.addr)
-			o.addr = nilPtr
+		if obj.addr != nilPtr {
+			C.delObjectLater(obj.addr)
+			obj.addr = nilPtr
 		}
 	})
 }
+
+// TODO commonObject.Connect(name, func(...) {})
+
+// TODO Signal emitting support for go values.
 
 // Window represents a QML window where components are rendered.
 type Window struct {
@@ -379,15 +452,14 @@ func (w *Window) Hide() {
 	})
 }
 
-// Root returns the root component instance being rendered in the window.
-func (w *Window) Root() *Value {
-	// XXX Test this.
-	var value Value
-	value.engine = w.engine
+// Root returns the root object being rendered in the window.
+func (w *Window) Root() *Object {
+	var object Object
+	object.engine = w.engine
 	gui(func() {
-		value.addr = C.viewRootObject(w.addr)
+		object.addr = C.viewRootObject(w.addr)
 	})
-	return &value
+	return &object
 }
 
 // Wait blocks the current goroutine until the window is closed.
@@ -420,7 +492,6 @@ func hookWindowHidden(addr unsafe.Pointer) {
 type TypeSpec struct {
 	Location     string
 	Major, Minor int
-
 	// TODO Consider refactoring this type into ModuleSpec for the above + []TypeSpec for the below
 	Name string
 	New  func() interface{}

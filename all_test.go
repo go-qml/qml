@@ -81,7 +81,7 @@ type TestType struct {
 	Float64Value float64
 	Float32Value float32
 	AnyValue     interface{}
-	ValueValue   *qml.Value
+	ObjectValue  *qml.Object
 }
 
 func (ts *TestType) StringMethod() string {
@@ -172,7 +172,7 @@ func (s *S) TestContextSetVars(c *C) {
 		Float64Value: 4.2,
 		Float32Value: 4.2,
 		AnyValue:     nil,
-		ValueValue:   compinst,
+		ObjectValue:  compinst,
 	}
 	s.context.SetVars(&vars)
 
@@ -188,7 +188,7 @@ func (s *S) TestContextSetVars(c *C) {
 	vars.AnyValue = 42
 	c.Assert(s.context.Var("anyValue"), Equals, intNN(42))
 
-	c.Assert(s.context.Var("valueValue").(*qml.Value).Field("width"), Equals, float64(42))
+	c.Assert(s.context.Var("objectValue").(*qml.Object).Int("width"), Equals, 42)
 }
 
 func (s *S) TestComponentSetDataError(c *C) {
@@ -217,7 +217,7 @@ type TestData struct {
 	engine    *qml.Engine
 	context   *qml.Context
 	component *qml.Component
-	compinst  *qml.Value
+	compinst  *qml.Object
 	value     *TestType
 }
 
@@ -261,18 +261,23 @@ var tests = []struct {
 	},
 	{
 		Summary: "Reading of value fields",
-		QML:     "Item { width: 300; height: 200 }",
+		QML: `
+			Item {
+				width: 123;
+				property string s: "foo";
+			}
+		`,
 		Done: func(d *TestData) {
-			d.Check(d.compinst.Field("width"), Equals, float64(300))
-			d.Check(d.compinst.Field("height"), Equals, float64(200))
+			d.Check(d.compinst.Int("width"), Equals, 123)
+			d.Check(d.compinst.String("s"), Equals, "foo")
 		},
 	},
 	{
 		Summary: "Read an object field",
 		QML:     "Item { property var obj: Rectangle { width: 300; height: 200 } }",
 		Done: func(d *TestData) {
-			d.Check(d.compinst.Field("obj").(*qml.Value).Field("width"), Equals, float64(300))
-			d.Check(d.compinst.Field("obj").(*qml.Value).Field("height"), Equals, float64(200))
+			d.Check(d.compinst.Object("obj").Int("width"), Equals, 300)
+			d.Check(d.compinst.Object("obj").Int("height"), Equals, 200)
 		},
 	},
 	{
@@ -294,9 +299,9 @@ var tests = []struct {
 		`,
 		Done: func(d *TestData) {
 			value := TestType{StringValue: "<content>"}
-			d.compinst.SetField("obj", &value)
-			d.compinst.SetField("width", 300)
-			d.compinst.SetField("height", 200)
+			d.compinst.Set("obj", &value)
+			d.compinst.Set("width", 300)
+			d.compinst.Set("height", 200)
 		},
 		DoneLog: "String is <content>.*Width is 300.*Height is 200",
 	},
@@ -310,12 +315,12 @@ var tests = []struct {
 		QMLLog: "Identical: true",
 	},
 	{
-		Summary: "Find a child",
+		Summary: "Object finding via objectName",
 		QML:     `Item { Item { objectName: "subitem"; property string s: "<found>" } }`,
 		Done: func(d *TestData) {
-			value := d.compinst.MustFind("subitem")
-			d.Check(value.Field("s"), Equals, "<found>")
-			d.Check(func() { d.compinst.MustFind("foo") }, Panics, `cannot find child "foo"`)
+			obj := d.compinst.ObjectByName("subitem")
+			d.Check(obj.String("s"), Equals, "<found>")
+			d.Check(func() { d.compinst.ObjectByName("foo") }, Panics, `cannot find descendant with objectName == "foo"`)
 		},
 	},
 	{
@@ -412,7 +417,7 @@ var tests = []struct {
 		Done: func(d *TestData) {
 			d.value.StringValue = "<new>"
 			qml.Changed(d.value, &d.value.StringValue)
-			d.Check(d.compinst.Field("s"), Equals, "String is <new>")
+			d.Check(d.compinst.String("s"), Equals, "String is <new>")
 		},
 	},
 	{
@@ -486,7 +491,7 @@ var tests = []struct {
 	{
 		Summary: "Call a QML method with no result or parameters from Go",
 		QML:     `Item { function f() { console.log("f was called"); } }`,
-		Done:    func(d *TestData) { d.Check(d.compinst.Call("f"), Equals, nil) },
+		Done:    func(d *TestData) { d.Check(d.compinst.Call("f"), IsNil) },
 		DoneLog: "f was called",
 	},
 	{
@@ -510,7 +515,7 @@ var tests = []struct {
 			}
 		`,
 		Done: func(d *TestData) {
-			d.Check(d.compinst.Call("f").(*qml.Value).Field("width"), Equals, float64(300))
+			d.Check(d.compinst.Call("f").(*qml.Object).Int("width"), Equals, 300)
 		},
 	},
 	{
@@ -550,8 +555,8 @@ var tests = []struct {
 		Done: func(d *TestData) {
 			win := d.component.CreateWindow(nil)
 			root := win.Root()
-			d.Check(root.Field("width"), Equals, float64(300))
-			d.Check(root.Field("height"), Equals, float64(200))
+			d.Check(root.Int("width"), Equals, 300)
+			d.Check(root.Int("height"), Equals, 200)
 			d.Check(root.Call("inc", 42), Equals, int32(43))
 			root.Destroy()
 		},
@@ -565,9 +570,9 @@ var tests = []struct {
 	{
 		Summary: "Create a QML-defined component in Go",
 		QML:     `Item { property var comp: Component { Rectangle { width: 300 } } }`,
-		Done:    func(d *TestData) {
-			rect := d.compinst.Field("comp").(*qml.Value).Create(nil)
-			d.Assert(rect.Field("width"), Equals, float64(300))
+		Done: func(d *TestData) {
+			rect := d.compinst.Object("comp").Create(nil)
+			d.Assert(rect.Int("width"), Equals, 300)
 		},
 	},
 	{
