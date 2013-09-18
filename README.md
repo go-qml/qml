@@ -20,8 +20,8 @@ See [this video](https://www.youtube.com/watch?v=FVQlMrPa7lI) for a quick introd
 Community
 ---------
 
-Please join the [mailing list](https://groups.google.com/forum/#!forum/go-qml) for following
-relevant development news and discussing project details.
+Please join the [mailing list](https://groups.google.com/forum/#!forum/go-qml) for
+following relevant development news and discussing project details.
 
 API documentation
 ------------------
@@ -38,11 +38,13 @@ To try the _alpha release_, you'll need:
   * The current [Ubuntu SDK](http://developer.ubuntu.com/get-started/), or equivalent Qt libraries
   * Packages _qtbase5-private-dev_ and _qtdeclarative5-private-dev_ or equivalent header files, for the dynamic meta object support
 
-In practice, if you are in Ubuntu, this should work assuming you have Go 1.2-dev installed:
+In practice, if you are in Ubuntu, this should work for the Qt dependencies:
 
     sudo add-apt-repository ppa:ubuntu-sdk-team/ppa
     sudo apt-get update
     sudo apt-get install ubuntu-sdk qtbase5-private-dev qtdeclarative5-private-dev
+
+For installing Go 1.2 from sources, check the [Go documentation](http://golang.org/doc/install/source).
 
 Installation
 ------------
