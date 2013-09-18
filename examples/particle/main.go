@@ -1,7 +1,7 @@
 package main
 
 import (
-	"launchpad.net/qml"
+	"github.com/niemeyer/qml"
 	"math/rand"
 	"time"
 )
@@ -56,20 +56,15 @@ func (ctrl *Control) Emit(x, y int) {
 	component := ctrl.Root.Object("emitterComponent")
 	for i := 0; i < 8; i++ {
 		emitter := component.Create(nil)
-		fields := map[string]interface{}{
-			"x":        x,
-			"y":        y,
-			"targetX":  rand.Intn(240) - 120 + x,
-			"targetY":  rand.Intn(240) - 120 + y,
-			"life":     rand.Intn(2400) + 200,
-			"emitRate": rand.Intn(32) + 32,
-		}
-		for key, value := range fields {
-			emitter.SetField(key, value)
-		}
-		emitter.MustFind("xAnim").Call("start")
-		emitter.MustFind("yAnim").Call("start")
-		emitter.SetField("enabled", true)
+		emitter.Set("x", x)
+		emitter.Set("y", y)
+		emitter.Set("targetX", rand.Intn(240) - 120 + x)
+		emitter.Set("targetY", rand.Intn(240) - 120 + y)
+		emitter.Set("life", rand.Intn(2400) + 200)
+		emitter.Set("emitRate", rand.Intn(32) + 32)
+		emitter.ObjectByName("xAnim").Call("start")
+		emitter.ObjectByName("yAnim").Call("start")
+		emitter.Set("enabled", true)
 	}
 }
 

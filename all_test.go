@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	. "launchpad.net/gocheck"
-	"launchpad.net/qml"
+	"github.com/niemeyer/qml"
 	"os"
 	"regexp"
 	"runtime"

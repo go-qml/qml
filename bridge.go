@@ -11,7 +11,7 @@ import "C"
 
 import (
 	"fmt"
-	"launchpad.net/qml/tref"
+	"github.com/niemeyer/qml/tref"
 	"reflect"
 	"runtime"
 	"sync"
