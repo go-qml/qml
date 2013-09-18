@@ -2,15 +2,15 @@
 //
 // Warning
 //
-// This package is in an alpha stage, and still in heavy development. APIs will
-// change, and things will break.
+// This package is in an alpha stage, and still in heavy development. APIs may
+// change, and things may break.
+// 
+// At this time contributors and developers that are interested in tracking the
+// development closely are encouraged to use it. If you'd prefer a more stable
+// release, please hold on a bit and subscribe to the mailing list for news. It's
+// in a pretty good state, so it shall not take too long.
 //
-// At this time only contributors and developers that are willing to track the
-// development closely are encouraged to use it.
-//
-// See https://www.youtube.com/watch?v=FVQlMrPa7lI for a quick introduction.
-//
-package qml
+// See http://github.com/niemeyer/qml for details.
 
 // #include <stdlib.h>
 //
