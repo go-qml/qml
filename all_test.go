@@ -530,10 +530,10 @@ var tests = []struct {
 			value := TestType{StringValue: "<content>"}
 			stats := qml.Stats()
 			d.compinst.Call("hold", &value)
-			d.Assert(qml.Stats().ValuesAlive, Equals, stats.ValuesAlive+1)
+			d.Check(qml.Stats().ValuesAlive, Equals, stats.ValuesAlive+1)
 			d.compinst.Call("log")
 			d.compinst.Call("hold", nil)
-			d.Assert(qml.Stats().ValuesAlive, Equals, stats.ValuesAlive)
+			d.Check(qml.Stats().ValuesAlive, Equals, stats.ValuesAlive)
 		},
 		DoneLog: "String is <content>",
 	},
@@ -543,7 +543,7 @@ var tests = []struct {
 			data, err := base64.StdEncoding.DecodeString("R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==")
 			d.Assert(err, IsNil)
 			err = ioutil.WriteFile("test.gif", data, 0644)
-			d.Assert(err, IsNil)
+			d.Check(err, IsNil)
 		},
 		QML:    `Image { source: "test.gif"; Component.onCompleted: console.log("Ready:", status == Image.Ready) }`,
 		QMLLog: "Ready: true",
@@ -572,7 +572,9 @@ var tests = []struct {
 		QML:     `Item { property var comp: Component { Rectangle { width: 300 } } }`,
 		Done: func(d *TestData) {
 			rect := d.compinst.Object("comp").Create(nil)
-			d.Assert(rect.Int("width"), Equals, 300)
+			d.Check(rect.Int("width"), Equals, 300)
+			d.Check(func() { d.compinst.Create(nil) }, Panics, "object is not a component")
+			d.Check(func() { d.compinst.CreateWindow(nil) }, Panics, "object is not a component")
 		},
 	},
 	{

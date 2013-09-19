@@ -280,6 +280,12 @@ QQmlContext_ *objectContext(QObject_ *object)
     return qmlContext(reinterpret_cast<QObject *>(object));
 }
 
+int objectIsComponent(QObject_ *object)
+{
+    QObject *qobject = reinterpret_cast<QObject *>(object);
+    return dynamic_cast<QQmlComponent *>(qobject) ? 1 : 0;
+}
+
 QString_ *newString(const char *data, int len)
 {
     // This will copy data only once.

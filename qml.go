@@ -110,6 +110,9 @@ func (e *Engine) Destroy() {
 // content read from r. The location informs the resource name for
 // logged messages, and its path is used to locate any other resources
 // referenced by the QML content.
+//
+// Once a component is loaded, component instances may be created from
+// the resulting object via its Create and CreateWindow methods.
 func (e *Engine) Load(location string, r io.Reader) (*Object, error) {
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
@@ -138,8 +141,11 @@ func (e *Engine) Load(location string, r io.Reader) (*Object, error) {
 	return comp, nil
 }
 
-// Load loads a component from the provided QML file.
+// LoadFile loads a component from the provided QML file.
 // Resources referenced by the QML content will be resolved relative to its path.
+//
+// Once a component is loaded, component instances may be created from
+// the resulting object via its Create and CreateWindow methods.
 func (e *Engine) LoadFile(path string) (*Object, error) {
 	// TODO Test this.
 	f, err := os.Open(path)
@@ -153,6 +159,9 @@ func (e *Engine) LoadFile(path string) (*Object, error) {
 // LoadString loads a component from the provided QML string.
 // The location informs the resource name for logged messages, and its
 // path is used to locate any other resources referenced by the QML content.
+//
+// Once a component is loaded, component instances may be created from
+// the resulting object via its Create and CreateWindow methods.
 func (e *Engine) LoadString(location, qml string) (*Object, error) {
 	return e.Load(location, strings.NewReader(qml))
 }
@@ -236,12 +245,13 @@ func (ctx *Context) Var(name string) interface{} {
 
 // TODO engine.ObjectOf(&value) => *Object for the Go value
 
+// Object represents a QML object.
 type Object struct {
 	addr   unsafe.Pointer
 	engine *Engine
 }
 
-// Set changes the value of property.
+// Set changes the named object property to the given value.
 func (obj *Object) Set(property string, value interface{}) error {
 	cproperty := C.CString(property)
 	defer C.free(unsafe.Pointer(cproperty))
@@ -360,8 +370,13 @@ func (obj *Object) Call(method string, params ...interface{}) interface{} {
 // Create creates a new instance of the component held by obj.
 // The component instance runs under the ctx context. If ctx is nil,
 // it runs under the same context as obj.
+//
+// The Create method panics if called on an object that does not
+// represent a QML component.
 func (obj *Object) Create(ctx *Context) *Object {
-	// TODO Implement C.objectIsComponent and panic if it returns false.
+	if C.objectIsComponent(obj.addr) == 0 {
+		panic("object is not a component")
+	}
 	var root Object
 	root.engine = obj.engine
 	gui(func() {
@@ -378,8 +393,13 @@ func (obj *Object) Create(ctx *Context) *Object {
 // and creates a new window holding the instance as its root object.
 // The component instance runs under the ctx context. If ctx is nil,
 // it runs under the same context as obj.
+//
+// The CreateWindow method panics if called on an object that
+// does not represent a QML component.
 func (obj *Object) CreateWindow(ctx *Context) *Window {
-	// TODO Implement C.objectIsComponent and panic if it returns false.
+	if C.objectIsComponent(obj.addr) == 0 {
+		panic("object is not a component")
+	}
 	var win Window
 	win.obj.engine = obj.engine
 	gui(func() {
