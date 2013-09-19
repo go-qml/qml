@@ -4,14 +4,21 @@ import (
 	"sync"
 )
 
-var stats *Stats
+var stats *Statistics
 var statsMutex sync.Mutex
 
-func SetStats(enabled bool) {
+func Stats() (snapshot Statistics) {
+	statsMutex.Lock()
+	snapshot = *stats
+	statsMutex.Unlock()
+	return
+}
+
+func CollectStats(enabled bool) {
 	statsMutex.Lock()
 	if enabled {
 		if stats == nil {
-			stats = &Stats{}
+			stats = &Statistics{}
 		}
 	} else {
 		stats = nil
@@ -19,17 +26,10 @@ func SetStats(enabled bool) {
 	statsMutex.Unlock()
 }
 
-func GetStats() (snapshot Stats) {
-	statsMutex.Lock()
-	snapshot = *stats
-	statsMutex.Unlock()
-	return
-}
-
 func ResetStats() {
 	statsMutex.Lock()
 	old := stats
-	stats = &Stats{}
+	stats = &Statistics{}
 	// These are absolute values:
 	stats.EnginesAlive = old.EnginesAlive
 	stats.ValuesAlive = old.ValuesAlive
@@ -37,12 +37,12 @@ func ResetStats() {
 	return
 }
 
-type Stats struct {
+type Statistics struct {
 	EnginesAlive int
 	ValuesAlive  int
 }
 
-func (stats *Stats) enginesAlive(delta int) {
+func (stats *Statistics) enginesAlive(delta int) {
 	if stats != nil {
 		statsMutex.Lock()
 		stats.EnginesAlive += delta
@@ -50,7 +50,7 @@ func (stats *Stats) enginesAlive(delta int) {
 	}
 }
 
-func (stats *Stats) valuesAlive(delta int) {
+func (stats *Statistics) valuesAlive(delta int) {
 	if stats != nil {
 		statsMutex.Lock()
 		stats.ValuesAlive += delta

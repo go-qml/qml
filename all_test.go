@@ -30,10 +30,10 @@ func (s *S) SetUpSuite(c *C) {
 
 func (s *S) SetUpTest(c *C) {
 	qml.SetLogger(c)
-	qml.SetStats(true)
+	qml.CollectStats(true)
 	qml.ResetStats()
 
-	stats := qml.GetStats()
+	stats := qml.Stats()
 	if stats.EnginesAlive > 0 || stats.ValuesAlive > 0 {
 		panic(fmt.Sprintf("Test started with values alive: %#v\n", stats))
 	}
@@ -53,7 +53,7 @@ func (s *S) TearDownTest(c *C) {
 		// So it *reposts* the deferred deletion event, in practice *preventing*
 		// these objects from being deleted.
 		runtime.GC()
-		stats := qml.GetStats()
+		stats := qml.Stats()
 		if stats.EnginesAlive == 0 && stats.ValuesAlive == 0 {
 			break
 		}
@@ -528,12 +528,12 @@ var tests = []struct {
 			}`,
 		Done: func(d *TestData) {
 			value := TestType{StringValue: "<content>"}
-			stats := qml.GetStats()
+			stats := qml.Stats()
 			d.compinst.Call("hold", &value)
-			d.Assert(qml.GetStats().ValuesAlive, Equals, stats.ValuesAlive+1)
+			d.Assert(qml.Stats().ValuesAlive, Equals, stats.ValuesAlive+1)
 			d.compinst.Call("log")
 			d.compinst.Call("hold", nil)
-			d.Assert(qml.GetStats().ValuesAlive, Equals, stats.ValuesAlive)
+			d.Assert(qml.Stats().ValuesAlive, Equals, stats.ValuesAlive)
 		},
 		DoneLog: "String is <content>",
 	},
