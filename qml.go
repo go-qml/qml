@@ -110,7 +110,7 @@ func (e *Engine) Destroy() {
 // content read from r. The location informs the resource name for
 // logged messages, and its path is used to locate any other resources
 // referenced by the QML content.
-func (e *Engine) Load(location string, r io.Reader) (*Component, error) {
+func (e *Engine) Load(location string, r io.Reader) (*Object, error) {
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
 		return nil, err
@@ -121,12 +121,12 @@ func (e *Engine) Load(location string, r io.Reader) (*Component, error) {
 
 	cdata, cdatalen := unsafeBytesData(data)
 	cloc, cloclen := unsafeStringData(location)
-	component := &Component{Object{engine: e}}
+	comp := &Object{engine: e}
 	gui(func() {
 		// TODO The component's parent should probably be the engine.
-		component.obj.addr = C.newComponent(e.addr, nilPtr)
-		C.componentSetData(component.obj.addr, cdata, cdatalen, cloc, cloclen)
-		message := C.componentErrorString(component.obj.addr)
+		comp.addr = C.newComponent(e.addr, nilPtr)
+		C.componentSetData(comp.addr, cdata, cdatalen, cloc, cloclen)
+		message := C.componentErrorString(comp.addr)
 		if message != nilCharPtr {
 			err = errors.New(strings.TrimRight(C.GoString(message), "\n"))
 			C.free(unsafe.Pointer(message))
@@ -135,12 +135,12 @@ func (e *Engine) Load(location string, r io.Reader) (*Component, error) {
 	if err != nil {
 		return nil, err
 	}
-	return component, nil
+	return comp, nil
 }
 
 // Load loads a component from the provided QML file.
 // Resources referenced by the QML content will be resolved relative to its path.
-func (e *Engine) LoadFile(path string) (*Component, error) {
+func (e *Engine) LoadFile(path string) (*Object, error) {
 	// TODO Test this.
 	f, err := os.Open(path)
 	if err != nil {
@@ -153,7 +153,7 @@ func (e *Engine) LoadFile(path string) (*Component, error) {
 // LoadString loads a component from the provided QML string.
 // The location informs the resource name for logged messages, and its
 // path is used to locate any other resources referenced by the QML content.
-func (e *Engine) LoadString(location, qml string) (*Component, error) {
+func (e *Engine) LoadString(location, qml string) (*Object, error) {
 	return e.Load(location, strings.NewReader(qml))
 }
 
@@ -233,48 +233,6 @@ func (ctx *Context) Var(name string) interface{} {
 }
 
 // TODO Context.Spawn() => Context
-
-type Component struct {
-	obj Object
-}
-
-// TODO Drop Component. We should be able to use a plain qml.Object for these features,
-//      and it makes sense to do so given that components may be defined in QML as well.
-
-// Create creates an instance of the component.
-func (c *Component) Create(ctx *Context) *Object {
-	var obj Object
-	obj.engine = c.obj.engine
-	gui(func() {
-		ctxaddr := nilPtr
-		if ctx != nil {
-			ctxaddr = ctx.obj.addr
-		}
-		obj.addr = C.componentCreate(c.obj.addr, ctxaddr)
-	})
-	return &obj
-}
-
-// CreateWindow creates a new instance of the c component running under
-// the provided context, and creates a new window for the component
-// instance to render its content into.
-//
-// If the provided context is nil, the engine's root context is used.
-//
-// If the returned window is not destroyed explicitly, it will be
-// destroyed when the engine behind the used context is.
-func (c *Component) CreateWindow(ctx *Context) *Window {
-	var win Window
-	win.obj.engine = c.obj.engine
-	gui(func() {
-		ctxaddr := nilPtr
-		if ctx != nil {
-			ctxaddr = ctx.obj.addr
-		}
-		win.obj.addr = C.componentCreateView(c.obj.addr, ctxaddr)
-	})
-	return &win
-}
 
 // TODO engine.ObjectOf(&value) => *Object for the Go value
 
@@ -399,6 +357,9 @@ func (obj *Object) Call(method string, params ...interface{}) interface{} {
 	return unpackDataValue(&result, obj.engine)
 }
 
+// Create creates a new instance of the component held by obj.
+// The component instance runs under the ctx context. If ctx is nil,
+// it runs under the same context as obj.
 func (obj *Object) Create(ctx *Context) *Object {
 	// TODO Implement C.objectIsComponent and panic if it returns false.
 	var root Object
@@ -411,6 +372,24 @@ func (obj *Object) Create(ctx *Context) *Object {
 		root.addr = C.componentCreate(obj.addr, ctxaddr)
 	})
 	return &root
+}
+
+// CreateWindow creates a new instance of the component held by obj,
+// and creates a new window holding the instance as its root object.
+// The component instance runs under the ctx context. If ctx is nil,
+// it runs under the same context as obj.
+func (obj *Object) CreateWindow(ctx *Context) *Window {
+	// TODO Implement C.objectIsComponent and panic if it returns false.
+	var win Window
+	win.obj.engine = obj.engine
+	gui(func() {
+		ctxaddr := nilPtr
+		if ctx != nil {
+			ctxaddr = ctx.obj.addr
+		}
+		win.obj.addr = C.componentCreateView(obj.addr, ctxaddr)
+	})
+	return &win
 }
 
 // Destroy finalizes the value and releases any resources used.

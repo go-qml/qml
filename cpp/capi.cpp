@@ -118,6 +118,9 @@ QQuickView_ *componentCreateView(QQmlComponent_ *component, QQmlContext_ *contex
     QQmlComponent *qcomponent = reinterpret_cast<QQmlComponent *>(component);
     QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
 
+    if (!qcontext) {
+        qcontext = qmlContext(qcomponent);
+    }
     QObject *instance = qcomponent->create(qcontext);
     QQuickView *view = new QQuickView(qmlEngine(qcomponent), 0);
     view->setContent(qcomponent->url(), qcomponent, instance);

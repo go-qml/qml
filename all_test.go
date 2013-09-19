@@ -216,7 +216,7 @@ type TestData struct {
 	*C
 	engine    *qml.Engine
 	context   *qml.Context
-	component *qml.Component
+	component *qml.Object
 	compinst  *qml.Object
 	value     *TestType
 }
