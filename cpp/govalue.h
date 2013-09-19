@@ -4,7 +4,6 @@
 // Unfortunatley we need access to private bits, because the
 // whole dynamic meta-object concept is sadly being hidden
 // away, and without it this package wouldn't exist.
-#include <private/qobject_p.h>
 #include <private/qmetaobject_p.h>
 
 #include "capi.h"
