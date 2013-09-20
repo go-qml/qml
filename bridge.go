@@ -1,9 +1,9 @@
 package qml
 
 // #cgo CPPFLAGS: -I/usr/include/qt5/QtCore/5.0.2/QtCore -I./cpp
-// #cgo CXXFLAGS: -std=c++11
-// #cgo pkg-config: Qt5Core Qt5Widgets Qt5Quick glib-2.0
+// #cgo CXXFLAGS: -std=c++0x
 // #cgo LDFLAGS: -lstdc++
+// #cgo pkg-config: Qt5Core Qt5Widgets Qt5Quick glib-2.0
 //
 // #include "cpp/capi.h"
 //
