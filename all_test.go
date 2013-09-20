@@ -283,6 +283,7 @@ var tests = []struct {
 				property double float64p: 1.1
 				property string stringp: "<content>"
 				property var objectp: Rectangle { width: 123 }
+				property var nilp: null
 			}
 		`,
 		Done: func(d *TestData) {
@@ -297,6 +298,7 @@ var tests = []struct {
 			d.Check(obj.Float64("float64p"), Equals, float64(1.1))
 			d.Check(obj.String("stringp"), Equals, "<content>")
 			d.Check(obj.Object("objectp").Int("width"), Equals, 123)
+			d.Check(obj.Property("nilp"), Equals, nil)
 
 			d.Check(func() { obj.Bool("intp") }, Panics, `value of property "intp" is not a bool: 1`)
 			d.Check(func() { obj.Int("boolp") }, Panics, `value of property "boolp" cannot be represented as an int: true`)
@@ -304,6 +306,7 @@ var tests = []struct {
 			d.Check(func() { obj.Float64("boolp") }, Panics, `value of property "boolp" cannot be represented as a float64: true`)
 			d.Check(func() { obj.String("boolp") }, Panics, `value of property "boolp" is not a string: true`)
 			d.Check(func() { obj.Object("boolp") }, Panics, `value of property "boolp" is not a *qml.Object: true`)
+			d.Check(func() { obj.Property("missing") }, Panics, `object does not have a "missing" property`)
 		},
 	},
 	{

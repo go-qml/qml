@@ -203,12 +203,18 @@ void delObjectLater(QObject_ *object)
     reinterpret_cast<QObject *>(object)->deleteLater();
 }
 
-void objectGetProperty(QObject_ *object, const char *name, DataValue *value)
+int objectGetProperty(QObject_ *object, const char *name, DataValue *result)
 {
     QObject *qobject = reinterpret_cast<QObject *>(object);
     
     QVariant var = qobject->property(name);
-    packDataValue(&var, value);
+    packDataValue(&var, result);
+
+    if (!var.isValid() && qobject->metaObject()->indexOfProperty(name) == -1) {
+            // TODO May have to check the dynamic property names too.
+            return 0;
+    }
+    return 1;
 }
 
 void objectSetProperty(QObject_ *object, const char *name, DataValue *value)

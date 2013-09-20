@@ -267,20 +267,24 @@ func (obj *Object) Set(property string, value interface{}) error {
 // Property returns the current value for a property of the object.
 // If the property type is known, type-specific methods such as Int
 // and String are more convenient to use.
+// Property panics if the property does not exist.
 func (obj *Object) Property(name string) interface{} {
-	// TODO Panic if the property is not found.
 	cname := C.CString(name)
 	defer C.free(unsafe.Pointer(cname))
 
 	var dvalue C.DataValue
+	var found C.int
 	gui(func() {
-		C.objectGetProperty(obj.addr, cname, &dvalue)
+		found = C.objectGetProperty(obj.addr, cname, &dvalue)
 	})
+	if found == 0 {
+		panic(fmt.Sprintf("object does not have a %q property", name))
+	}
 	return unpackDataValue(&dvalue, obj.engine)
 }
 
 // Int returns the int value of the given property.
-// The call panics if the property value cannot be represented as an int.
+// Int panics if the property value cannot be represented as an int.
 func (obj *Object) Int(property string) int {
 	switch value := obj.Property(property).(type) {
 	case int:
@@ -304,7 +308,7 @@ func (obj *Object) Int(property string) int {
 }
 
 // Int64 returns the int64 value of the given property.
-// The call panics if the property value cannot be represented as an int64.
+// Int64 panics if the property value cannot be represented as an int64.
 func (obj *Object) Int64(property string) int64 {
 	switch value := obj.Property(property).(type) {
 	case int:
@@ -325,7 +329,7 @@ func (obj *Object) Int64(property string) int64 {
 }
 
 // Float64 returns the float64 value of the given property.
-// The call panics if the property value cannot be represented as float64.
+// Float64 panics if the property value cannot be represented as float64.
 func (obj *Object) Float64(property string) float64 {
 	switch value := obj.Property(property).(type) {
 	case int:
@@ -344,7 +348,7 @@ func (obj *Object) Float64(property string) float64 {
 }
 
 // Bool returns the bool value of the given property.
-// The call panics if the property value is not a bool.
+// Bool panics if the property value is not a bool.
 func (obj *Object) Bool(property string) bool {
 	value := obj.Property(property)
 	b, ok := value.(bool)
@@ -355,7 +359,7 @@ func (obj *Object) Bool(property string) bool {
 }
 
 // String returns the string value of the given property.
-// The call panics if the property value is not a string.
+// String panics if the property value is not a string.
 func (obj *Object) String(property string) string {
 	value := obj.Property(property)
 	s, ok := value.(string)
@@ -370,7 +374,7 @@ func (obj *Object) String(property string) string {
 //      results will make it easier on clients that want to handle arbitrary typing.
 
 // Object returns the *qml.Object value of the given property.
-// The call panics if the property value is not a *qml.Object.
+// Object panics if the property value is not a *qml.Object.
 func (obj *Object) Object(property string) *Object {
 	value := obj.Property(property)
 	object, ok := value.(*Object)
@@ -382,7 +386,7 @@ func (obj *Object) Object(property string) *Object {
 
 // ObjectByName returns the *qml.Object value of the descendant object that
 // was defined with the objectName property set to the provided value.
-// The call panics if the object is not found.
+// ObjectByName panics if the object is not found.
 func (obj *Object) ObjectByName(objectName string) *Object {
 	cname, cnamelen := unsafeStringData(objectName)
 	var dvalue C.DataValue
@@ -405,7 +409,7 @@ func (obj *Object) ObjectByName(objectName string) *Object {
 //      does for properties.
 
 // Call calls the given object method with the provided parameters.
-// It panics if the method does not exist.
+// Call panics if the method does not exist.
 func (obj *Object) Call(method string, params ...interface{}) interface{} {
 	if len(params) > len(dataValueArray) {
 		panic("too many parameters")
