@@ -35,14 +35,26 @@ Requirements
 To try the _alpha release_, you'll need:
 
   * Go 1.2 (in development), for the C++ support of _go build_
-  * The current [Ubuntu SDK](http://developer.ubuntu.com/get-started/), or equivalent Qt libraries
-  * Packages _qtbase5-private-dev_ and _qtdeclarative5-private-dev_ or equivalent header files, for the dynamic meta object support
 
-In practice, if you are in Ubuntu, this should work for the Qt dependencies:
+  * For Ubuntu:
+    * The current [Ubuntu SDK](http://developer.ubuntu.com/get-started/), or equivalent Qt libraries
+    * Packages _qtbase5-private-dev_ and _qtdeclarative5-private-dev_ or equivalent header files, for the dynamic meta object support
+
+  * For MacOS (homebrew):
+    * gcc (not a symlinked clang, will complain about `unrecognized command line option "-std=c++11"` otherwise)
+    * qt5
+
+In practice, this should work for the Qt dependencies:
+
+Ubuntu:
 
     sudo add-apt-repository ppa:ubuntu-sdk-team/ppa
     sudo apt-get update
     sudo apt-get install ubuntu-sdk qtbase5-private-dev qtdeclarative5-private-dev
+
+MacOS:
+
+    brew install gcc48 qt5
 
 For installing Go 1.2 from sources, check the [Go documentation](http://golang.org/doc/install/source).
 
@@ -52,3 +64,11 @@ Installation
 Once the requirements above are satisfied, _go get_ should work as usual:
 
     go get github.com/niemeyer/qml
+
+On MacOS you must specify the `CXX`, `PKG_CONFIG_PATH`, and `CGO_CPPFLAGS` environment variables, for example:
+
+    export PKG_CONFIG_PATH=`brew --prefix qt5`/lib/pkgconfig
+    QT5VERSION=`pkg-config --cflags Qt5Core | sed 's/^.*\(5\..\..\).*/\1/g'`
+    # For "private/qmetaobject_p.h" inclusion
+    export CGO_CPPFLAGS=-I`brew --prefix qt5`/include/QtCore/$QT5VERSION/QtCore
+    CXX=g++-4.8 go get -v -x github.com/niemeyer/qml
