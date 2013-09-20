@@ -273,11 +273,37 @@ var tests = []struct {
 		},
 	},
 	{
-		Summary: "Read an object field",
-		QML:     "Item { property var obj: Rectangle { width: 300; height: 200 } }",
+		Summary: "Read object properties",
+		QML:     `
+			Item {
+				property bool boolp: true
+				property int intp: 1
+				property var int64p: 4294967296
+				property real float32p: 1.1
+				property double float64p: 1.1
+				property string stringp: "<content>"
+				property var objectp: Rectangle { width: 123 }
+			}
+		`,
 		Done: func(d *TestData) {
-			d.Check(d.compinst.Object("obj").Int("width"), Equals, 300)
-			d.Check(d.compinst.Object("obj").Int("height"), Equals, 200)
+			obj := d.compinst
+			d.Check(obj.Bool("boolp"), Equals, true)
+			d.Check(obj.Int("intp"), Equals, 1)
+			d.Check(obj.Int64("intp"), Equals, int64(1))
+			d.Check(obj.Int64("int64p"), Equals, int64(4294967296))
+			d.Check(obj.Float64("intp"), Equals, float64(1))
+			d.Check(obj.Float64("int64p"), Equals, float64(4294967296))
+			d.Check(obj.Float64("float32p"), Equals, float64(1.1))
+			d.Check(obj.Float64("float64p"), Equals, float64(1.1))
+			d.Check(obj.String("stringp"), Equals, "<content>")
+			d.Check(obj.Object("objectp").Int("width"), Equals, 123)
+
+			d.Check(func() { obj.Bool("intp") }, Panics, `value of property "intp" is not a bool: 1`)
+			d.Check(func() { obj.Int("boolp") }, Panics, `value of property "boolp" cannot be represented as an int: true`)
+			d.Check(func() { obj.Int64("boolp") }, Panics, `value of property "boolp" cannot be represented as an int64: true`)
+			d.Check(func() { obj.Float64("boolp") }, Panics, `value of property "boolp" cannot be represented as a float64: true`)
+			d.Check(func() { obj.String("boolp") }, Panics, `value of property "boolp" is not a string: true`)
+			d.Check(func() { obj.Object("boolp") }, Panics, `value of property "boolp" is not a *qml.Object: true`)
 		},
 	},
 	{

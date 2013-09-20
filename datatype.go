@@ -91,6 +91,8 @@ func packDataValue(value interface{}, dvalue *C.DataValue, engine *Engine, owner
 	}
 }
 
+// TODO Handle byte slices.
+
 // unpackDataValue converts a value shipped by C++ into a native Go value.
 //
 // HEADS UP: This is considered safe to be run out of the main GUI thread.

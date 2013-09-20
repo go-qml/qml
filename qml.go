@@ -268,7 +268,7 @@ func (obj *Object) Set(property string, value interface{}) error {
 // If the property type is known, type-specific methods such as Int
 // and String are more convenient to use.
 func (obj *Object) Property(name string) interface{} {
-	// TODO Return an ok bool indicating whether the property was found.
+	// TODO Panic if the property is not found.
 	cname := C.CString(name)
 	defer C.free(unsafe.Pointer(cname))
 
@@ -289,35 +289,93 @@ func (obj *Object) Int(property string) int {
 		return int(value)
 	case int64:
 		if int64(int(value)) != value {
-			panic(fmt.Sprintf("value of property %q is too large for int: %v", property, value))
+			panic(fmt.Sprintf("value of property %q is too large for int: %#v", property, value))
 		}
+		return int(value)
+	case float32:
+		// May truncate, but seems a bit too much computing to validate these all the time.
 		return int(value)
 	case float64:
 		// May truncate, but seems a bit too much computing to validate these all the time.
 		return int(value)
 	default:
-		panic(fmt.Sprintf("value of property %q cannot be represented as an int: %v", property, value))
+		panic(fmt.Sprintf("value of property %q cannot be represented as an int: %#v", property, value))
 	}
+}
+
+// Int64 returns the int64 value of the given property.
+// The call panics if the property value cannot be represented as an int64.
+func (obj *Object) Int64(property string) int64 {
+	switch value := obj.Property(property).(type) {
+	case int:
+		return int64(value)
+	case int32:
+		return int64(value)
+	case int64:
+		return value
+	case float32:
+		// May truncate, but seems a bit too much computing to validate these all the time.
+		return int64(value)
+	case float64:
+		// May truncate, but seems a bit too much computing to validate these all the time.
+		return int64(value)
+	default:
+		panic(fmt.Sprintf("value of property %q cannot be represented as an int64: %#v", property, value))
+	}
+}
+
+// Float64 returns the float64 value of the given property.
+// The call panics if the property value cannot be represented as float64.
+func (obj *Object) Float64(property string) float64 {
+	switch value := obj.Property(property).(type) {
+	case int:
+		return float64(value)
+	case int32:
+		return float64(value)
+	case int64:
+		return float64(value)
+	case float32:
+		return float64(value)
+	case float64:
+		return value
+	default:
+		panic(fmt.Sprintf("value of property %q cannot be represented as a float64: %#v", property, value))
+	}
+}
+
+// Bool returns the bool value of the given property.
+// The call panics if the property value is not a bool.
+func (obj *Object) Bool(property string) bool {
+	value := obj.Property(property)
+	b, ok := value.(bool)
+	if !ok {
+		panic(fmt.Sprintf("value of property %q is not a bool: %#v", property, value))
+	}
+	return b
 }
 
 // String returns the string value of the given property.
 // The call panics if the property value is not a string.
 func (obj *Object) String(property string) string {
-	s, ok := obj.Property(property).(string)
+	value := obj.Property(property)
+	s, ok := value.(string)
 	if !ok {
-		panic(fmt.Sprintf("value of property %q is not a string: %v", property, s))
+		panic(fmt.Sprintf("value of property %q is not a string: %#v", property, value))
 	}
 	return s
 }
 
-// TODO More type-specific methods: int64, float64, etc
+
+// TODO Consider getting rid of int32 and float32 results. Always returning 64-bit
+//      results will make it easier on clients that want to handle arbitrary typing.
 
 // Object returns the *qml.Object value of the given property.
 // The call panics if the property value is not a *qml.Object.
 func (obj *Object) Object(property string) *Object {
-	object, ok := obj.Property(property).(*Object)
+	value := obj.Property(property)
+	object, ok := value.(*Object)
 	if !ok {
-		panic(fmt.Sprintf("value of property %q is not a *qml.Object: %v", property, object))
+		panic(fmt.Sprintf("value of property %q is not a *qml.Object: %#v", property, value))
 	}
 	return object
 }
