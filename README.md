@@ -71,4 +71,4 @@ On MacOS you must specify the `CXX`, `PKG_CONFIG_PATH`, and `CGO_CPPFLAGS` envir
     QT5VERSION=`pkg-config --cflags Qt5Core | sed 's/^.*\(5\..\..\).*/\1/g'`
     # For "private/qmetaobject_p.h" inclusion
     export CGO_CPPFLAGS=-I`brew --prefix qt5`/include/QtCore/$QT5VERSION/QtCore
-    CXX=g++-4.8 go get -v -x github.com/niemeyer/qml
+    CXX=g++-4.8 go get github.com/niemeyer/qml
