@@ -3,11 +3,11 @@
 #include <QtQml>
 #include <QDebug>
 
+#include <string.h>
+
 #include "govalue.h"
 #include "govaluetype.h"
 #include "capi.h"
-
-#include <QDebug>
 
 void newGuiApplication()
 {
