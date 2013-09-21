@@ -54,6 +54,7 @@ Ubuntu:
 
 MacOS:
 
+    brew tap homebrew/versions
     brew install gcc48 qt5
 
 For installing Go 1.2 from sources, check the [Go documentation](http://golang.org/doc/install/source).
