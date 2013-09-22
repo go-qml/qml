@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/niemeyer/qml"
 	"os"
-	"path/filepath"
 )
 
 func main() {
@@ -21,16 +20,7 @@ func main() {
 func run() error {
 	qml.Init(nil)
 	engine := qml.NewEngine()
-	path := os.Args[1]
-	if !filepath.IsAbs(path) {
-		wd, err := os.Getwd()
-		if err != nil {
-			return err
-		}
-		path = filepath.Join(wd, path)
-	}
-	fmt.Println(path)
-	component, err := engine.LoadFile(path)
+	component, err := engine.LoadFile(os.Args[1])
 	if err != nil {
 		return err
 	}

@@ -124,7 +124,7 @@ func (e *Engine) Load(location string, r io.Reader) (*Object, error) {
 		if filepath.IsAbs(location) {
 			location = "file:" + filepath.ToSlash(location)
 		} else {
-			dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+			dir, err := os.Getwd()
 			if err != nil {
 				return nil, fmt.Errorf("cannot obtain absolute path: %v", err)
 			}

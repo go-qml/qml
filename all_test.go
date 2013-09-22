@@ -193,7 +193,7 @@ func (s *S) TestContextSetVars(c *C) {
 
 func (s *S) TestComponentSetDataError(c *C) {
 	_, err := s.engine.LoadString("file.qml", "Item{}")
-	c.Assert(err, ErrorMatches, "file:file.qml:1 Item is not a type")
+	c.Assert(err, ErrorMatches, "file:.*/file.qml:1 Item is not a type")
 }
 
 func (s *S) TestComponentCreateWindow(c *C) {
