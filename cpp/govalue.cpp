@@ -98,6 +98,8 @@ int GoValueMetaObject::metaCall(QMetaObject::Call c, int idx, void **a)
             qWarning() << "Method" << m.name() << "not found!?";
             break;
         }
+    default:
+        break; // Unhandled.
     }
     return -1;
 }

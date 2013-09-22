@@ -407,7 +407,7 @@ void packDataValue(QVariant_ *var, DataValue *value)
     // There's apparently no better way to handle this since that's
     // how the types with well defined sizes (qint64) are mapped to
     // meta-types (QMetaType::LongLong).
-    switch (qvar->type()) {
+    switch ((int)qvar->type()) {
     case QVariant::Invalid:
         value->dataType = DTInvalid;
         break;
