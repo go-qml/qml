@@ -4,7 +4,7 @@
 //
 // This package is in an alpha stage, and still in heavy development. APIs may
 // change, and things may break.
-// 
+//
 // At this time contributors and developers that are interested in tracking the
 // development closely are encouraged to use it. If you'd prefer a more stable
 // release, please hold on a bit and subscribe to the mailing list for news. It's
@@ -26,6 +26,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -118,8 +119,17 @@ func (e *Engine) Load(location string, r io.Reader) (*Object, error) {
 	if err != nil {
 		return nil, err
 	}
-	if colon, slash := strings.Index(location, ":"), strings.Index(location, "/"); slash <= colon {
-		location = "file:" + location
+	if colon, slash := strings.Index(location, ":"), strings.Index(location, "/"); colon == -1 || slash <= colon {
+		// TODO Better testing for this.
+		if filepath.IsAbs(location) {
+			location = "file:" + filepath.ToSlash(location)
+		} else {
+			dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+			if err != nil {
+				return nil, fmt.Errorf("cannot obtain absolute path: %v", err)
+			}
+			location = "file:" + filepath.ToSlash(filepath.Join(dir, location))
+		}
 	}
 
 	cdata, cdatalen := unsafeBytesData(data)
