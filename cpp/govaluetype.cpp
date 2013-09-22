@@ -5,7 +5,7 @@
     template<> GoTypeInfo *GoValueType<N>::typeInfo = 0; \
     template<> GoTypeSpec_ *GoValueType<N>::typeSpec = 0;
 
-DEFINE_GOVALUETYPE(1);
+DEFINE_GOVALUETYPE(1)
 
 // TODO Define N of these.
 

@@ -89,6 +89,17 @@ void componentSetData(QQmlComponent_ *component, const char *data, int dataLen, 
     reinterpret_cast<QQmlComponent *>(component)->setData(qdata, qsurl);
 }
 
+static char *local_strdup(const char *str)
+{
+    char *strcopy = 0;
+    if (str) {
+        size_t len = strlen(str) + 1;
+        strcopy = (char *)malloc(len);
+        memcpy(strcopy, str, len);
+    }
+    return strcopy;
+}
+
 char *componentErrorString(QQmlComponent_ *component)
 {
     QQmlComponent *qcomponent = reinterpret_cast<QQmlComponent *>(component);
@@ -97,9 +108,9 @@ char *componentErrorString(QQmlComponent_ *component)
     }
     if (qcomponent->isError()) {
         QByteArray ba = qcomponent->errorString().toUtf8();
-        return strdup(ba.constData());
+        return local_strdup(ba.constData());
     }
-    return strdup("component is not ready (why!?)");
+    return local_strdup("component is not ready (why!?)");
 }
 
 QObject_ *componentCreate(QQmlComponent_ *component, QQmlContext_ *context)
@@ -404,7 +415,7 @@ void packDataValue(QVariant_ *var, DataValue *value)
         {
             value->dataType = DTString;
             QByteArray ba = qvar->toByteArray();
-            *(char**)(value->data) = strdup(ba.constData());
+            *(char**)(value->data) = local_strdup(ba.constData());
             value->len = ba.size();
             break;
         }
