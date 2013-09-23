@@ -29,16 +29,26 @@ API documentation
 The [API documentation](http://godoc.org/github.com/niemeyer/qml) is available in the usual location.
 
 
-Requirements
+Installation
 ------------
 
-To try the _alpha release_, you'll need:
+To try the _alpha release_ you'll need:
 
   * Go 1.2 (release candidate), for the C++ support of _go build_
   * The current [Ubuntu SDK](http://developer.ubuntu.com/get-started/), or equivalent Qt libraries
   * Packages _qtbase5-private-dev_ and _qtdeclarative5-private-dev_ or equivalent header files, for the dynamic meta object support
 
-In practice, if you are in Ubuntu, this should work for the Qt dependencies:
+See below for more details about getting these requirements installed in different environments and operating systems.
+
+After the requirements are satisfied, _go get_ should work as usual:
+
+    go get github.com/niemeyer/qml
+
+
+Requirements on Ubuntu
+----------------------
+
+If you are using Ubuntu, this should work for the Qt dependencies:
 
     $ sudo add-apt-repository ppa:ubuntu-sdk-team/ppa
     $ sudo apt-get update
@@ -56,13 +66,12 @@ and Go 1.2 may be installed using [godeb](http://blog.labix.org/2013/06/15/in-fl
     1.2rc1
     $ godeb install 1.2rc1
 
-If you're not in Ubuntu and your operating system does not offer these dependencies,
-you may have success installing [Go 1.2rc1](https://code.google.com/p/go/downloads/list?can=1&q=go1.2rc1)
-and [Qt 5.0.2](http://download.qt-project.org/archive/qt/5.0/5.0.2/) directly from the upstreams.
 
-Installation
-------------
+Requirements everywhere else
+----------------------------
 
-Once the requirements above are satisfied, _go get_ should work as usual:
+If your operating system does not offer these dependencies readily,
+you may still have success installing [Go 1.2rc1](https://code.google.com/p/go/downloads/list?can=1&q=go1.2rc1)
+and [Qt 5.0.2](http://download.qt-project.org/archive/qt/5.0/5.0.2/)
+directly from the upstreams.
 
-    go get github.com/niemeyer/qml
