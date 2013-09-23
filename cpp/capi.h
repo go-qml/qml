@@ -23,6 +23,7 @@ typedef void QQmlContext_;
 typedef void QQmlComponent_;
 typedef void QQuickView_;
 typedef void QMessageLogContext_;
+typedef void QImage_;
 typedef void GoValue_;
 typedef void GoAddr;
 typedef void GoTypeSpec_;
@@ -125,6 +126,11 @@ void viewShow(QQuickView_ *view);
 void viewHide(QQuickView_ *view);
 void viewConnectHidden(QQuickView_ *view);
 QObject_ *viewRootObject(QQuickView_ *view);
+QImage_ *viewGrabWindow(QQuickView_ *view);
+
+void delImage(QImage_ *image);
+void imageSize(QImage_ *image, int *width, int *height);
+const unsigned char *imageBits(QImage_ *image);
 
 QString_ *newString(const char *data, int len);
 void delString(QString_ *s);

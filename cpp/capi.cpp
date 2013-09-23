@@ -165,6 +165,32 @@ QObject_ *viewRootObject(QQuickView_ *view)
     return qview->rootObject();
 }
 
+QImage_ *viewGrabWindow(QQuickView_ *view)
+{
+    QQuickView *qview = reinterpret_cast<QQuickView *>(view);
+    QImage *image = new QImage;
+    *image = qview->grabWindow().convertToFormat(QImage::Format_ARGB32_Premultiplied);
+    return image;
+}
+
+void delImage(QImage_ *image)
+{
+    delete reinterpret_cast<QImage *>(image);
+}
+
+void imageSize(QImage_ *image, int *width, int *height)
+{
+    QImage *qimage = reinterpret_cast<QImage *>(image);
+    *width = qimage->width();
+    *height = qimage->height();
+}
+
+const unsigned char *imageBits(QImage_ *image)
+{
+    QImage *qimage = reinterpret_cast<QImage *>(image);
+    return qimage->constBits();
+}
+
 void contextSetObject(QQmlContext_ *context, QObject_ *value)
 {
     QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);

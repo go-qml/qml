@@ -1,0 +1,67 @@
+package main
+
+import (
+	"fmt"
+	"github.com/niemeyer/qml"
+	"image/png"
+	"os"
+)
+
+const webview = `
+import QtQuick 2.0
+import QtWebKit 3.0
+
+WebView {
+    width: 1024
+    height: 768
+    onLoadingChanged: loadRequest.status == WebView.LoadSucceededStatus && ctrl.snapshot()
+}
+`
+
+func main() {
+	if len(os.Args) != 3 {
+		fmt.Fprintf(os.Stderr, "usage: %s <url> <png path>\n", os.Args[0])
+		os.Exit(1)
+	}
+	if err := run(); err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
+}
+
+func run() error {
+	qml.Init(nil)
+	engine := qml.NewEngine()
+	component, err := engine.LoadString("webview.qml", webview)
+	if err != nil {
+		return err
+	}
+	ctrl := &Control{
+		done: make(chan error),
+		win:  component.CreateWindow(nil),
+	}
+	engine.Context().SetVar("ctrl", ctrl)
+	ctrl.win.Root().Set("url", os.Args[1])
+	ctrl.win.Show()
+	return <-ctrl.done
+}
+
+type Control struct {
+	win  *qml.Window
+	done chan error
+}
+
+func (ctrl *Control) Snapshot() {
+	f, err := os.Create(os.Args[2])
+	if err != nil {
+		ctrl.done <- err
+		return
+	}
+	defer f.Close()
+	img := ctrl.win.Snapshot()
+	err = png.Encode(f, img)
+	if err != nil {
+		os.Remove(os.Args[2])
+	}
+	ctrl.done <- err
+}

@@ -23,10 +23,12 @@ import "C"
 import (
 	"errors"
 	"fmt"
+	"image"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -379,7 +381,6 @@ func (obj *Object) String(property string) string {
 	return s
 }
 
-
 // TODO Consider getting rid of int32 and float32 results. Always returning 64-bit
 //      results will make it easier on clients that want to handle arbitrary typing.
 
@@ -542,6 +543,38 @@ func (win *Window) Wait() {
 		C.viewConnectHidden(win.obj.addr)
 	})
 	m.Lock()
+}
+
+// Snapshot returns an image with the visible contents of the window.
+// The main GUI thread is paused while the data is being acquired.
+func (win *Window) Snapshot() image.Image {
+	// TODO Test this.
+	var cimage unsafe.Pointer
+	gui(func() {
+		cimage = C.viewGrabWindow(win.obj.addr)
+	})
+	defer C.delImage(cimage)
+
+	// This should be safe to be done out of the main GUI thread.
+	var cwidth, cheight C.int
+	C.imageSize(cimage, &cwidth, &cheight)
+
+	var cbits []byte
+	cbitsh := (*reflect.SliceHeader)((unsafe.Pointer)(&cbits))
+	cbitsh.Data = (uintptr)((unsafe.Pointer)(C.imageBits(cimage)))
+	cbitsh.Len = int(cwidth * cheight * 8) // RRGGBBAA
+	cbitsh.Cap = cbitsh.Len
+
+	image := image.NewRGBA(image.Rect(0, 0, int(cwidth), int(cheight)))
+	l := int(cwidth * cheight * 4)
+	for i := 0; i < l; i += 4 {
+		var c uint32 = *(*uint32)(unsafe.Pointer(&cbits[i]))
+		image.Pix[i+0] = byte(c >> 16)
+		image.Pix[i+1] = byte(c >> 8)
+		image.Pix[i+2] = byte(c)
+		image.Pix[i+3] = byte(c >> 24)
+	}
+	return image
 }
 
 // Destroy destroys the window.
