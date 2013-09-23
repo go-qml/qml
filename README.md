@@ -11,6 +11,7 @@ the development closely are encouraged to use it. If you'd prefer a more
 stable release, please hold on a bit and subscribe to the mailing list
 for news. It's in a pretty good state, so it shall not take too long.
 
+
 Demo
 ----
 
@@ -23,6 +24,7 @@ Community
 Please join the [mailing list](https://groups.google.com/forum/#!forum/go-qml) for
 following relevant development news and discussing project details.
 
+
 API documentation
 ------------------
 
@@ -32,11 +34,11 @@ The [API documentation](http://godoc.org/github.com/niemeyer/qml) is available i
 Installation
 ------------
 
-To try the _alpha release_ you'll need:
+To try the alpha release you'll need:
 
   * Go 1.2 (release candidate), for the C++ support of _go build_
-  * The current [Ubuntu SDK](http://developer.ubuntu.com/get-started/), or equivalent Qt libraries
-  * Packages _qtbase5-private-dev_ and _qtdeclarative5-private-dev_ or equivalent header files, for the dynamic meta object support
+  * Qt 5.0.X or 5.1.X with the development files
+  * The Qt headers qmetaobject_p.h and qmetaobjectbuilder_p.h, for the dynamic meta object support
 
 See below for more details about getting these requirements installed in different environments and operating systems.
 
@@ -48,7 +50,7 @@ After the requirements are satisfied, _go get_ should work as usual:
 Requirements on Ubuntu
 ----------------------
 
-If you are using Ubuntu, this should work for the Qt dependencies:
+If you are using Ubuntu, the [Ubuntu SDK](http://developer.ubuntu.com/get-started/) will take care of the Qt dependencies:
 
     $ sudo add-apt-repository ppa:ubuntu-sdk-team/ppa
     $ sudo apt-get update
@@ -65,6 +67,25 @@ and Go 1.2 may be installed using [godeb](http://blog.labix.org/2013/06/15/in-fl
     $ godeb list | head -1
     1.2rc1
     $ godeb install 1.2rc1
+    $ go get github.com/niemeyer/qml
+
+
+Requirements on Mac OS
+----------------------
+
+On Mac OS you'll need gcc (not a symlinked clang, as it complains about `-std=c++11`), and
+must specify the `CXX`, `PKG_CONFIG_PATH`, and `CGO_CPPFLAGS` environment variables.
+
+Something along these lines should be effective:
+
+    $ brew tap homebrew/versions
+    $ brew install gcc48 qt5
+
+    $ export PKG_CONFIG_PATH=`brew --prefix qt5`/lib/pkgconfig
+    $ QT5VERSION=`pkg-config --cflags Qt5Core | sed 's/^.*\(5\..\..\).*/\1/g'`
+    $ # For "private/qmetaobject_p.h" inclusion
+    $ export CGO_CPPFLAGS=-I`brew --prefix qt5`/include/QtCore/$QT5VERSION/QtCore
+    $ CXX=g++-4.8 go get github.com/niemeyer/qml
 
 
 Requirements everywhere else
@@ -74,4 +95,3 @@ If your operating system does not offer these dependencies readily,
 you may still have success installing [Go 1.2rc1](https://code.google.com/p/go/downloads/list?can=1&q=go1.2rc1)
 and [Qt 5.0.2](http://download.qt-project.org/archive/qt/5.0/5.0.2/)
 directly from the upstreams.
-
