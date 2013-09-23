@@ -629,17 +629,21 @@ func registerType(spec *TypeSpec, singleton bool) error {
 
 		cloc := C.CString(localSpec.Location)
 		cname := C.CString(localSpec.Name)
+		cres := C.int(0)
 		if singleton {
-			C.registerSingleton(cloc, C.int(localSpec.Major), C.int(localSpec.Minor), cname, typeInfo(sample), unsafe.Pointer(&localSpec))
+			cres = C.registerSingleton(cloc, C.int(localSpec.Major), C.int(localSpec.Minor), cname, typeInfo(sample), unsafe.Pointer(&localSpec))
 		} else {
-			C.registerType(cloc, C.int(localSpec.Major), C.int(localSpec.Minor), cname, typeInfo(sample), unsafe.Pointer(&localSpec))
+			cres = C.registerType(cloc, C.int(localSpec.Major), C.int(localSpec.Minor), cname, typeInfo(sample), unsafe.Pointer(&localSpec))
 		}
-		// TODO Check if qmlRegisterType keeps a reference to those.
-		//C.free(unsafe.Pointer(cloc))
-		//C.free(unsafe.Pointer(cname))
-		types = append(types, &localSpec)
+		// It doesn't look like it keeps references to these, but it's undocumented and unclear.
+		C.free(unsafe.Pointer(cloc))
+		C.free(unsafe.Pointer(cname))
+		if cres == -1 {
+			err = fmt.Errorf("QML engine failed to register type; invalid type location or name?")
+		} else {
+			types = append(types, &localSpec)
+		}
 	})
 
-	// TODO Are there really no errors possible from qmlRegisterType?
 	return err
 }

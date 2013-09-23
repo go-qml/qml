@@ -143,8 +143,8 @@ void unpackDataValue(DataValue *value, QVariant_ *result);
 
 QVariantList_ *newVariantList(DataValue *list, int len);
 
-void registerType(char *location, int major, int minor, char *name, GoTypeInfo *typeInfo, GoTypeSpec_ *spec);
-void registerSingleton(char *location, int major, int minor, char *name, GoTypeInfo *typeInfo, GoTypeSpec_ *spec);
+int registerType(char *location, int major, int minor, char *name, GoTypeInfo *typeInfo, GoTypeSpec_ *spec);
+int registerSingleton(char *location, int major, int minor, char *name, GoTypeInfo *typeInfo, GoTypeSpec_ *spec);
 
 void installLogHandler();
 
