@@ -7,6 +7,7 @@
 
 #include "govalue.h"
 #include "govaluetype.h"
+#include "connector.h"
 #include "capi.h"
 
 void newGuiApplication()
@@ -316,6 +317,27 @@ void objectSetParent(QObject_ *object, QObject_ *parent)
     QObject *qparent = reinterpret_cast<QObject *>(parent);
 
     qobject->setParent(qparent);
+}
+
+int objectConnect(QObject_ *object, const char *signal, int signalLen, void *data)
+{
+    QObject *qobject = reinterpret_cast<QObject *>(object);
+    QByteArray qsignal(signal, signalLen);
+    const QMetaObject *meta = qobject->metaObject();
+    // Walk backwards so descendants have priority.
+    for (int i = meta->methodCount()-1; i >= 0; i--) {
+            QMetaMethod method = meta->method(i);
+            if (method.methodType() == QMetaMethod::Signal) {
+                QByteArray name = method.name();
+                if (name.length() == signalLen && qstrncmp(name.constData(), signal, signalLen) == 0) {
+                    Connector *connector = new Connector(qobject, data);
+                    const QMetaObject *connmeta = connector->metaObject();
+                    QObject::connect(qobject, method, connector, connmeta->method(connmeta->methodOffset()+0));
+                    return 1;
+                }
+            }
+    }
+    return 0;
 }
 
 QQmlContext_ *objectContext(QObject_ *object)

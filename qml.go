@@ -498,6 +498,56 @@ func (obj *Object) Destroy() {
 	})
 }
 
+// TODO Proper garbage collection for these.
+var funcRefs = make(map[interface{}]bool)
+
+// On connects the named signal from obj with the provided function, so that
+// when obj next emits that signal, the function is called with the parameters
+// the signal carries.
+//
+// NOTE: Signal connection support is still being worked on. At the moment
+// the provided function must not take any parameters.
+//
+// For example:
+//
+//     obj.On("clicked", func() { fmt.Println("obj got a click") })
+//
+// Note that Go uses the real signal name, rather than the one used when
+// defining QML signal handlers ("clicked" rather than "onClicked").
+//
+// For more details regarding signals and QML see:
+//
+//     http://qt-project.org/doc/qt-5.0/qtqml/qml-qtquick2-connections.html
+//
+func (obj *Object) On(signal string, function interface{}) {
+	if reflect.ValueOf(function).Kind() != reflect.Func {
+		panic("function provided to On is not a function or method")
+	}
+	// TODO Support signal parameters (don't forget to remove the documentation note).
+	if reflect.ValueOf(function).Type().NumIn() != 0 {
+		panic("connection support is still being worked on; at the moment the function provided to On cannot take arguments")
+	}
+	csignal, csignallen := unsafeStringData(signal)
+	found := C.int(0)
+	gui(func() {
+		// TODO Inform the number of parameters in function, so that it can fail early,
+		//      and avoid building DataValue parameters that won't be used.
+		found = C.objectConnect(obj.addr, csignal, csignallen, unsafe.Pointer(&function))
+		funcRefs[&function] = true
+	})
+	if found != 1 {
+		// TODO Add the type name of obj here.
+		panic(fmt.Sprintf("object has no %q signal", signal))
+	}
+}
+
+//export hookSignal
+func hookSignal(objectp unsafe.Pointer, functionp unsafe.Pointer, params *C.DataValue, paramsLen C.int) {
+	function := *(*interface{})(functionp)
+	functionv := reflect.ValueOf(function)
+	functionv.Call(nil)
+}
+
 // TODO Object.Connect(name, func(...) {})
 
 // TODO Signal emitting support for go values.

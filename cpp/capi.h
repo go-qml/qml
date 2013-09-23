@@ -115,6 +115,7 @@ void objectInvoke(QObject_ *object, const char *method, DataValue *result, DataV
 void objectFindChild(QObject_ *object, QString_ *name, DataValue *result);
 QQmlContext_ *objectContext(QObject_ *object);
 int objectIsComponent(QObject_ *object);
+int objectConnect(QObject_ *object, const char *signal, int signalLen, void *data);
 
 QQmlComponent_ *newComponent(QQmlEngine_ *engine, QObject_ *parent);
 void componentSetData(QQmlComponent_ *component, const char *data, int dataLen, const char *url, int urlLen);
@@ -156,6 +157,7 @@ void hookGoValueCallMethod(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, D
 void hookGoValueDestroyed(QQmlEngine_ *engine, GoAddr *addr);
 GoAddr *hookGoValueTypeNew(GoValue_ *value, GoTypeSpec_ *spec);
 void hookWindowHidden(QObject_ *addr);
+void hookSignal(QObject_ *sender, void *data, DataValue *params, int paramsLen);
 
 #ifdef __cplusplus
 } // extern "C"

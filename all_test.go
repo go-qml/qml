@@ -617,6 +617,24 @@ var tests = []struct {
 		},
 		DoneLog: "item destroyed",
 	},
+	{
+		Summary: "Connect to a QML signal",
+		QML:     `
+			Item {
+				id: item
+				signal doIt()
+				function emitDoIt() { item.doIt() }
+			}
+		`,
+		Done: func(d *TestData) {
+			itWorks := false
+			d.compinst.On("doIt", func() { itWorks = true })
+			d.Check(itWorks, Equals, false)
+			d.compinst.Call("emitDoIt")
+			d.Check(itWorks, Equals, true)
+			d.Check(func() { d.compinst.On("missing", func() {}) }, Panics, `object has no "missing" signal`)
+		},
+	},
 }
 
 var tablef = flag.String("tablef", "", "if provided, TestTable only runs tests with a summary matching the regexp")
