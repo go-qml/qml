@@ -4,9 +4,9 @@ import (
 	"encoding/base64"
 	"flag"
 	"fmt"
+	"github.com/niemeyer/qml"
 	"io/ioutil"
 	. "launchpad.net/gocheck"
-	"github.com/niemeyer/qml"
 	"os"
 	"regexp"
 	"runtime"
@@ -161,7 +161,7 @@ func (s *S) TestContextGetMissing(c *C) {
 func (s *S) TestContextSetVars(c *C) {
 	component, err := s.engine.LoadString("file.qml", "import QtQuick 2.0\nItem { width: 42 }")
 	c.Assert(err, IsNil)
-	compinst := component.Create(nil)
+	root := component.Create(nil)
 
 	vars := TestType{
 		StringValue:  "<content>",
@@ -172,7 +172,7 @@ func (s *S) TestContextSetVars(c *C) {
 		Float64Value: 4.2,
 		Float32Value: 4.2,
 		AnyValue:     nil,
-		ObjectValue:  compinst,
+		ObjectValue:  root,
 	}
 	s.context.SetVars(&vars)
 
@@ -217,7 +217,7 @@ type TestData struct {
 	engine    *qml.Engine
 	context   *qml.Context
 	component *qml.Object
-	compinst  *qml.Object
+	root      *qml.Object
 	value     *TestType
 }
 
@@ -268,13 +268,13 @@ var tests = []struct {
 			}
 		`,
 		Done: func(d *TestData) {
-			d.Check(d.compinst.Int("width"), Equals, 123)
-			d.Check(d.compinst.String("s"), Equals, "foo")
+			d.Check(d.root.Int("width"), Equals, 123)
+			d.Check(d.root.String("s"), Equals, "foo")
 		},
 	},
 	{
 		Summary: "Read object properties",
-		QML:     `
+		QML: `
 			Item {
 				property bool boolp: true
 				property int intp: 1
@@ -287,7 +287,7 @@ var tests = []struct {
 			}
 		`,
 		Done: func(d *TestData) {
-			obj := d.compinst
+			obj := d.root
 			d.Check(obj.Bool("boolp"), Equals, true)
 			d.Check(obj.Int("intp"), Equals, 1)
 			d.Check(obj.Int64("intp"), Equals, int64(1))
@@ -328,9 +328,9 @@ var tests = []struct {
 		`,
 		Done: func(d *TestData) {
 			value := TestType{StringValue: "<content>"}
-			d.compinst.Set("obj", &value)
-			d.compinst.Set("width", 300)
-			d.compinst.Set("height", 200)
+			d.root.Set("obj", &value)
+			d.root.Set("width", 300)
+			d.root.Set("height", 200)
 		},
 		DoneLog: "String is <content>.*Width is 300.*Height is 200",
 	},
@@ -347,9 +347,9 @@ var tests = []struct {
 		Summary: "Object finding via objectName",
 		QML:     `Item { Item { objectName: "subitem"; property string s: "<found>" } }`,
 		Done: func(d *TestData) {
-			obj := d.compinst.ObjectByName("subitem")
+			obj := d.root.ObjectByName("subitem")
 			d.Check(obj.String("s"), Equals, "<found>")
-			d.Check(func() { d.compinst.ObjectByName("foo") }, Panics, `cannot find descendant with objectName == "foo"`)
+			d.Check(func() { d.root.ObjectByName("foo") }, Panics, `cannot find descendant with objectName == "foo"`)
 		},
 	},
 	{
@@ -446,7 +446,7 @@ var tests = []struct {
 		Done: func(d *TestData) {
 			d.value.StringValue = "<new>"
 			qml.Changed(d.value, &d.value.StringValue)
-			d.Check(d.compinst.String("s"), Equals, "String is <new>")
+			d.Check(d.root.String("s"), Equals, "String is <new>")
 		},
 	},
 	{
@@ -520,19 +520,19 @@ var tests = []struct {
 	{
 		Summary: "Call a QML method with no result or parameters from Go",
 		QML:     `Item { function f() { console.log("f was called"); } }`,
-		Done:    func(d *TestData) { d.Check(d.compinst.Call("f"), IsNil) },
+		Done:    func(d *TestData) { d.Check(d.root.Call("f"), IsNil) },
 		DoneLog: "f was called",
 	},
 	{
 		Summary: "Call a QML method with result and parameters from Go",
 		QML:     `Item { function add(a, b) { return a+b; } }`,
-		Done:    func(d *TestData) { d.Check(d.compinst.Call("add", 1, 2), Equals, int32(3)) },
+		Done:    func(d *TestData) { d.Check(d.root.Call("add", 1, 2), Equals, int32(3)) },
 	},
 	{
 		Summary: "Call a QML method with a custom type",
 		Value:   TestType{StringValue: "<content>"},
 		QML:     `Item { function log(value) { console.log("String is", value.stringValue) } }`,
-		Done:    func(d *TestData) { d.compinst.Call("log", d.value) },
+		Done:    func(d *TestData) { d.root.Call("log", d.value) },
 		DoneLog: "String is <content>",
 	},
 	{
@@ -544,7 +544,7 @@ var tests = []struct {
 			}
 		`,
 		Done: func(d *TestData) {
-			d.Check(d.compinst.Call("f").(*qml.Object).Int("width"), Equals, 300)
+			d.Check(d.root.Call("f").(*qml.Object).Int("width"), Equals, 300)
 		},
 	},
 	{
@@ -558,10 +558,10 @@ var tests = []struct {
 		Done: func(d *TestData) {
 			value := TestType{StringValue: "<content>"}
 			stats := qml.Stats()
-			d.compinst.Call("hold", &value)
+			d.root.Call("hold", &value)
 			d.Check(qml.Stats().ValuesAlive, Equals, stats.ValuesAlive+1)
-			d.compinst.Call("log")
-			d.compinst.Call("hold", nil)
+			d.root.Call("log")
+			d.root.Call("hold", nil)
 			d.Check(qml.Stats().ValuesAlive, Equals, stats.ValuesAlive)
 		},
 		DoneLog: "String is <content>",
@@ -593,17 +593,17 @@ var tests = []struct {
 	{
 		Summary: "Pass a *Value back into a method",
 		QML:     `Rectangle { width: 300; function log(r) { console.log("Width is", r.width) } }`,
-		Done:    func(d *TestData) { d.compinst.Call("log", d.compinst) },
+		Done:    func(d *TestData) { d.root.Call("log", d.root) },
 		DoneLog: "Width is 300",
 	},
 	{
 		Summary: "Create a QML-defined component in Go",
 		QML:     `Item { property var comp: Component { Rectangle { width: 300 } } }`,
 		Done: func(d *TestData) {
-			rect := d.compinst.Object("comp").Create(nil)
+			rect := d.root.Object("comp").Create(nil)
 			d.Check(rect.Int("width"), Equals, 300)
-			d.Check(func() { d.compinst.Create(nil) }, Panics, "object is not a component")
-			d.Check(func() { d.compinst.CreateWindow(nil) }, Panics, "object is not a component")
+			d.Check(func() { d.root.Create(nil) }, Panics, "object is not a component")
+			d.Check(func() { d.root.CreateWindow(nil) }, Panics, "object is not a component")
 		},
 	},
 	{
@@ -611,15 +611,15 @@ var tests = []struct {
 		QML:     `Item { Component.onDestruction: console.log("item destroyed") }`,
 		Done: func(d *TestData) {
 			// Create a local instance to avoid double-destroying it.
-			compinst := d.component.Create(nil)
-			compinst.Call("deleteLater")
+			root := d.component.Create(nil)
+			root.Call("deleteLater")
 			time.Sleep(100 * time.Millisecond)
 		},
 		DoneLog: "item destroyed",
 	},
 	{
 		Summary: "Connect to a QML signal",
-		QML:     `
+		QML: `
 			Item {
 				id: item
 				signal doIt()
@@ -628,11 +628,11 @@ var tests = []struct {
 		`,
 		Done: func(d *TestData) {
 			itWorks := false
-			d.compinst.On("doIt", func() { itWorks = true })
+			d.root.On("doIt", func() { itWorks = true })
 			d.Check(itWorks, Equals, false)
-			d.compinst.Call("emitDoIt")
+			d.root.Call("emitDoIt")
 			d.Check(itWorks, Equals, true)
-			d.Check(func() { d.compinst.On("missing", func() {}) }, Panics, `object has no "missing" signal`)
+			d.Check(func() { d.root.On("missing", func() {}) }, Panics, `object has no "missing" signal`)
 		},
 	},
 }
@@ -702,11 +702,11 @@ func (s *S) TestTable(c *C) {
 
 		// The component instance is destroyed before the loop ends below,
 		// but do a defer to ensure it will be destroyed if the test fails.
-		compinst := component.Create(nil)
-		defer compinst.Destroy()
+		root := component.Create(nil)
+		defer root.Destroy()
 
 		testData.component = component
-		testData.compinst = compinst
+		testData.root = root
 
 		if t.QMLLog != "" {
 			logged := c.GetTestLog()[len(logMark):]
@@ -756,7 +756,7 @@ func (s *S) TestTable(c *C) {
 			}
 		}
 
-		compinst.Destroy()
+		root.Destroy()
 
 		if c.Failed() {
 			c.FailNow() // So relevant logs are at the bottom.
