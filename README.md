@@ -107,7 +107,7 @@ If you fancy building everything yourselves instead of downloading binaries that
 
 Set the following environment variables:
 
-* CFLAGS         Add Qt include path
+* CFLAGS         Add Qt include path and the path of the subfolder 'QtCore\5.X.X\QtCore' under the include folder, replaced with your Qt version.
 * LIBRARY_PATH   Add Qt lib path
 * PATH           And Qt binary path
 
