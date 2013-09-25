@@ -111,7 +111,7 @@ Set the following environment variables:
 * LIBRARY_PATH  Add Qt lib path
 * PATH          And Qt binary path
 
-Assmuning you installed Qt in c:\qt\Qt5.1.1\
+Assuming you installed Qt in c:\qt\Qt5.1.1\
 that would yield adding the following to the env vars (in environment variables dialog):
 
 CPATH += c:\qt\Qt5.1.1\5.1.1\mingw48_32\include;c:\qt\Qt5.1.1\5.1.1\mingw48_32\include\QtCore\5.1.1\QtCore
