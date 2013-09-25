@@ -107,11 +107,18 @@ If you fancy building everything yourselves instead of downloading binaries that
 
 Set the following environment variables:
 
-* CFLAGS         Add Qt include path and the path of the subfolder 'QtCore\5.X.X\QtCore' under the include folder, replaced with your Qt version.
-* LIBRARY_PATH   Add Qt lib path
-* PATH           And Qt binary path
+* CPATH         Add Qt include path and the path of the subfolder 'QtCore\5.X.X\QtCore' under the include folder, replaced with your Qt version.
+* LIBRARY_PATH  Add Qt lib path
+* PATH          And Qt binary path
 
-And finally from the command line:
+Assmuning you installed Qt in c:\qt\Qt5.1.1\
+that would yield adding the following to the env vars (in environment variables dialog):
+
+CPATH += c:\qt\Qt5.1.1\5.1.1\mingw48_32\include;c:\qt\Qt5.1.1\5.1.1\mingw48_32\include\QtCore\5.1.1\QtCore
+LIBRARY_PATH += c:\qt\Qt5.1.1\5.1.1\mingw48_32\lib
+PATH += c:\qt\Qt5.1.1\5.1.1\mingw48_32\bin
+
+And finally from the command line (you have to reopen the shell for the env var changes to take effect):
 
 $ go get github.com/niemeyer/qml
 
