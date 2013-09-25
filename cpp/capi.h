@@ -21,6 +21,7 @@ typedef void QString_;
 typedef void QQmlEngine_;
 typedef void QQmlContext_;
 typedef void QQmlComponent_;
+typedef void QQuickWindow_;
 typedef void QQuickView_;
 typedef void QMessageLogContext_;
 typedef void QImage_;
@@ -115,19 +116,21 @@ void objectInvoke(QObject_ *object, const char *method, DataValue *result, DataV
 void objectFindChild(QObject_ *object, QString_ *name, DataValue *result);
 QQmlContext_ *objectContext(QObject_ *object);
 int objectIsComponent(QObject_ *object);
+int objectIsWindow(QObject_ *object);
+int objectIsView(QObject_ *object);
 int objectConnect(QObject_ *object, const char *signal, int signalLen, void *data);
 
 QQmlComponent_ *newComponent(QQmlEngine_ *engine, QObject_ *parent);
 void componentSetData(QQmlComponent_ *component, const char *data, int dataLen, const char *url, int urlLen);
 char *componentErrorString(QQmlComponent_ *component);
 QObject_ *componentCreate(QQmlComponent_ *component, QQmlContext_ *context);
-QQuickView_ *componentCreateView(QQmlComponent_ *component, QQmlContext_ *context);
+QQuickWindow_ *componentCreateWindow(QQmlComponent_ *component, QQmlContext_ *context);
 
-void viewShow(QQuickView_ *view);
-void viewHide(QQuickView_ *view);
-void viewConnectHidden(QQuickView_ *view);
-QObject_ *viewRootObject(QQuickView_ *view);
-QImage_ *viewGrabWindow(QQuickView_ *view);
+void windowShow(QQuickWindow_ *win);
+void windowHide(QQuickWindow_ *win);
+void windowConnectHidden(QQuickWindow_ *win);
+QObject_ *windowRootObject(QQuickWindow_ *win);
+QImage_ *windowGrabWindow(QQuickWindow_ *win);
 
 void delImage(QImage_ *image);
 void imageSize(QImage_ *image, int *width, int *height);

@@ -579,7 +579,7 @@ var tests = []struct {
 		Done:   func(d *TestData) { os.Remove("test.gif") },
 	},
 	{
-		Summary: "Test that window.Root works",
+		Summary: "Create window with non-window root object",
 		QML:     `Rectangle { width: 300; height: 200; function inc(x) { return x+1 } }`,
 		Done: func(d *TestData) {
 			win := d.component.CreateWindow(nil)
@@ -588,6 +588,20 @@ var tests = []struct {
 			d.Check(root.Int("height"), Equals, 200)
 			d.Check(root.Call("inc", 42), Equals, int32(43))
 			root.Destroy()
+		},
+	},
+	{
+		Summary: "Create window with window root object",
+		QML:     `
+			import QtQuick.Window 2.0
+			Window { title: "<title>"; width: 300; height: 200 }
+		`,
+		Done: func(d *TestData) {
+			win := d.component.CreateWindow(nil)
+			root := win.Root()
+			d.Check(root.String("title"), Equals, "<title>")
+			d.Check(root.Int("width"), Equals, 300)
+			d.Check(root.Int("height"), Equals, 200)
 		},
 	},
 	{

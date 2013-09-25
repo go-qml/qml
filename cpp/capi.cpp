@@ -125,7 +125,7 @@ QObject_ *componentCreate(QQmlComponent_ *component, QQmlContext_ *context)
     return qcomponent->create(qcontext);
 }
 
-QQuickView_ *componentCreateView(QQmlComponent_ *component, QQmlContext_ *context)
+QQuickWindow_ *componentCreateWindow(QQmlComponent_ *component, QQmlContext_ *context)
 {
     QQmlComponent *qcomponent = reinterpret_cast<QQmlComponent *>(component);
     QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
@@ -133,44 +133,49 @@ QQuickView_ *componentCreateView(QQmlComponent_ *component, QQmlContext_ *contex
     if (!qcontext) {
         qcontext = qmlContext(qcomponent);
     }
-    QObject *instance = qcomponent->create(qcontext);
-    QQuickView *view = new QQuickView(qmlEngine(qcomponent), 0);
-    view->setContent(qcomponent->url(), qcomponent, instance);
-    view->setResizeMode(QQuickView::SizeRootObjectToView);
-    return view;
+    QObject *win = qcomponent->create(qcontext);
+    if (!objectIsWindow(win)) {
+        QQuickView *view = new QQuickView(qmlEngine(qcomponent), 0);
+        view->setContent(qcomponent->url(), qcomponent, win);
+        view->setResizeMode(QQuickView::SizeRootObjectToView);
+        win = view;
+    }
+    return win;
 }
 
-void viewShow(QQuickView_ *view)
+void windowShow(QQuickWindow_ *win)
 {
-    reinterpret_cast<QQuickView *>(view)->show();
+    reinterpret_cast<QQuickWindow *>(win)->show();
 }
 
-void viewHide(QQuickView_ *view)
+void windowHide(QQuickWindow_ *win)
 {
-    reinterpret_cast<QQuickView *>(view)->hide();
+    reinterpret_cast<QQuickWindow *>(win)->hide();
 }
 
-void viewConnectHidden(QQuickView_ *view)
+void windowConnectHidden(QQuickWindow_ *win)
 {
-    QQuickView *qview = reinterpret_cast<QQuickView *>(view);
-    QObject::connect(qview, &QWindow::visibleChanged, [=](bool visible){
+    QQuickWindow *qwin = reinterpret_cast<QQuickWindow *>(win);
+    QObject::connect(qwin, &QWindow::visibleChanged, [=](bool visible){
         if (!visible) {
-            hookWindowHidden(view);
+            hookWindowHidden(win);
         }
     });
 }
 
-QObject_ *viewRootObject(QQuickView_ *view)
+QObject_ *windowRootObject(QQuickWindow_ *win)
 {
-    QQuickView *qview = reinterpret_cast<QQuickView *>(view);
-    return qview->rootObject();
+    if (objectIsView(win)) {
+        return reinterpret_cast<QQuickView *>(win)->rootObject();
+    }
+    return win;
 }
 
-QImage_ *viewGrabWindow(QQuickView_ *view)
+QImage_ *windowGrabWindow(QQuickWindow_ *win)
 {
-    QQuickView *qview = reinterpret_cast<QQuickView *>(view);
+    QQuickWindow *qwin = reinterpret_cast<QQuickWindow *>(win);
     QImage *image = new QImage;
-    *image = qview->grabWindow().convertToFormat(QImage::Format_ARGB32_Premultiplied);
+    *image = qwin->grabWindow().convertToFormat(QImage::Format_ARGB32_Premultiplied);
     return image;
 }
 
@@ -349,6 +354,18 @@ int objectIsComponent(QObject_ *object)
 {
     QObject *qobject = reinterpret_cast<QObject *>(object);
     return dynamic_cast<QQmlComponent *>(qobject) ? 1 : 0;
+}
+
+int objectIsWindow(QObject_ *object)
+{
+    QObject *qobject = reinterpret_cast<QObject *>(object);
+    return dynamic_cast<QQuickWindow *>(qobject) ? 1 : 0;
+}
+
+int objectIsView(QObject_ *object)
+{
+    QObject *qobject = reinterpret_cast<QObject *>(object);
+    return dynamic_cast<QQuickView *>(qobject) ? 1 : 0;
 }
 
 QString_ *newString(const char *data, int len)

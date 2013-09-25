@@ -480,7 +480,7 @@ func (obj *Object) CreateWindow(ctx *Context) *Window {
 		if ctx != nil {
 			ctxaddr = ctx.obj.addr
 		}
-		win.obj.addr = C.componentCreateView(obj.addr, ctxaddr)
+		win.obj.addr = C.componentCreateWindow(obj.addr, ctxaddr)
 	})
 	return &win
 }
@@ -560,23 +560,25 @@ type Window struct {
 // Show exposes the window.
 func (win *Window) Show() {
 	gui(func() {
-		C.viewShow(win.obj.addr)
+		C.windowShow(win.obj.addr)
 	})
 }
 
 // Hide hides the window.
 func (win *Window) Hide() {
 	gui(func() {
-		C.viewHide(win.obj.addr)
+		C.windowHide(win.obj.addr)
 	})
 }
 
-// Root returns the root object being rendered in the window.
+// Root returns the root object being rendered.
+//
+// If the window was defined in QML code, the root object is the window itself.
 func (win *Window) Root() *Object {
 	var obj Object
 	obj.engine = win.obj.engine
 	gui(func() {
-		obj.addr = C.viewRootObject(win.obj.addr)
+		obj.addr = C.windowRootObject(win.obj.addr)
 	})
 	return &obj
 }
@@ -590,7 +592,7 @@ func (win *Window) Wait() {
 		// TODO Must be able to wait for the same Window from multiple goroutines.
 		// TODO If the window is not visible, must return immediately.
 		waitingWindows[win.obj.addr] = &m
-		C.viewConnectHidden(win.obj.addr)
+		C.windowConnectHidden(win.obj.addr)
 	})
 	m.Lock()
 }
@@ -601,7 +603,7 @@ func (win *Window) Snapshot() image.Image {
 	// TODO Test this.
 	var cimage unsafe.Pointer
 	gui(func() {
-		cimage = C.viewGrabWindow(win.obj.addr)
+		cimage = C.windowGrabWindow(win.obj.addr)
 	})
 	defer C.delImage(cimage)
 
