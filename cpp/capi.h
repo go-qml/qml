@@ -50,7 +50,7 @@ typedef enum {
 
     // Used in type information, not in an actual data value.
     DTAny     = 201, // Can hold any of the above types.
-    DTMethod  = 202,
+    DTMethod  = 202
 } DataType;
 
 typedef struct {
