@@ -91,36 +91,21 @@ Something along these lines should be effective:
 Requirements on Windows
 -----------------------
 
-On windows you need to install the following:
+On Windows you'll need the following:
 
-* Mingw-gcc 4.8.1
-Download the mingw-get-setup.exe from http://www.mingw.org, download and install the mingw32-gcc compiler from within the
-setup GUI.
+  * [MinGW gcc](http://sourceforge.net/projects/mingw/files/latest/download) 4.8.1 (install mingw-get and install the gcc from within the setup GUI)
+  * [Qt 5.1.1](http://download.qt-project.org/official_releases/qt/5.1/5.1.1/qt-windows-opensource-5.1.1-mingw48_opengl-x86-offline.exe) for MinGW 4.8
+  * [Go 1.2rc1](https://code.google.com/p/go/downloads/list?can=1&q=go1.2rc1) for Windows
 
-* Qt 5.1.1 or later
-Download Qt 5 binary setup installer for Windows (for Mingw 4.8) from http://qt-project.org and install
+Then, assuming Qt was installed under `C:\Qt5.1.1\`, set up the following environment variables in the respective configuration:
 
-* Go 1.2rc1 or later
-Download binary MSI installer for Windows from http://golang.org and install.
+    CPATH += C:\Qt5.1.1\5.1.1\mingw48_32\include;C:\Qt5.1.1\5.1.1\mingw48_32\include\QtCore\5.1.1\QtCore
+    LIBRARY_PATH += C:\Qt5.1.1\5.1.1\mingw48_32\lib
+    PATH += C:\Qt5.1.1\5.1.1\mingw48_32\bin
 
-If you fancy building everything yourselves instead of downloading binaries that is entirely possible too :)
+After reopening the shell for the environment changes to take effect, this should work:
 
-Set the following environment variables:
-
-* CPATH         Add Qt include path and the path of the subfolder 'QtCore\5.X.X\QtCore' under the include folder, replaced with your Qt version.
-* LIBRARY_PATH  Add Qt lib path
-* PATH          And Qt binary path
-
-Assuming you installed Qt in c:\qt\Qt5.1.1\
-that would yield adding the following to the env vars (in environment variables dialog):
-
-CPATH += c:\qt\Qt5.1.1\5.1.1\mingw48_32\include;c:\qt\Qt5.1.1\5.1.1\mingw48_32\include\QtCore\5.1.1\QtCore
-LIBRARY_PATH += c:\qt\Qt5.1.1\5.1.1\mingw48_32\lib
-PATH += c:\qt\Qt5.1.1\5.1.1\mingw48_32\bin
-
-And finally from the command line (you have to reopen the shell for the env var changes to take effect):
-
-$ go get github.com/niemeyer/qml
+    go get github.com/niemeyer/qml
 
 
 Requirements everywhere else
