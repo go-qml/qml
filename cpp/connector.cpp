@@ -3,9 +3,23 @@
 #include "connector.h"
 
 
-void Connector::invoke0()
+void Connector::invoke()
 {
-    hookSignal(sender, data, 0, 0);
+    qFatal("should never get called");
+}
+
+int Connector::qt_metacall(QMetaObject::Call c, int idx, void **a)
+{
+    if (c == QMetaObject::InvokeMetaMethod && idx == metaObject()->methodOffset()) {
+        DataValue args[MaxParams];
+        for (int i = 0; i < argsLen; i++) {
+            QVariant var(method.parameterType(i), a[1 + i]);
+            packDataValue(&var, &args[i]);
+        }
+        hookSignal(engine, sender, data, args);
+        return -1;
+    }
+    return standard_qt_metacall(c, idx, a);
 }
 
 // vim:ts=4:sw=4:et

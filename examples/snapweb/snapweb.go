@@ -14,7 +14,6 @@ import QtWebKit 3.0
 WebView {
     width: 1024
     height: 768
-    onLoadingChanged: loadRequest.status == WebView.LoadSucceededStatus && ctrl.snapshot()
 }
 `
 
@@ -41,7 +40,9 @@ func run() error {
 		win:  component.CreateWindow(nil),
 	}
 	engine.Context().SetVar("ctrl", ctrl)
-	ctrl.win.Root().Set("url", os.Args[1])
+	root := ctrl.win.Root()
+	root.On("loadingChanged", ctrl.Snapshot)
+	root.Set("url", os.Args[1])
 	ctrl.win.Show()
 	return <-ctrl.done
 }
@@ -51,7 +52,10 @@ type Control struct {
 	done chan error
 }
 
-func (ctrl *Control) Snapshot() {
+func (ctrl *Control) Snapshot(request *qml.Object) {
+	if request.Int("status") != 2 {
+		return
+	}
 	f, err := os.Create(os.Args[2])
 	if err != nil {
 		ctrl.done <- err

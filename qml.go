@@ -505,8 +505,10 @@ var funcRefs = make(map[interface{}]bool)
 // when obj next emits that signal, the function is called with the parameters
 // the signal carries.
 //
-// NOTE: Signal connection support is still being worked on. At the moment
-// the provided function must not take any parameters.
+// The provided function must accept a number of parameters that is equal to
+// or less than the number of parameters provided by the signal, and the
+// resepctive parameter types must match exactly or be conversible according
+// to normal Go rules.
 //
 // For example:
 //
@@ -520,35 +522,52 @@ var funcRefs = make(map[interface{}]bool)
 //     http://qt-project.org/doc/qt-5.0/qtqml/qml-qtquick2-connections.html
 //
 func (obj *Object) On(signal string, function interface{}) {
-	if reflect.ValueOf(function).Kind() != reflect.Func {
+	funcv := reflect.ValueOf(function)
+	funct := funcv.Type()
+	if funcv.Kind() != reflect.Func {
 		panic("function provided to On is not a function or method")
 	}
-	// TODO Support signal parameters (don't forget to remove the documentation note).
-	if reflect.ValueOf(function).Type().NumIn() != 0 {
-		panic("connection support is still being worked on; at the moment the function provided to On cannot take arguments")
+	if funct.NumIn() > C.MaxParams {
+		panic("function takes too many arguments")
 	}
 	csignal, csignallen := unsafeStringData(signal)
-	found := C.int(0)
+	var cerr *C.error
 	gui(func() {
-		// TODO Inform the number of parameters in function, so that it can fail early,
-		//      and avoid building DataValue parameters that won't be used.
-		found = C.objectConnect(obj.addr, csignal, csignallen, unsafe.Pointer(&function))
+		cerr = C.objectConnect(obj.engine.addr, obj.addr, csignal, csignallen, unsafe.Pointer(&function), C.int(funcv.Type().NumIn()))
 		funcRefs[&function] = true
 	})
-	if found != 1 {
-		// TODO Add the type name of obj here.
-		panic(fmt.Sprintf("object has no %q signal", signal))
+	if cerr != nil {
+		panic(cerror(cerr).Error())
 	}
+}
+
+func cerror(cerr *C.error) error {
+	err := errors.New(C.GoString((*C.char)(unsafe.Pointer(cerr))))
+	C.free(unsafe.Pointer(cerr))
+	return err
 }
 
 //export hookSignal
-func hookSignal(objectp unsafe.Pointer, functionp unsafe.Pointer, params *C.DataValue, paramsLen C.int) {
-	function := *(*interface{})(functionp)
-	functionv := reflect.ValueOf(function)
-	functionv.Call(nil)
+func hookSignal(enginep unsafe.Pointer, objectp unsafe.Pointer, funcp unsafe.Pointer, args *C.DataValue) {
+	engine := engines[enginep]
+	if engine == nil {
+		panic("signal called after engine was destroyed")
+	}
+	funcv := reflect.ValueOf(*(*interface{})(funcp))
+	funct := funcv.Type()
+	numIn := funct.NumIn()
+	var params [C.MaxParams]reflect.Value
+	for i := 0; i < numIn; i++ {
+		arg := (*C.DataValue)(unsafe.Pointer(uintptr(unsafe.Pointer(args)) + uintptr(i) * dataValueSize))
+		param := reflect.ValueOf(unpackDataValue(arg, engine))
+		if paramt := funct.In(i); param.Type() != paramt {
+			// TODO Provide a better error message when this fails.
+			param = param.Convert(paramt)
+		}
+		params[i] = param
+	}
+	funcv.Call(params[:numIn])
 }
-
-// TODO Object.Connect(name, func(...) {})
 
 // TODO Signal emitting support for go values.
 

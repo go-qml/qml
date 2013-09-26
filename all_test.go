@@ -261,16 +261,8 @@ var tests = []struct {
 	},
 	{
 		Summary: "Reading of value fields",
-		QML: `
-			Item {
-				width: 123;
-				property string s: "foo";
-			}
-		`,
-		Done: func(d *TestData) {
-			d.Check(d.root.Int("width"), Equals, 123)
-			d.Check(d.root.String("s"), Equals, "foo")
-		},
+		QML:     `Item { width: 123 }`,
+		Done:    func(d *TestData) { d.Check(d.root.Int("width"), Equals, 123) },
 	},
 	{
 		Summary: "Read object properties",
@@ -333,6 +325,16 @@ var tests = []struct {
 			d.root.Set("height", 200)
 		},
 		DoneLog: "String is <content>.*Width is 300.*Height is 200",
+	},
+	{
+		Summary: "Reading and setting of a QUrl property",
+		QML:     `import QtWebKit 3.0; WebView {}`,
+		Done:    func(d *TestData) {
+			d.Check(d.root.String("url"), Equals, "")
+			url := "http://localhost:54321"
+			d.root.Set("url", url)
+			d.Check(d.root.String("url"), Equals, url)
+		},
 	},
 	{
 		Summary: "Identical values remain identical when possible",
@@ -592,7 +594,7 @@ var tests = []struct {
 	},
 	{
 		Summary: "Create window with window root object",
-		QML:     `
+		QML: `
 			import QtQuick.Window 2.0
 			Window { title: "<title>"; width: 300; height: 200 }
 		`,
@@ -632,7 +634,15 @@ var tests = []struct {
 		DoneLog: "item destroyed",
 	},
 	{
-		Summary: "Connect to a QML signal",
+		Summary: "Errors connecting to QML signals",
+		QML: `Item { signal doIt() }`,
+		Done: func(d *TestData) {
+			d.Check(func() { d.root.On("missing", func() {}) }, Panics, `object does not expose a "missing" signal`)
+			d.Check(func() { d.root.On("doIt", func(s string) {}) }, Panics, `signal "doIt" has too few parameters for provided function`)
+		},
+	},
+	{
+		Summary: "Connect to a QML signal without parameters",
 		QML: `
 			Item {
 				id: item
@@ -646,7 +656,39 @@ var tests = []struct {
 			d.Check(itWorks, Equals, false)
 			d.root.Call("emitDoIt")
 			d.Check(itWorks, Equals, true)
-			d.Check(func() { d.root.On("missing", func() {}) }, Panics, `object has no "missing" signal`)
+		},
+	},
+	{
+		Summary: "Connect to a QML signal with a parameters",
+		QML: `
+			Item {
+				id: item
+				signal doIt(string s, int n)
+				function emitDoIt() { item.doIt("<arg>", 123) }
+			}
+		`,
+		Done: func(d *TestData) {
+			var stack []interface{}
+			d.root.On("doIt", func() { stack = append(stack, "A") })
+			d.root.On("doIt", func(s string) { stack = append(stack, "B", s) })
+			d.root.On("doIt", func(s string, i int) { stack = append(stack, "C", s, i) })
+			d.Check(stack, IsNil)
+			d.root.Call("emitDoIt")
+			d.Check(stack, DeepEquals, []interface{}{"A", "B", "<arg>", "C", "<arg>", 123})
+		},
+	},
+	{
+		Summary: "Connect to a QML signal with an object parameter",
+		QML:     `import QtWebKit 3.0; WebView{}`,
+		Done: func(d *TestData) {
+			url := "http://localhost:54321/"
+			done := make(chan bool)
+			d.root.On("navigationRequested", func(request *qml.Object) {
+				d.Check(request.String("url"), Equals, url)
+				done <- true
+			})
+			d.root.Set("url", url)
+			<-done
 		},
 	},
 }

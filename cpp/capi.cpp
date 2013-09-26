@@ -10,6 +10,27 @@
 #include "connector.h"
 #include "capi.h"
 
+static char *local_strdup(const char *str)
+{
+    char *strcopy = 0;
+    if (str) {
+        size_t len = strlen(str) + 1;
+        strcopy = (char *)malloc(len);
+        memcpy(strcopy, str, len);
+    }
+    return strcopy;
+}
+
+error *errorf(const char *format, ...)
+{
+    va_list ap;
+    va_start(ap, format);
+    QString str = QString().vsprintf(format, ap);
+    va_end(ap);
+    QByteArray ba = str.toUtf8();
+    return local_strdup(ba.constData());
+}
+
 void newGuiApplication()
 {
     static char empty[1] = {0};
@@ -88,17 +109,6 @@ void componentSetData(QQmlComponent_ *component, const char *data, int dataLen, 
     QByteArray qurl(url, urlLen);
     QString qsurl = QString::fromUtf8(qurl);
     reinterpret_cast<QQmlComponent *>(component)->setData(qdata, qsurl);
-}
-
-static char *local_strdup(const char *str)
-{
-    char *strcopy = 0;
-    if (str) {
-        size_t len = strlen(str) + 1;
-        strcopy = (char *)malloc(len);
-        memcpy(strcopy, str, len);
-    }
-    return strcopy;
 }
 
 char *componentErrorString(QQmlComponent_ *component)
@@ -283,8 +293,8 @@ void objectInvoke(QObject_ *object, const char *method, DataValue *resultdv, Dat
     QObject *qobject = reinterpret_cast<QObject *>(object);
 
     QVariant result;
-    QVariant param[MaximumParamCount-1];
-    QGenericArgument arg[MaximumParamCount-1];
+    QVariant param[MaxParams];
+    QGenericArgument arg[MaxParams];
     for (int i = 0; i < paramsLen; i++) {
         unpackDataValue(&paramsdv[i], &param[i]);
         arg[i] = Q_ARG(QVariant, param[i]);
@@ -324,10 +334,12 @@ void objectSetParent(QObject_ *object, QObject_ *parent)
     qobject->setParent(qparent);
 }
 
-int objectConnect(QObject_ *object, const char *signal, int signalLen, void *data)
+error *objectConnect(QQmlEngine_ *engine, QObject_ *object, const char *signal, int signalLen, void *data, int argsLen)
 {
     QObject *qobject = reinterpret_cast<QObject *>(object);
+    QQmlEngine *qengine = reinterpret_cast<QQmlEngine *>(engine);
     QByteArray qsignal(signal, signalLen);
+
     const QMetaObject *meta = qobject->metaObject();
     // Walk backwards so descendants have priority.
     for (int i = meta->methodCount()-1; i >= 0; i--) {
@@ -335,14 +347,19 @@ int objectConnect(QObject_ *object, const char *signal, int signalLen, void *dat
             if (method.methodType() == QMetaMethod::Signal) {
                 QByteArray name = method.name();
                 if (name.length() == signalLen && qstrncmp(name.constData(), signal, signalLen) == 0) {
-                    Connector *connector = new Connector(qobject, data);
+                    if (method.parameterCount() < argsLen) {
+                        // TODO Might continue looking to see if a different signal has the same name and enough arguments.
+                        return errorf("signal \"%s\" has too few parameters for provided function", name.constData());
+                    }
+                    Connector *connector = new Connector(qengine, qobject, method, data, argsLen);
                     const QMetaObject *connmeta = connector->metaObject();
-                    QObject::connect(qobject, method, connector, connmeta->method(connmeta->methodOffset()+0));
-                    return 1;
+                    QObject::connect(qobject, method, connector, connmeta->method(connmeta->methodOffset()));
+                    return 0;
                 }
             }
     }
-    return 0;
+    // Cannot use constData here as the byte array is not null-terminated.
+    return errorf("object does not expose a \"%s\" signal", qsignal.data());
 }
 
 QQmlContext_ *objectContext(QObject_ *object)
@@ -476,6 +493,9 @@ void packDataValue(QVariant_ *var, DataValue *value)
     case QVariant::Invalid:
         value->dataType = DTInvalid;
         break;
+    case QMetaType::QUrl:
+        *qvar = qvar->value<QUrl>().toString();
+        // fallthrough
     case QMetaType::QString:
         {
             value->dataType = DTString;
@@ -504,8 +524,8 @@ void packDataValue(QVariant_ *var, DataValue *value)
         value->dataType = DTFloat32;
         *(float*)(value->data) = qvar->toFloat();
         break;
-    case QMetaType::QObjectStar:
-        {
+    default:
+        if (qvar->type() == (int)QMetaType::QObjectStar || qvar->canConvert<QObject *>()) {
             QObject *qobject = qvar->value<QObject *>();
             GoValue *govalue = dynamic_cast<GoValue *>(qobject);
             if (govalue) {
@@ -517,9 +537,7 @@ void packDataValue(QVariant_ *var, DataValue *value)
             }
             break;
         }
-        // fallthrough
-    default:
-        qFatal("Unsupported variant type: %d", qvar->type());
+        qFatal("Unsupported variant type: %d (%s)", qvar->type(), qvar->typeName());
         break;
     }
 }

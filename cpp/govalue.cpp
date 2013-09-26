@@ -82,7 +82,7 @@ int GoValueMetaObject::metaCall(QMetaObject::Call c, int idx, void **a)
             for (int i = 0; i < valuePriv->typeInfo->methodsLen; i++) {
                 if (memberInfo->metaIndex == idx) {
                     // args[0] is the result if any.
-                    DataValue args[MaximumParamCount];
+                    DataValue args[1 + MaxParams];
                     for (int i = 1; i < memberInfo->numIn+1; i++) {
                         packDataValue(reinterpret_cast<QVariant *>(a[i]), &args[i]);
                     }

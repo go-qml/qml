@@ -8,9 +8,10 @@
 extern "C" {
 #endif
 
-// It's surprising that this constant is privately defined within qmetaobject.cpp.
+// It's surprising that MaximumParamCount is privately defined within qmetaobject.cpp.
 // Must fix the objectInvoke function if this is changed.
-enum { MaximumParamCount = 11 }; // Up to 10 arguments + 1 return value
+// This is Qt's MaximuParamCount - 1, as it does not take the result value in account.
+enum { MaxParams = 10 };
 
 typedef void QApplication_;
 typedef void QMetaObject_;
@@ -28,6 +29,9 @@ typedef void QImage_;
 typedef void GoValue_;
 typedef void GoAddr;
 typedef void GoTypeSpec_;
+
+typedef char error;
+error *errorf(const char *format, ...);
 
 typedef enum {
     DTUnknown = 0, // Has an unsupported type.
@@ -118,7 +122,7 @@ QQmlContext_ *objectContext(QObject_ *object);
 int objectIsComponent(QObject_ *object);
 int objectIsWindow(QObject_ *object);
 int objectIsView(QObject_ *object);
-int objectConnect(QObject_ *object, const char *signal, int signalLen, void *data);
+error *objectConnect(QQmlEngine_ *engine, QObject_ *object, const char *signal, int signalLen, void *data, int argsLen);
 
 QQmlComponent_ *newComponent(QQmlEngine_ *engine, QObject_ *parent);
 void componentSetData(QQmlComponent_ *component, const char *data, int dataLen, const char *url, int urlLen);
@@ -160,7 +164,7 @@ void hookGoValueCallMethod(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, D
 void hookGoValueDestroyed(QQmlEngine_ *engine, GoAddr *addr);
 GoAddr *hookGoValueTypeNew(GoValue_ *value, GoTypeSpec_ *spec);
 void hookWindowHidden(QObject_ *addr);
-void hookSignal(QObject_ *sender, void *data, DataValue *params, int paramsLen);
+void hookSignal(QQmlEngine_ *engine, QObject_ *sender, void *data, DataValue *params);
 
 #ifdef __cplusplus
 } // extern "C"

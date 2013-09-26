@@ -20,7 +20,7 @@
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_Connector_t {
     QByteArrayData data[3];
-    char stringdata[20];
+    char stringdata[19];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -30,10 +30,10 @@ struct qt_meta_stringdata_Connector_t {
 static const qt_meta_stringdata_Connector_t qt_meta_stringdata_Connector = {
     {
 QT_MOC_LITERAL(0, 0, 9),
-QT_MOC_LITERAL(1, 10, 7),
-QT_MOC_LITERAL(2, 18, 0)
+QT_MOC_LITERAL(1, 10, 6),
+QT_MOC_LITERAL(2, 17, 0)
     },
-    "Connector\0invoke0\0\0"
+    "Connector\0invoke\0\0"
 };
 #undef QT_MOC_LITERAL
 
@@ -64,7 +64,7 @@ void Connector::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
     if (_c == QMetaObject::InvokeMetaMethod) {
         Connector *_t = static_cast<Connector *>(_o);
         switch (_id) {
-        case 0: _t->invoke0(); break;
+        case 0: _t->invoke(); break;
         default: ;
         }
     }
@@ -90,7 +90,7 @@ void *Connector::qt_metacast(const char *_clname)
     return QObject::qt_metacast(_clname);
 }
 
-int Connector::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int Connector::standard_qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QObject::qt_metacall(_c, _id, _a);
     if (_id < 0)

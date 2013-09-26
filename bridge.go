@@ -333,7 +333,7 @@ func convertAndSet(to, from reflect.Value) {
 
 var (
 	dataValueSize  = uintptr(unsafe.Sizeof(C.DataValue{}))
-	dataValueArray [C.MaximumParamCount - 1]C.DataValue
+	dataValueArray [C.MaxParams]C.DataValue
 )
 
 //export hookGoValueCallMethod
@@ -348,7 +348,7 @@ func hookGoValueCallMethod(enginep, foldp unsafe.Pointer, reflectIndex C.int, ar
 	method := v.Method(int(reflectIndex))
 
 	// TODO Ensure methods with more parameters than this are not registered.
-	var params [C.MaximumParamCount - 1]reflect.Value
+	var params [C.MaxParams]reflect.Value
 
 	numIn := uintptr(method.Type().NumIn())
 	for i := uintptr(0); i < numIn; i++ {
