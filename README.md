@@ -88,6 +88,41 @@ Something along these lines should be effective:
     $ CXX=g++-4.8 go get github.com/niemeyer/qml
 
 
+Requirements on Windows
+-----------------------
+
+On windows you need to install the following:
+
+* Mingw-gcc 4.8.1
+Download the mingw-get-setup.exe from http://www.mingw.org, download and install the mingw32-gcc compiler from within the
+setup GUI.
+
+* Qt 5.1.1 or later
+Download Qt 5 binary setup installer for Windows (for Mingw 4.8) from http://qt-project.org and install
+
+* Go 1.2rc1 or later
+Download binary MSI installer for Windows from http://golang.org and install.
+
+If you fancy building everything yourselves instead of downloading binaries that is entirely possible too :)
+
+Set the following environment variables:
+
+* CPATH         Add Qt include path and the path of the subfolder 'QtCore\5.X.X\QtCore' under the include folder, replaced with your Qt version.
+* LIBRARY_PATH  Add Qt lib path
+* PATH          And Qt binary path
+
+Assuming you installed Qt in c:\qt\Qt5.1.1\
+that would yield adding the following to the env vars (in environment variables dialog):
+
+CPATH += c:\qt\Qt5.1.1\5.1.1\mingw48_32\include;c:\qt\Qt5.1.1\5.1.1\mingw48_32\include\QtCore\5.1.1\QtCore
+LIBRARY_PATH += c:\qt\Qt5.1.1\5.1.1\mingw48_32\lib
+PATH += c:\qt\Qt5.1.1\5.1.1\mingw48_32\bin
+
+And finally from the command line (you have to reopen the shell for the env var changes to take effect):
+
+$ go get github.com/niemeyer/qml
+
+
 Requirements everywhere else
 ----------------------------
 
