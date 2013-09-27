@@ -15,7 +15,8 @@ for news. It's in a pretty good state, so it shall not take too long.
 Demo
 ----
 
-See [this video](https://www.youtube.com/watch?v=FVQlMrPa7lI) for a quick introduction.
+See [this video](http://youtu.be/FVQlMrPa7lI) for a quick demo and overview, and
+the [follow up](http://youtu.be/HB-3o8Cysec) to see it working on an Ubuntu Touch phone.
 
 
 Community
