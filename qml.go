@@ -498,8 +498,7 @@ func (obj *Object) Destroy() {
 	})
 }
 
-// TODO Proper garbage collection for these.
-var funcRefs = make(map[interface{}]bool)
+var connectedFunction = make(map[*interface{}]bool)
 
 // On connects the named signal from obj with the provided function, so that
 // when obj next emits that signal, the function is called with the parameters
@@ -533,22 +532,29 @@ func (obj *Object) On(signal string, function interface{}) {
 	csignal, csignallen := unsafeStringData(signal)
 	var cerr *C.error
 	gui(func() {
-		cerr = C.objectConnect(obj.engine.addr, obj.addr, csignal, csignallen, unsafe.Pointer(&function), C.int(funcv.Type().NumIn()))
-		funcRefs[&function] = true
+		cerr = C.objectConnect(obj.addr, csignal, csignallen, obj.engine.addr, unsafe.Pointer(&function), C.int(funcv.Type().NumIn()))
+		if cerr == nil {
+			connectedFunction[&function] = true
+			stats.connectionsAlive(+1)
+		}
 	})
 	if cerr != nil {
 		panic(cerror(cerr).Error())
 	}
 }
 
-func cerror(cerr *C.error) error {
-	err := errors.New(C.GoString((*C.char)(unsafe.Pointer(cerr))))
-	C.free(unsafe.Pointer(cerr))
-	return err
+//export hookSignalDisconnect
+func hookSignalDisconnect(funcp unsafe.Pointer) {
+	before := len(connectedFunction)
+	delete(connectedFunction, (*interface{})(funcp))
+	if before == len(connectedFunction) {
+		panic("disconnecting unknown signal function")
+	}
+	stats.connectionsAlive(-1)
 }
 
-//export hookSignal
-func hookSignal(enginep unsafe.Pointer, objectp unsafe.Pointer, funcp unsafe.Pointer, args *C.DataValue) {
+//export hookSignalCall
+func hookSignalCall(enginep unsafe.Pointer, funcp unsafe.Pointer, args *C.DataValue) {
 	engine := engines[enginep]
 	if engine == nil {
 		panic("signal called after engine was destroyed")
@@ -567,6 +573,12 @@ func hookSignal(enginep unsafe.Pointer, objectp unsafe.Pointer, funcp unsafe.Poi
 		params[i] = param
 	}
 	funcv.Call(params[:numIn])
+}
+
+func cerror(cerr *C.error) error {
+	err := errors.New(C.GoString((*C.char)(unsafe.Pointer(cerr))))
+	C.free(unsafe.Pointer(cerr))
+	return err
 }
 
 // TODO Signal emitting support for go values.

@@ -34,7 +34,7 @@ func (s *S) SetUpTest(c *C) {
 	qml.ResetStats()
 
 	stats := qml.Stats()
-	if stats.EnginesAlive > 0 || stats.ValuesAlive > 0 {
+	if stats.EnginesAlive > 0 || stats.ValuesAlive > 0 || stats.ConnectionsAlive > 0 {
 		panic(fmt.Sprintf("Test started with values alive: %#v\n", stats))
 	}
 
@@ -54,11 +54,11 @@ func (s *S) TearDownTest(c *C) {
 		// these objects from being deleted.
 		runtime.GC()
 		stats := qml.Stats()
-		if stats.EnginesAlive == 0 && stats.ValuesAlive == 0 {
+		if stats.EnginesAlive == 0 && stats.ValuesAlive == 0 && stats.ConnectionsAlive == 0 {
 			break
 		}
 		if retries == 0 {
-			panic(fmt.Sprintf("there are objects alive:\n%#v\n", stats))
+			panic(fmt.Sprintf("there are values alive:\n%#v\n", stats))
 		}
 		retries--
 		time.Sleep(100 * time.Millisecond)

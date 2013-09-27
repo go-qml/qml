@@ -38,8 +38,9 @@ func ResetStats() {
 }
 
 type Statistics struct {
-	EnginesAlive int
-	ValuesAlive  int
+	EnginesAlive     int
+	ValuesAlive      int
+	ConnectionsAlive int
 }
 
 func (stats *Statistics) enginesAlive(delta int) {
@@ -54,6 +55,14 @@ func (stats *Statistics) valuesAlive(delta int) {
 	if stats != nil {
 		statsMutex.Lock()
 		stats.ValuesAlive += delta
+		statsMutex.Unlock()
+	}
+}
+
+func (stats *Statistics) connectionsAlive(delta int) {
+	if stats != nil {
+		statsMutex.Lock()
+		stats.ConnectionsAlive += delta
 		statsMutex.Unlock()
 	}
 }

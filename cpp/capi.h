@@ -122,7 +122,7 @@ QQmlContext_ *objectContext(QObject_ *object);
 int objectIsComponent(QObject_ *object);
 int objectIsWindow(QObject_ *object);
 int objectIsView(QObject_ *object);
-error *objectConnect(QQmlEngine_ *engine, QObject_ *object, const char *signal, int signalLen, void *data, int argsLen);
+error *objectConnect(QObject_ *object, const char *signal, int signalLen, QQmlEngine_ *engine, void *func, int argsLen);
 
 QQmlComponent_ *newComponent(QQmlEngine_ *engine, QObject_ *parent);
 void componentSetData(QQmlComponent_ *component, const char *data, int dataLen, const char *url, int urlLen);
@@ -164,7 +164,8 @@ void hookGoValueCallMethod(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, D
 void hookGoValueDestroyed(QQmlEngine_ *engine, GoAddr *addr);
 GoAddr *hookGoValueTypeNew(GoValue_ *value, GoTypeSpec_ *spec);
 void hookWindowHidden(QObject_ *addr);
-void hookSignal(QQmlEngine_ *engine, QObject_ *sender, void *data, DataValue *params);
+void hookSignalCall(QQmlEngine_ *engine, void *func, DataValue *params);
+void hookSignalDisconnect(void *func);
 
 #ifdef __cplusplus
 } // extern "C"

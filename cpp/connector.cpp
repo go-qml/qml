@@ -2,6 +2,10 @@
 
 #include "connector.h"
 
+Connector::~Connector()
+{
+    hookSignalDisconnect(func);
+}
 
 void Connector::invoke()
 {
@@ -16,7 +20,7 @@ int Connector::qt_metacall(QMetaObject::Call c, int idx, void **a)
             QVariant var(method.parameterType(i), a[1 + i]);
             packDataValue(&var, &args[i]);
         }
-        hookSignal(engine, sender, data, args);
+        hookSignalCall(engine, func, args);
         return -1;
     }
     return standard_qt_metacall(c, idx, a);

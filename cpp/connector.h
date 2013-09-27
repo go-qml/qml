@@ -9,8 +9,10 @@ class Connector : public QObject
 
     public:
 
-    Connector(QQmlEngine *engine, QObject *sender, QMetaMethod method, void *data, int argsLen)
-        : engine(engine), sender(sender), method(method), data(data), argsLen(argsLen) {};
+    Connector(QObject *sender, QMetaMethod method, QQmlEngine *engine, void *func, int argsLen)
+        : QObject(sender), engine(engine), method(method), func(func), argsLen(argsLen) {};
+
+    virtual ~Connector();
 
     // MOC HACK: s/Connector::qt_metacall/Connector::standard_qt_metacall/
     int standard_qt_metacall(QMetaObject::Call c, int idx, void **a);
@@ -22,9 +24,8 @@ class Connector : public QObject
     private:
 
     QQmlEngine *engine;
-    QObject *sender;
     QMetaMethod method;
-    void *data;
+    void *func;
     int argsLen;
 };
 

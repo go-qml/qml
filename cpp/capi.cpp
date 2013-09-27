@@ -334,7 +334,7 @@ void objectSetParent(QObject_ *object, QObject_ *parent)
     qobject->setParent(qparent);
 }
 
-error *objectConnect(QQmlEngine_ *engine, QObject_ *object, const char *signal, int signalLen, void *data, int argsLen)
+error *objectConnect(QObject_ *object, const char *signal, int signalLen, QQmlEngine_ *engine, void *func, int argsLen)
 {
     QObject *qobject = reinterpret_cast<QObject *>(object);
     QQmlEngine *qengine = reinterpret_cast<QQmlEngine *>(engine);
@@ -351,7 +351,7 @@ error *objectConnect(QQmlEngine_ *engine, QObject_ *object, const char *signal, 
                         // TODO Might continue looking to see if a different signal has the same name and enough arguments.
                         return errorf("signal \"%s\" has too few parameters for provided function", name.constData());
                     }
-                    Connector *connector = new Connector(qengine, qobject, method, data, argsLen);
+                    Connector *connector = new Connector(qobject, method, qengine, func, argsLen);
                     const QMetaObject *connmeta = connector->metaObject();
                     QObject::connect(qobject, method, connector, connmeta->method(connmeta->methodOffset()));
                     return 0;
