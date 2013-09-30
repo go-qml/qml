@@ -116,3 +116,14 @@ If your operating system does not offer these dependencies readily,
 you may still have success installing [Go 1.2rc1](https://code.google.com/p/go/downloads/list?can=1&q=go1.2rc1)
 and [Qt 5.0.2](http://download.qt-project.org/archive/qt/5.0/5.0.2/)
 directly from the upstreams.
+
+Let's say you're living on the edge using Go and Qt built directly
+from repositories. On a *nix system you would need to have this configuration
+before executing `go get`:
+
+    QT5PATH=<Qt 5 install location>
+    QT5VERSION=<Qt 5 Version Number, e.g., 5.1.2>
+    export PKG_CONFIG_PATH=$QT5PATH/lib/pkgconfig
+    export CGO_CPPFLAGS=-I$QT5PATH/include/QtCore/$QT5VERSION/QtCore
+
+    go get github.com/niemeyer/qml
