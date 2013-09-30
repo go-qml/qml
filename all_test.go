@@ -88,7 +88,7 @@ func (ts *TestType) StringMethod() string {
 	return ts.StringValue
 }
 
-func (ts *TestType) Mod(dividend, divisor int32) (int32, error) {
+func (ts *TestType) Mod(dividend, divisor int) (int, error) {
 	if divisor == 0 {
 		return 0, fmt.Errorf("<division by zero>")
 	}

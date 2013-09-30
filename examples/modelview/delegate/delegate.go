@@ -36,6 +36,6 @@ func (colors *Colors) Len() int {
 	return len(colors.names)
 }
 
-func (colors *Colors) Name(index int32) string {
+func (colors *Colors) Name(index int) string {
 	return colors.names[index]
 }

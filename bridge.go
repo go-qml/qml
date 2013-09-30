@@ -346,16 +346,20 @@ func hookGoValueCallMethod(enginep, foldp unsafe.Pointer, reflectIndex C.int, ar
 	//      that can still error out to the user in due time.
 
 	method := v.Method(int(reflectIndex))
+	methodt := method.Type()
 
 	// TODO Ensure methods with more parameters than this are not registered.
 	var params [C.MaxParams]reflect.Value
 
-	numIn := uintptr(method.Type().NumIn())
-	for i := uintptr(0); i < numIn; i++ {
-		// TODO Convert the arguments when possible (int32 => int, etc).
-		// TODO Type checking to avoid explosions (or catch the explosion)
-		paramdv := (*C.DataValue)(unsafe.Pointer(uintptr(unsafe.Pointer(args)) + (i+1)*dataValueSize))
-		params[i] = reflect.ValueOf(unpackDataValue(paramdv, fold.engine))
+	numIn := methodt.NumIn()
+	for i := 0; i < numIn; i++ {
+		// TODO Better error messages on type errors.
+		paramdv := (*C.DataValue)(unsafe.Pointer(uintptr(unsafe.Pointer(args)) + (uintptr(i)+1)*dataValueSize))
+		param := reflect.ValueOf(unpackDataValue(paramdv, fold.engine))
+		if argt := methodt.In(i); param.Type() != argt {
+			param = param.Convert(argt)
+		}
+		params[i] = param
 	}
 
 	result := method.Call(params[:numIn])
