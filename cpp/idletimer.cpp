@@ -16,11 +16,19 @@ class IdleTimer : public QObject
 
     public:
 
-    static void start(int *hookWaiting)
-    {
+    static IdleTimer *singleton() {
         static IdleTimer singleton;
-        singleton.hookWaiting = hookWaiting;
-        singleton.timer.start(0, &singleton);
+        return &singleton;
+    }
+
+    void init(int *hookWaiting)
+    {
+        this->hookWaiting = hookWaiting;
+    }
+
+    Q_INVOKABLE void start()
+    {
+        timer.start(0, this);
     }
 
     protected:
@@ -29,6 +37,8 @@ class IdleTimer : public QObject
     {
         if (g_atomic_int_get(hookWaiting) > 0) {
             hookIdleTimer();
+        } else {
+            timer.stop();
         }
     }
 
@@ -39,9 +49,14 @@ class IdleTimer : public QObject
     QBasicTimer timer;    
 };
 
-void startIdleTimer(int *hookWaiting)
+void idleTimerInit(int *hookWaiting)
 {
-    IdleTimer::start(hookWaiting);
+    IdleTimer::singleton()->init(hookWaiting);
+}
+
+void idleTimerStart()
+{
+    QMetaObject::invokeMethod(IdleTimer::singleton(), "start", Qt::QueuedConnection);
 }
 
 // vim:ts=4:sw=4:et:ft=cpp

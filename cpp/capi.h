@@ -96,7 +96,9 @@ typedef struct {
 void newGuiApplication();
 void applicationExec();
 void applicationFlushAll();
-void startIdleTimer(int *hookWaiting);
+
+void idleTimerInit(int *hookWaiting);
+void idleTimerStart();
 
 void *currentThread();
 void *appThread();

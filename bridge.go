@@ -25,9 +25,9 @@ var hookWaiting C.int
 func guiLoop() {
 	runtime.LockOSThread()
 	guiLoopRef = tref.Ref()
-	guiLoopReady.Unlock()
 	C.newGuiApplication()
-	C.startIdleTimer(&hookWaiting)
+	C.idleTimerInit(&hookWaiting)
+	guiLoopReady.Unlock()
 	C.applicationExec()
 }
 
@@ -48,7 +48,9 @@ func gui(f func()) {
 	}
 
 	// Tell Qt we're waiting for the idle hook to be called.
-	atomic.AddInt32((*int32)(unsafe.Pointer(&hookWaiting)), 1)
+	if atomic.AddInt32((*int32)(unsafe.Pointer(&hookWaiting)), 1) == 1 {
+		C.idleTimerStart()
+	}
 
 	// Send f to be executed by the idle hook in the main GUI thread.
 	guiFunc <- f
