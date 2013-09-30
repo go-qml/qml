@@ -1,5 +1,6 @@
 #include <QApplication>
 #include <QQuickView>
+#include <QQuickItem>
 #include <QtQml>
 #include <QDebug>
 
@@ -143,19 +144,28 @@ QQuickWindow_ *componentCreateWindow(QQmlComponent_ *component, QQmlContext_ *co
     if (!qcontext) {
         qcontext = qmlContext(qcomponent);
     }
-    QObject *win = qcomponent->create(qcontext);
-    if (!objectIsWindow(win)) {
+    QObject *obj = qcomponent->create(qcontext);
+    if (!objectIsWindow(obj)) {
         QQuickView *view = new QQuickView(qmlEngine(qcomponent), 0);
-        view->setContent(qcomponent->url(), qcomponent, win);
+        view->setContent(qcomponent->url(), qcomponent, obj);
         view->setResizeMode(QQuickView::SizeRootObjectToView);
-        win = view;
+        obj = view;
     }
-    return win;
+    return obj;
 }
+
+// Workaround for bug https://bugs.launchpad.net/bugs/1179716
+struct ShowWindow : public QQuickWindow {
+    void show() {
+        QQuickWindow::show();
+        QResizeEvent resize(size(), size());
+        resizeEvent(&resize);
+    }
+};
 
 void windowShow(QQuickWindow_ *win)
 {
-    reinterpret_cast<QQuickWindow *>(win)->show();
+    reinterpret_cast<ShowWindow *>(win)->show();
 }
 
 void windowHide(QQuickWindow_ *win)
