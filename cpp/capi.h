@@ -32,6 +32,7 @@ typedef void GoTypeSpec_;
 
 typedef char error;
 error *errorf(const char *format, ...);
+void panicf(const char *format, ...);
 
 typedef enum {
     DTUnknown = 0, // Has an unsupported type.
@@ -168,6 +169,7 @@ GoAddr *hookGoValueTypeNew(GoValue_ *value, GoTypeSpec_ *spec);
 void hookWindowHidden(QObject_ *addr);
 void hookSignalCall(QQmlEngine_ *engine, void *func, DataValue *params);
 void hookSignalDisconnect(void *func);
+void hookPanic(char *message);
 
 #ifdef __cplusplus
 } // extern "C"

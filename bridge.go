@@ -5,6 +5,8 @@ package qml
 // #cgo LDFLAGS: -lstdc++
 // #cgo pkg-config: Qt5Core Qt5Widgets Qt5Quick glib-2.0
 //
+// #include <stdlib.h>
+//
 // #include "cpp/capi.h"
 //
 import "C"
@@ -410,4 +412,10 @@ func ensureEngine(enginep, foldp unsafe.Pointer) *valueFold {
 		panic("value had no engine, but was not created by a registered type; who created the value?")
 	}
 	return fold
+}
+
+//export hookPanic
+func hookPanic(message *C.char) {
+	defer C.free(unsafe.Pointer(message))
+	panic(C.GoString(message))
 }

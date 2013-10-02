@@ -1,6 +1,7 @@
 #include <QObject>
 
 #include "connector.h"
+#include "capi.h"
 
 Connector::~Connector()
 {
@@ -9,7 +10,7 @@ Connector::~Connector()
 
 void Connector::invoke()
 {
-    qFatal("should never get called");
+    panicf("should never get called");
 }
 
 int Connector::qt_metacall(QMetaObject::Call c, int idx, void **a)

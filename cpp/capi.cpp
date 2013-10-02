@@ -32,6 +32,16 @@ error *errorf(const char *format, ...)
     return local_strdup(ba.constData());
 }
 
+void panicf(const char *format, ...)
+{
+    va_list ap;
+    va_start(ap, format);
+    QString str = QString().vsprintf(format, ap);
+    va_end(ap);
+    QByteArray ba = str.toUtf8();
+    hookPanic(local_strdup(ba.constData()));
+}
+
 void newGuiApplication()
 {
     static char empty[1] = {0};
@@ -310,7 +320,7 @@ void objectInvoke(QObject_ *object, const char *method, DataValue *resultdv, Dat
         arg[i] = Q_ARG(QVariant, param[i]);
     }
     if (paramsLen > 10) {
-        qFatal("fix the parameter dispatching");
+        panicf("fix the parameter dispatching");
     }
     bool ok = QMetaObject::invokeMethod(qobject, method, Qt::DirectConnection, 
             Q_RETURN_ARG(QVariant, result),
@@ -486,7 +496,7 @@ void unpackDataValue(DataValue *value, QVariant_ *var)
         qvar->clear();
         break;
     default:
-        qFatal("Unsupported data type: %d", value->dataType);
+        panicf("unknown data type: %d", value->dataType);
         break;
     }
 }
@@ -547,7 +557,7 @@ void packDataValue(QVariant_ *var, DataValue *value)
             }
             break;
         }
-        qFatal("Unsupported variant type: %d (%s)", qvar->type(), qvar->typeName());
+        panicf("unsupported variant type: %d (%s)", qvar->type(), qvar->typeName());
         break;
     }
 }
