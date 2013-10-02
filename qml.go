@@ -182,9 +182,9 @@ func (e *Engine) LoadString(location, qml string) (Object, error) {
 func (e *Engine) Context() *Context {
 	e.assertValid()
 	var ctx Context
-	ctx.obj.engine = e
+	ctx.engine = e
 	gui(func() {
-		ctx.obj.addr = C.engineRootContext(e.addr)
+		ctx.addr = C.engineRootContext(e.addr)
 	})
 	return &ctx
 }
@@ -192,7 +192,7 @@ func (e *Engine) Context() *Context {
 // Context represents a QML context that can hold variables visible
 // to logic running within it.
 type Context struct {
-	obj CommonObject
+	CommonObject
 }
 
 // SetVar makes the provided value available as a variable with the
@@ -211,12 +211,12 @@ func (ctx *Context) SetVar(name string, value interface{}) {
 	cname, cnamelen := unsafeStringData(name)
 	gui(func() {
 		var dvalue C.DataValue
-		packDataValue(value, &dvalue, ctx.obj.engine, cppOwner)
+		packDataValue(value, &dvalue, ctx.engine, cppOwner)
 
 		qname := C.newString(cname, cnamelen)
 		defer C.delString(qname)
 
-		C.contextSetProperty(ctx.obj.addr, qname, &dvalue)
+		C.contextSetProperty(ctx.addr, qname, &dvalue)
 	})
 }
 
@@ -231,7 +231,7 @@ func (ctx *Context) SetVar(name string, value interface{}) {
 // value is unused or changed.
 func (ctx *Context) SetVars(value interface{}) {
 	gui(func() {
-		C.contextSetObject(ctx.obj.addr, wrapGoValue(ctx.obj.engine, value, cppOwner))
+		C.contextSetObject(ctx.addr, wrapGoValue(ctx.engine, value, cppOwner))
 	})
 }
 
@@ -244,9 +244,9 @@ func (ctx *Context) Var(name string) interface{} {
 		qname := C.newString(cname, cnamelen)
 		defer C.delString(qname)
 
-		C.contextGetProperty(ctx.obj.addr, qname, &dvalue)
+		C.contextGetProperty(ctx.addr, qname, &dvalue)
 	})
-	return unpackDataValue(&dvalue, ctx.obj.engine)
+	return unpackDataValue(&dvalue, ctx.engine)
 }
 
 // TODO Context.Spawn() => Context
@@ -483,7 +483,7 @@ func (obj *CommonObject) Create(ctx *Context) Object {
 	gui(func() {
 		ctxaddr := nilPtr
 		if ctx != nil {
-			ctxaddr = ctx.obj.addr
+			ctxaddr = ctx.addr
 		}
 		root.addr = C.componentCreate(obj.addr, ctxaddr)
 	})
@@ -506,7 +506,7 @@ func (obj *CommonObject) CreateWindow(ctx *Context) *Window {
 	gui(func() {
 		ctxaddr := nilPtr
 		if ctx != nil {
-			ctxaddr = ctx.obj.addr
+			ctxaddr = ctx.addr
 		}
 		win.addr = C.componentCreateWindow(obj.addr, ctxaddr)
 	})
