@@ -30,11 +30,11 @@ func main() {
 }
 
 type Control struct {
-	Root    *qml.Object
+	Root    qml.Object
 	Message string
 }
 
-func (ctrl *Control) TextReleased(text *qml.Object) {
+func (ctrl *Control) TextReleased(text qml.Object) {
 	x := text.Int("x")
 	y := text.Int("y")
 	width := text.Int("width")
@@ -68,6 +68,6 @@ func (ctrl *Control) Emit(x, y int) {
 	}
 }
 
-func (ctrl *Control) Done(emitter *qml.Object) {
+func (ctrl *Control) Done(emitter qml.Object) {
 	emitter.Destroy()
 }
