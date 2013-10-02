@@ -3,7 +3,10 @@ package main
 import (
 	"fmt"
 	"github.com/niemeyer/qml"
+	"image/color"
+	"math/rand"
 	"os"
+	"time"
 )
 
 func main() {
@@ -16,7 +19,7 @@ func main() {
 func run() error {
 	qml.Init(nil)
 	engine := qml.NewEngine()
-	colors := &Colors{[]string{"red", "green", "blue", "black"}}
+	colors := &Colors{}
 	engine.Context().SetVar("colors", colors)
 	component, err := engine.LoadFile("delegate.qml")
 	if err != nil {
@@ -24,18 +27,28 @@ func run() error {
 	}
 	window := component.CreateWindow(nil)
 	window.Show()
+	go func() {
+		n := func() uint8 { return uint8(rand.Intn(256)) }
+		for i := 0; i < 100; i++ {
+			colors.Add(color.RGBA{n(), n(), n(), 0xff})
+			time.Sleep(1 * time.Second)
+		}
+	}()
 	window.Wait()
 	return nil
 }
 
 type Colors struct {
-	names []string
+	list []color.RGBA
+	Len  int
 }
 
-func (colors *Colors) Len() int {
-	return len(colors.names)
+func (colors *Colors) Add(c color.RGBA) {
+	colors.list = append(colors.list, c)
+	colors.Len = len(colors.list)
+	qml.Changed(colors, &colors.Len)
 }
 
-func (colors *Colors) Name(index int) string {
-	return colors.names[index]
+func (colors *Colors) Color(index int) color.RGBA {
+	return colors.list[index]
 }
