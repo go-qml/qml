@@ -417,7 +417,7 @@ func (obj *Common) Color(property string) color.RGBA {
 	value := obj.Property(property)
 	c, ok := value.(color.RGBA)
 	if !ok {
-		panic(fmt.Sprintf("value of property %q is not a string: %#v", property, value))
+		panic(fmt.Sprintf("value of property %q is not a color: %#v", property, value))
 	}
 	return c
 }
