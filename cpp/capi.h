@@ -44,6 +44,7 @@ typedef enum {
     DTInt32   = 13,
     DTFloat64 = 14,
     DTFloat32 = 15,
+    DTColor   = 16,
 
     DTGoAddr  = 100,
     DTObject  = 101,

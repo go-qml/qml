@@ -7,6 +7,7 @@ import "C"
 import (
 	"bytes"
 	"fmt"
+	"image/color"
 	"reflect"
 	"unicode"
 	"unsafe"
@@ -85,6 +86,9 @@ func packDataValue(value interface{}, dvalue *C.DataValue, engine *Engine, owner
 	case *Common:
 		dvalue.dataType = C.DTObject
 		*(*unsafe.Pointer)(datap) = value.addr
+	case color.RGBA:
+		dvalue.dataType = C.DTColor
+		*(*uint32)(datap) = uint32(value.A) << 24 | uint32(value.R) << 16 | uint32(value.G) << 8 | uint32(value.B)
 	default:
 		dvalue.dataType = C.DTObject
 		if obj, ok := value.(Object); ok {
@@ -120,6 +124,9 @@ func unpackDataValue(dvalue *C.DataValue, engine *Engine) interface{} {
 		return *(*float64)(datap)
 	case C.DTFloat32:
 		return *(*float32)(datap)
+	case C.DTColor:
+		var c uint32 = *(*uint32)(datap)
+		return color.RGBA{byte(c >> 16), byte(c >> 8), byte(c), byte(c >> 24)}
 	case C.DTGoAddr:
 		return (*(**valueFold)(datap)).gvalue
 	case C.DTInvalid:

@@ -482,6 +482,9 @@ void unpackDataValue(DataValue *value, QVariant_ *var)
     case DTFloat32:
         *qvar = *(float*)(value->data);
         break;
+    case DTColor:
+        *qvar = QColor(*(QRgb*)(value->data));
+        break;
     case DTList:
         *qvar = **(QVariantList**)(value->data);
         delete *(QVariantList**)(value->data);
@@ -543,6 +546,10 @@ void packDataValue(QVariant_ *var, DataValue *value)
     case QMetaType::Float:
         value->dataType = DTFloat32;
         *(float*)(value->data) = qvar->toFloat();
+        break;
+    case QMetaType::QColor:
+        value->dataType = DTColor;
+        *(unsigned int*)(value->data) = qvar->value<QColor>().rgba();
         break;
     default:
         if (qvar->type() == (int)QMetaType::QObjectStar || qvar->canConvert<QObject *>()) {

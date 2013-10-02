@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/niemeyer/qml"
+	"image/color"
 	"io/ioutil"
 	. "launchpad.net/gocheck"
 	"os"
@@ -334,6 +335,15 @@ var tests = []struct {
 			url := "http://localhost:54321"
 			d.root.Set("url", url)
 			d.Check(d.root.String("url"), Equals, url)
+		},
+	},
+	{
+		Summary: "Reading and setting of a QColor property",
+		QML:     `Text{ color: Qt.rgba(1/16, 1/8, 1/4, 1/2); function hasColor(c) { return Qt.colorEqual(color, c) }}`,
+		Done:    func(d *TestData) {
+			d.Assert(d.root.Color("color"), Equals, color.RGBA{256/16, 256/8, 256/4, 256/2})
+			d.root.Set("color", color.RGBA{256/2, 256/4, 256/8, 256/16})
+			d.Assert(d.root.Call("hasColor", color.RGBA{256/2, 256/4, 256/8, 256/16}), Equals, true)
 		},
 	},
 	{

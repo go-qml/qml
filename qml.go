@@ -24,6 +24,7 @@ import (
 	"errors"
 	"fmt"
 	"image"
+	"image/color"
 	"io"
 	"io/ioutil"
 	"os"
@@ -265,6 +266,7 @@ type Object interface {
 	Float64(property string) float64
 	Bool(property string) bool
 	String(property string) string
+	Color(property string) color.RGBA
 	Object(property string) Object
 	ObjectByName(objectName string) Object
 	Call(method string, params ...interface{}) interface{}
@@ -407,6 +409,17 @@ func (obj *Common) String(property string) string {
 		panic(fmt.Sprintf("value of property %q is not a string: %#v", property, value))
 	}
 	return s
+}
+
+// Color returns the RGBA value of the given color property.
+// Color panics if the property value is not a color.
+func (obj *Common) Color(property string) color.RGBA {
+	value := obj.Property(property)
+	c, ok := value.(color.RGBA)
+	if !ok {
+		panic(fmt.Sprintf("value of property %q is not a string: %#v", property, value))
+	}
+	return c
 }
 
 // TODO Consider getting rid of int32 and float32 results. Always returning 64-bit
