@@ -81,7 +81,7 @@ type TestType struct {
 	Float64Value float64
 	Float32Value float32
 	AnyValue     interface{}
-	ObjectValue  *qml.Object
+	ObjectValue  qml.Object
 }
 
 func (ts *TestType) StringMethod() string {
@@ -188,7 +188,7 @@ func (s *S) TestContextSetVars(c *C) {
 	vars.AnyValue = 42
 	c.Assert(s.context.Var("anyValue"), Equals, intNN(42))
 
-	c.Assert(s.context.Var("objectValue").(*qml.Object).Int("width"), Equals, 42)
+	c.Assert(s.context.Var("objectValue").(qml.Object).Int("width"), Equals, 42)
 }
 
 func (s *S) TestComponentSetDataError(c *C) {
@@ -216,8 +216,8 @@ type TestData struct {
 	*C
 	engine    *qml.Engine
 	context   *qml.Context
-	component *qml.Object
-	root      *qml.Object
+	component qml.Object
+	root      qml.Object
 	value     *TestType
 }
 
@@ -297,7 +297,7 @@ var tests = []struct {
 			d.Check(func() { obj.Int64("boolp") }, Panics, `value of property "boolp" cannot be represented as an int64: true`)
 			d.Check(func() { obj.Float64("boolp") }, Panics, `value of property "boolp" cannot be represented as a float64: true`)
 			d.Check(func() { obj.String("boolp") }, Panics, `value of property "boolp" is not a string: true`)
-			d.Check(func() { obj.Object("boolp") }, Panics, `value of property "boolp" is not a *qml.Object: true`)
+			d.Check(func() { obj.Object("boolp") }, Panics, `value of property "boolp" is not a QML object: true`)
 			d.Check(func() { obj.Property("missing") }, Panics, `object does not have a "missing" property`)
 		},
 	},
@@ -546,7 +546,7 @@ var tests = []struct {
 			}
 		`,
 		Done: func(d *TestData) {
-			d.Check(d.root.Call("f").(*qml.Object).Int("width"), Equals, 300)
+			d.Check(d.root.Call("f").(qml.Object).Int("width"), Equals, 300)
 		},
 	},
 	{
@@ -683,7 +683,7 @@ var tests = []struct {
 		Done: func(d *TestData) {
 			url := "http://localhost:54321/"
 			done := make(chan bool)
-			d.root.On("navigationRequested", func(request *qml.Object) {
+			d.root.On("navigationRequested", func(request qml.Object) {
 				d.Check(request.String("url"), Equals, url)
 				done <- true
 			})
