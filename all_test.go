@@ -330,7 +330,7 @@ var tests = []struct {
 	{
 		Summary: "Reading and setting of a QUrl property",
 		QML:     `import QtWebKit 3.0; WebView {}`,
-		Done:    func(d *TestData) {
+		Done: func(d *TestData) {
 			d.Check(d.root.String("url"), Equals, "")
 			url := "http://localhost:54321"
 			d.root.Set("url", url)
@@ -340,10 +340,10 @@ var tests = []struct {
 	{
 		Summary: "Reading and setting of a QColor property",
 		QML:     `Text{ color: Qt.rgba(1/16, 1/8, 1/4, 1/2); function hasColor(c) { return Qt.colorEqual(color, c) }}`,
-		Done:    func(d *TestData) {
-			d.Assert(d.root.Color("color"), Equals, color.RGBA{256/16, 256/8, 256/4, 256/2})
-			d.root.Set("color", color.RGBA{256/2, 256/4, 256/8, 256/16})
-			d.Assert(d.root.Call("hasColor", color.RGBA{256/2, 256/4, 256/8, 256/16}), Equals, true)
+		Done: func(d *TestData) {
+			d.Assert(d.root.Color("color"), Equals, color.RGBA{256 / 16, 256 / 8, 256 / 4, 256 / 2})
+			d.root.Set("color", color.RGBA{256 / 2, 256 / 4, 256 / 8, 256 / 16})
+			d.Assert(d.root.Call("hasColor", color.RGBA{256 / 2, 256 / 4, 256 / 8, 256 / 16}), Equals, true)
 		},
 	},
 	{
@@ -389,6 +389,15 @@ var tests = []struct {
 			Item { Component.onCompleted: console.log("String is", GoSingleton.stringValue) }
 		`,
 		QMLLog: "String is <content>",
+	},
+	{
+		Summary: "qml.Changed on unknown value is okay",
+		Value:   TestType{StringValue: "<old>"},
+		Init: func(d *TestData) {
+			value := &TestType{}
+			qml.Changed(&value, &value.StringValue)
+		},
+		QML: `Item{}`,
 	},
 	{
 		Summary: "qml.Changed triggers a QML slot",
@@ -653,7 +662,7 @@ var tests = []struct {
 	},
 	{
 		Summary: "Errors connecting to QML signals",
-		QML: `Item { signal doIt() }`,
+		QML:     `Item { signal doIt() }`,
 		Done: func(d *TestData) {
 			d.Check(func() { d.root.On("missing", func() {}) }, Panics, `object does not expose a "missing" signal`)
 			d.Check(func() { d.root.On("doIt", func(s string) {}) }, Panics, `signal "doIt" has too few parameters for provided function`)

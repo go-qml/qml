@@ -121,13 +121,11 @@ func Changed(value, fieldAddr interface{}) {
 		panic("provided field is not a member of the given value")
 	}
 
-	found := false
 	gui(func() {
 		tinfo := typeInfo(value)
 		for _, engine := range engines {
 			fold := engine.values[value]
 			for fold != nil {
-				found = true
 				C.goValueActivate(fold.cvalue, tinfo, C.int(offset))
 				fold = fold.next
 			}
@@ -135,7 +133,6 @@ func Changed(value, fieldAddr interface{}) {
 			//      This would prevent the iteration and the deferrals.
 			for fold, _ = range typeNew {
 				if fold.gvalue == value {
-					found = true
 					// Activate these later so they don't get recursively moved
 					// out of typeNew while the iteration is still happening.
 					defer C.goValueActivate(fold.cvalue, tinfo, C.int(offset))
@@ -143,10 +140,6 @@ func Changed(value, fieldAddr interface{}) {
 			}
 		}
 	})
-	if !found {
-		// TODO Perhaps return an error instead.
-		panic("value is not known")
-	}
 }
 
 // hookIdleTimer is run once per iteration of the Qt event loop,
