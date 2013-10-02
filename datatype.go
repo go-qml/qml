@@ -82,13 +82,13 @@ func packDataValue(value interface{}, dvalue *C.DataValue, engine *Engine, owner
 	case float32:
 		dvalue.dataType = C.DTFloat32
 		*(*float32)(datap) = value
-	case *CommonObject:
+	case *Common:
 		dvalue.dataType = C.DTObject
 		*(*unsafe.Pointer)(datap) = value.addr
 	default:
 		dvalue.dataType = C.DTObject
 		if obj, ok := value.(Object); ok {
-			*(*unsafe.Pointer)(datap) = obj.CommonObject().addr
+			*(*unsafe.Pointer)(datap) = obj.Common().addr
 		} else {
 			*(*unsafe.Pointer)(datap) = wrapGoValue(engine, value, owner)
 		}
@@ -126,7 +126,7 @@ func unpackDataValue(dvalue *C.DataValue, engine *Engine) interface{} {
 		return nil
 	case C.DTObject:
 		// TODO Would be good to preserve identity on the Go side.
-		return &CommonObject{
+		return &Common{
 			engine: engine,
 			addr:   (*(*unsafe.Pointer)(datap)),
 		}

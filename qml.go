@@ -136,7 +136,7 @@ func (e *Engine) Load(location string, r io.Reader) (Object, error) {
 
 	cdata, cdatalen := unsafeBytesData(data)
 	cloc, cloclen := unsafeStringData(location)
-	comp := &CommonObject{engine: e}
+	comp := &Common{engine: e}
 	gui(func() {
 		// TODO The component's parent should probably be the engine.
 		comp.addr = C.newComponent(e.addr, nilPtr)
@@ -192,7 +192,7 @@ func (e *Engine) Context() *Context {
 // Context represents a QML context that can hold variables visible
 // to logic running within it.
 type Context struct {
-	CommonObject
+	Common
 }
 
 // SetVar makes the provided value available as a variable with the
@@ -251,13 +251,13 @@ func (ctx *Context) Var(name string) interface{} {
 
 // TODO Context.Spawn() => Context
 
-// TODO engine.ObjectOf(&value) => *CommonObject for the Go value
+// TODO engine.ObjectOf(&value) => *Common for the Go value
 
 // Object is the common interface implemented by all QML types.
 //
-// See the documentation of CommonObject for details about this interface.
+// See the documentation of Common for details about this interface.
 type Object interface {
-	CommonObject() *CommonObject
+	Common() *Common
 	Set(property string, value interface{}) error
 	Property(name string) interface{}
 	Int(property string) int
@@ -274,25 +274,25 @@ type Object interface {
 	On(signal string, function interface{})
 }
 
-// CommonObject implements the common behavior of all QML objects.
+// Common implements the common behavior of all QML objects.
 // It implements the Object interface.
-type CommonObject struct {
+type Common struct {
 	addr   unsafe.Pointer
 	engine *Engine
 }
 
-var _ Object = (*CommonObject)(nil)
+var _ Object = (*Common)(nil)
 
-// CommonObject returns obj itself.
+// Common returns obj itself.
 //
-// This provides access to the underlying *CommonObject for types that
+// This provides access to the underlying *Common for types that
 // embed it, when these are used via the Object interface.
-func (obj *CommonObject) CommonObject() *CommonObject {
+func (obj *Common) Common() *Common {
 	return obj
 }
 
 // Set changes the named object property to the given value.
-func (obj *CommonObject) Set(property string, value interface{}) error {
+func (obj *Common) Set(property string, value interface{}) error {
 	cproperty := C.CString(property)
 	defer C.free(unsafe.Pointer(cproperty))
 	gui(func() {
@@ -308,7 +308,7 @@ func (obj *CommonObject) Set(property string, value interface{}) error {
 // If the property type is known, type-specific methods such as Int
 // and String are more convenient to use.
 // Property panics if the property does not exist.
-func (obj *CommonObject) Property(name string) interface{} {
+func (obj *Common) Property(name string) interface{} {
 	cname := C.CString(name)
 	defer C.free(unsafe.Pointer(cname))
 
@@ -325,7 +325,7 @@ func (obj *CommonObject) Property(name string) interface{} {
 
 // Int returns the int value of the given property.
 // Int panics if the property value cannot be represented as an int.
-func (obj *CommonObject) Int(property string) int {
+func (obj *Common) Int(property string) int {
 	switch value := obj.Property(property).(type) {
 	case int:
 		return value
@@ -349,7 +349,7 @@ func (obj *CommonObject) Int(property string) int {
 
 // Int64 returns the int64 value of the given property.
 // Int64 panics if the property value cannot be represented as an int64.
-func (obj *CommonObject) Int64(property string) int64 {
+func (obj *Common) Int64(property string) int64 {
 	switch value := obj.Property(property).(type) {
 	case int:
 		return int64(value)
@@ -370,7 +370,7 @@ func (obj *CommonObject) Int64(property string) int64 {
 
 // Float64 returns the float64 value of the given property.
 // Float64 panics if the property value cannot be represented as float64.
-func (obj *CommonObject) Float64(property string) float64 {
+func (obj *Common) Float64(property string) float64 {
 	switch value := obj.Property(property).(type) {
 	case int:
 		return float64(value)
@@ -389,7 +389,7 @@ func (obj *CommonObject) Float64(property string) float64 {
 
 // Bool returns the bool value of the given property.
 // Bool panics if the property value is not a bool.
-func (obj *CommonObject) Bool(property string) bool {
+func (obj *Common) Bool(property string) bool {
 	value := obj.Property(property)
 	b, ok := value.(bool)
 	if !ok {
@@ -400,7 +400,7 @@ func (obj *CommonObject) Bool(property string) bool {
 
 // String returns the string value of the given property.
 // String panics if the property value is not a string.
-func (obj *CommonObject) String(property string) string {
+func (obj *Common) String(property string) string {
 	value := obj.Property(property)
 	s, ok := value.(string)
 	if !ok {
@@ -414,7 +414,7 @@ func (obj *CommonObject) String(property string) string {
 
 // Object returns the Object value of the given property.
 // Object panics if the property value is not a QML object.
-func (obj *CommonObject) Object(property string) Object {
+func (obj *Common) Object(property string) Object {
 	value := obj.Property(property)
 	object, ok := value.(Object)
 	if !ok {
@@ -426,7 +426,7 @@ func (obj *CommonObject) Object(property string) Object {
 // ObjectByName returns the Object value of the descendant object that
 // was defined with the objectName property set to the provided value.
 // ObjectByName panics if the object is not found.
-func (obj *CommonObject) ObjectByName(objectName string) Object {
+func (obj *Common) ObjectByName(objectName string) Object {
 	cname, cnamelen := unsafeStringData(objectName)
 	var dvalue C.DataValue
 	gui(func() {
@@ -449,7 +449,7 @@ func (obj *CommonObject) ObjectByName(objectName string) Object {
 
 // Call calls the given object method with the provided parameters.
 // Call panics if the method does not exist.
-func (obj *CommonObject) Call(method string, params ...interface{}) interface{} {
+func (obj *Common) Call(method string, params ...interface{}) interface{} {
 	if len(params) > len(dataValueArray) {
 		panic("too many parameters")
 	}
@@ -474,11 +474,11 @@ func (obj *CommonObject) Call(method string, params ...interface{}) interface{} 
 //
 // The Create method panics if called on an object that does not
 // represent a QML component.
-func (obj *CommonObject) Create(ctx *Context) Object {
+func (obj *Common) Create(ctx *Context) Object {
 	if C.objectIsComponent(obj.addr) == 0 {
 		panic("object is not a component")
 	}
-	var root CommonObject
+	var root Common
 	root.engine = obj.engine
 	gui(func() {
 		ctxaddr := nilPtr
@@ -497,7 +497,7 @@ func (obj *CommonObject) Create(ctx *Context) Object {
 //
 // The CreateWindow method panics if called on an object that
 // does not represent a QML component.
-func (obj *CommonObject) CreateWindow(ctx *Context) *Window {
+func (obj *Common) CreateWindow(ctx *Context) *Window {
 	if C.objectIsComponent(obj.addr) == 0 {
 		panic("object is not a component")
 	}
@@ -515,7 +515,7 @@ func (obj *CommonObject) CreateWindow(ctx *Context) *Window {
 
 // Destroy finalizes the value and releases any resources used.
 // The value must not be used after calling this method.
-func (obj *CommonObject) Destroy() {
+func (obj *Common) Destroy() {
 	// TODO We might hook into the destroyed signal, and prevent this object
 	//      from being used in post-destruction crash-prone ways.
 	gui(func() {
@@ -548,7 +548,7 @@ var connectedFunction = make(map[*interface{}]bool)
 //
 //     http://qt-project.org/doc/qt-5.0/qtqml/qml-qtquick2-connections.html
 //
-func (obj *CommonObject) On(signal string, function interface{}) {
+func (obj *Common) On(signal string, function interface{}) {
 	funcv := reflect.ValueOf(function)
 	funct := funcv.Type()
 	if funcv.Kind() != reflect.Func {
@@ -613,7 +613,7 @@ func cerror(cerr *C.error) error {
 
 // Window represents a QML window where components are rendered.
 type Window struct {
-	CommonObject
+	Common
 }
 
 // Show exposes the window.
@@ -634,7 +634,7 @@ func (win *Window) Hide() {
 //
 // If the window was defined in QML code, the root object is the window itself.
 func (win *Window) Root() Object {
-	var obj CommonObject
+	var obj Common
 	obj.engine = win.engine
 	gui(func() {
 		obj.addr = C.windowRootObject(win.addr)

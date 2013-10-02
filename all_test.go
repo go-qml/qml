@@ -607,6 +607,14 @@ var tests = []struct {
 		},
 	},
 	{
+		Summary: "Window is object",
+		QML:     `Item {}`,
+		Done: func(d *TestData) {
+			win := d.component.CreateWindow(nil)
+			d.Assert(win.Int("status"), Equals, 1) // Ready
+		},
+	},
+	{
 		Summary: "Pass a *Value back into a method",
 		QML:     `Rectangle { width: 300; function log(r) { console.log("Width is", r.width) } }`,
 		Done:    func(d *TestData) { d.root.Call("log", d.root) },
