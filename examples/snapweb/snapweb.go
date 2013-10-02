@@ -52,7 +52,7 @@ type Control struct {
 	done chan error
 }
 
-func (ctrl *Control) Snapshot(request *qml.Object) {
+func (ctrl *Control) Snapshot(request qml.Object) {
 	if request.Int("status") != 2 {
 		return
 	}
