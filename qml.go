@@ -502,13 +502,13 @@ func (obj *CommonObject) CreateWindow(ctx *Context) *Window {
 		panic("object is not a component")
 	}
 	var win Window
-	win.obj.engine = obj.engine
+	win.engine = obj.engine
 	gui(func() {
 		ctxaddr := nilPtr
 		if ctx != nil {
 			ctxaddr = ctx.obj.addr
 		}
-		win.obj.addr = C.componentCreateWindow(obj.addr, ctxaddr)
+		win.addr = C.componentCreateWindow(obj.addr, ctxaddr)
 	})
 	return &win
 }
@@ -613,20 +613,20 @@ func cerror(cerr *C.error) error {
 
 // Window represents a QML window where components are rendered.
 type Window struct {
-	obj CommonObject
+	CommonObject
 }
 
 // Show exposes the window.
 func (win *Window) Show() {
 	gui(func() {
-		C.windowShow(win.obj.addr)
+		C.windowShow(win.addr)
 	})
 }
 
 // Hide hides the window.
 func (win *Window) Hide() {
 	gui(func() {
-		C.windowHide(win.obj.addr)
+		C.windowHide(win.addr)
 	})
 }
 
@@ -635,9 +635,9 @@ func (win *Window) Hide() {
 // If the window was defined in QML code, the root object is the window itself.
 func (win *Window) Root() Object {
 	var obj CommonObject
-	obj.engine = win.obj.engine
+	obj.engine = win.engine
 	gui(func() {
-		obj.addr = C.windowRootObject(win.obj.addr)
+		obj.addr = C.windowRootObject(win.addr)
 	})
 	return &obj
 }
@@ -650,8 +650,8 @@ func (win *Window) Wait() {
 	gui(func() {
 		// TODO Must be able to wait for the same Window from multiple goroutines.
 		// TODO If the window is not visible, must return immediately.
-		waitingWindows[win.obj.addr] = &m
-		C.windowConnectHidden(win.obj.addr)
+		waitingWindows[win.addr] = &m
+		C.windowConnectHidden(win.addr)
 	})
 	m.Lock()
 }
@@ -662,7 +662,7 @@ func (win *Window) Snapshot() image.Image {
 	// TODO Test this.
 	var cimage unsafe.Pointer
 	gui(func() {
-		cimage = C.windowGrabWindow(win.obj.addr)
+		cimage = C.windowGrabWindow(win.addr)
 	})
 	defer C.delImage(cimage)
 
@@ -686,12 +686,6 @@ func (win *Window) Snapshot() image.Image {
 		image.Pix[i+3] = byte(c >> 24)
 	}
 	return image
-}
-
-// Destroy destroys the window.
-// The window should not be used after this method is called.
-func (win *Window) Destroy() {
-	win.obj.Destroy()
 }
 
 var waitingWindows = make(map[unsafe.Pointer]*sync.Mutex)
