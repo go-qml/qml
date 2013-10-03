@@ -237,7 +237,7 @@ func (ctx *Context) SetVars(value interface{}) {
 }
 
 // Var returns the context variable with the given name.
-func (ctx *Context) Var(name string) Result {
+func (ctx *Context) Var(name string) interface{} {
 	cname, cnamelen := unsafeStringData(name)
 
 	var dvalue C.DataValue
@@ -247,7 +247,7 @@ func (ctx *Context) Var(name string) Result {
 
 		C.contextGetProperty(ctx.addr, qname, &dvalue)
 	})
-	return Result{unpackDataValue(&dvalue, ctx.engine)}
+	return unpackDataValue(&dvalue, ctx.engine)
 }
 
 // TODO Context.Spawn() => Context
@@ -260,7 +260,7 @@ func (ctx *Context) Var(name string) Result {
 type Object interface {
 	Common() *Common
 	Set(property string, value interface{}) error
-	Property(name string) Result
+	Property(name string) interface{}
 	Int(property string) int
 	Int64(property string) int64
 	Float64(property string) float64
@@ -269,17 +269,11 @@ type Object interface {
 	Color(property string) color.RGBA
 	Object(property string) Object
 	ObjectByName(objectName string) Object
-	Call(method string, params ...interface{}) Result
+	Call(method string, params ...interface{}) interface{}
 	Create(ctx *Context) Object
 	CreateWindow(ctx *Context) *Window
 	Destroy()
 	On(signal string, function interface{})
-}
-
-// Result is a general interface{} type that contains convenient
-// access methods for well known types.
-type Result struct {
-	Value interface{}
 }
 
 // Common implements the common behavior of all QML objects.
@@ -316,7 +310,7 @@ func (obj *Common) Set(property string, value interface{}) error {
 // If the property type is known, type-specific methods such as Int
 // and String are more convenient to use.
 // Property panics if the property does not exist.
-func (obj *Common) Property(name string) Result {
+func (obj *Common) Property(name string) interface{} {
 	cname := C.CString(name)
 	defer C.free(unsafe.Pointer(cname))
 
@@ -328,14 +322,13 @@ func (obj *Common) Property(name string) Result {
 	if found == 0 {
 		panic(fmt.Sprintf("object does not have a %q property", name))
 	}
-	return Result{unpackDataValue(&dvalue, obj.engine)}
+	return unpackDataValue(&dvalue, obj.engine)
 }
 
 // Int returns the int value of the named property.
 // Int panics if the property cannot be represented as an int.
 func (obj *Common) Int(property string) int {
-	// Logic duplicated in Result.Int. Update both.
-	switch value := obj.Property(property).Value.(type) {
+	switch value := obj.Property(property).(type) {
 	case int:
 		return value
 	case int32:
@@ -354,34 +347,10 @@ func (obj *Common) Int(property string) int {
 	}
 }
 
-// Int returns the int value of the result.
-// Int panics if the result cannot be represented as an int.
-func (r Result) Int() int {
-	// Logic duplicated in Common.Int. Update both.
-	switch value := r.Value.(type) {
-	case int:
-		return value
-	case int32:
-		return int(value)
-	case int64:
-		if int64(int(value)) != value {
-			panic(fmt.Sprintf("value is too large for int: %#v", value))
-		}
-		return int(value)
-	case float32:
-		return int(value)
-	case float64:
-		return int(value)
-	default:
-		panic(fmt.Sprintf("value cannot be represented as an int: %#v", value))
-	}
-}
-
 // Int64 returns the int64 value of the named property.
 // Int64 panics if the property cannot be represented as an int64.
 func (obj *Common) Int64(property string) int64 {
-	// Logic duplicated in Result.Int64. Update both.
-	switch value := obj.Property(property).Value.(type) {
+	switch value := obj.Property(property).(type) {
 	case int:
 		return int64(value)
 	case int32:
@@ -397,31 +366,10 @@ func (obj *Common) Int64(property string) int64 {
 	}
 }
 
-// Int64 returns the int64 value of the result.
-// Int64 panics if the result cannot be represented as an int64.
-func (r Result) Int64() int64 {
-	// Logic duplicated in Common.Int64. Update both.
-	switch value := r.Value.(type) {
-	case int:
-		return int64(value)
-	case int32:
-		return int64(value)
-	case int64:
-		return value
-	case float32:
-		return int64(value)
-	case float64:
-		return int64(value)
-	default:
-		panic(fmt.Sprintf("value cannot be represented as an int64: %#v", value))
-	}
-}
-
 // Float64 returns the float64 value of the named property.
 // Float64 panics if the property cannot be represented as float64.
 func (obj *Common) Float64(property string) float64 {
-	// Logic duplicated in Result.Float64. Update both.
-	switch value := obj.Property(property).Value.(type) {
+	switch value := obj.Property(property).(type) {
 	case int:
 		return float64(value)
 	case int32:
@@ -437,68 +385,30 @@ func (obj *Common) Float64(property string) float64 {
 	}
 }
 
-// Float64 returns the float64 value of the result.
-// Float64 panics if the result cannot be represented as float64.
-func (r Result) Float64() float64 {
-	// Logic duplicated in Common.Float64. Update both.
-	switch value := r.Value.(type) {
-	case int:
-		return float64(value)
-	case int32:
-		return float64(value)
-	case int64:
-		return float64(value)
-	case float32:
-		return float64(value)
-	case float64:
-		return value
-	default:
-		panic(fmt.Sprintf("value cannot be represented as a float64: %#v", value))
-	}
-}
-
 // Bool returns the bool value of the named property.
 // Bool panics if the property is not a bool.
 func (obj *Common) Bool(property string) bool {
-	value := obj.Property(property).Value
+	value := obj.Property(property)
 	if b, ok := value.(bool); ok {
 		return b
 	}
 	panic(fmt.Sprintf("value of property %q is not a bool: %#v", property, value))
 }
 
-// Bool returns the bool value of the result.
-// Bool panics if the result is not a bool.
-func (r Result) Bool(property string) bool {
-	if b, ok := r.Value.(bool); ok {
-		return b
-	}
-	panic(fmt.Sprintf("value is not a bool: %#v", r))
-}
-
 // String returns the string value of the named property.
 // String panics if the property is not a string.
 func (obj *Common) String(property string) string {
-	value := obj.Property(property).Value
+	value := obj.Property(property)
 	if s, ok := value.(string); ok {
 		return s
 	}
 	panic(fmt.Sprintf("value of property %q is not a string: %#v", property, value))
 }
 
-// String returns the string value of the result.
-// String panics if the result is not a string.
-func (r Result) String() string {
-	if s, ok := r.Value.(string); ok {
-		return s
-	}
-	panic(fmt.Sprintf("value is not a string: %#v", r))
-}
-
 // Color returns the RGBA value of the named property.
 // Color panics if the property is not a color.
 func (obj *Common) Color(property string) color.RGBA {
-	value := obj.Property(property).Value
+	value := obj.Property(property)
 	c, ok := value.(color.RGBA)
 	if !ok {
 		panic(fmt.Sprintf("value of property %q is not a color: %#v", property, value))
@@ -506,33 +416,15 @@ func (obj *Common) Color(property string) color.RGBA {
 	return c
 }
 
-// Color returns the RGBA value of the result.
-// Color panics if the result is not a color.
-func (r Result) Color() color.RGBA {
-	if c, ok := r.Value.(color.RGBA); ok {
-		return c
-	}
-	panic(fmt.Sprintf("value is not a color: %#v", r))
-}
-
 // Object returns the object value of the named property.
 // Object panics if the property is not a QML object.
 func (obj *Common) Object(property string) Object {
-	value := obj.Property(property).Value
+	value := obj.Property(property)
 	object, ok := value.(Object)
 	if !ok {
 		panic(fmt.Sprintf("value of property %q is not a QML object: %#v", property, value))
 	}
 	return object
-}
-
-// Object returns the object value of the result.
-// Object panics if the result is not a QML object.
-func (r Result) Object() Object {
-	if object, ok := r.Value.(Object); ok {
-		return object
-	}
-	panic(fmt.Sprintf("value is not a QML object: %#v", r))
 }
 
 // TODO Consider getting rid of int32 and float32 results. Always returning 64-bit
@@ -558,7 +450,7 @@ func (obj *Common) ObjectByName(objectName string) Object {
 
 // Call calls the given object method with the provided parameters.
 // Call panics if the method does not exist.
-func (obj *Common) Call(method string, params ...interface{}) Result {
+func (obj *Common) Call(method string, params ...interface{}) interface{} {
 	if len(params) > len(dataValueArray) {
 		panic("too many parameters")
 	}
@@ -574,7 +466,7 @@ func (obj *Common) Call(method string, params ...interface{}) Result {
 		//      If so, this method needs an error result too.
 		C.objectInvoke(obj.addr, cmethod, &result, &dataValueArray[0], C.int(len(params)))
 	})
-	return Result{unpackDataValue(&result, obj.engine)}
+	return unpackDataValue(&result, obj.engine)
 }
 
 // Create creates a new instance of the component held by obj.
