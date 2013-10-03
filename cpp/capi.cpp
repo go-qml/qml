@@ -165,7 +165,8 @@ QQuickWindow_ *componentCreateWindow(QQmlComponent_ *component, QQmlContext_ *co
 }
 
 // Workaround for bug https://bugs.launchpad.net/bugs/1179716
-struct ShowWindow : public QQuickWindow {
+class ShowWindow : public QQuickWindow {
+    public:
     void show() {
         QQuickWindow::show();
         QResizeEvent resize(size(), size());
