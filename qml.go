@@ -331,8 +331,6 @@ func (obj *Common) Int(property string) int {
 	switch value := obj.Property(property).(type) {
 	case int:
 		return value
-	case int32:
-		return int(value)
 	case int64:
 		if int64(int(value)) != value {
 			panic(fmt.Sprintf("value of property %q is too large for int: %#v", property, value))
@@ -353,8 +351,6 @@ func (obj *Common) Int64(property string) int64 {
 	switch value := obj.Property(property).(type) {
 	case int:
 		return int64(value)
-	case int32:
-		return int64(value)
 	case int64:
 		return value
 	case float32:
@@ -371,8 +367,6 @@ func (obj *Common) Int64(property string) int64 {
 func (obj *Common) Float64(property string) float64 {
 	switch value := obj.Property(property).(type) {
 	case int:
-		return float64(value)
-	case int32:
 		return float64(value)
 	case int64:
 		return float64(value)

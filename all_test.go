@@ -122,13 +122,12 @@ var getSetTests = []struct{ set, get interface{} }{
 	{"value", same},
 	{true, same},
 	{false, same},
-	{int64(42), same},
-	{int32(42), int64(42)},
+	{int64(42), int64(42)},
 	{float64(42), same},
 	{float32(42), same},
 	{new(TestType), same},
 	{nil, same},
-	{42, int64(42)},
+	{42, same},
 }
 
 func (s *S) TestContextGetSet(c *C) {
@@ -167,15 +166,15 @@ func (s *S) TestContextSetVars(c *C) {
 
 	c.Assert(s.context.Var("stringValue"), Equals, "<content>")
 	c.Assert(s.context.Var("boolValue"), Equals, true)
-	c.Assert(s.context.Var("intValue"), Equals, int64(42))
+	c.Assert(s.context.Var("intValue"), Equals, 42)
 	c.Assert(s.context.Var("int64Value"), Equals, int64(42))
-	c.Assert(s.context.Var("int32Value"), Equals, int64(42))
+	c.Assert(s.context.Var("int32Value"), Equals, 42)
 	c.Assert(s.context.Var("float64Value"), Equals, float64(4.2))
 	c.Assert(s.context.Var("float32Value"), Equals, float32(4.2))
 	c.Assert(s.context.Var("anyValue"), Equals, nil)
 
 	vars.AnyValue = 42
-	c.Assert(s.context.Var("anyValue"), Equals, int64(42))
+	c.Assert(s.context.Var("anyValue"), Equals, 42)
 
 	c.Assert(s.context.Var("objectValue").(qml.Object).Int("width"), Equals, 42)
 }
@@ -535,7 +534,7 @@ var tests = []struct {
 	{
 		Summary: "Call a QML method with result and parameters from Go",
 		QML:     `Item { function add(a, b) { return a+b; } }`,
-		Done:    func(d *TestData) { d.Check(d.root.Call("add", 1, 2), Equals, int64(3)) },
+		Done:    func(d *TestData) { d.Check(d.root.Call("add", 1, 2), Equals, 3) },
 	},
 	{
 		Summary: "Call a QML method with a custom type",
@@ -595,7 +594,7 @@ var tests = []struct {
 			root := win.Root()
 			d.Check(root.Int("width"), Equals, 300)
 			d.Check(root.Int("height"), Equals, 200)
-			d.Check(root.Call("inc", 42), Equals, int64(43))
+			d.Check(root.Call("inc", 42), Equals, 43)
 			root.Destroy()
 		},
 	},

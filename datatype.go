@@ -69,8 +69,13 @@ func packDataValue(value interface{}, dvalue *C.DataValue, engine *Engine, owner
 		dvalue.dataType = C.DTBool
 		*(*bool)(datap) = value
 	case int:
-		dvalue.dataType = intDT
-		*(*int)(datap) = value
+		if value > 1<<31-1 {
+			dvalue.dataType = C.DTInt64
+			*(*int64)(datap) = int64(value)
+		} else {
+			dvalue.dataType = C.DTInt32
+			*(*int32)(datap) = int32(value)
+		}
 	case int64:
 		dvalue.dataType = C.DTInt64
 		*(*int64)(datap) = value
@@ -88,7 +93,7 @@ func packDataValue(value interface{}, dvalue *C.DataValue, engine *Engine, owner
 		*(*unsafe.Pointer)(datap) = value.addr
 	case color.RGBA:
 		dvalue.dataType = C.DTColor
-		*(*uint32)(datap) = uint32(value.A) << 24 | uint32(value.R) << 16 | uint32(value.G) << 8 | uint32(value.B)
+		*(*uint32)(datap) = uint32(value.A)<<24 | uint32(value.R)<<16 | uint32(value.G)<<8 | uint32(value.B)
 	default:
 		dvalue.dataType = C.DTObject
 		if obj, ok := value.(Object); ok {
@@ -119,7 +124,7 @@ func unpackDataValue(dvalue *C.DataValue, engine *Engine) interface{} {
 	case C.DTInt64:
 		return *(*int64)(datap)
 	case C.DTInt32:
-		return int64(*(*int32)(datap))
+		return int(*(*int32)(datap))
 	case C.DTFloat64:
 		return *(*float64)(datap)
 	case C.DTFloat32:
