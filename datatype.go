@@ -119,7 +119,7 @@ func unpackDataValue(dvalue *C.DataValue, engine *Engine) interface{} {
 	case C.DTInt64:
 		return *(*int64)(datap)
 	case C.DTInt32:
-		return *(*int32)(datap)
+		return int64(*(*int32)(datap))
 	case C.DTFloat64:
 		return *(*float64)(datap)
 	case C.DTFloat32:

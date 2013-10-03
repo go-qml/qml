@@ -427,9 +427,6 @@ func (obj *Common) Object(property string) Object {
 	return object
 }
 
-// TODO Consider getting rid of int32 and float32 results. Always returning 64-bit
-//      results will make it easier on clients that want to handle arbitrary typing.
-
 // ObjectByName returns the Object value of the descendant object that
 // was defined with the objectName property set to the provided value.
 // ObjectByName panics if the object is not found.
