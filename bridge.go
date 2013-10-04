@@ -16,6 +16,7 @@ import (
 	"github.com/niemeyer/qml/tref"
 	"reflect"
 	"runtime"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"unsafe"
@@ -344,17 +345,21 @@ func hookGoValueCallMethod(enginep, foldp unsafe.Pointer, reflectIndex C.int, ar
 
 	method := v.Method(int(reflectIndex))
 	methodt := method.Type()
+	methodName := v.Type().Method(int(reflectIndex)).Name
 
 	// TODO Ensure methods with more parameters than this are not registered.
 	var params [C.MaxParams]reflect.Value
+	var err error
 
 	numIn := methodt.NumIn()
 	for i := 0; i < numIn; i++ {
-		// TODO Better error messages on type errors.
 		paramdv := (*C.DataValue)(unsafe.Pointer(uintptr(unsafe.Pointer(args)) + (uintptr(i)+1)*dataValueSize))
 		param := reflect.ValueOf(unpackDataValue(paramdv, fold.engine))
 		if argt := methodt.In(i); param.Type() != argt {
-			param = param.Convert(argt)
+			param, err = convertParam(methodName, i, param, argt)
+			if err != nil {
+				panic(err.Error())
+			}
 		}
 		params[i] = param
 	}
@@ -373,6 +378,21 @@ func hookGoValueCallMethod(enginep, foldp unsafe.Pointer, reflectIndex C.int, ar
 		args.dataType = C.DTList
 		*(*unsafe.Pointer)(unsafe.Pointer(&args.data)) = C.newVariantList(&dataValueArray[0], C.int(len(result)))
 	}
+}
+
+func convertParam(methodName string, index int, param reflect.Value, argt reflect.Type) (newv reflect.Value, err error) {
+	defer func() {
+		if panicv := recover(); panicv != nil {
+			const prefix = "reflect.Value.Convert: "
+			if s, ok := panicv.(string); ok && strings.HasPrefix(s, prefix) {
+				err = fmt.Errorf("cannot convert parameter %d of method %s from %s to %s (got %#v)",
+					index, methodName, param.Type().Name(), argt.Name(), param.Interface())
+			} else {
+				panic(panicv)
+			}
+		}
+	}()
+	return param.Convert(argt), nil
 }
 
 func ensureEngine(enginep, foldp unsafe.Pointer) *valueFold {
