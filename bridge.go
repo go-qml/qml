@@ -187,12 +187,22 @@ const (
 //
 // This must be run from the main GUI thread.
 func wrapGoValue(engine *Engine, gvalue interface{}, owner valueOwner) (cvalue unsafe.Pointer) {
-
-	// TODO Return an error if gvalue is a non-basic type and not a pointer.
-	//      Pointer-to-pointer is also not okay.
 	prev, ok := engine.values[gvalue]
 	if ok && (prev.owner == owner || owner != cppOwner) {
 		return prev.cvalue
+	}
+
+	gvaluev := reflect.ValueOf(gvalue)
+	gvaluek := gvaluev.Kind()
+	if gvaluek == reflect.Struct && !hashable(gvalue) {
+		name := gvaluev.Type().Name()
+		if name != "" {
+			name = " (" + name + ")"
+		}
+		panic("cannot hand an unhashable struct value" + name + " to QML logic; use its address instead")
+	}
+	if gvaluek == reflect.Ptr && gvaluev.Elem().Kind() == reflect.Ptr {
+		panic("cannot hand pointer of pointer to QML logic; use a simple pointer instead")
 	}
 
 	parent := nilPtr
@@ -297,12 +307,29 @@ func hookGoValueReadField(enginep, foldp unsafe.Pointer, reflectIndex C.int, res
 	}
 	field := v.Field(int(reflectIndex))
 
+	fieldk := field.Kind()
+	for fieldk == reflect.Ptr || fieldk == reflect.Interface {
+		field = field.Elem()
+		fieldk = field.Kind()
+	}
+	if fieldk == reflect.Struct {
+		if field.CanAddr() {
+			field = field.Addr()
+		} else if !hashable(field.Interface()) {
+			panic(fmt.Sprintf("cannot access unaddressable and unhashable struct value on interface field %s.%s", v.Type().Name(), v.Type().Field(int(reflectIndex)).Name))
+		}
+	}
+	var gvalue interface{}
+	if field.IsValid() {
+		gvalue = field.Interface()
+	}
+
 	// TODO Strings are being passed in an unsafe manner here. There is a
 	// small chance that the field is changed and the garbage collector is run
 	// before C++ has a chance to look at the data. We can solve this problem
 	// by queuing up values in a stack, and cleaning the stack when the
 	// idle timer fires next.
-	packDataValue(field.Interface(), resultdv, fold.engine, jsOwner)
+	packDataValue(gvalue, resultdv, fold.engine, jsOwner)
 }
 
 //export hookGoValueWriteField

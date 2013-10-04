@@ -336,6 +336,13 @@ func methodQtSignature(method reflect.Method) (signature, result string) {
 	return
 }
 
+func hashable(value interface{}) (hashable bool) {
+	defer recover()
+	var m map[interface{}]bool
+	_ = m[value]
+	return true
+}
+
 // unsafeString returns a Go string backed by C data.
 //
 // If the C data is deallocated or moved, the string will be
