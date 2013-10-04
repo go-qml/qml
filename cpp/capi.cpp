@@ -165,8 +165,7 @@ QQuickWindow_ *componentCreateWindow(QQmlComponent_ *component, QQmlContext_ *co
 }
 
 // Workaround for bug https://bugs.launchpad.net/bugs/1179716
-class ShowWindow : public QQuickWindow {
-    public:
+struct DoShowWindow : public QQuickWindow {
     void show() {
         QQuickWindow::show();
         QResizeEvent resize(size(), size());
@@ -176,7 +175,7 @@ class ShowWindow : public QQuickWindow {
 
 void windowShow(QQuickWindow_ *win)
 {
-    reinterpret_cast<ShowWindow *>(win)->show();
+    reinterpret_cast<DoShowWindow *>(win)->show();
 }
 
 void windowHide(QQuickWindow_ *win)
