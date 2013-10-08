@@ -327,10 +327,11 @@ error *objectInvoke(QObject_ *object, const char *method, DataValue *resultdv, D
     if (paramsLen > 10) {
         errorf("fix the parameter dispatching");
     }
-    const char *normalizedMethod = QMetaObject::normalizedSignature(signature.toStdString().c_str()); 
-    const int index = qobject->metaObject()->indexOfMethod(normalizedMethod);
+    QByteArray normalizedMethod = QMetaObject::normalizedSignature(signature.toStdString().c_str());
+    const int index = qobject->metaObject()->indexOfMethod(normalizedMethod.data());
+	qDebug() << normalizedMethod;
     if (index == -1 ) {
-        return errorf("cannot call method \"%s\". Wrong name or parameter", normalizedMethod);
+        return errorf("cannot call method \"%s\". Wrong name or parameter", normalizedMethod.data());
     }
     bool validCall;
     if (qobject->metaObject()->method(index).returnType() == QMetaType::Void) {
@@ -342,7 +343,7 @@ error *objectInvoke(QObject_ *object, const char *method, DataValue *resultdv, D
             arg[0], arg[1], arg[2], arg[3], arg[4], arg[5], arg[6], arg[7], arg[8], arg[9]);
     }
     if (!validCall) {
-        return errorf("cannot call method \"%s()\". Unknown error", normalizedMethod);
+        return errorf("cannot call method \"%s()\". Unknown error", normalizedMethod.data());
     }
     packDataValue(&result, resultdv);
     return 0;
