@@ -311,30 +311,41 @@ void objectSetProperty(QObject_ *object, const char *name, DataValue *value)
 error *objectInvoke(QObject_ *object, const char *method, DataValue *resultdv, DataValue *paramsdv, int paramsLen)
 {
     QObject *qobject = reinterpret_cast<QObject *>(object);
+    QString signature = QString::fromUtf8(method);
 
     QVariant result;
     QVariant param[MaxParams];
     QGenericArgument arg[MaxParams];
+    signature.append("(");
     for (int i = 0; i < paramsLen; i++) {
+        if (i != 0) signature.append(",");
         unpackDataValue(&paramsdv[i], &param[i]);
         arg[i] = Q_ARG(QVariant, param[i]);
+        signature.append("QVariant");
     }
+    signature.append(")");
     if (paramsLen > 10) {
         errorf("fix the parameter dispatching");
     }
-    bool ok = QMetaObject::invokeMethod(qobject, method, Qt::DirectConnection, 
+    const char *normalizedMethod = QMetaObject::normalizedSignature(signature.toStdString().c_str()); 
+    const int index = qobject->metaObject()->indexOfMethod(normalizedMethod);
+    if (index == -1 ) {
+        return errorf("cannot call method \"%s\". Wrong name or parameter", normalizedMethod);
+    }
+    bool validCall;
+    if (qobject->metaObject()->method(index).returnType() == QMetaType::Void) {
+    validCall = QMetaObject::invokeMethod(qobject, method, Qt::DirectConnection, 
+        arg[0], arg[1], arg[2], arg[3], arg[4], arg[5], arg[6], arg[7], arg[8], arg[9]);
+    } else {
+        validCall = QMetaObject::invokeMethod(qobject, method, Qt::DirectConnection, 
             Q_RETURN_ARG(QVariant, result),
             arg[0], arg[1], arg[2], arg[3], arg[4], arg[5], arg[6], arg[7], arg[8], arg[9]);
-    if (!ok) {
-        // TODO Find out how to tell if a result is available or not without calling it twice.
-        ok = QMetaObject::invokeMethod(qobject, method, Qt::DirectConnection, 
-            arg[0], arg[1], arg[2], arg[3], arg[4], arg[5], arg[6], arg[7], arg[8], arg[9]);
     }
-	if (!ok) {
-		return errorf("cannot call method \"%s()\". Wrong name or parameter", method);
-	}
+    if (!validCall) {
+        return errorf("cannot call method \"%s()\". Unknown error", normalizedMethod);
+    }
     packDataValue(&result, resultdv);
-	return 0;
+    return 0;
 }
 
 void objectFindChild(QObject_ *object, QString_ *name, DataValue *resultdv)
