@@ -1,4 +1,4 @@
-// See http://qt-project.org/doc/qt-5.1/qtquick/qml-tutorial1.html
+// See http://qt-project.org/doc/qt-5.1/qtquick/qml-tutorial3.html
 
 import QtQuick 2.0
 
