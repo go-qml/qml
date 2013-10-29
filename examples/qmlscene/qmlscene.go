@@ -20,6 +20,9 @@ func main() {
 func run() error {
 	qml.Init(nil)
 	engine := qml.NewEngine()
+
+	engine.On("quit", func() { os.Exit(0) })
+
 	component, err := engine.LoadFile(os.Args[1])
 	if err != nil {
 		return err

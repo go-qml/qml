@@ -61,7 +61,7 @@ func Init(options *InitOptions) {
 
 // Engine provides an environment for instantiating QML components.
 type Engine struct {
-	addr      unsafe.Pointer
+	Common
 	values    map[interface{}]*valueFold
 	destroyed bool
 }
@@ -76,6 +76,7 @@ func NewEngine() *Engine {
 	engine := &Engine{values: make(map[interface{}]*valueFold)}
 	gui(func() {
 		engine.addr = C.newEngine(nil)
+		engine.engine = engine
 		engines[engine.addr] = engine
 		stats.enginesAlive(+1)
 	})
