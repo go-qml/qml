@@ -311,27 +311,30 @@ void objectSetProperty(QObject_ *object, const char *name, DataValue *value)
 error *objectInvoke(QObject_ *object, const char *method, DataValue *resultdv, DataValue *paramsdv, int paramsLen)
 {
     QObject *qobject = reinterpret_cast<QObject *>(object);
-    QString signature = QString::fromUtf8(method);
-
+    QString signature = QString::fromUtf8(method).append("(");
     QVariant result;
+
     QVariant param[MaxParams];
     QGenericArgument arg[MaxParams];
-    signature.append("(");
     for (int i = 0; i < paramsLen; i++) {
-        if (i != 0) signature.append(",");
         unpackDataValue(&paramsdv[i], &param[i]);
         arg[i] = Q_ARG(QVariant, param[i]);
-        signature.append("QVariant");
     }
-    signature.append(")");
     if (paramsLen > 10) {
-        errorf("fix the parameter dispatching");
+        panicf("fix the parameter dispatching");
     }
-    QByteArray normalizedMethod = QMetaObject::normalizedSignature(signature.toStdString().c_str());
-    const int index = qobject->metaObject()->indexOfMethod(normalizedMethod.data());
-	qDebug() << normalizedMethod;
+
+    int index = -1;
+    const QMetaObject* metaObject = qobject->metaObject();
+    for(int i = 0; i < metaObject->methodCount(); i++) {
+        QString qmethod = QString::fromLatin1(metaObject->method(i).methodSignature());
+        if (qmethod.startsWith(signature)) {
+            index = i;
+            break;
+        }
+    }
     if (index == -1 ) {
-        return errorf("cannot call method \"%s\". Wrong name or parameter", normalizedMethod.data());
+        return errorf("cannot call method \"%s()\". Wrong name or parameter", method);
     }
     bool validCall;
     if (qobject->metaObject()->method(index).returnType() == QMetaType::Void) {
@@ -343,7 +346,7 @@ error *objectInvoke(QObject_ *object, const char *method, DataValue *resultdv, D
             arg[0], arg[1], arg[2], arg[3], arg[4], arg[5], arg[6], arg[7], arg[8], arg[9]);
     }
     if (!validCall) {
-        return errorf("cannot call method \"%s()\". Unknown error", normalizedMethod.data());
+        return errorf("cannot call method \"%s()\". Unknown error", method);
     }
     packDataValue(&result, resultdv);
     return 0;
