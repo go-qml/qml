@@ -705,6 +705,17 @@ var tests = []struct {
 			<-done
 		},
 	},
+	{
+		Summary: "Panics on invalid Call",
+		QML: `
+		Item {
+			id: item
+		}
+		`,
+		Done: func(d *TestData) {
+			d.Check(func() { d.root.Call("invalidCall") }, Panics, "cannot call method \"invalidCall()\". Wrong name or parameter")
+		},
+	},
 }
 
 var tablef = flag.String("tablef", "", "if provided, TestTable only runs tests with a summary matching the regexp")
