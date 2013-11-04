@@ -110,6 +110,7 @@ QQmlContext_ *engineRootContext(QQmlEngine_ *engine);
 void engineSetOwnershipCPP(QQmlEngine_ *engine, QObject_ *object);
 void engineSetOwnershipJS(QQmlEngine_ *engine, QObject_ *object);
 void engineSetContextForObject(QQmlEngine_ *engine, QObject_ *object);
+void engineAddImageProvider(QQmlEngine_ *engine, QString_ *providerId, void *imageFunc);
 
 void contextGetProperty(QQmlContext_ *context, QString_ *name, DataValue *value);
 void contextSetProperty(QQmlContext_ *context, QString_ *name, DataValue *value);
@@ -140,9 +141,11 @@ void windowConnectHidden(QQuickWindow_ *win);
 QObject_ *windowRootObject(QQuickWindow_ *win);
 QImage_ *windowGrabWindow(QQuickWindow_ *win);
 
+QImage_ *newImage(int width, int height);
 void delImage(QImage_ *image);
 void imageSize(QImage_ *image, int *width, int *height);
-const unsigned char *imageBits(QImage_ *image);
+unsigned char *imageBits(QImage_ *image);
+const unsigned char *imageConstBits(QImage_ *image);
 
 QString_ *newString(const char *data, int len);
 void delString(QString_ *s);
@@ -166,6 +169,7 @@ void hookGoValueReadField(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, Da
 void hookGoValueWriteField(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, DataValue *assign);
 void hookGoValueCallMethod(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, DataValue *result);
 void hookGoValueDestroyed(QQmlEngine_ *engine, GoAddr *addr);
+QImage_ *hookRequestImage(void *imageFunc, char *id, int idLen, int width, int height);
 GoAddr *hookGoValueTypeNew(GoValue_ *value, GoTypeSpec_ *spec);
 void hookWindowHidden(QObject_ *addr);
 void hookSignalCall(QQmlEngine_ *engine, void *func, DataValue *params);

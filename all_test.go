@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/niemeyer/qml"
+	"image"
 	"image/color"
 	"io/ioutil"
 	. "launchpad.net/gocheck"
@@ -704,6 +705,21 @@ var tests = []struct {
 			d.root.Set("url", url)
 			<-done
 		},
+	},
+	{
+		Summary: "Load image from Go provider",
+		Init: func(d *TestData) {
+			d.engine.AddImageProvider("myprov", func(id string, width, height int) image.Image {
+				return image.NewRGBA(image.Rect(0, 0, 200, 100))
+			})
+		},
+		QML:     `
+			Image {
+				source: "image://myprov/myid.png"
+				Component.onCompleted: console.log("Size:", width, height)
+			}
+		`,
+		QMLLog: "Size: 200 100",
 	},
 }
 

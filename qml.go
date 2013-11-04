@@ -64,6 +64,8 @@ type Engine struct {
 	Common
 	values    map[interface{}]*valueFold
 	destroyed bool
+
+	imageProviders map[string]*func(providerId string, width, height int) image.Image
 }
 
 var engines = make(map[unsafe.Pointer]*Engine)
@@ -77,6 +79,7 @@ func NewEngine() *Engine {
 	gui(func() {
 		engine.addr = C.newEngine(nil)
 		engine.engine = engine
+		engine.imageProviders = make(map[string]*func(providerId string, width, height int) image.Image)
 		engines[engine.addr] = engine
 		stats.enginesAlive(+1)
 	})
@@ -189,6 +192,71 @@ func (e *Engine) Context() *Context {
 		ctx.addr = C.engineRootContext(e.addr)
 	})
 	return &ctx
+}
+
+// AddImageProvider registers f to be called when an image is requested by QML code
+// with the specified provider identifier. It is a runtime error to register the same
+// provider identifier multiple times.
+//
+// The imageId provided to f is the requested image source, with the "image:" scheme
+// and provider identifier removed. For example, with an image image source of
+// "image://myprovider/icons/home.ext", the respective imageId would be "icons/home.ext".
+//
+// If either the width or the height parameters provided to f are zero, no specific
+// size for the image was requested. If non-zero, the returned image should have the
+// the provided size, and will be resized if the returned image has a different size.
+//
+// See the documentation for more details on image providers:
+//
+//   http://qt-project.org/doc/qt-5.0/qtquick/qquickimageprovider.html
+//
+func (e *Engine) AddImageProvider(providerId string, f func(imageId string, width, height int) image.Image) {
+	if _, ok := e.imageProviders[providerId]; ok {
+		panic(fmt.Sprintf("engine already has an image provider with id %q", providerId))
+	}
+	e.imageProviders[providerId] = &f
+	cproviderId, cproviderIdLen := unsafeStringData(providerId)
+	gui(func() {
+		qproviderId := C.newString(cproviderId, cproviderIdLen)
+		defer C.delString(qproviderId)
+		C.engineAddImageProvider(e.addr, qproviderId, unsafe.Pointer(&f))
+	})
+}
+
+//export hookRequestImage
+func hookRequestImage(imageFunc unsafe.Pointer, cid *C.char, cidLen, cwidth, cheight C.int) unsafe.Pointer {
+	// TODO Test this.
+
+	f := *(*func(imageId string, width, height int) image.Image)(imageFunc)
+
+	id := unsafeString(cid, cidLen)
+	width := int(cwidth)
+	height := int(cheight)
+
+	img := f(id, width, height)
+
+	var cimage unsafe.Pointer
+
+	rect := img.Bounds()
+	width = rect.Max.X - rect.Min.X
+	height = rect.Max.Y - rect.Min.Y
+	cimage = C.newImage(C.int(width), C.int(height))
+
+	var cbits []byte
+	cbitsh := (*reflect.SliceHeader)((unsafe.Pointer)(&cbits))
+	cbitsh.Data = (uintptr)((unsafe.Pointer)(C.imageBits(cimage)))
+	cbitsh.Len = width * height * 4 // RGBA
+	cbitsh.Cap = cbitsh.Len
+
+	i := 0
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
+			r, g, b, a := img.At(x, y).RGBA()
+			*(*uint32)(unsafe.Pointer(&cbits[i])) = (a>>8)<<24 | (r>>8)<<16 | (g>>8)<<8 | (b >> 8)
+			i += 4
+		}
+	}
+	return cimage
 }
 
 // Context represents a QML context that can hold variables visible
@@ -585,7 +653,7 @@ func hookSignalCall(enginep unsafe.Pointer, funcp unsafe.Pointer, args *C.DataVa
 	numIn := funct.NumIn()
 	var params [C.MaxParams]reflect.Value
 	for i := 0; i < numIn; i++ {
-		arg := (*C.DataValue)(unsafe.Pointer(uintptr(unsafe.Pointer(args)) + uintptr(i) * dataValueSize))
+		arg := (*C.DataValue)(unsafe.Pointer(uintptr(unsafe.Pointer(args)) + uintptr(i)*dataValueSize))
 		param := reflect.ValueOf(unpackDataValue(arg, engine))
 		if paramt := funct.In(i); param.Type() != paramt {
 			// TODO Provide a better error message when this fails.
@@ -665,8 +733,8 @@ func (win *Window) Snapshot() image.Image {
 
 	var cbits []byte
 	cbitsh := (*reflect.SliceHeader)((unsafe.Pointer)(&cbits))
-	cbitsh.Data = (uintptr)((unsafe.Pointer)(C.imageBits(cimage)))
-	cbitsh.Len = int(cwidth * cheight * 8) // RRGGBBAA
+	cbitsh.Data = (uintptr)((unsafe.Pointer)(C.imageConstBits(cimage)))
+	cbitsh.Len = int(cwidth * cheight * 8) // ARGB
 	cbitsh.Cap = cbitsh.Len
 
 	image := image.NewRGBA(image.Rect(0, 0, int(cwidth), int(cheight)))

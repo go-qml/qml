@@ -3,6 +3,7 @@
 #include <QQuickItem>
 #include <QtQml>
 #include <QDebug>
+#include <QQuickImageProvider>
 
 #include <string.h>
 
@@ -114,6 +115,43 @@ QQmlComponent_ *newComponent(QQmlEngine_ *engine, QObject_ *parent)
     return new QQmlComponent(qengine);
 }
 
+class GoImageProvider : public QQuickImageProvider {
+
+    // TODO Destroy this when engine is destroyed.
+
+    public:
+
+    GoImageProvider(void *imageFunc) : QQuickImageProvider(QQmlImageProviderBase::Image), imageFunc(imageFunc) {};
+
+    virtual QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize)
+    {
+        QByteArray ba = id.toUtf8();
+        int width = 0, height = 0;
+        if (requestedSize.isValid()) {
+            width = requestedSize.width();
+            height = requestedSize.height();
+        }
+        QImage *image = reinterpret_cast<QImage *>(hookRequestImage(imageFunc, (char*)ba.constData(), ba.size(), width, height));
+        *size = image->size();
+        if (requestedSize.isValid() && requestedSize != *size) {
+            *image = image->scaled(requestedSize, Qt::KeepAspectRatio);
+        }
+        return *image;
+    };
+
+    private:
+
+    void *imageFunc;
+};
+
+void engineAddImageProvider(QQmlEngine_ *engine, QString_ *providerId, void *imageFunc)
+{
+    QQmlEngine *qengine = reinterpret_cast<QQmlEngine *>(engine);
+    QString *qproviderId = reinterpret_cast<QString *>(providerId);
+
+    qengine->addImageProvider(*qproviderId, new GoImageProvider(imageFunc));
+}
+
 void componentSetData(QQmlComponent_ *component, const char *data, int dataLen, const char *url, int urlLen)
 {
     QByteArray qdata(data, dataLen);
@@ -209,6 +247,11 @@ QImage_ *windowGrabWindow(QQuickWindow_ *win)
     return image;
 }
 
+QImage_ *newImage(int width, int height)
+{
+    return new QImage(width, height, QImage::Format_ARGB32_Premultiplied);
+}
+
 void delImage(QImage_ *image)
 {
     delete reinterpret_cast<QImage *>(image);
@@ -221,7 +264,13 @@ void imageSize(QImage_ *image, int *width, int *height)
     *height = qimage->height();
 }
 
-const unsigned char *imageBits(QImage_ *image)
+unsigned char *imageBits(QImage_ *image)
+{
+    QImage *qimage = reinterpret_cast<QImage *>(image);
+    return qimage->bits();
+}
+
+const unsigned char *imageConstBits(QImage_ *image)
 {
     QImage *qimage = reinterpret_cast<QImage *>(image);
     return qimage->constBits();
