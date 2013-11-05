@@ -312,7 +312,7 @@ func hookGoValueReadField(enginep, foldp unsafe.Pointer, reflectIndex C.int, res
 		field = field.Elem()
 		fieldk = field.Kind()
 	}
-	if fieldk == reflect.Struct {
+	if fieldk == reflect.Struct && field.Type() != typeRGBA {
 		if field.CanAddr() {
 			field = field.Addr()
 		} else if !hashable(field.Interface()) {

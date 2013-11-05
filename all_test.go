@@ -84,6 +84,7 @@ type TestType struct {
 	Float32Value float32
 	AnyValue     interface{}
 	ObjectValue  qml.Object
+	ColorValue   color.RGBA
 }
 
 func (ts *TestType) StringMethod() string {
@@ -335,6 +336,14 @@ var tests = []struct {
 		},
 	},
 	{
+		Summary: "Reading and setting of a QColor property from a Go field",
+		Init:    func(d *TestData) { d.value.ColorValue = color.RGBA{256 / 16, 256 / 8, 256 / 4, 256 / 2} },
+		QML:     `Text{ property var c: value.colorValue; Component.onCompleted: { console.log(value.colorValue); } }`,
+		Done: func(d *TestData) {
+			d.Assert(d.root.Color("c"), Equals, color.RGBA{256 / 16, 256 / 8, 256 / 4, 256 / 2})
+		},
+	},
+	{
 		Summary: "Identical values remain identical when possible",
 		Init: func(d *TestData) {
 			d.context.SetVar("a", d.value)
@@ -578,7 +587,7 @@ var tests = []struct {
 	{
 		Summary: "Call a non-existent QML method",
 		QML:     `Item {}`,
-		Done:    func(d *TestData) {
+		Done: func(d *TestData) {
 			d.Check(func() { d.root.Call("add", 1, 2) }, Panics, `object does not expose a method "add"`)
 		},
 	},
@@ -720,7 +729,7 @@ var tests = []struct {
 				return image.NewRGBA(image.Rect(0, 0, 200, 100))
 			})
 		},
-		QML:     `
+		QML: `
 			Image {
 				source: "image://myprov/myid.png"
 				Component.onCompleted: console.log("Size:", width, height)

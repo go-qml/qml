@@ -30,6 +30,7 @@ var (
 	typeFloat64 = reflect.TypeOf(float64(0))
 	typeFloat32 = reflect.TypeOf(float32(0))
 	typeIface   = reflect.TypeOf(new(interface{})).Elem()
+	typeRGBA    = reflect.TypeOf(color.RGBA{})
 )
 
 func init() {
@@ -166,6 +167,8 @@ func dataTypeOf(typ reflect.Type) C.DataType {
 		return C.DTFloat64
 	case typeIface:
 		return C.DTAny
+	case typeRGBA:
+		return C.DTColor
 	}
 	return C.DTObject
 }
@@ -275,7 +278,6 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 		memberInfo.methodSignature = C.CString(signature)
 		memberInfo.resultSignature = C.CString(result)
 		// TODO Sort out methods with a variable number of arguments.
-		// TODO Sort out methods with more than one result.
 		// It's called while bound, so drop the receiver.
 		memberInfo.numIn = C.int(method.Type.NumIn() - 1)
 		memberInfo.numOut = C.int(method.Type.NumOut())

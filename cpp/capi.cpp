@@ -556,7 +556,7 @@ void unpackDataValue(DataValue *value, QVariant_ *var)
         *qvar = *(float*)(value->data);
         break;
     case DTColor:
-        *qvar = QColor(*(QRgb*)(value->data));
+        *qvar = QColor::fromRgba(*(QRgb*)(value->data));
         break;
     case DTList:
         *qvar = **(QVariantList**)(value->data);
