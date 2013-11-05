@@ -357,7 +357,7 @@ void objectSetProperty(QObject_ *object, const char *name, DataValue *value)
     qobject->setProperty(name, var);
 }
 
-void objectInvoke(QObject_ *object, const char *method, DataValue *resultdv, DataValue *paramsdv, int paramsLen)
+error *objectInvoke(QObject_ *object, const char *method, DataValue *resultdv, DataValue *paramsdv, int paramsLen)
 {
     QObject *qobject = reinterpret_cast<QObject *>(object);
 
@@ -378,8 +378,12 @@ void objectInvoke(QObject_ *object, const char *method, DataValue *resultdv, Dat
         // TODO Find out how to tell if a result is available or not without calling it twice.
         ok = QMetaObject::invokeMethod(qobject, method, Qt::DirectConnection, 
             arg[0], arg[1], arg[2], arg[3], arg[4], arg[5], arg[6], arg[7], arg[8], arg[9]);
+        if (!ok) {
+                return errorf("invalid call to method \"%s\"", method);
+        }
     }
     packDataValue(&result, resultdv);
+    return 0;
 }
 
 void objectFindChild(QObject_ *object, QString_ *name, DataValue *resultdv)

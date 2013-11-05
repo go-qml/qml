@@ -576,6 +576,13 @@ var tests = []struct {
 		DoneLog: "String is <content>",
 	},
 	{
+		Summary: "Call a non-existent QML method",
+		QML:     `Item {}`,
+		Done:    func(d *TestData) {
+			d.Check(func() { d.root.Call("add", 1, 2) }, Panics, `invalid call to method "add"`)
+		},
+	},
+	{
 		Summary: "Ensure URL of provided file is correct by loading a local file",
 		Init: func(d *TestData) {
 			data, err := base64.StdEncoding.DecodeString("R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==")

@@ -225,8 +225,6 @@ func (e *Engine) AddImageProvider(providerId string, f func(imageId string, widt
 
 //export hookRequestImage
 func hookRequestImage(imageFunc unsafe.Pointer, cid *C.char, cidLen, cwidth, cheight C.int) unsafe.Pointer {
-	// TODO Test this.
-
 	f := *(*func(imageId string, width, height int) image.Image)(imageFunc)
 
 	id := unsafeString(cid, cidLen)
@@ -517,15 +515,16 @@ func (obj *Common) Call(method string, params ...interface{}) interface{} {
 	cmethod := C.CString(method)
 	defer C.free(unsafe.Pointer(cmethod))
 	var result C.DataValue
+	var cerr *C.error
 	gui(func() {
 		for i, param := range params {
 			packDataValue(param, &dataValueArray[i], obj.engine, jsOwner)
 		}
-		// TODO Panic if the underlying invokation returns false.
-		// TODO Is there any other actual error other than existence that can be observed?
-		//      If so, this method needs an error result too.
-		C.objectInvoke(obj.addr, cmethod, &result, &dataValueArray[0], C.int(len(params)))
+		cerr = C.objectInvoke(obj.addr, cmethod, &result, &dataValueArray[0], C.int(len(params)))
 	})
+	if cerr != nil {
+		panic(cerror(cerr).Error())
+	}
 	return unpackDataValue(&result, obj.engine)
 }
 
