@@ -357,7 +357,7 @@ void objectSetProperty(QObject_ *object, const char *name, DataValue *value)
     qobject->setProperty(name, var);
 }
 
-error *objectInvoke(QObject_ *object, const char *method, DataValue *resultdv, DataValue *paramsdv, int paramsLen)
+error *objectInvoke(QObject_ *object, const char *method, int methodLen, DataValue *resultdv, DataValue *paramsdv, int paramsLen)
 {
     QObject *qobject = reinterpret_cast<QObject *>(object);
 
@@ -371,19 +371,39 @@ error *objectInvoke(QObject_ *object, const char *method, DataValue *resultdv, D
     if (paramsLen > 10) {
         panicf("fix the parameter dispatching");
     }
-    bool ok = QMetaObject::invokeMethod(qobject, method, Qt::DirectConnection, 
-            Q_RETURN_ARG(QVariant, result),
-            arg[0], arg[1], arg[2], arg[3], arg[4], arg[5], arg[6], arg[7], arg[8], arg[9]);
-    if (!ok) {
-        // TODO Find out how to tell if a result is available or not without calling it twice.
-        ok = QMetaObject::invokeMethod(qobject, method, Qt::DirectConnection, 
-            arg[0], arg[1], arg[2], arg[3], arg[4], arg[5], arg[6], arg[7], arg[8], arg[9]);
-        if (!ok) {
-                return errorf("invalid call to method \"%s\"", method);
+
+    const QMetaObject *metaObject = qobject->metaObject();
+    // Walk backwards so descendants have priority.
+    for (int i = metaObject->methodCount()-1; i >= 0; i--) {
+        QMetaMethod metaMethod = metaObject->method(i);
+        QMetaMethod::MethodType methodType = metaMethod.methodType();
+        if (methodType == QMetaMethod::Method || methodType == QMetaMethod::Slot) {
+            QByteArray name = metaMethod.name();
+            if (name.length() == methodLen && qstrncmp(name.constData(), method, methodLen) == 0) {
+                if (metaMethod.parameterCount() < paramsLen) {
+                    // TODO Might continue looking to see if a different signal has the same name and enough arguments.
+                    return errorf("method \"%s\" has too few parameters for provided arguments", method);
+                }
+
+                bool ok;
+                if (metaMethod.returnType() == QMetaType::Void) {
+                    ok = metaMethod.invoke(qobject, Qt::DirectConnection, 
+                        arg[0], arg[1], arg[2], arg[3], arg[4], arg[5], arg[6], arg[7], arg[8], arg[9]);
+                } else {
+                    ok = metaMethod.invoke(qobject, Qt::DirectConnection, Q_RETURN_ARG(QVariant, result),
+                        arg[0], arg[1], arg[2], arg[3], arg[4], arg[5], arg[6], arg[7], arg[8], arg[9]);
+                }
+                if (!ok) {
+                    return errorf("invalid parameters to method \"%s\"", method);
+                }
+
+                packDataValue(&result, resultdv);
+                return 0;
+            }
         }
     }
-    packDataValue(&result, resultdv);
-    return 0;
+
+    return errorf("object does not expose a method \"%s\"", method);
 }
 
 void objectFindChild(QObject_ *object, QString_ *name, DataValue *resultdv)

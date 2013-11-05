@@ -512,15 +512,14 @@ func (obj *Common) Call(method string, params ...interface{}) interface{} {
 	if len(params) > len(dataValueArray) {
 		panic("too many parameters")
 	}
-	cmethod := C.CString(method)
-	defer C.free(unsafe.Pointer(cmethod))
+	cmethod, cmethodLen := unsafeStringData(method)
 	var result C.DataValue
 	var cerr *C.error
 	gui(func() {
 		for i, param := range params {
 			packDataValue(param, &dataValueArray[i], obj.engine, jsOwner)
 		}
-		cerr = C.objectInvoke(obj.addr, cmethod, &result, &dataValueArray[0], C.int(len(params)))
+		cerr = C.objectInvoke(obj.addr, cmethod, cmethodLen, &result, &dataValueArray[0], C.int(len(params)))
 	})
 	if cerr != nil {
 		panic(cerror(cerr).Error())

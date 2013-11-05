@@ -579,7 +579,7 @@ var tests = []struct {
 		Summary: "Call a non-existent QML method",
 		QML:     `Item {}`,
 		Done:    func(d *TestData) {
-			d.Check(func() { d.root.Call("add", 1, 2) }, Panics, `invalid call to method "add"`)
+			d.Check(func() { d.root.Call("add", 1, 2) }, Panics, `object does not expose a method "add"`)
 		},
 	},
 	{
