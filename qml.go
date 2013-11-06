@@ -759,17 +759,40 @@ func hookWindowHidden(addr unsafe.Pointer) {
 	m.Unlock()
 }
 
+// TypeSpec holds the specification of a QML type that is backed by Go logic.
+// 
+// The type specification must be registered with the RegisterTypes function
+// before it will be visible to QML code.
 type TypeSpec struct {
+	// Name holds the identifier the type is known as.
 	Name      string
+
+	// New is called when QML code requests the creation of a new value of this type.
 	New       func() interface{}
+
+	// Singleton defines whether a single instance of the type should be used
+	// for all accesses, as a singleton value. If true, all properties of the
+	// singleton value are directly accessible under the type name.
 	Singleton bool
 
-	// Force use of fields by name.
-	private struct{}
+	private struct{} // Force use of fields by name.
 }
 
 var types []*TypeSpec
 
+// RegisterTypes registers the provided list of type specifications for use
+// by QML code. To access the registered types, they must be imported from the
+// provided location and major.minor version numbers.
+//
+// For example, with a location "GoExtension", major 4, and minor 2, this statement
+// should import all the registered types in the module's namespace:
+//
+//     import GoExtension 4.2
+//
+// The documentation on import statements provides more details:
+//
+//     http://qt-project.org/doc/qt-5.0/qtqml/qtqml-syntax-imports.html
+//
 func RegisterTypes(location string, major, minor int, types []TypeSpec) {
 	for i := range types {
 		err := registerType(location, major, minor, &types[i])
