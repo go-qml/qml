@@ -760,24 +760,26 @@ func hookWindowHidden(addr unsafe.Pointer) {
 }
 
 type TypeSpec struct {
-	Location     string
-	Major, Minor int
-	// TODO Consider refactoring this type into ModuleSpec for the above + []TypeSpec for the below
-	Name string
-	New  func() interface{}
+	Name      string
+	New       func() interface{}
+	Singleton bool
+
+	// Force use of fields by name.
+	private struct{}
 }
 
 var types []*TypeSpec
 
-func RegisterType(spec *TypeSpec) error {
-	return registerType(spec, false)
+func RegisterTypes(location string, major, minor int, types []TypeSpec) {
+	for i := range types {
+		err := registerType(location, major, minor, &types[i])
+		if err != nil {
+			panic(err)
+		}
+	}
 }
 
-func RegisterSingleton(spec *TypeSpec) error {
-	return registerType(spec, true)
-}
-
-func registerType(spec *TypeSpec, singleton bool) error {
+func registerType(location string, major, minor int, spec *TypeSpec) error {
 	// Copy and hold a reference to the spec data.
 	localSpec := *spec
 
@@ -791,13 +793,13 @@ func registerType(spec *TypeSpec, singleton bool) error {
 			return
 		}
 
-		cloc := C.CString(localSpec.Location)
+		cloc := C.CString(location)
 		cname := C.CString(localSpec.Name)
 		cres := C.int(0)
-		if singleton {
-			cres = C.registerSingleton(cloc, C.int(localSpec.Major), C.int(localSpec.Minor), cname, typeInfo(sample), unsafe.Pointer(&localSpec))
+		if localSpec.Singleton {
+			cres = C.registerSingleton(cloc, C.int(major), C.int(minor), cname, typeInfo(sample), unsafe.Pointer(&localSpec))
 		} else {
-			cres = C.registerType(cloc, C.int(localSpec.Major), C.int(localSpec.Minor), cname, typeInfo(sample), unsafe.Pointer(&localSpec))
+			cres = C.registerType(cloc, C.int(major), C.int(minor), cname, typeInfo(sample), unsafe.Pointer(&localSpec))
 		}
 		// It doesn't look like it keeps references to these, but it's undocumented and unclear.
 		C.free(unsafe.Pointer(cloc))

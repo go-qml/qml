@@ -744,25 +744,16 @@ var tablef = flag.String("tablef", "", "if provided, TestTable only runs tests w
 func (s *S) TestTable(c *C) {
 	var goTypeValue *TestType = &TestType{}
 
-	typeSpec := qml.TypeSpec{
-		Location: "GoTest",
-		Major:    4,
-		Minor:    2,
-		Name:     "GoType",
-		New:      func() interface{} { return goTypeValue },
-	}
-	err := qml.RegisterType(&typeSpec)
-	c.Assert(err, IsNil)
+	types := []qml.TypeSpec{{
+		Name: "GoType",
+		New:  func() interface{} { return goTypeValue },
+	}, {
+		Name:      "GoSingleton",
+		New:       func() interface{} { return goTypeValue },
+		Singleton: true,
+	}}
 
-	singletonSpec := qml.TypeSpec{
-		Location: "GoTest",
-		Major:    4,
-		Minor:    2,
-		Name:     "GoSingleton",
-		New:      func() interface{} { return goTypeValue },
-	}
-	err = qml.RegisterSingleton(&singletonSpec)
-	c.Assert(err, IsNil)
+	qml.RegisterTypes("GoTest", 4, 2, types)
 
 	filter := regexp.MustCompile("")
 	if tablef != nil {
