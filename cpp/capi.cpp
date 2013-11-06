@@ -510,29 +510,6 @@ void goValueActivate(GoValue_ *value, GoTypeInfo *typeInfo, int addrOffset)
     // TODO Return an error; probably an unexported field.
 }
 
-template<int N>
-int registerSingletonN(char *location, int major, int minor, char *name, GoTypeInfo *info, GoTypeSpec_ *spec) {
-    GoValueType<N>::init(info, spec);
-    return qmlRegisterSingletonType< GoValueType<N> >(location, major, minor, name, [](QQmlEngine *qmlEngine, QJSEngine *jsEngine) -> QObject* {
-        QObject *singleton = new GoValueType<N>();
-        QQmlEngine::setContextForObject(singleton, qmlEngine->rootContext());
-        return singleton;
-    });
-}
-
-int registerSingleton(char *location, int major, int minor, char *name, GoTypeInfo *info, GoTypeSpec_ *spec)
-{
-    // TODO Must increment the number and use different types per call.
-    return registerSingletonN<1>(location, major, minor, name, info, spec);
-}
-
-int registerType(char *location, int major, int minor, char *name, GoTypeInfo *info, GoTypeSpec_ *spec)
-{
-    // TODO Must increment the number and use different types per call.
-    GoValueType<1>::init(info, spec);
-    return qmlRegisterType< GoValueType<1> >(location, major, minor, name);
-}
-
 void unpackDataValue(DataValue *value, QVariant_ *var)
 {
     QVariant *qvar = reinterpret_cast<QVariant *>(var);
