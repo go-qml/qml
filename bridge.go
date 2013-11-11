@@ -333,17 +333,22 @@ func hookGoValueReadField(enginep, foldp unsafe.Pointer, reflectIndex C.int, res
 }
 
 //export hookGoValueWriteField
-func hookGoValueWriteField(enginep, foldp unsafe.Pointer, reflectIndex C.int, assigndv *C.DataValue) {
+func hookGoValueWriteField(enginep, foldp unsafe.Pointer, reflectIndex, onChangedIndex C.int, assigndv *C.DataValue) {
 	fold := ensureEngine(enginep, foldp)
 	v := reflect.ValueOf(fold.gvalue)
-	for v.Type().Kind() == reflect.Ptr {
-		v = v.Elem()
+	ve := v
+	for ve.Type().Kind() == reflect.Ptr {
+		ve = ve.Elem()
 	}
-	field := v.Field(int(reflectIndex))
+	field := ve.Field(int(reflectIndex))
 	assign := unpackDataValue(assigndv, fold.engine)
 
 	// TODO Return false to the call site if it fails. That's how Qt seems to handle it internally.
 	convertAndSet(field, reflect.ValueOf(assign))
+
+	if onChangedIndex != -1 {
+		v.Method(int(onChangedIndex)).Call(nil)
+	}
 }
 
 func convertAndSet(to, from reflect.Value) {

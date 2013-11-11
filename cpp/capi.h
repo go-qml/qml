@@ -65,6 +65,7 @@ typedef struct {
     char *memberName; // points to memberNames
     DataType memberType;
     int reflectIndex;
+    int reflectChangedIndex;
     int metaIndex;
     int addrOffset;
     char *methodSignature;
@@ -168,7 +169,7 @@ void installLogHandler();
 void hookIdleTimer();
 void hookLogHandler(LogMessage *message);
 void hookGoValueReadField(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, DataValue *result);
-void hookGoValueWriteField(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, DataValue *assign);
+void hookGoValueWriteField(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, int onChangedIndex, DataValue *assign);
 void hookGoValueCallMethod(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, DataValue *result);
 void hookGoValueDestroyed(QQmlEngine_ *engine, GoAddr *addr);
 QImage_ *hookRequestImage(void *imageFunc, char *id, int idLen, int width, int height);

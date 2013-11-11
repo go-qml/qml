@@ -47,8 +47,9 @@ int GoValueMetaObject::metaCall(QMetaObject::Call c, int idx, void **a)
     case QMetaObject::ReadProperty:
     case QMetaObject::WriteProperty:
         {
-            // TODO Cache propertyOffset, methodOffset, and qmlEngine results?
-            if (idx < propertyOffset()) {
+            // TODO Cache propertyOffset, methodOffset (and maybe qmlEngine)
+            int propOffset = propertyOffset();
+            if (idx < propOffset) {
                 return value->qt_metacall(c, idx, a);
             }
             GoMemberInfo *memberInfo = valuePriv->typeInfo->fields;
@@ -63,7 +64,8 @@ int GoValueMetaObject::metaCall(QMetaObject::Call c, int idx, void **a)
                         DataValue assign;
                         QVariant *in = reinterpret_cast<QVariant *>(a[0]);
                         packDataValue(in, &assign);
-                        hookGoValueWriteField(qmlEngine(value), valuePriv->addr, memberInfo->reflectIndex, &assign);
+                        hookGoValueWriteField(qmlEngine(value), valuePriv->addr, memberInfo->reflectIndex, memberInfo->reflectChangedIndex, &assign);
+                        activate(value, methodOffset() + (idx - propOffset), 0);
                     }
                     return -1;
                 }

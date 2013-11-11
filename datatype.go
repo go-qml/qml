@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"image/color"
 	"reflect"
+	"strings"
 	"unicode"
 	"unsafe"
 )
@@ -193,6 +194,8 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	typeInfo.typeName = C.CString(vt.Name())
 	typeInfo.metaObject = nilPtr
 
+	var onChanged map[string]int
+
 	// TODO Only do that if it's a struct?
 	vtptr := reflect.PtrTo(vt)
 
@@ -241,6 +244,14 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 			}
 		}
 		names = append(names, 0)
+
+		// Track "On*Changed" notification methods.
+		if len(name) > 9 && name[0] == 'O' && name[1] == 'n' && strings.HasSuffix(name, "Changed") {
+			if onChanged == nil {
+				onChanged = make(map[string]int)
+			}
+			onChanged[name[2:len(name)-7]] = i
+		}
 	}
 	if len(names) != namesLen {
 		panic("pre-allocated buffer size was wrong")
@@ -262,9 +273,13 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 		memberInfo.memberName = (*C.char)(unsafe.Pointer(mnames + mnamesi))
 		memberInfo.memberType = dataTypeOf(field.Type)
 		memberInfo.reflectIndex = C.int(i)
+		memberInfo.reflectChangedIndex = -1
 		memberInfo.addrOffset = C.int(field.Offset)
 		membersi += 1
 		mnamesi += uintptr(len(field.Name)) + 1
+		if methodIndex, ok := onChanged[field.Name]; ok {
+			memberInfo.reflectChangedIndex = C.int(methodIndex)
+		}
 	}
 	for i := 0; i < numMethod; i++ {
 		method := vtptr.Method(i)
@@ -272,6 +287,7 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 		memberInfo.memberName = (*C.char)(unsafe.Pointer(mnames + mnamesi))
 		memberInfo.memberType = C.DTMethod
 		memberInfo.reflectIndex = C.int(i)
+		memberInfo.reflectChangedIndex = -1
 		memberInfo.addrOffset = 0
 		signature, result := methodQtSignature(method)
 		// TODO The signature data might be embedded in the same array as the member names.

@@ -49,7 +49,7 @@ func (s *S) TearDownTest(c *C) {
 
 	retries := 30 // Three seconds top.
 	for {
-		// Do not call qml.Flush here. It creates a nested event loop that
+		// Do not call qml.Flush here. It creates a nested event loop
 		// that attempts to process the deferred object deletes and cannot,
 		// because deferred deletes are only processed at the same loop level.
 		// So it *reposts* the deferred deletion event, in practice *preventing*
@@ -85,10 +85,16 @@ type TestType struct {
 	AnyValue     interface{}
 	ObjectValue  qml.Object
 	ColorValue   color.RGBA
+
+	stringValueChanged int
 }
 
 func (ts *TestType) StringMethod() string {
 	return ts.StringValue
+}
+
+func (ts *TestType) OnStringValueChanged() {
+	ts.stringValueChanged++
 }
 
 func (ts *TestType) Mod(dividend, divisor int) (int, error) {
@@ -374,9 +380,12 @@ var tests = []struct {
 		Summary: "Write Go type property",
 		QML: `
 			import GoTest 4.2
-			GoType { stringValue: "<new>"; intValue: 300 }
+			GoType { stringValue: "<content>"; intValue: 300 }
 		`,
-		QMLValue: TestType{StringValue: "<new>", IntValue: 300},
+		QMLValue: TestType{StringValue: "<content>", IntValue: 300},
+		Done: func(d *TestData) {
+			d.Assert(d.value.stringValueChanged, Equals, 1)
+		},
 	},
 	{
 		Summary: "Access underlying Go value with Interface",
@@ -388,6 +397,19 @@ var tests = []struct {
 			d.Assert(d.root.Interface().(*TestType).StringValue, Equals, "<content>")
 			d.Assert(d.context.Interface, Panics, "QML object is not backed by a Go value")
 		},
+	},
+	{
+		Summary: "Notification signals on custom Go type",
+		QML: `
+			import GoTest 4.2
+			GoType {
+				id: custom
+				stringValue: "<old>"
+				onStringValueChanged: custom.stringValue = "<newest>"
+				Component.onCompleted: custom.stringValue = "<new>"
+			}
+		`,
+		QMLValue: TestType{StringValue: "<newest>"},
 	},
 	{
 		Summary: "Singleton type registration",
