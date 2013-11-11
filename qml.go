@@ -791,15 +791,20 @@ func hookWindowHidden(addr unsafe.Pointer) {
 }
 
 // TypeSpec holds the specification of a QML type that is backed by Go logic.
-// 
+//
 // The type specification must be registered with the RegisterTypes function
 // before it will be visible to QML code.
 type TypeSpec struct {
 	// Name holds the identifier the type is known as.
-	Name      string
+	Name string
 
-	// New is called when QML code requests the creation of a new value of this type.
-	New       func() interface{}
+	// New is called when QML code requests the creation of a new value of
+	// this type. All returned values must be backed by the same Go type.
+	//
+	// If the returned value is a struct containing a field such as FieldName
+	// and a respective method OnFieldNameChanged, the latter method will
+	// be called whenever QML logic writes into the former field.
+	New func() interface{}
 
 	// Singleton defines whether a single instance of the type should be used
 	// for all accesses, as a singleton value. If true, all properties of the
