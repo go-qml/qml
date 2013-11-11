@@ -118,6 +118,7 @@ void contextSetObject(QQmlContext_ *context, QObject_ *value);
 
 void delObject(QObject_ *object);
 void delObjectLater(QObject_ *object);
+const char *objectTypeName(QObject_ *object);
 int objectGetProperty(QObject_ *object, const char *name, DataValue *result);
 void objectSetProperty(QObject_ *object, const char *name, DataValue *value);
 void objectSetParent(QObject_ *object, QObject_ *parent);

@@ -737,6 +737,11 @@ var tests = []struct {
 		`,
 		QMLLog: "Size: 200 100",
 	},
+	{
+		Summary: "TypeName",
+		QML: `Item{}`,
+		Done: func(d *TestData) { d.Assert(d.root.TypeName(), Equals, "QQuickItem") },
+	},
 }
 
 var tablef = flag.String("tablef", "", "if provided, TestTable only runs tests with a summary matching the regexp")

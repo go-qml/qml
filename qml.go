@@ -326,6 +326,7 @@ func (ctx *Context) Var(name string) interface{} {
 // See the documentation of Common for details about this interface.
 type Object interface {
 	Common() *Common
+	TypeName() string
 	Set(property string, value interface{}) error
 	Property(name string) interface{}
 	Int(property string) int
@@ -358,6 +359,15 @@ var _ Object = (*Common)(nil)
 // embed it, when these are used via the Object interface.
 func (obj *Common) Common() *Common {
 	return obj
+}
+
+// TypeName returns the underlying type name for the held value.
+func (obj *Common) TypeName() string {
+	var name string
+	gui(func() {
+		name = C.GoString(C.objectTypeName(obj.addr))
+	})
+	return name
 }
 
 // Set changes the named object property to the given value.
@@ -784,12 +794,12 @@ var types []*TypeSpec
 // by QML code. To access the registered types, they must be imported from the
 // provided location and major.minor version numbers.
 //
-// For example, with a location "GoExtension", major 4, and minor 2, this statement
+// For example, with a location "GoExtensions", major 4, and minor 2, this statement
 // should import all the registered types in the module's namespace:
 //
-//     import GoExtension 4.2
+//     import GoExtensions 4.2
 //
-// The documentation on import statements provides more details:
+// The documentation on QML import statements provides more details on these:
 //
 //     http://qt-project.org/doc/qt-5.0/qtqml/qtqml-syntax-imports.html
 //

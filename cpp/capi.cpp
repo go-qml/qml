@@ -325,6 +325,11 @@ void delObjectLater(QObject_ *object)
     reinterpret_cast<QObject *>(object)->deleteLater();
 }
 
+const char *objectTypeName(QObject_ *object)
+{
+    return reinterpret_cast<QObject *>(object)->metaObject()->className();
+}
+
 int objectGetProperty(QObject_ *object, const char *name, DataValue *result)
 {
     QObject *qobject = reinterpret_cast<QObject *>(object);
