@@ -483,6 +483,17 @@ int objectIsView(QObject_ *object)
     return dynamic_cast<QQuickView *>(qobject) ? 1 : 0;
 }
 
+error *objectGoAddr(QObject_ *object, GoAddr **addr)
+{
+    QObject *qobject = reinterpret_cast<QObject *>(object);
+    GoValue *goValue = dynamic_cast<GoValue *>(qobject);
+    if (goValue) {
+        *addr = goValue->addr();
+        return 0;
+    }
+    return errorf("QML object is not backed by a Go value");
+}
+
 QString_ *newString(const char *data, int len)
 {
     // This will copy data only once.

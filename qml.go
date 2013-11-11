@@ -327,6 +327,7 @@ func (ctx *Context) Var(name string) interface{} {
 type Object interface {
 	Common() *Common
 	TypeName() string
+	Interface() interface{}
 	Set(property string, value interface{}) error
 	Property(name string) interface{}
 	Int(property string) int
@@ -368,6 +369,24 @@ func (obj *Common) TypeName() string {
 		name = C.GoString(C.objectTypeName(obj.addr))
 	})
 	return name
+}
+
+// Interface returns the underlying Go value that is being held by
+// the object wrapper.
+//
+// It is a runtime error to call Interface on values that are not
+// backed by a Go value.
+func (obj *Common) Interface() interface{} {
+	var result interface{}
+	var cerr *C.error
+	gui(func() {
+		var fold *valueFold
+		if cerr = C.objectGoAddr(obj.addr, (*unsafe.Pointer)(unsafe.Pointer(&fold))); cerr == nil {
+			result = fold.gvalue
+		}
+	})
+	cmust(cerr)
+	return result
 }
 
 // Set changes the named object property to the given value.
@@ -531,9 +550,7 @@ func (obj *Common) Call(method string, params ...interface{}) interface{} {
 		}
 		cerr = C.objectInvoke(obj.addr, cmethod, cmethodLen, &result, &dataValueArray[0], C.int(len(params)))
 	})
-	if cerr != nil {
-		panic(cerror(cerr).Error())
-	}
+	cmust(cerr)
 	return unpackDataValue(&result, obj.engine)
 }
 
@@ -635,9 +652,7 @@ func (obj *Common) On(signal string, function interface{}) {
 			stats.connectionsAlive(+1)
 		}
 	})
-	if cerr != nil {
-		panic(cerror(cerr).Error())
-	}
+	cmust(cerr)
 }
 
 //export hookSignalDisconnect
@@ -676,6 +691,12 @@ func cerror(cerr *C.error) error {
 	err := errors.New(C.GoString((*C.char)(unsafe.Pointer(cerr))))
 	C.free(unsafe.Pointer(cerr))
 	return err
+}
+
+func cmust(cerr *C.error) {
+	if cerr != nil {
+		panic(cerror(cerr).Error())
+	}
 }
 
 // TODO Signal emitting support for go values.

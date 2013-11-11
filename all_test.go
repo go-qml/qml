@@ -379,6 +379,17 @@ var tests = []struct {
 		QMLValue: TestType{StringValue: "<new>", IntValue: 300},
 	},
 	{
+		Summary: "Access underlying Go value with Interface",
+		QML: `
+			import GoTest 4.2
+			GoType { stringValue: "<content>" }
+		`,
+		Done: func(d *TestData) {
+			d.Assert(d.root.Interface().(*TestType).StringValue, Equals, "<content>")
+			d.Assert(d.context.Interface, Panics, "QML object is not backed by a Go value")
+		},
+	},
+	{
 		Summary: "Singleton type registration",
 		Value:   TestType{StringValue: "<content>"},
 		QML: `
