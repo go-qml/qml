@@ -198,9 +198,9 @@ func (e *Engine) Context() *Context {
 // with the specified provider identifier. It is a runtime error to register the same
 // provider identifier multiple times.
 //
-// The imageId provided to f is the requested image source, with the "image:" scheme
+// The imgId provided to f is the requested image source, with the "image:" scheme
 // and provider identifier removed. For example, with an image image source of
-// "image://myprovider/icons/home.ext", the respective imageId would be "icons/home.ext".
+// "image://myprovider/icons/home.ext", the respective imgId would be "icons/home.ext".
 //
 // If either the width or the height parameters provided to f are zero, no specific
 // size for the image was requested. If non-zero, the returned image should have the
@@ -210,22 +210,22 @@ func (e *Engine) Context() *Context {
 //
 //   http://qt-project.org/doc/qt-5.0/qtquick/qquickimageprovider.html
 //
-func (e *Engine) AddImageProvider(providerId string, f func(imageId string, width, height int) image.Image) {
-	if _, ok := e.imageProviders[providerId]; ok {
-		panic(fmt.Sprintf("engine already has an image provider with id %q", providerId))
+func (e *Engine) AddImageProvider(prvId string, f func(imgId string, width, height int) image.Image) {
+	if _, ok := e.imageProviders[prvId]; ok {
+		panic(fmt.Sprintf("engine already has an image provider with id %q", prvId))
 	}
-	e.imageProviders[providerId] = &f
-	cproviderId, cproviderIdLen := unsafeStringData(providerId)
+	e.imageProviders[prvId] = &f
+	cprvId, cprvIdLen := unsafeStringData(prvId)
 	gui(func() {
-		qproviderId := C.newString(cproviderId, cproviderIdLen)
-		defer C.delString(qproviderId)
-		C.engineAddImageProvider(e.addr, qproviderId, unsafe.Pointer(&f))
+		qprvId := C.newString(cprvId, cprvIdLen)
+		defer C.delString(qprvId)
+		C.engineAddImageProvider(e.addr, qprvId, unsafe.Pointer(&f))
 	})
 }
 
 //export hookRequestImage
 func hookRequestImage(imageFunc unsafe.Pointer, cid *C.char, cidLen, cwidth, cheight C.int) unsafe.Pointer {
-	f := *(*func(imageId string, width, height int) image.Image)(imageFunc)
+	f := *(*func(imgId string, width, height int) image.Image)(imageFunc)
 
 	id := unsafeString(cid, cidLen)
 	width := int(cwidth)
@@ -821,11 +821,11 @@ var types []*TypeSpec
 // provided location and major.minor version numbers.
 //
 // For example, with a location "GoExtensions", major 4, and minor 2, this statement
-// should import all the registered types in the module's namespace:
+// imports all the registered types in the module's namespace:
 //
 //     import GoExtensions 4.2
 //
-// The documentation on QML import statements provides more details on these:
+// See the documentation on QML import statements for details on these:
 //
 //     http://qt-project.org/doc/qt-5.0/qtqml/qtqml-syntax-imports.html
 //
