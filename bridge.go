@@ -187,11 +187,6 @@ const (
 //
 // This must be run from the main GUI thread.
 func wrapGoValue(engine *Engine, gvalue interface{}, owner valueOwner) (cvalue unsafe.Pointer) {
-	prev, ok := engine.values[gvalue]
-	if ok && (prev.owner == owner || owner != cppOwner) {
-		return prev.cvalue
-	}
-
 	gvaluev := reflect.ValueOf(gvalue)
 	gvaluek := gvaluev.Kind()
 	if gvaluek == reflect.Struct && !hashable(gvalue) {
@@ -203,6 +198,11 @@ func wrapGoValue(engine *Engine, gvalue interface{}, owner valueOwner) (cvalue u
 	}
 	if gvaluek == reflect.Ptr && gvaluev.Elem().Kind() == reflect.Ptr {
 		panic("cannot hand pointer of pointer to QML logic; use a simple pointer instead")
+	}
+
+	prev, ok := engine.values[gvalue]
+	if ok && (prev.owner == owner || owner != cppOwner) {
+		return prev.cvalue
 	}
 
 	parent := nilPtr
@@ -316,7 +316,7 @@ func hookGoValueReadField(enginep, foldp unsafe.Pointer, reflectIndex C.int, res
 		if field.CanAddr() {
 			field = field.Addr()
 		} else if !hashable(field.Interface()) {
-			panic(fmt.Sprintf("cannot access unaddressable and unhashable struct value on interface field %s.%s", v.Type().Name(), v.Type().Field(int(reflectIndex)).Name))
+			panic(fmt.Sprintf("cannot access unaddressable and unhashable struct value on interface field %s.%s; value: %#v", v.Type().Name(), v.Type().Field(int(reflectIndex)).Name, field.Interface()))
 		}
 	}
 	var gvalue interface{}
