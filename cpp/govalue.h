@@ -8,24 +8,33 @@
 
 #include "capi.h"
 
-class GoValuePrivate;
+class GoValueMetaObject;
+
+// TODO Painting.
+//#include <QQuickPaintedItem>
+//#include <QPainter>
+//class GoValue : public QQuickPaintedItem
 class GoValue : public QObject
 {
     Q_OBJECT
 
 public:
+    GoAddr *addr;
+    GoTypeInfo *typeInfo;
+
     GoValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject *parent);
 
-    GoAddr *addr();
-
     void activate(int propIndex);
+
+    // TODO Painting.
+    //virtual void paint(QPainter *painter);
 
     static QMetaObject *metaObjectFor(GoTypeInfo *typeInfo);
 
     virtual ~GoValue();
 
 private:
-    Q_DECLARE_PRIVATE(GoValue)
+    GoValueMetaObject *valueMeta;
 };
 
 #endif // GOVALUE_H

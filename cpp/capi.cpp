@@ -488,7 +488,7 @@ error *objectGoAddr(QObject_ *object, GoAddr **addr)
     QObject *qobject = reinterpret_cast<QObject *>(object);
     GoValue *goValue = dynamic_cast<GoValue *>(qobject);
     if (goValue) {
-        *addr = goValue->addr();
+        *addr = goValue->addr;
         return 0;
     }
     return errorf("QML object is not backed by a Go value");
@@ -623,7 +623,7 @@ void packDataValue(QVariant_ *var, DataValue *value)
             GoValue *govalue = dynamic_cast<GoValue *>(qobject);
             if (govalue) {
                 value->dataType = DTGoAddr;
-                *(void **)(value->data) = govalue->addr();
+                *(void **)(value->data) = govalue->addr;
             } else {
                 value->dataType = DTObject;
                 *(void **)(value->data) = qobject;
