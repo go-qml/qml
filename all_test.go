@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	. "launchpad.net/gocheck"
 	"os"
+	"reflect"
 	"regexp"
 	"runtime"
 	"strings"
@@ -85,6 +86,7 @@ type TestType struct {
 	AnyValue     interface{}
 	ObjectValue  qml.Object
 	ColorValue   color.RGBA
+	IntsValue    []int
 
 	stringValueChanged int
 }
@@ -251,7 +253,7 @@ var tests = []struct {
 	},
 	{
 		Summary: "Reading of nested field via a value (not pointer) in an interface",
-		Value:   TestType{AnyValue: TestType{StringValue: "<content>"}},
+		Value:   TestType{AnyValue: struct{ StringValue string }{"<content>"}},
 		QML:     `Item { Component.onCompleted: console.log("String is", value.anyValue.stringValue) }`,
 		QMLLog:  "String is <content>",
 	},
@@ -349,6 +351,12 @@ var tests = []struct {
 			d.Assert(d.root.Color("c"), Equals, color.RGBA{256 / 16, 256 / 8, 256 / 4, 256 / 2})
 		},
 	},
+	// TODO Support list values.
+	//{
+	//	Summary:  "Setting of a Go slice property",
+	//	QML:      `Item { Component.onCompleted: value.intsValue = [1, 2, 3] }`,
+	//	QMLValue: TestType{IntsValue: []int{1, 2, 3}},
+	//},
 	{
 		Summary: "Identical values remain identical when possible",
 		Init: func(d *TestData) {
@@ -772,8 +780,8 @@ var tests = []struct {
 	},
 	{
 		Summary: "TypeName",
-		QML: `Item{}`,
-		Done: func(d *TestData) { d.Assert(d.root.TypeName(), Equals, "QQuickItem") },
+		QML:     `Item{}`,
+		Done:    func(d *TestData) { d.Assert(d.root.TypeName(), Equals, "QQuickItem") },
 	},
 }
 
@@ -848,7 +856,7 @@ func (s *S) TestTable(c *C) {
 			}
 		}
 
-		if t.QMLValue != (TestType{}) {
+		if !reflect.DeepEqual(t.QMLValue, TestType{}) {
 			c.Check(value.StringValue, Equals, t.QMLValue.StringValue)
 			c.Check(value.BoolValue, Equals, t.QMLValue.BoolValue)
 			c.Check(value.IntValue, Equals, t.QMLValue.IntValue)
@@ -857,6 +865,7 @@ func (s *S) TestTable(c *C) {
 			c.Check(value.Float64Value, Equals, t.QMLValue.Float64Value)
 			c.Check(value.Float32Value, Equals, t.QMLValue.Float32Value)
 			c.Check(value.AnyValue, Equals, t.QMLValue.AnyValue)
+			c.Check(value.IntsValue, DeepEquals, t.QMLValue.IntsValue)
 		}
 
 		if !c.Failed() {
@@ -875,7 +884,7 @@ func (s *S) TestTable(c *C) {
 				}
 			}
 
-			if t.DoneValue != (TestType{}) {
+			if !reflect.DeepEqual(t.DoneValue, TestType{}) {
 				c.Check(value.StringValue, Equals, t.DoneValue.StringValue)
 				c.Check(value.BoolValue, Equals, t.DoneValue.BoolValue)
 				c.Check(value.IntValue, Equals, t.DoneValue.IntValue)
@@ -884,6 +893,7 @@ func (s *S) TestTable(c *C) {
 				c.Check(value.Float64Value, Equals, t.DoneValue.Float64Value)
 				c.Check(value.Float32Value, Equals, t.DoneValue.Float32Value)
 				c.Check(value.AnyValue, Equals, t.DoneValue.AnyValue)
+				c.Check(value.IntsValue, DeepEquals, t.DoneValue.IntsValue)
 			}
 		}
 
