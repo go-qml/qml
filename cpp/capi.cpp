@@ -617,6 +617,18 @@ void packDataValue(QVariant_ *var, DataValue *value)
         value->dataType = DTColor;
         *(unsigned int*)(value->data) = qvar->value<QColor>().rgba();
         break;
+    case QMetaType::QVariantList:
+        {
+            QVariantList varlist = qvar->toList();
+            DataValue *dvlist = (DataValue *) malloc(sizeof(DataValue) * varlist.size());
+            for (int i = 0; i < varlist.size(); i++) {
+                packDataValue((void*)&varlist.at(i), &dvlist[i]);
+            }
+            value->dataType = DTList;
+            value->len = varlist.size();
+            *(DataValue**)(value->data) = dvlist;
+        }
+        break;
     default:
         if (qvar->type() == (int)QMetaType::QObjectStar || qvar->canConvert<QObject *>()) {
             QObject *qobject = qvar->value<QObject *>();

@@ -142,8 +142,20 @@ func unpackDataValue(dvalue *C.DataValue, engine *Engine) interface{} {
 		// TODO Would be good to preserve identity on the Go side.
 		return &Common{
 			engine: engine,
-			addr:   (*(*unsafe.Pointer)(datap)),
+			addr:   *(*unsafe.Pointer)(datap),
 		}
+	case C.DTList:
+		var dvlist []C.DataValue
+		var dvlisth = (*reflect.SliceHeader)(unsafe.Pointer(&dvlist))
+		dvlisth.Data = uintptr(*(*unsafe.Pointer)(datap))
+		dvlisth.Len = int(dvalue.len)
+		dvlisth.Cap = int(dvalue.len)
+		result := make([]interface{}, len(dvlist))
+		for i := range result {
+			result[i] = unpackDataValue(&dvlist[i], engine)
+		}
+		C.free(*(*unsafe.Pointer)(datap))
+		return result
 	}
 	panic(fmt.Sprintf("unsupported data type: %d", dvalue.dataType))
 }

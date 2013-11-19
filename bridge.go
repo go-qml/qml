@@ -351,6 +351,8 @@ func hookGoValueWriteField(enginep, foldp unsafe.Pointer, reflectIndex, onChange
 	}
 }
 
+var ifaceSliceType = reflect.TypeOf([]interface{}(nil)) 
+
 func convertAndSet(to, from reflect.Value) {
 	defer func() {
 		if v := recover(); v != nil {
@@ -358,7 +360,20 @@ func convertAndSet(to, from reflect.Value) {
 			panic("FIXME attempted to set a field with the wrong type; this should be an error")
 		}
 	}()
-	to.Set(from.Convert(to.Type()))
+	toType := to.Type()
+	fromType := from.Type()
+	if toType == fromType {
+		to.Set(from)
+	} else if fromType == ifaceSliceType && to.Kind() == reflect.Slice {
+		len := from.Len()
+		to.Set(reflect.MakeSlice(toType, len, len))
+		elemType := toType.Elem()
+		for i := 0; i < len; i++ {
+			to.Index(i).Set(from.Index(i).Elem().Convert(elemType))
+		}
+	} else {
+		to.Set(from.Convert(toType))
+	}
 }
 
 var (

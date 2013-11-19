@@ -351,12 +351,11 @@ var tests = []struct {
 			d.Assert(d.root.Color("c"), Equals, color.RGBA{256 / 16, 256 / 8, 256 / 4, 256 / 2})
 		},
 	},
-	// TODO Support list values.
-	//{
-	//	Summary:  "Setting of a Go slice property",
-	//	QML:      `Item { Component.onCompleted: value.intsValue = [1, 2, 3] }`,
-	//	QMLValue: TestType{IntsValue: []int{1, 2, 3}},
-	//},
+	{
+		Summary:  "Setting of a Go slice property",
+		QML:      `Item { Component.onCompleted: value.intsValue = [1, 2, 3.5] }`,
+		QMLValue: TestType{IntsValue: []int{1, 2, 3}},
+	},
 	{
 		Summary: "Identical values remain identical when possible",
 		Init: func(d *TestData) {
