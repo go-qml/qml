@@ -337,6 +337,7 @@ type Object interface {
 	String(property string) string
 	Color(property string) color.RGBA
 	Object(property string) Object
+	Slice(property string, result interface{})
 	ObjectByName(objectName string) Object
 	Call(method string, params ...interface{}) interface{}
 	Create(ctx *Context) Object
@@ -506,6 +507,7 @@ func (obj *Common) Color(property string) color.RGBA {
 	return c
 }
 
+
 // Object returns the object value of the named property.
 // Object panics if the property is not a QML object.
 func (obj *Common) Object(property string) Object {
@@ -515,6 +517,22 @@ func (obj *Common) Object(property string) Object {
 		panic(fmt.Sprintf("value of property %q is not a QML object: %#v", property, value))
 	}
 	return object
+}
+
+// Slice allocates a new slice and copies the content of the named list
+// property to it, performing type conversions as possible, and then
+// assigns the result to the slice pointed to by sliceAddr.
+// Slice panics if the property value is not a list with proper values.
+func (obj *Common) Slice(property string, sliceAddr interface{}) {
+	toPtr := reflect.ValueOf(sliceAddr)
+	if toPtr.Kind() != reflect.Ptr || toPtr.Type().Elem().Kind() != reflect.Slice {
+		panic(fmt.Sprintf("Slice got a sliceAddr parameter that is not a slice address: %#v", sliceAddr))
+	}
+	from := reflect.ValueOf(obj.Property(property))
+	if from.Kind() != reflect.Slice {
+		panic(fmt.Sprintf("value of property %q is not a slice: %#v", property, from.Interface()))
+	}
+	convertAndSet(toPtr.Elem(), from)
 }
 
 // ObjectByName returns the Object value of the descendant object that

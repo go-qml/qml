@@ -352,14 +352,50 @@ var tests = []struct {
 			d.Assert(d.root.Color("c"), Equals, color.RGBA{256 / 16, 256 / 8, 256 / 4, 256 / 2})
 		},
 	},
+	// TODO Support QQmlListProperty
+	//{
+	//	Summary: "Reading a property into a Go slice",
+	//	QML: `
+	//		Item {
+	//			states: [
+	//				State { id: on;  name: "on" },
+	//				State { id: off; name: "off" }
+	//			]
+	//		}
+	//	`,
+	//	Done: func(d *TestData) {
+	//		var states []qml.Object
+	//		d.root.Slice("states", &states)
+	//		d.Assert(states[0].String("name"), Equals, "on")
+	//		d.Assert(states[1].String("name"), Equals, "off")
+	//		d.Assert(len(states), Equals, 2)
+	//	},
+	//},
+	{
+		Summary: "Reading a property into a Go slice",
+		QML: `
+			Item {
+				State { id: on;  name: "on" }
+				State { id: off; name: "off" }
+				property var mystates: [on, off]
+			}
+		`,
+		Done: func(d *TestData) {
+			var states []qml.Object
+			d.root.Slice("mystates", &states)
+			d.Assert(states[0].String("name"), Equals, "on")
+			d.Assert(states[1].String("name"), Equals, "off")
+			d.Assert(len(states), Equals, 2)
+		},
+	},
 	{
 		Summary:  "Setting of a Go slice property",
 		QML:      `Item { Component.onCompleted: value.intsValue = [1, 2, 3.5] }`,
 		QMLValue: TestType{IntsValue: []int{1, 2, 3}},
 	},
 	{
-		Summary:  "Setting of a Go slice property",
-		QML:      `
+		Summary: "Setting of a Go slice property",
+		QML: `
 			Item {
 				State { id: on;  name: "on" }
 				State { id: off; name: "off" }
