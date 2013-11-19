@@ -4,11 +4,15 @@
 
 #include "capi.h"
 
+#ifdef __MINGW64__
+#include "mutex"
+#else
 extern "C" {
 
 int g_atomic_int_get(const volatile int *value);
 
 }
+#endif 
 
 class IdleTimer : public QObject
 {
@@ -17,8 +21,20 @@ class IdleTimer : public QObject
     public:
 
     static IdleTimer *singleton() {
+#ifdef __MINGW64__
+        if (!instance) {
+            
+            std::lock_guard<std::mutex> lock(mx);
+
+            if (!instance) {
+                instance = new IdleTimer();
+            }
+        }
+        return instance;
+#else
         static IdleTimer singleton;
         return &singleton;
+#endif
     }
 
     void init(int *hookWaiting)
@@ -35,7 +51,13 @@ class IdleTimer : public QObject
 
     void timerEvent(QTimerEvent *event)
     {
+#ifdef __MINGW64__  
+        MemoryBarrier();
+
+        if (*hookWaiting > 0) {  
+#else    
         if (g_atomic_int_get(hookWaiting) > 0) {
+#endif
             hookIdleTimer();
         } else {
             timer.stop();
@@ -45,9 +67,18 @@ class IdleTimer : public QObject
     private:
 
     int *hookWaiting;
+    QBasicTimer timer;
 
-    QBasicTimer timer;    
+#ifdef __MINGW64__
+    static std::mutex mx;
+    static IdleTimer *instance;
+#endif
 };
+
+#ifdef __MINGW64__
+IdleTimer* IdleTimer::instance = 0;
+std::mutex IdleTimer::mx;
+#endif 
 
 void idleTimerInit(int *hookWaiting)
 {
