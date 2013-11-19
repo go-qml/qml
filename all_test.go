@@ -87,6 +87,7 @@ type TestType struct {
 	ObjectValue  qml.Object
 	ColorValue   color.RGBA
 	IntsValue    []int
+	ObjectsValue []qml.Object
 
 	stringValueChanged int
 }
@@ -355,6 +356,21 @@ var tests = []struct {
 		Summary:  "Setting of a Go slice property",
 		QML:      `Item { Component.onCompleted: value.intsValue = [1, 2, 3.5] }`,
 		QMLValue: TestType{IntsValue: []int{1, 2, 3}},
+	},
+	{
+		Summary:  "Setting of a Go slice property",
+		QML:      `
+			Item {
+				State { id: on;  name: "on" }
+				State { id: off; name: "off" }
+				Component.onCompleted: value.objectsValue = [on, off]
+			}
+		`,
+		Done: func(d *TestData) {
+			d.Assert(d.value.ObjectsValue[0].String("name"), Equals, "on")
+			d.Assert(d.value.ObjectsValue[1].String("name"), Equals, "off")
+			d.Assert(len(d.value.ObjectsValue), Equals, 2)
+		},
 	},
 	{
 		Summary: "Identical values remain identical when possible",
