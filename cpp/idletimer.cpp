@@ -3,12 +3,7 @@
 #include <QDebug>
 
 #include "capi.h"
-
-extern "C" {
-
-int g_atomic_int_get(const volatile int *value);
-
-}
+#include "mutex"
 
 class IdleTimer : public QObject
 {
@@ -17,8 +12,15 @@ class IdleTimer : public QObject
     public:
 
     static IdleTimer *singleton() {
-        static IdleTimer singleton;
-        return &singleton;
+        if (!instance) {
+            
+            std::lock_guard<std::mutex> lock(mx);
+
+            if (!instance) {
+                instance = new IdleTimer();
+            }
+        }
+        return instance;
     }
 
     void init(int *hookWaiting)
@@ -35,7 +37,11 @@ class IdleTimer : public QObject
 
     void timerEvent(QTimerEvent *event)
     {
-        if (g_atomic_int_get(hookWaiting) > 0) {
+        // this is a gcc intrinsic, non-gcc compilers will
+        // need some other memory barrier inducing call
+        __sync_synchronize();
+        
+        if (*hookWaiting > 0) {
             hookIdleTimer();
         } else {
             timer.stop();
@@ -45,9 +51,14 @@ class IdleTimer : public QObject
     private:
 
     int *hookWaiting;
+    QBasicTimer timer;
 
-    QBasicTimer timer;    
+    static std::mutex mx;
+    static IdleTimer *instance;
 };
+
+IdleTimer* IdleTimer::instance = 0;
+std::mutex IdleTimer::mx;
 
 void idleTimerInit(int *hookWaiting)
 {
