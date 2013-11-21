@@ -620,12 +620,13 @@ void packDataValue(QVariant_ *var, DataValue *value)
     case QMetaType::QVariantList:
         {
             QVariantList varlist = qvar->toList();
-            DataValue *dvlist = (DataValue *) malloc(sizeof(DataValue) * varlist.size());
-            for (int i = 0; i < varlist.size(); i++) {
+            int len = varlist.size();
+            DataValue *dvlist = (DataValue *) malloc(sizeof(DataValue) * len);
+            for (int i = 0; i < len; i++) {
                 packDataValue((void*)&varlist.at(i), &dvlist[i]);
             }
             value->dataType = DTList;
-            value->len = varlist.size();
+            value->len = len;
             *(DataValue**)(value->data) = dvlist;
         }
         break;
@@ -641,6 +642,23 @@ void packDataValue(QVariant_ *var, DataValue *value)
                 *(void **)(value->data) = qobject;
             }
             break;
+        }
+
+        if (qstrncmp(qvar->typeName(), "QQmlListProperty<", 17) == 0) {
+            QQmlListProperty<QObject> *list = reinterpret_cast<QQmlListProperty<QObject>*>(qvar->data());
+            if (list->count && list->at) {
+                int len = list->count(list);
+                DataValue *dvlist = (DataValue *) malloc(sizeof(DataValue) * len);
+                QVariant elem;
+                for (int i = 0; i < len; i++) {
+                    elem.setValue(list->at(list, i));
+                    packDataValue(&elem, &dvlist[i]);
+                }
+                value->dataType = DTList;
+                value->len = len;
+                *(DataValue**)(value->data) = dvlist;
+                break;
+            }
         }
         panicf("unsupported variant type: %d (%s)", qvar->type(), qvar->typeName());
         break;
