@@ -239,7 +239,7 @@ var tests = []struct {
 	DoneValue TestType
 }{
 	{
-		Summary: "Setting and reading of context variables",
+		Summary: "Read a context variable and its fields",
 		Value:   TestType{StringValue: "<content>", IntValue: 42},
 		QML: `
 			Item {
@@ -253,13 +253,13 @@ var tests = []struct {
 		QMLLog: "String is <content>.*Int is 42.*Any is undefined",
 	},
 	{
-		Summary: "Reading of nested field via a value (not pointer) in an interface",
+		Summary: "Read a nested field via a value (not pointer) in an interface",
 		Value:   TestType{AnyValue: struct{ StringValue string }{"<content>"}},
 		QML:     `Item { Component.onCompleted: console.log("String is", value.anyValue.stringValue) }`,
 		QMLLog:  "String is <content>",
 	},
 	{
-		Summary: "Reading of value fields",
+		Summary: "Read a native property",
 		QML:     `Item { width: 123 }`,
 		Done:    func(d *TestData) { d.Check(d.root.Int("width"), Equals, 123) },
 	},
@@ -307,7 +307,7 @@ var tests = []struct {
 		QMLLog:  "Private is undefined",
 	},
 	{
-		Summary: "Setting of value fields",
+		Summary: "Set a custom property",
 		QML: `
 			Item {
 				property var obj: null
@@ -326,7 +326,7 @@ var tests = []struct {
 		DoneLog: "String is <content>.*Width is 300.*Height is 200",
 	},
 	{
-		Summary: "Reading and setting of a QUrl property",
+		Summary: "Read and set a QUrl property",
 		QML:     `import QtWebKit 3.0; WebView {}`,
 		Done: func(d *TestData) {
 			d.Check(d.root.String("url"), Equals, "")
@@ -336,7 +336,7 @@ var tests = []struct {
 		},
 	},
 	{
-		Summary: "Reading and setting of a QColor property",
+		Summary: "Read and set a QColor property",
 		QML:     `Text{ color: Qt.rgba(1/16, 1/8, 1/4, 1/2); function hasColor(c) { return Qt.colorEqual(color, c) }}`,
 		Done: func(d *TestData) {
 			d.Assert(d.root.Color("color"), Equals, color.RGBA{256 / 16, 256 / 8, 256 / 4, 256 / 2})
@@ -345,7 +345,7 @@ var tests = []struct {
 		},
 	},
 	{
-		Summary: "Reading and setting of a QColor property from a Go field",
+		Summary: "Read and set a QColor property from a Go field",
 		Init:    func(d *TestData) { d.value.ColorValue = color.RGBA{256 / 16, 256 / 8, 256 / 4, 256 / 2} },
 		QML:     `Text{ property var c: value.colorValue; Component.onCompleted: { console.log(value.colorValue); } }`,
 		Done: func(d *TestData) {
@@ -353,7 +353,7 @@ var tests = []struct {
 		},
 	},
 	{
-		Summary: "Reading a property into a Go slice",
+		Summary: "Read a QQmlListProperty property into a Go slice",
 		QML: `
 			Item {
 				states: [
@@ -372,7 +372,7 @@ var tests = []struct {
 		},
 	},
 	{
-		Summary: "Reading a property into a Go slice",
+		Summary: "Read a QVariantList property into a Go slice",
 		QML: `
 			Item {
 				State { id: on;  name: "on" }
@@ -389,12 +389,12 @@ var tests = []struct {
 		},
 	},
 	{
-		Summary:  "Setting of a Go slice property",
+		Summary:  "Set a Go slice property",
 		QML:      `Item { Component.onCompleted: value.intsValue = [1, 2, 3.5] }`,
 		QMLValue: TestType{IntsValue: []int{1, 2, 3}},
 	},
 	{
-		Summary: "Setting of a Go slice property",
+		Summary: "Set a Go slice property with objects",
 		QML: `
 			Item {
 				State { id: on;  name: "on" }
