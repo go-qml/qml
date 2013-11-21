@@ -368,6 +368,7 @@ var tests = []struct {
 			d.Assert(states[0].String("name"), Equals, "on")
 			d.Assert(states[1].String("name"), Equals, "off")
 			d.Assert(len(states), Equals, 2)
+			d.Assert(d.root.Property("states").(*qml.List).Len(), Equals, 2)
 		},
 	},
 	{

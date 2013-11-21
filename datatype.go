@@ -155,7 +155,7 @@ func unpackDataValue(dvalue *C.DataValue, engine *Engine) interface{} {
 			result[i] = unpackDataValue(&dvlist[i], engine)
 		}
 		C.free(*(*unsafe.Pointer)(datap))
-		return result
+		return &List{result}
 	}
 	panic(fmt.Sprintf("unsupported data type: %d", dvalue.dataType))
 }

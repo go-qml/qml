@@ -346,6 +346,31 @@ type Object interface {
 	On(signal string, function interface{})
 }
 
+// List holds a QML list.
+type List struct {
+	// In the future this will be able to hold a reference to QML-owned
+	// lists, so they can be mutated.
+	data []interface{}
+}
+
+// Len returns the number of elements in the list.
+func (list *List) Len() int {
+	return len(list.data)
+}
+
+// Slice allocates a new slice and copies the list content into it,
+// performing type conversions as possible, and then assigns the result
+// to the slice pointed to by sliceAddr.
+// Slice panics if the list values are not compatible with the
+// provided slice.
+func (list *List) Slice(sliceAddr interface{}) {
+	toPtr := reflect.ValueOf(sliceAddr)
+	if toPtr.Kind() != reflect.Ptr || toPtr.Type().Elem().Kind() != reflect.Slice {
+		panic(fmt.Sprintf("Slice got a sliceAddr parameter that is not a slice address: %#v", sliceAddr))
+	}
+	convertAndSet(toPtr.Elem(), reflect.ValueOf(list))
+}
+
 // Common implements the common behavior of all QML objects.
 // It implements the Object interface.
 type Common struct {
@@ -524,15 +549,12 @@ func (obj *Common) Object(property string) Object {
 // assigns the result to the slice pointed to by sliceAddr.
 // Slice panics if the property value is not a list with proper values.
 func (obj *Common) Slice(property string, sliceAddr interface{}) {
-	toPtr := reflect.ValueOf(sliceAddr)
-	if toPtr.Kind() != reflect.Ptr || toPtr.Type().Elem().Kind() != reflect.Slice {
-		panic(fmt.Sprintf("Slice got a sliceAddr parameter that is not a slice address: %#v", sliceAddr))
+	value := obj.Property(property)
+	list, ok := value.(*List)
+	if !ok {
+		panic(fmt.Sprintf("value of property %q is not a QML list: %#v", property, value))
 	}
-	from := reflect.ValueOf(obj.Property(property))
-	if from.Kind() != reflect.Slice {
-		panic(fmt.Sprintf("value of property %q is not a slice: %#v", property, from.Interface()))
-	}
-	convertAndSet(toPtr.Elem(), from)
+	list.Slice(sliceAddr)
 }
 
 // ObjectByName returns the Object value of the descendant object that

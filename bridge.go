@@ -351,7 +351,7 @@ func hookGoValueWriteField(enginep, foldp unsafe.Pointer, reflectIndex, onChange
 	}
 }
 
-var ifaceSliceType = reflect.TypeOf([]interface{}(nil)) 
+var listType = reflect.TypeOf(&List{})
 
 func convertAndSet(to, from reflect.Value) {
 	defer func() {
@@ -364,12 +364,12 @@ func convertAndSet(to, from reflect.Value) {
 	fromType := from.Type()
 	if toType == fromType {
 		to.Set(from)
-	} else if fromType == ifaceSliceType && to.Kind() == reflect.Slice {
-		len := from.Len()
-		to.Set(reflect.MakeSlice(toType, len, len))
+	} else if fromType == listType && to.Kind() == reflect.Slice {
+		list := from.Interface().(*List)
+		to.Set(reflect.MakeSlice(toType, len(list.data), len(list.data)))
 		elemType := toType.Elem()
-		for i := 0; i < len; i++ {
-			to.Index(i).Set(from.Index(i).Elem().Convert(elemType))
+		for i, elem := range list.data {
+			to.Index(i).Set(reflect.ValueOf(elem).Convert(elemType))
 		}
 	} else {
 		to.Set(from.Convert(toType))
