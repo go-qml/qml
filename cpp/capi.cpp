@@ -112,7 +112,9 @@ QQmlComponent_ *newComponent(QQmlEngine_ *engine, QObject_ *parent)
 {
     QQmlEngine *qengine = reinterpret_cast<QQmlEngine *>(engine);
     //QObject *qparent = reinterpret_cast<QObject *>(parent);
-    return new QQmlComponent(qengine);
+    QQmlComponent *qcomponent = new QQmlComponent(qengine);
+    QQmlEngine::setContextForObject(qcomponent, qengine->rootContext());
+    return qcomponent;
 }
 
 class GoImageProvider : public QQuickImageProvider {
