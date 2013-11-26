@@ -464,7 +464,7 @@ var tests = []struct {
 			GoType {
 				id: custom
 				stringValue: "<old>"
-				onStringValueChanged: custom.stringValue = "<newest>"
+				onStringValueChanged: if (custom.stringValue != "<newest>") { custom.stringValue = "<newest>" }
 				Component.onCompleted: custom.stringValue = "<new>"
 			}
 		`,
@@ -636,7 +636,7 @@ var tests = []struct {
 	{
 		Summary: "Call a QML method with result and parameters from Go",
 		QML:     `Item { function add(a, b) { return a+b; } }`,
-		Done:    func(d *TestData) { d.Check(d.root.Call("add", 1, 2), Equals, 3) },
+		Done:    func(d *TestData) { d.Check(d.root.Call("add", 1, 2.0), Equals, float64(3)) },
 	},
 	{
 		Summary: "Call a QML method with a custom type",
@@ -703,7 +703,7 @@ var tests = []struct {
 			root := win.Root()
 			d.Check(root.Int("width"), Equals, 300)
 			d.Check(root.Int("height"), Equals, 200)
-			d.Check(root.Call("inc", 42), Equals, 43)
+			d.Check(root.Call("inc", 42.0), Equals, float64(43))
 			root.Destroy()
 		},
 	},
