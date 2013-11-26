@@ -113,6 +113,7 @@ QQmlComponent_ *newComponent(QQmlEngine_ *engine, QObject_ *parent)
     QQmlEngine *qengine = reinterpret_cast<QQmlEngine *>(engine);
     //QObject *qparent = reinterpret_cast<QObject *>(parent);
     QQmlComponent *qcomponent = new QQmlComponent(qengine);
+    // Qt 5.2.0 returns NULL on qmlEngine(qcomponent) without this.
     QQmlEngine::setContextForObject(qcomponent, qengine->rootContext());
     return qcomponent;
 }
