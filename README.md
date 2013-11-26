@@ -71,10 +71,10 @@ and Go 1.2 may be installed using [godeb](http://blog.labix.org/2013/06/15/in-fl
     $ go get github.com/niemeyer/qml
 
 
-Requirements on Mac OS
-----------------------
+Requirements on Mac OS X
+------------------------
 
-On Mac OS you'll need gcc (not a symlinked clang, as it complains about `-std=c++11`), and
+On Mac OS X you'll need gcc (not a symlinked clang, as it complains about `-std=c++11`), and
 must specify the `CXX`, `PKG_CONFIG_PATH`, and `CGO_CPPFLAGS` environment variables.
 
 Something along these lines should be effective:
@@ -88,8 +88,9 @@ Something along these lines should be effective:
     $ export CGO_CPPFLAGS=-I`brew --prefix qt5`/include/QtCore/$QT5VERSION/QtCore
     $ CXX=g++-4.8 go get github.com/niemeyer/qml
 
-For OSX Mavericks you may need to use `brew install qt5 --HEAD` and check that QT5VERSION is something reasonable like
-`5.2.0`, `ls /usr/local/Cellar/qt5/HEAD/include/QtCore/ | grep '^5'` should also work.
+For Mac OS X Mavericks you may need to use `brew install qt5 --HEAD` and check that QT5VERSION
+is something reasonable like `5.2.0`, `ls /usr/local/Cellar/qt5/HEAD/include/QtCore/ | grep '^5'`
+should also work.
 
 Requirements on Windows
 -----------------------
