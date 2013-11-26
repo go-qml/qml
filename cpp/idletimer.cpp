@@ -1,14 +1,9 @@
 #include <QBasicTimer>
 #include <QThread>
 #include <QDebug>
+#include <mutex>
 
 #include "capi.h"
-
-extern "C" {
-
-int g_atomic_int_get(const volatile int *value);
-
-}
 
 class IdleTimer : public QObject
 {
@@ -35,7 +30,8 @@ class IdleTimer : public QObject
 
     void timerEvent(QTimerEvent *event)
     {
-        if (g_atomic_int_get(hookWaiting) > 0) {
+        __sync_synchronize();
+        if (*hookWaiting > 0) {
             hookIdleTimer();
         } else {
             timer.stop();
