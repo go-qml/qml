@@ -449,7 +449,7 @@ var tests = []struct {
 		Summary: "Register Go type",
 		Value:   TestType{StringValue: "<content>"},
 		QML: `
-			import GoTest 4.2
+			import GoTypes 4.2
 			GoType { Component.onCompleted: console.log("String is", stringValue) }
 		`,
 		QMLLog: "String is <content>",
@@ -457,7 +457,7 @@ var tests = []struct {
 	{
 		Summary: "Write Go type property",
 		QML: `
-			import GoTest 4.2
+			import GoTypes 4.2
 			GoType { stringValue: "<content>"; intValue: 300 }
 		`,
 		QMLValue: TestType{StringValue: "<content>", IntValue: 300},
@@ -468,7 +468,7 @@ var tests = []struct {
 	{
 		Summary: "Access underlying Go value with Interface",
 		QML: `
-			import GoTest 4.2
+			import GoTypes 4.2
 			GoType { stringValue: "<content>" }
 		`,
 		Done: func(d *TestData) {
@@ -479,7 +479,7 @@ var tests = []struct {
 	{
 		Summary: "Notification signals on custom Go type",
 		QML: `
-			import GoTest 4.2
+			import GoTypes 4.2
 			GoType {
 				id: custom
 				stringValue: "<old>"
@@ -493,7 +493,7 @@ var tests = []struct {
 		Summary: "Singleton type registration",
 		Value:   TestType{StringValue: "<content>"},
 		QML: `
-			import GoTest 4.2
+			import GoTypes 4.2
 			Item { Component.onCompleted: console.log("String is", GoSingleton.stringValue) }
 		`,
 		QMLLog: "String is <content>",
@@ -512,7 +512,7 @@ var tests = []struct {
 		Value:   TestType{StringValue: "<old>"},
 
 		QML: `
-			import GoTest 4.2
+			import GoTypes 4.2
 			GoType { onStringValueChanged: console.log("String is", stringValue) }
 		`,
 		QMLLog:   "!String is",
@@ -529,7 +529,7 @@ var tests = []struct {
 		Summary: "qml.Changed must not trigger on the wrong field",
 		Value:   TestType{StringValue: "<old>"},
 		QML: `
-			import GoTest 4.2
+			import GoTypes 4.2
 			GoType { onStringValueChanged: console.log("String is", stringValue) }
 		`,
 		Done: func(d *TestData) {
@@ -548,7 +548,7 @@ var tests = []struct {
 		},
 
 		QML: `
-			import GoTest 4.2
+			import GoTypes 4.2
 			Item {
 				property var p1: GoType { onStringValueChanged: console.log("p1 has", stringValue) }
 				property var p2: GoType { onStringValueChanged: console.log("p2 has", stringValue) }
@@ -869,7 +869,7 @@ func (s *S) TestTable(c *C) {
 		Singleton: true,
 	}}
 
-	qml.RegisterTypes("GoTest", 4, 2, types)
+	qml.RegisterTypes("GoTypes", 4, 2, types)
 
 	filter := regexp.MustCompile("")
 	if tablef != nil {
