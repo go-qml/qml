@@ -372,6 +372,25 @@ var tests = []struct {
 		},
 	},
 	{
+		Summary: "Read a QQmlListReference property into a Go slice",
+		QML: `
+			Item {
+				property list<State> mystates: [
+					State { id: on;  name: "on" },
+					State { id: off; name: "off" }
+				]
+				Component.onCompleted: value.objectsValue = mystates
+			}
+		`,
+		Done: func(d *TestData) {
+			var states []qml.Object
+			d.root.Slice("mystates", &states)
+			d.Assert(states[0].String("name"), Equals, "on")
+			d.Assert(states[1].String("name"), Equals, "off")
+			d.Assert(len(states), Equals, 2)
+		},
+	},
+	{
 		Summary: "Read a QVariantList property into a Go slice",
 		QML: `
 			Item {

@@ -646,7 +646,22 @@ void packDataValue(QVariant_ *var, DataValue *value)
             }
             break;
         }
-
+        {
+            QQmlListReference ref = qvar->value<QQmlListReference>();
+            if (ref.isValid() && ref.canCount() && ref.canAt()) {
+                int len = ref.count();
+                DataValue *dvlist = (DataValue *) malloc(sizeof(DataValue) * len);
+                QVariant elem;
+                for (int i = 0; i < len; i++) {
+                    elem.setValue(ref.at(i));
+                    packDataValue(&elem, &dvlist[i]);
+                }
+                value->dataType = DTList;
+                value->len = len;
+                *(DataValue**)(value->data) = dvlist;
+                break;
+            }
+        }
         if (qstrncmp(qvar->typeName(), "QQmlListProperty<", 17) == 0) {
             QQmlListProperty<QObject> *list = reinterpret_cast<QQmlListProperty<QObject>*>(qvar->data());
             if (list->count && list->at) {
