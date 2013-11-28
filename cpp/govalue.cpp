@@ -48,8 +48,19 @@ int GoValueMetaObject::metaCall(QMetaObject::Call c, int idx, void **a)
                     if (c == QMetaObject::ReadProperty) {
                         DataValue result;
                         hookGoValueReadField(qmlEngine(value), value->addr, memberInfo->reflectIndex, &result);
-                        QVariant *out = reinterpret_cast<QVariant *>(a[0]);
-                        unpackDataValue(&result, out);
+                        if (memberInfo->memberType == DTListProperty) {
+                            if (result.dataType != DTListProperty) {
+                                panicf("reading DTListProperty field returned non-DTListProperty result");
+                            }
+                            QQmlListProperty<QObject> *in = *reinterpret_cast<QQmlListProperty<QObject> **>(result.data);
+                            QQmlListProperty<QObject> *out = reinterpret_cast<QQmlListProperty<QObject> *>(a[0]);
+                            *out = *in;
+                            // TODO Could provide a single variable in the stack to ReadField instead.
+                            delete in;
+                        } else {
+                            QVariant *out = reinterpret_cast<QVariant *>(a[0]);
+                            unpackDataValue(&result, out);
+                        }
                     } else {
                         DataValue assign;
                         QVariant *in = reinterpret_cast<QVariant *>(a[0]);
@@ -145,7 +156,11 @@ QMetaObject *GoValue::metaObjectFor(GoTypeInfo *typeInfo)
     int relativePropIndex = mob.propertyCount();
     for (int i = 0; i < typeInfo->fieldsLen; i++) {
         mob.addSignal("__" + QByteArray::number(relativePropIndex) + "()");
-        QMetaPropertyBuilder propb = mob.addProperty(memberInfo->memberName, "QVariant", relativePropIndex);
+        const char *typeName = "QVariant";
+        if (memberInfo->memberType == DTListProperty) {
+            typeName = "QQmlListProperty<QObject>";
+        }
+        QMetaPropertyBuilder propb = mob.addProperty(memberInfo->memberName, typeName, relativePropIndex);
         propb.setWritable(true);
         memberInfo->metaIndex = relativePropIndex;
         memberInfo++;

@@ -23,15 +23,16 @@ var (
 	nilPtr     = unsafe.Pointer(uintptr(0))
 	nilCharPtr = (*C.char)(nilPtr)
 
-	typeString  = reflect.TypeOf("")
-	typeBool    = reflect.TypeOf(false)
-	typeInt     = reflect.TypeOf(int(0))
-	typeInt64   = reflect.TypeOf(int64(0))
-	typeInt32   = reflect.TypeOf(int32(0))
-	typeFloat64 = reflect.TypeOf(float64(0))
-	typeFloat32 = reflect.TypeOf(float32(0))
-	typeIface   = reflect.TypeOf(new(interface{})).Elem()
-	typeRGBA    = reflect.TypeOf(color.RGBA{})
+	typeString   = reflect.TypeOf("")
+	typeBool     = reflect.TypeOf(false)
+	typeInt      = reflect.TypeOf(int(0))
+	typeInt64    = reflect.TypeOf(int64(0))
+	typeInt32    = reflect.TypeOf(int32(0))
+	typeFloat64  = reflect.TypeOf(float64(0))
+	typeFloat32  = reflect.TypeOf(float32(0))
+	typeIface    = reflect.TypeOf(new(interface{})).Elem()
+	typeRGBA     = reflect.TypeOf(color.RGBA{})
+	typeObjSlice = reflect.TypeOf([]Object(nil))
 )
 
 func init() {
@@ -93,6 +94,10 @@ func packDataValue(value interface{}, dvalue *C.DataValue, engine *Engine, owner
 	case *Common:
 		dvalue.dataType = C.DTObject
 		*(*unsafe.Pointer)(datap) = value.addr
+	case *[]Object:
+		// TODO Prevent value from being garbage collected improperly.
+		dvalue.dataType = C.DTListProperty
+		*(*unsafe.Pointer)(datap) = C.newListProperty(engine.addr, unsafe.Pointer(value))
 	case color.RGBA:
 		dvalue.dataType = C.DTColor
 		*(*uint32)(datap) = uint32(value.A)<<24 | uint32(value.R)<<16 | uint32(value.G)<<8 | uint32(value.B)
@@ -144,7 +149,7 @@ func unpackDataValue(dvalue *C.DataValue, engine *Engine) interface{} {
 			engine: engine,
 			addr:   *(*unsafe.Pointer)(datap),
 		}
-	case C.DTList:
+	case C.DTValueList:
 		var dvlist []C.DataValue
 		var dvlisth = (*reflect.SliceHeader)(unsafe.Pointer(&dvlist))
 		dvlisth.Data = uintptr(*(*unsafe.Pointer)(datap))
@@ -182,6 +187,8 @@ func dataTypeOf(typ reflect.Type) C.DataType {
 		return C.DTAny
 	case typeRGBA:
 		return C.DTColor
+	case typeObjSlice:
+		return C.DTListProperty
 	}
 	return C.DTObject
 }

@@ -22,6 +22,7 @@ typedef void QString_;
 typedef void QQmlEngine_;
 typedef void QQmlContext_;
 typedef void QQmlComponent_;
+typedef void QQmlListProperty_;
 typedef void QQuickWindow_;
 typedef void QQuickView_;
 typedef void QMessageLogContext_;
@@ -46,9 +47,11 @@ typedef enum {
     DTFloat32 = 15,
     DTColor   = 16,
 
-    DTGoAddr  = 100,
-    DTObject  = 101,
-    DTList    = 102,
+    DTGoAddr       = 100,
+    DTObject       = 101,
+    DTValueList    = 102,
+    DTVariantList  = 103,
+    DTListProperty = 104,
 
     // Used in type information, not in an actual data value.
     DTAny     = 201, // Can hold any of the above types.
@@ -161,6 +164,8 @@ void unpackDataValue(DataValue *value, QVariant_ *result);
 
 QVariantList_ *newVariantList(DataValue *list, int len);
 
+QQmlListProperty_ *newListProperty(QQmlEngine_ *engine, GoAddr *addr);
+
 int registerType(char *location, int major, int minor, char *name, GoTypeInfo *typeInfo, GoTypeSpec_ *spec);
 int registerSingleton(char *location, int major, int minor, char *name, GoTypeInfo *typeInfo, GoTypeSpec_ *spec);
 
@@ -178,6 +183,10 @@ void hookWindowHidden(QObject_ *addr);
 void hookSignalCall(QQmlEngine_ *engine, void *func, DataValue *params);
 void hookSignalDisconnect(void *func);
 void hookPanic(char *message);
+int hookListPropertyCount(QQmlEngine_ *engine, GoAddr *addr);
+QObject_ *hookListPropertyAt(QQmlEngine_ *engine, GoAddr *addr, int i);
+void hookListPropertyAppend(QQmlEngine_ *engine, GoAddr *addr, QObject_ *obj);
+void hookListPropertyClear(QQmlEngine_ *engine, GoAddr *addr);
 
 #ifdef __cplusplus
 } // extern "C"

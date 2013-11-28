@@ -554,7 +554,7 @@ void unpackDataValue(DataValue *value, QVariant_ *var)
     case DTColor:
         *qvar = QColor::fromRgba(*(QRgb*)(value->data));
         break;
-    case DTList:
+    case DTVariantList:
         *qvar = **(QVariantList**)(value->data);
         delete *(QVariantList**)(value->data);
         break;
@@ -628,7 +628,7 @@ void packDataValue(QVariant_ *var, DataValue *value)
             for (int i = 0; i < len; i++) {
                 packDataValue((void*)&varlist.at(i), &dvlist[i]);
             }
-            value->dataType = DTList;
+            value->dataType = DTValueList;
             value->len = len;
             *(DataValue**)(value->data) = dvlist;
         }
@@ -656,7 +656,7 @@ void packDataValue(QVariant_ *var, DataValue *value)
                     elem.setValue(ref.at(i));
                     packDataValue(&elem, &dvlist[i]);
                 }
-                value->dataType = DTList;
+                value->dataType = DTValueList;
                 value->len = len;
                 *(DataValue**)(value->data) = dvlist;
                 break;
@@ -672,7 +672,7 @@ void packDataValue(QVariant_ *var, DataValue *value)
                     elem.setValue(list->at(list, i));
                     packDataValue(&elem, &dvlist[i]);
                 }
-                value->dataType = DTList;
+                value->dataType = DTValueList;
                 value->len = len;
                 *(DataValue**)(value->data) = dvlist;
                 break;
@@ -693,6 +693,38 @@ QVariantList_ *newVariantList(DataValue *list, int len)
         vlist->append(var);
     }
     return vlist;
+}
+
+QObject *listPropertyAt(QQmlListProperty<QObject> *list, int i)
+{
+    return reinterpret_cast<QObject *>(hookListPropertyAt(list->dummy1, list->data, i));
+}
+
+int listPropertyCount(QQmlListProperty<QObject> *list)
+{
+    return hookListPropertyCount(list->dummy1, list->data);
+}
+
+void listPropertyAppend(QQmlListProperty<QObject> *list, QObject *obj)
+{
+    hookListPropertyAppend(list->dummy1, list->data, obj);
+}
+
+void listPropertyClear(QQmlListProperty<QObject> *list)
+{
+    hookListPropertyClear(list->dummy1, list->data);
+}
+
+QQmlListProperty_ *newListProperty(QQmlEngine_ *engine, GoAddr *addr)
+{
+    QQmlListProperty<QObject> *list = new QQmlListProperty<QObject>();
+    list->dummy1 = engine;
+    list->data = addr;
+    list->at = listPropertyAt;
+    list->count = listPropertyCount;
+    list->append = listPropertyAppend;
+    list->clear = listPropertyClear;
+    return list;
 }
 
 void internalLogHandler(QtMsgType severity, const QMessageLogContext &context, const QString &text)

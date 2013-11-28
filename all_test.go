@@ -466,6 +466,38 @@ var tests = []struct {
 		},
 	},
 	{
+		Summary: "Write an inline object list to a Go type property",
+		QML: `
+			import GoTypes 4.2
+			GoType {
+				objectsValue: [State{ name: "on" }, State{ name: "off" }]
+				Component.onCompleted: {
+					console.log("Length:", objectsValue.length)
+					console.log("Name:", objectsValue[0].name)
+				}
+			}
+		`,
+		QMLLog: "Length: 2.*Name: on",
+		Done: func(d *TestData) {
+			d.Assert(d.value.ObjectsValue[0].String("name"), Equals, "on")
+			d.Assert(d.value.ObjectsValue[1].String("name"), Equals, "off")
+			d.Assert(len(d.value.ObjectsValue), Equals, 2)
+		},
+	},
+	{
+		Summary: "Clear an object list in a Go type property",
+		QML: `
+			import GoTypes 4.2
+			GoType {
+				objectsValue: [State{ name: "on" }, State{ name: "off" }]
+				Component.onCompleted: objectsValue = []
+			}
+		`,
+		Done: func(d *TestData) {
+			d.Assert(len(d.value.ObjectsValue), Equals, 0)
+		},
+	},
+	{
 		Summary: "Access underlying Go value with Interface",
 		QML: `
 			import GoTypes 4.2

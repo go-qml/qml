@@ -316,7 +316,7 @@ func hookGoValueReadField(enginep, foldp unsafe.Pointer, reflectIndex C.int, res
 		field = field.Elem()
 		fieldk = field.Kind()
 	}
-	if fieldk == reflect.Struct && field.Type() != typeRGBA {
+	if fieldk == reflect.Slice || fieldk == reflect.Struct && field.Type() != typeRGBA {
 		if field.CanAddr() {
 			field = field.Addr()
 		} else if !hashable(field.Interface()) {
@@ -426,7 +426,7 @@ func hookGoValueCallMethod(enginep, foldp unsafe.Pointer, reflectIndex C.int, ar
 		for i, v := range result {
 			packDataValue(v.Interface(), &dataValueArray[i], fold.engine, jsOwner)
 		}
-		args.dataType = C.DTList
+		args.dataType = C.DTVariantList
 		*(*unsafe.Pointer)(unsafe.Pointer(&args.data)) = C.newVariantList(&dataValueArray[0], C.int(len(result)))
 	}
 }
@@ -482,4 +482,42 @@ func ensureEngine(enginep, foldp unsafe.Pointer) *valueFold {
 func hookPanic(message *C.char) {
 	defer C.free(unsafe.Pointer(message))
 	panic(C.GoString(message))
+}
+
+//export hookListPropertyAt
+func hookListPropertyAt(enginep unsafe.Pointer, slicep unsafe.Pointer, index C.int) (objp unsafe.Pointer) { 
+	engine := engines[enginep]
+	if engine == nil {
+		panic("unknown engine pointer; who created the engine?")
+	}
+	slice := (*[]Object)(slicep)
+	return (*slice)[int(index)].Common().addr
+}
+
+//export hookListPropertyCount
+func hookListPropertyCount(enginep unsafe.Pointer, slicep unsafe.Pointer) C.int {
+	// TODO Might just poke at the slice header directly in this case.
+	return C.int(len(*(*[]Object)(slicep)))
+}
+
+//export hookListPropertyAppend
+func hookListPropertyAppend(enginep unsafe.Pointer, slicep unsafe.Pointer, objp unsafe.Pointer) {
+	engine := engines[enginep]
+	if engine == nil {
+		panic("unknown engine pointer; who created the engine?")
+	}
+	var objdv C.DataValue
+	objdv.dataType = C.DTObject
+	*(*unsafe.Pointer)(unsafe.Pointer(&objdv.data)) = objp
+	slice := (*[]Object)(slicep)
+	*slice = append(*slice, unpackDataValue(&objdv, engine).(Object))
+}
+
+//export hookListPropertyClear
+func hookListPropertyClear(enginep unsafe.Pointer, slicep unsafe.Pointer) {
+	slice := (*[]Object)(slicep)
+	for i := range (*slice) {
+		(*slice)[i] = nil
+	}
+	*slice = (*slice)[0:0]
 }
