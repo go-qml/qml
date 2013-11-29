@@ -697,25 +697,25 @@ QVariantList_ *newVariantList(DataValue *list, int len)
 
 QObject *listPropertyAt(QQmlListProperty<QObject> *list, int i)
 {
-    return reinterpret_cast<QObject *>(hookListPropertyAt(list->data, (uintptr_t)list->dummy1, (uintptr_t)list->dummy2, i));
+    return reinterpret_cast<QObject *>(hookListPropertyAt(list->data, (intptr_t)list->dummy1, (intptr_t)list->dummy2, i));
 }
 
 int listPropertyCount(QQmlListProperty<QObject> *list)
 {
-    return hookListPropertyCount(list->data, (uintptr_t)list->dummy1, (uintptr_t)list->dummy2);
+    return hookListPropertyCount(list->data, (intptr_t)list->dummy1, (intptr_t)list->dummy2);
 }
 
 void listPropertyAppend(QQmlListProperty<QObject> *list, QObject *obj)
 {
-    hookListPropertyAppend(list->data, (uintptr_t)list->dummy1, (uintptr_t)list->dummy2, obj);
+    hookListPropertyAppend(list->data, (intptr_t)list->dummy1, (intptr_t)list->dummy2, obj);
 }
 
 void listPropertyClear(QQmlListProperty<QObject> *list)
 {
-    hookListPropertyClear(list->data, (uintptr_t)list->dummy1, (uintptr_t)list->dummy2);
+    hookListPropertyClear(list->data, (intptr_t)list->dummy1, (intptr_t)list->dummy2);
 }
 
-QQmlListProperty_ *newListProperty(GoAddr *addr, uintptr_t reflectIndex, uintptr_t onChangedIndex)
+QQmlListProperty_ *newListProperty(GoAddr *addr, intptr_t reflectIndex, intptr_t onChangedIndex)
 {
     QQmlListProperty<QObject> *list = new QQmlListProperty<QObject>();
     list->data = addr;

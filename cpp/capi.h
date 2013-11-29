@@ -164,7 +164,7 @@ void unpackDataValue(DataValue *value, QVariant_ *result);
 
 QVariantList_ *newVariantList(DataValue *list, int len);
 
-QQmlListProperty_ *newListProperty(GoAddr *addr, uintptr_t reflectIndex, uintptr_t onChangedIndex);
+QQmlListProperty_ *newListProperty(GoAddr *addr, intptr_t reflectIndex, intptr_t onChangedIndex);
 
 int registerType(char *location, int major, int minor, char *name, GoTypeInfo *typeInfo, GoTypeSpec_ *spec);
 int registerSingleton(char *location, int major, int minor, char *name, GoTypeInfo *typeInfo, GoTypeSpec_ *spec);
@@ -183,10 +183,10 @@ void hookWindowHidden(QObject_ *addr);
 void hookSignalCall(QQmlEngine_ *engine, void *func, DataValue *params);
 void hookSignalDisconnect(void *func);
 void hookPanic(char *message);
-int hookListPropertyCount(GoAddr *addr, uintptr_t reflectIndex, uintptr_t onChangedIndex);
-QObject_ *hookListPropertyAt(GoAddr *addr, uintptr_t reflectIndex, uintptr_t onChangedIndex, int i);
-void hookListPropertyAppend(GoAddr *addr, uintptr_t reflectIndex, uintptr_t onChangedIndex, QObject_ *obj);
-void hookListPropertyClear(GoAddr *addr, uintptr_t reflectIndex, uintptr_t onChangedIndex);
+int hookListPropertyCount(GoAddr *addr, intptr_t reflectIndex, intptr_t onChangedIndex);
+QObject_ *hookListPropertyAt(GoAddr *addr, intptr_t reflectIndex, intptr_t onChangedIndex, int i);
+void hookListPropertyAppend(GoAddr *addr, intptr_t reflectIndex, intptr_t onChangedIndex, QObject_ *obj);
+void hookListPropertyClear(GoAddr *addr, intptr_t reflectIndex, intptr_t onChangedIndex);
 
 #ifdef __cplusplus
 } // extern "C"

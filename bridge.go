@@ -329,7 +329,7 @@ func hookGoValueReadField(enginep, foldp unsafe.Pointer, reflectIndex C.int, res
 		// TODO Handle other GoValue slices (!= []qml.Object).
 		onChangedIndex := -1 // TODO FIXME
 		resultdv.dataType = C.DTListProperty
-		*(*unsafe.Pointer)(unsafe.Pointer(&resultdv.data)) = C.newListProperty(foldp, C.uintptr_t(reflectIndex), C.uintptr_t(onChangedIndex))
+		*(*unsafe.Pointer)(unsafe.Pointer(&resultdv.data)) = C.newListProperty(foldp, C.intptr_t(reflectIndex), C.intptr_t(onChangedIndex))
 		return
 	}
 
@@ -507,7 +507,7 @@ func hookPanic(message *C.char) {
 }
 
 //export hookListPropertyAt
-func hookListPropertyAt(foldp unsafe.Pointer, reflectIndex, onChangedIndex C.uintptr_t, index C.int) (objp unsafe.Pointer) { 
+func hookListPropertyAt(foldp unsafe.Pointer, reflectIndex, onChangedIndex C.intptr_t, index C.int) (objp unsafe.Pointer) { 
 	fold := (*valueFold)(foldp)
 	field := fold.gfield(int(reflectIndex))
 	slice := field.Addr().Interface().(*[]Object)
@@ -515,7 +515,7 @@ func hookListPropertyAt(foldp unsafe.Pointer, reflectIndex, onChangedIndex C.uin
 }
 
 //export hookListPropertyCount
-func hookListPropertyCount(foldp unsafe.Pointer, reflectIndex, onChangedIndex C.uintptr_t) C.int {
+func hookListPropertyCount(foldp unsafe.Pointer, reflectIndex, onChangedIndex C.intptr_t) C.int {
 	fold := (*valueFold)(foldp)
 	field := fold.gfield(int(reflectIndex))
 	slice := field.Addr().Interface().(*[]Object)
@@ -523,7 +523,7 @@ func hookListPropertyCount(foldp unsafe.Pointer, reflectIndex, onChangedIndex C.
 }
 
 //export hookListPropertyAppend
-func hookListPropertyAppend(foldp unsafe.Pointer, reflectIndex, onChangedIndex C.uintptr_t, objp unsafe.Pointer) {
+func hookListPropertyAppend(foldp unsafe.Pointer, reflectIndex, onChangedIndex C.intptr_t, objp unsafe.Pointer) {
 	fold := (*valueFold)(foldp)
 	field := fold.gfield(int(reflectIndex))
 	slice := field.Addr().Interface().(*[]Object)
@@ -534,7 +534,7 @@ func hookListPropertyAppend(foldp unsafe.Pointer, reflectIndex, onChangedIndex C
 }
 
 //export hookListPropertyClear
-func hookListPropertyClear(foldp unsafe.Pointer, reflectIndex, onChangedIndex C.uintptr_t) {
+func hookListPropertyClear(foldp unsafe.Pointer, reflectIndex, onChangedIndex C.intptr_t) {
 	fold := (*valueFold)(foldp)
 	field := fold.gfield(int(reflectIndex))
 	slice := field.Addr().Interface().(*[]Object)
