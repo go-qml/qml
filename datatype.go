@@ -94,10 +94,6 @@ func packDataValue(value interface{}, dvalue *C.DataValue, engine *Engine, owner
 	case *Common:
 		dvalue.dataType = C.DTObject
 		*(*unsafe.Pointer)(datap) = value.addr
-	case *[]Object:
-		// TODO Prevent value from being garbage collected improperly.
-		dvalue.dataType = C.DTListProperty
-		*(*unsafe.Pointer)(datap) = C.newListProperty(engine.addr, unsafe.Pointer(value))
 	case color.RGBA:
 		dvalue.dataType = C.DTColor
 		*(*uint32)(datap) = uint32(value.A)<<24 | uint32(value.R)<<16 | uint32(value.G)<<8 | uint32(value.B)

@@ -179,6 +179,23 @@ type valueFold struct {
 	owner  valueOwner
 }
 
+func (fold *valueFold) gfield(reflectIndex int) reflect.Value {
+	v := reflect.ValueOf(fold.gvalue)
+	for v.Type().Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	field := v.Field(reflectIndex)
+	for {
+		switch field.Kind() {
+		case reflect.Ptr, reflect.Interface:
+			field = field.Elem()
+			continue
+		}
+		return field
+	}
+	panic("cannot happen")
+}
+
 type valueOwner uint8
 
 const (
@@ -305,22 +322,27 @@ func hookGoValueDestroyed(enginep unsafe.Pointer, foldp unsafe.Pointer) {
 //export hookGoValueReadField
 func hookGoValueReadField(enginep, foldp unsafe.Pointer, reflectIndex C.int, resultdv *C.DataValue) {
 	fold := ensureEngine(enginep, foldp)
-	v := reflect.ValueOf(fold.gvalue)
-	for v.Type().Kind() == reflect.Ptr {
-		v = v.Elem()
+	field := fold.gfield(int(reflectIndex))
+
+	// Cannot compare Type directly as field may be invalid (nil).
+	if field.Kind() == reflect.Slice && field.Type() == typeObjSlice {
+		// TODO Handle other GoValue slices (!= []qml.Object).
+		onChangedIndex := -1 // TODO FIXME
+		resultdv.dataType = C.DTListProperty
+		*(*unsafe.Pointer)(unsafe.Pointer(&resultdv.data)) = C.newListProperty(foldp, C.uintptr_t(reflectIndex), C.uintptr_t(onChangedIndex))
+		return
 	}
-	field := v.Field(int(reflectIndex))
 
 	fieldk := field.Kind()
-	for fieldk == reflect.Ptr || fieldk == reflect.Interface {
-		field = field.Elem()
-		fieldk = field.Kind()
-	}
 	if fieldk == reflect.Slice || fieldk == reflect.Struct && field.Type() != typeRGBA {
 		if field.CanAddr() {
 			field = field.Addr()
 		} else if !hashable(field.Interface()) {
-			panic(fmt.Sprintf("cannot access unaddressable and unhashable struct value on interface field %s.%s; value: %#v", v.Type().Name(), v.Type().Field(int(reflectIndex)).Name, field.Interface()))
+			t := reflect.ValueOf(fold.gvalue).Type()
+			for t.Kind() == reflect.Ptr {
+				t = t.Elem()
+			}
+			panic(fmt.Sprintf("cannot access unaddressable and unhashable struct value on interface field %s.%s; value: %#v", t.Name(), t.Field(int(reflectIndex)).Name, field.Interface()))
 		}
 	}
 	var gvalue interface{}
@@ -485,37 +507,37 @@ func hookPanic(message *C.char) {
 }
 
 //export hookListPropertyAt
-func hookListPropertyAt(enginep unsafe.Pointer, slicep unsafe.Pointer, index C.int) (objp unsafe.Pointer) { 
-	engine := engines[enginep]
-	if engine == nil {
-		panic("unknown engine pointer; who created the engine?")
-	}
-	slice := (*[]Object)(slicep)
+func hookListPropertyAt(foldp unsafe.Pointer, reflectIndex, onChangedIndex C.uintptr_t, index C.int) (objp unsafe.Pointer) { 
+	fold := (*valueFold)(foldp)
+	field := fold.gfield(int(reflectIndex))
+	slice := field.Addr().Interface().(*[]Object)
 	return (*slice)[int(index)].Common().addr
 }
 
 //export hookListPropertyCount
-func hookListPropertyCount(enginep unsafe.Pointer, slicep unsafe.Pointer) C.int {
-	// TODO Might just poke at the slice header directly in this case.
-	return C.int(len(*(*[]Object)(slicep)))
+func hookListPropertyCount(foldp unsafe.Pointer, reflectIndex, onChangedIndex C.uintptr_t) C.int {
+	fold := (*valueFold)(foldp)
+	field := fold.gfield(int(reflectIndex))
+	slice := field.Addr().Interface().(*[]Object)
+	return C.int(len(*slice))
 }
 
 //export hookListPropertyAppend
-func hookListPropertyAppend(enginep unsafe.Pointer, slicep unsafe.Pointer, objp unsafe.Pointer) {
-	engine := engines[enginep]
-	if engine == nil {
-		panic("unknown engine pointer; who created the engine?")
-	}
+func hookListPropertyAppend(foldp unsafe.Pointer, reflectIndex, onChangedIndex C.uintptr_t, objp unsafe.Pointer) {
+	fold := (*valueFold)(foldp)
+	field := fold.gfield(int(reflectIndex))
+	slice := field.Addr().Interface().(*[]Object)
 	var objdv C.DataValue
 	objdv.dataType = C.DTObject
 	*(*unsafe.Pointer)(unsafe.Pointer(&objdv.data)) = objp
-	slice := (*[]Object)(slicep)
-	*slice = append(*slice, unpackDataValue(&objdv, engine).(Object))
+	*slice = append(*slice, unpackDataValue(&objdv, fold.engine).(Object))
 }
 
 //export hookListPropertyClear
-func hookListPropertyClear(enginep unsafe.Pointer, slicep unsafe.Pointer) {
-	slice := (*[]Object)(slicep)
+func hookListPropertyClear(foldp unsafe.Pointer, reflectIndex, onChangedIndex C.uintptr_t) {
+	fold := (*valueFold)(foldp)
+	field := fold.gfield(int(reflectIndex))
+	slice := field.Addr().Interface().(*[]Object)
 	for i := range (*slice) {
 		(*slice)[i] = nil
 	}
