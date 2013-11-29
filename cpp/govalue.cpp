@@ -47,7 +47,7 @@ int GoValueMetaObject::metaCall(QMetaObject::Call c, int idx, void **a)
                 if (memberInfo->metaIndex == idx) {
                     if (c == QMetaObject::ReadProperty) {
                         DataValue result;
-                        hookGoValueReadField(qmlEngine(value), value->addr, memberInfo->reflectIndex, &result);
+                        hookGoValueReadField(qmlEngine(value), value->addr, memberInfo->reflectIndex, memberInfo->reflectChangedIndex, &result);
                         if (memberInfo->memberType == DTListProperty) {
                             if (result.dataType != DTListProperty) {
                                 panicf("reading DTListProperty field returned non-DTListProperty result");
@@ -144,9 +144,9 @@ QMetaObject *GoValue::metaObjectFor(GoTypeInfo *typeInfo)
     }
 
     QMetaObjectBuilder mob;
-    mob.setSuperClass(&QObject::staticMetaObject);
     // TODO Painting.
     //mob.setSuperClass(&QQuickPaintedItem::staticMetaObject);
+    mob.setSuperClass(&QObject::staticMetaObject);
     mob.setClassName(typeInfo->typeName);
     mob.setFlags(QMetaObjectBuilder::DynamicMetaObject);
 
@@ -181,7 +181,7 @@ QMetaObject *GoValue::metaObjectFor(GoTypeInfo *typeInfo)
     }
 
     // TODO Support default properties.
-    //mob.addClassInfo("DefaultProperty", "text");
+    //mob.addClassInfo("DefaultProperty", "objects");
 
     QMetaObject *mo = mob.toMetaObject();
 

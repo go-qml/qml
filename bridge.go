@@ -320,14 +320,13 @@ func hookGoValueDestroyed(enginep unsafe.Pointer, foldp unsafe.Pointer) {
 }
 
 //export hookGoValueReadField
-func hookGoValueReadField(enginep, foldp unsafe.Pointer, reflectIndex C.int, resultdv *C.DataValue) {
+func hookGoValueReadField(enginep, foldp unsafe.Pointer, reflectIndex, onChangedIndex C.int, resultdv *C.DataValue) {
 	fold := ensureEngine(enginep, foldp)
 	field := fold.gfield(int(reflectIndex))
 
 	// Cannot compare Type directly as field may be invalid (nil).
 	if field.Kind() == reflect.Slice && field.Type() == typeObjSlice {
 		// TODO Handle other GoValue slices (!= []qml.Object).
-		onChangedIndex := -1 // TODO FIXME
 		resultdv.dataType = C.DTListProperty
 		*(*unsafe.Pointer)(unsafe.Pointer(&resultdv.data)) = C.newListProperty(foldp, C.intptr_t(reflectIndex), C.intptr_t(onChangedIndex))
 		return
@@ -531,6 +530,10 @@ func hookListPropertyAppend(foldp unsafe.Pointer, reflectIndex, onChangedIndex C
 	objdv.dataType = C.DTObject
 	*(*unsafe.Pointer)(unsafe.Pointer(&objdv.data)) = objp
 	*slice = append(*slice, unpackDataValue(&objdv, fold.engine).(Object))
+	if onChangedIndex != -1 {
+		// TODO Must probably dereference the ptr here. Test it.
+		reflect.ValueOf(fold.gvalue).Method(int(onChangedIndex)).Call(nil)
+	}
 }
 
 //export hookListPropertyClear
@@ -542,4 +545,8 @@ func hookListPropertyClear(foldp unsafe.Pointer, reflectIndex, onChangedIndex C.
 		(*slice)[i] = nil
 	}
 	*slice = (*slice)[0:0]
+	if onChangedIndex != -1 {
+		// TODO Must probably dereference the ptr here. Test it.
+		reflect.ValueOf(fold.gvalue).Method(int(onChangedIndex)).Call(nil)
+	}
 }

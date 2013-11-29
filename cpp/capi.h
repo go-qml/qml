@@ -173,7 +173,7 @@ void installLogHandler();
 
 void hookIdleTimer();
 void hookLogHandler(LogMessage *message);
-void hookGoValueReadField(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, DataValue *result);
+void hookGoValueReadField(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, int onChangedIndex, DataValue *result);
 void hookGoValueWriteField(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, int onChangedIndex, DataValue *assign);
 void hookGoValueCallMethod(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, DataValue *result);
 void hookGoValueDestroyed(QQmlEngine_ *engine, GoAddr *addr);

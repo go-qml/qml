@@ -89,7 +89,8 @@ type TestType struct {
 	IntsValue    []int
 	ObjectsValue []qml.Object
 
-	stringValueChanged int
+	stringValueChanged  int
+	objectsValueChanged int
 }
 
 func (ts *TestType) StringMethod() string {
@@ -98,6 +99,10 @@ func (ts *TestType) StringMethod() string {
 
 func (ts *TestType) OnStringValueChanged() {
 	ts.stringValueChanged++
+}
+
+func (ts *TestType) OnObjectsValueChanged() {
+	ts.objectsValueChanged++
 }
 
 func (ts *TestType) Mod(dividend, divisor int) (int, error) {
@@ -388,6 +393,7 @@ var tests = []struct {
 			d.Assert(states[0].String("name"), Equals, "on")
 			d.Assert(states[1].String("name"), Equals, "off")
 			d.Assert(len(states), Equals, 2)
+			d.Assert(d.value.objectsValueChanged, Equals, 3)
 		},
 	},
 	{
@@ -482,6 +488,7 @@ var tests = []struct {
 			d.Assert(d.value.ObjectsValue[0].String("name"), Equals, "on")
 			d.Assert(d.value.ObjectsValue[1].String("name"), Equals, "off")
 			d.Assert(len(d.value.ObjectsValue), Equals, 2)
+			d.Assert(d.value.objectsValueChanged, Equals, 2)
 		},
 	},
 	{
@@ -495,6 +502,7 @@ var tests = []struct {
 		`,
 		Done: func(d *TestData) {
 			d.Assert(len(d.value.ObjectsValue), Equals, 0)
+			d.Assert(d.value.objectsValueChanged, Equals, 3)
 		},
 	},
 	{
