@@ -11,10 +11,10 @@
 class GoValueMetaObject;
 
 // TODO Painting.
-//#include <QQuickPaintedItem>
-//#include <QPainter>
-//class GoValue : public QQuickPaintedItem
-class GoValue : public QObject
+#include <QQuickItem>
+#include <QPainter>
+class GoValue : public QQuickItem
+//class GoValue : public QObject
 {
     Q_OBJECT
 
@@ -28,6 +28,7 @@ public:
 
     // TODO Painting.
     //virtual void paint(QPainter *painter);
+    virtual void itemChange(ItemChange, const ItemChangeData &);
 
     static QMetaObject *metaObjectFor(GoTypeInfo *typeInfo);
 
@@ -35,8 +36,11 @@ public:
 
 private:
     GoValueMetaObject *valueMeta;
+
+public slots:
+    virtual void paint();
 };
 
 #endif // GOVALUE_H
 
-// vim:ts=4:et
+// vim:ts=4:sw=4:et:ft=cpp

@@ -113,8 +113,7 @@ GoValue::GoValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject *parent)
     valueMeta = new GoValueMetaObject(this, typeInfo);
     setParent(parent);
 
-    // TODO Painting.
-    //setFillColor(QColor(255,0,0));
+    QQuickItem::setFlag(QQuickItem::ItemHasContents, true);
 }
 
 GoValue::~GoValue()
@@ -130,12 +129,61 @@ void GoValue::activate(int propIndex)
     valueMeta->activate(this, valueMeta->methodOffset() + relativeIndex, 0);
 }
 
+#include <QOpenGLContext>
+
+void GoValue::itemChange(ItemChange change, const ItemChangeData &)
+{
+    QQuickWindow *win = window();
+    if (change != ItemSceneChange || !win) {
+        return;
+    }
+    //QObject::connect(win, &QQuickWindow::beforeRendering, [=]() {
+    //    qWarning() << "beforeRendering";
+    //    glViewport(0, 0, window()->width(), window()->height());
+    //    glLineWidth(2.5); 
+    //    glColor3f(1.0, 0.0, 0.0);
+    //    glBegin(GL_LINES);
+    //    glVertex3f(0.0, 0.0, 0.0);
+    //    glVertex3f(15, 0, 0);
+    //    //glEnd();
+    //});
+
+    QObject::connect(win, &QQuickWindow::beforeRendering, this, &GoValue::paint, Qt::DirectConnection);
+}
+
 // TODO Painting.
 //void GoValue::paint(QPainter *painter)
-//{
-//    qWarning() << "GoValue::paint() called";
-//    painter->drawLine(10, 10, 40, 40);
-//}
+void GoValue::paint()
+{
+    qWarning() << "GoValue::paint() called";
+    //painter->drawLine(10, 10, 40, 40);
+
+    window()->setClearBeforeRendering(false);
+    glViewport(0, 0, window()->width(), window()->height());
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    glLineWidth(2.5); 
+    glColor3f(1.0, 0.0, 0.0);
+    glBegin(GL_LINES);
+    glVertex3f(0.0, 0.0, 0.0);
+    glVertex3f(1, 0, 0);
+    glEnd();
+
+    //glViewport(0, 0, 150, 150);
+    //glMatrixMode(GL_PROJECTION);
+    //glLoadIdentity();
+    //glOrtho(0, 150, 150,0,0,10);
+    //glMatrixMode(GL_MODELVIEW);
+    //glLoadIdentity();
+
+    //glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    //glColor3ub(255, 0, 0);
+    //glBegin(GL_QUADS);
+    //    glVertex2i(0, 0);
+    //    glVertex2i(100, 0);
+    //    glVertex2i(100, 100);
+    //    glVertex2i(0, 100);
+    //glEnd();
+}
 
 QMetaObject *GoValue::metaObjectFor(GoTypeInfo *typeInfo)
 {
@@ -145,8 +193,8 @@ QMetaObject *GoValue::metaObjectFor(GoTypeInfo *typeInfo)
 
     QMetaObjectBuilder mob;
     // TODO Painting.
-    //mob.setSuperClass(&QQuickPaintedItem::staticMetaObject);
-    mob.setSuperClass(&QObject::staticMetaObject);
+    mob.setSuperClass(&QQuickItem::staticMetaObject);
+    //mob.setSuperClass(&QObject::staticMetaObject);
     mob.setClassName(typeInfo->typeName);
     mob.setFlags(QMetaObjectBuilder::DynamicMetaObject);
 
