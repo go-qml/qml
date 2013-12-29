@@ -143,6 +143,7 @@ QQuickWindow_ *componentCreateWindow(QQmlComponent_ *component, QQmlContext_ *co
 
 void windowShow(QQuickWindow_ *win);
 void windowHide(QQuickWindow_ *win);
+uintptr_t windowWinId(QQuickWindow_ *win);
 void windowConnectHidden(QQuickWindow_ *win);
 QObject_ *windowRootObject(QQuickWindow_ *win);
 QImage_ *windowGrabWindow(QQuickWindow_ *win);

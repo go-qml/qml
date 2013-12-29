@@ -224,6 +224,11 @@ void windowHide(QQuickWindow_ *win)
     reinterpret_cast<QQuickWindow *>(win)->hide();
 }
 
+uintptr_t windowWinId(QQuickWindow_ *win)
+{
+    return reinterpret_cast<QQuickWindow *>(win)->winId();
+}
+
 void windowConnectHidden(QQuickWindow_ *win)
 {
     QQuickWindow *qwin = reinterpret_cast<QQuickWindow *>(win);

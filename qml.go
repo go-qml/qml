@@ -760,6 +760,15 @@ func (win *Window) Hide() {
 	})
 }
 
+// WinId gets the native window handle.
+func (win *Window) WinId() uintptr {
+	var winId uintptr
+	gui(func() {
+		 winId = uintptr(C.windowWinId(win.addr))
+	})
+	return winId
+}
+
 // Root returns the root object being rendered.
 //
 // If the window was defined in QML code, the root object is the window itself.
