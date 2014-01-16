@@ -5,9 +5,14 @@ package qml
 // #cgo CPPFLAGS: -I/usr/include/qt5/QtCore/5.1.1/QtCore
 // #cgo CPPFLAGS: -I/usr/include/qt5/QtCore/5.2.0/QtCore
 // #cgo CPPFLAGS: -I/usr/include/qt/QtCore/5.1.1/QtCore
-// #cgo CXXFLAGS: -std=c++0x -pedantic-errors -Wall -fno-strict-aliasing
+// #cgo CPPFLAGS: -I/usr/include/qt5/QtQuick/5.2.0/QtQuick/
+// #cgo CPPFLAGS: -I/usr/include/qt5/QtQuick/5.0.2/QtQuick/
+// // #cgo CPPFLAGS: -I/home/niemeyer/Qt5.2.0/5.2.0/gcc_64/include/QtCore/5.2.0/QtCore
+// // #cgo CPPFLAGS: -I/home/niemeyer/Qt5.2.0/5.2.0/gcc_64/include/QtQuick/5.2.0/QtQuick
+// #cgo CXXFLAGS: -std=c++0x -pedantic-errors -Wall -fno-strict-aliasing -DGL_GLEXT_PROTOTYPES
 // #cgo LDFLAGS: -lstdc++ -lGL
-// #cgo pkg-config: Qt5Core Qt5Widgets Qt5Quick glib-2.0
+// #cgo pkg-config: Qt5Core Qt5Widgets Qt5Quick Qt5OpenGL
+//
 //
 // #include <stdlib.h>
 //
@@ -18,6 +23,7 @@ import "C"
 import (
 	"fmt"
 	"github.com/niemeyer/qml/tref"
+	"github.com/niemeyer/qml/gl"
 	"reflect"
 	"runtime"
 	"strings"
@@ -549,4 +555,165 @@ func hookListPropertyClear(foldp unsafe.Pointer, reflectIndex, onChangedIndex C.
 		// TODO Must probably dereference the ptr here. Test it.
 		reflect.ValueOf(fold.gvalue).Method(int(onChangedIndex)).Call(nil)
 	}
+}
+
+//export hookQMLRenderGL
+func hookQMLRenderGL(xf, yf, widthf, heightf float64) {
+	//gl.ClearColor(1.0, 1.0, 1.0, 1.0);
+        //gl.Clear(gl.COLOR_BUFFER_BIT);
+	//gl.ClearColor(1.0, 1.0, 1.0, 1.0);
+	//gl.Color3f(1.0, 1.0, 1.0)
+	//gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
+	//gl.BindTexture(gl.TEXTURE_2D, 0)
+
+	//gl.Disable(gl.DEPTH_TEST);
+	//gl.Disable(gl.BLEND);
+	//gl.BlendFunc(gl.SRC_ALPHA, gl.ONE);
+	//gl.Texture(0).Unbind(gl.TEXTURE_2D)
+
+	//gl.Disable(gl.TEXTURE_2D);
+	//gl.Enable(gl.BLEND)
+	//gl.Disable(gl.DEPTH_TEST)
+	//gl.Enable(gl.SCISSOR_TEST)
+	//gl.DepthMask(false)
+	//gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
+
+	//gl.Viewport(0, 0, 200, 200)
+	//gl.ClearColor(1.0, 1.0, 1.0, 1.0)
+	//gl.Clear(gl.COLOR_BUFFER_BIT)
+
+	//gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGB, 800, 600, 0, gl.RGB, gl.UNSIGNED_BYTE, nil)
+
+	//gl.MatrixMode(gl.PROJECTION);
+	//gl.LoadIdentity();
+	//gl.MatrixMode(gl.MODELVIEW);
+	//gl.LoadIdentity();
+
+	//var framebufferId [1]int32
+	//gl.GetIntegerv(gl.FRAMEBUFFER_BINDING, framebufferId[:])
+	//framebuffer := gl.Framebuffer(framebufferId[0])
+	//fmt.Println("error D:", gl.GetError(), framebufferId[0])
+	//fmt.Println("framebuffer:", framebuffer)
+
+	//gl.Viewport(0, 0, 200, 200)
+
+	//colorTexture := gl.GenTexture()
+	//fmt.Println("error A:", gl.GetError())
+	//colorTexture.Bind(gl.TEXTURE_2D)
+	//fmt.Println("colorTexture:", colorTexture)
+	//fmt.Println("error B:", gl.GetError())
+
+	//gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+	//gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+	//gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+	//gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+	//gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+	//gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1440, 900, 0, gl.RGBA, gl.UNSIGNED_BYTE, nil)
+	//fmt.Println("error C:", gl.GetError())
+
+	//colorTexture.Unbind(gl.TEXTURE_2D)
+
+	//framebuffer.Unbind()
+
+	//var framebufferId2 [1]int32
+	//gl.GetIntegerv(gl.FRAMEBUFFER_BINDING, framebufferId2[:])
+	////framebuffer2 := gl.Framebuffer(framebufferId2[0])
+	//fmt.Println("error D2:", gl.GetError(), framebufferId2[0])
+
+	//framebuffer.Bind()
+	//gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, colorTexture, 0)
+
+	//gl.Disable(gl.DEPTH_TEST)
+	//gl.Disable(gl.BLEND)
+	//gl.Disable(gl.DEPTH_TEST)
+	//gl.BlendFunc(gl.ONE, gl.ZERO)
+	//gl.CullFace(gl.FRONT)
+	//gl.Enable(gl.TEXTURE_2D)
+
+	//gl.Enable(gl.STENCIL_TEST)
+	//gl.StencilFunc(gl.ALWAYS, 0x1, 0x1)
+	//gl.StencilOp(gl.REPLACE, gl.REPLACE, gl.REPLACE)
+
+	//gl.MatrixMode (gl.MODELVIEW);
+	//gl.PushMatrix ();
+	//gl.LoadIdentity ();
+	//gl.MatrixMode (gl.PROJECTION);
+	//gl.PushMatrix ();
+	//gl.LoadIdentity ();
+
+	//gl.DrawBuffer(gl.FRONT_AND_BACK)
+	//gl.Disable(gl.COLOR_LOGIC_OP)
+	//gl.ShadeModel(gl.SMOOTH)
+
+	//gl.DepthMask(false)
+
+	//gl.ColorMask(false, false, false, true)
+
+	//gl.ClearColor(1.0, 1.0, 1.0, 0.5)
+	//gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT)
+
+	//gl.Color3f(1.0, 1.0, 1.0)
+
+	//vertices := []float32{
+	//	50, 50,
+	//	150, 50,
+	//	150, 150,
+	//	50, 150,
+	//}
+
+	//buffer := gl.GenBuffer()
+	//buffer.Bind(gl.ARRAY_BUFFER)
+	//gl.BufferData(gl.ARRAY_BUFFER, len(vertices) * 4, vertices, gl.STATIC_DRAW)
+
+	//array := gl.GenVertexArray()
+	//array.Bind()
+	//gl.DrawArrays(gl.QUADS, 0, 4)
+
+	//gl.Rectf(-0.75,0.75, 0.75, -0.75);
+
+	//gl.ClearColor(0.0, 1.0, 1.0, 0.5)
+	//gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT)
+
+
+	// *********************
+
+	//var buffers [1]gl.GLuint
+	//gl.GenBuffers(1, buffers[:])
+
+	width := gl.GLfloat(widthf)
+	height := gl.GLfloat(heightf)
+
+	gl.Enable(gl.BLEND)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+	gl.Color4f(1.0, 1.0, 1.0, 0.8)
+	gl.Begin(gl.QUADS)
+	gl.Vertex2f(0, 0)
+	gl.Vertex2f(width, 0)
+	gl.Vertex2f(width, height)
+	gl.Vertex2f(0, height)
+	gl.End()
+
+	gl.LineWidth(2.5)
+	gl.Color4f(0.0, 0.0, 0.0, 1.0)
+	gl.Begin(gl.LINES)
+	gl.Vertex2f(0, 0)
+	gl.Vertex2f(width, height)
+	gl.Vertex2f(width, 0)
+	gl.Vertex2f(0, height)
+	gl.End()
+
+	// *********************
+
+	//gl.Vertex2f(-0.75, -0.75)
+	//gl.Vertex2f(0.75, -0.75)
+	//gl.Vertex2f(0.75, 0.75)
+	//gl.Vertex2f(-0.75, 0.75)
+	//gl.End()
+	//gl.Flush()
+
+
+	//gl.PopMatrix ();
+	//gl.MatrixMode (gl.MODELVIEW);
+	//gl.PopMatrix ();
 }

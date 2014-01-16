@@ -187,6 +187,7 @@ int hookListPropertyCount(GoAddr *addr, intptr_t reflectIndex, intptr_t onChange
 QObject_ *hookListPropertyAt(GoAddr *addr, intptr_t reflectIndex, intptr_t onChangedIndex, int i);
 void hookListPropertyAppend(GoAddr *addr, intptr_t reflectIndex, intptr_t onChangedIndex, QObject_ *obj);
 void hookListPropertyClear(GoAddr *addr, intptr_t reflectIndex, intptr_t onChangedIndex);
+void hookQMLRenderGL(double x, double y, double width, double height);
 
 #ifdef __cplusplus
 } // extern "C"

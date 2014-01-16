@@ -1,7 +1,12 @@
-
 #include <private/qmetaobjectbuilder_p.h>
+#include <private/qsgrendernode_p.h>
 
-#include <QtQml/qqml.h>
+#include <QtOpenGL/QtOpenGL>
+#include <QtOpenGL/QGLFunctions>
+
+//#include <QtQuick/QSGSimpleRectNode>
+
+#include <QtQml/QtQml>
 #include <QQmlEngine>
 #include <QDebug>
 
@@ -114,6 +119,8 @@ GoValue::GoValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject *parent)
     setParent(parent);
 
     QQuickItem::setFlag(QQuickItem::ItemHasContents, true);
+
+    QQuickPaintedItem::setRenderTarget(QQuickPaintedItem::FramebufferObject);
 }
 
 GoValue::~GoValue()
@@ -131,58 +138,130 @@ void GoValue::activate(int propIndex)
 
 #include <QOpenGLContext>
 
-void GoValue::itemChange(ItemChange change, const ItemChangeData &)
-{
-    QQuickWindow *win = window();
-    if (change != ItemSceneChange || !win) {
-        return;
-    }
-    //QObject::connect(win, &QQuickWindow::beforeRendering, [=]() {
-    //    qWarning() << "beforeRendering";
-    //    glViewport(0, 0, window()->width(), window()->height());
-    //    glLineWidth(2.5); 
-    //    glColor3f(1.0, 0.0, 0.0);
-    //    glBegin(GL_LINES);
-    //    glVertex3f(0.0, 0.0, 0.0);
-    //    glVertex3f(15, 0, 0);
-    //    //glEnd();
-    //});
+//void GoValue::itemChange(ItemChange change, const ItemChangeData &)
+//{
+//    QQuickWindow *win = window();
+//    if (change != ItemSceneChange || !win) {
+//        return;
+//    }
+//    //QObject::connect(win, &QQuickWindow::beforeRendering, [=]() {
+//    //    qWarning() << "beforeRendering";
+//    //    glViewport(0, 0, window()->width(), window()->height());
+//    //    glLineWidth(2.5); 
+//    //    glColor3f(1.0, 0.0, 0.0);
+//    //    glBegin(GL_LINES);
+//    //    glVertex3f(0.0, 0.0, 0.0);
+//    //    glVertex3f(15, 0, 0);
+//    //    //glEnd();
+//    //});
+//
+//    //QObject::connect(win, &QQuickWindow::beforeRendering, this, &GoValue::paint, Qt::DirectConnection);
+//}
 
-    QObject::connect(win, &QQuickWindow::beforeRendering, this, &GoValue::paint, Qt::DirectConnection);
-}
+
+//class GoValueNode : public QSGRenderNode
+//{
+//public:
+//    virtual StateFlags changedStates()
+//    {
+//        qWarning() << "GoValueNode::changedStates called";
+//        //return ColorState;
+//        return StateFlags(DepthState) | StencilState | ScissorState | ColorState | BlendState | CullState | ViewportState;
+//    }
+//
+//    virtual void render(const RenderState &)
+//    {
+//        qWarning() << "GoValueNode::render called";
+//        // If clip has been set, scissoring will make sure the right area is cleared.
+//        //glViewport(0, 0, 50, 50);
+//        //glClearColor(color.redF(), color.greenF(), color.blueF(), 1.0f);
+//        //glClear(GL_COLOR_BUFFER_BIT);
+//
+//        hookQMLRenderGL();
+//    }
+//
+//    QColor color;
+//};
+
+
+//QSGNode *GoValue::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *updatePaintNodeData)
+//{
+//    qWarning() << "GoValue::updatePaintNode called";
+//    //qWarning() << "width:" << window()->width() << "height:" << window()->height();
+//
+//    GoValueNode *node = static_cast<GoValueNode *>(oldNode);
+//    if (!node) {
+//        node = new GoValueNode();
+//    }
+//    node->color = Qt::white;
+//    return node;
+//
+//    //GoValueNode *gvnode = static_cast<GoValueNode *>(oldNode);
+//    //if (!gvnode) {
+//    //    gvnode = new GoValueNode();
+//    //}
+//    //return gvnode;
+//
+//    //oldNode->markDirty(QSGNode::DirtyNodeAdded|QSGNode::DirtyMatrix);
+//    
+//
+//    //return xform;
+//
+//    //QSGTransformNode *xform = static_cast<QSGTransformNode *>(oldNode);
+//    //if (!xform) {
+//    //    xform = new QSGTransformNode();
+//    //    GoValueNode *gvnode = new GoValueNode();
+//    //    QSGSimpleRectNode *rect = new QSGSimpleRectNode();
+//
+//    //    xform->appendChildNode(rect);
+//    //    xform->appendChildNode(gvnode);
+//
+//    //    QMatrix4x4 matrix;
+//    //    matrix.scale(1.0);
+//    //    xform->setMatrix(matrix);
+//    //    rect->setRect(QRect(0, 0, 100, 100));
+//
+//    //    //oldNode->markDirty(QSGNode::DirtyNodeAdded|QSGNode::DirtyMatrix);
+//    //}
+//
+//    //return xform;
+//}
 
 // TODO Painting.
-//void GoValue::paint(QPainter *painter)
-void GoValue::paint()
+void GoValue::paint(QPainter *painter)
+//void GoValue::paint()
 {
     qWarning() << "GoValue::paint() called";
     //painter->drawLine(10, 10, 40, 40);
+    painter->beginNativePainting();
+    hookQMLRenderGL(x(), y(), width(), height());
+    painter->endNativePainting();
 
-    window()->setClearBeforeRendering(false);
-    glViewport(0, 0, window()->width(), window()->height());
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    glLineWidth(2.5); 
-    glColor3f(1.0, 0.0, 0.0);
-    glBegin(GL_LINES);
-    glVertex3f(0.0, 0.0, 0.0);
-    glVertex3f(1, 0, 0);
-    glEnd();
-
-    //glViewport(0, 0, 150, 150);
-    //glMatrixMode(GL_PROJECTION);
-    //glLoadIdentity();
-    //glOrtho(0, 150, 150,0,0,10);
-    //glMatrixMode(GL_MODELVIEW);
-    //glLoadIdentity();
-
-    //glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    //glColor3ub(255, 0, 0);
-    //glBegin(GL_QUADS);
-    //    glVertex2i(0, 0);
-    //    glVertex2i(100, 0);
-    //    glVertex2i(100, 100);
-    //    glVertex2i(0, 100);
-    //glEnd();
+//    window()->setClearBeforeRendering(false);
+//    glViewport(0, 0, window()->width(), window()->height());
+//    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+//    glLineWidth(2.5); 
+//    glColor3f(1.0, 0.0, 0.0);
+//    glBegin(GL_LINES);
+//    glVertex3f(0.0, 0.0, 0.0);
+//    glVertex3f(1, 0, 0);
+//    glEnd();
+//
+//    //glViewport(0, 0, 150, 150);
+//    //glMatrixMode(GL_PROJECTION);
+//    //glLoadIdentity();
+//    //glOrtho(0, 150, 150,0,0,10);
+//    //glMatrixMode(GL_MODELVIEW);
+//    //glLoadIdentity();
+//
+//    //glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+//    //glColor3ub(255, 0, 0);
+//    //glBegin(GL_QUADS);
+//    //    glVertex2i(0, 0);
+//    //    glVertex2i(100, 0);
+//    //    glVertex2i(100, 100);
+//    //    glVertex2i(0, 100);
+//    //glEnd();
 }
 
 QMetaObject *GoValue::metaObjectFor(GoTypeInfo *typeInfo)
