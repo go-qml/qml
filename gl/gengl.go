@@ -8,6 +8,10 @@ package gl
 //
 import "C"
 
+import (
+	"unsafe"
+)
+
 type (
 	Enum     C.GLenum
 	Boolean  C.GLboolean
@@ -1089,32 +1093,32 @@ func LoadIdentity() {
 	C.glLoadIdentity()
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glRotated.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glRotate.xml
 func Rotated(angle Double, x Double, y Double, z Double) {
 	C.glRotated(C.GLdouble(angle), C.GLdouble(x), C.GLdouble(y), C.GLdouble(z))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glRotatef.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glRotate.xml
 func Rotatef(angle Float, x Float, y Float, z Float) {
 	C.glRotatef(C.GLfloat(angle), C.GLfloat(x), C.GLfloat(y), C.GLfloat(z))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glScaled.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glScale.xml
 func Scaled(x Double, y Double, z Double) {
 	C.glScaled(C.GLdouble(x), C.GLdouble(y), C.GLdouble(z))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glScalef.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glScale.xml
 func Scalef(x Float, y Float, z Float) {
 	C.glScalef(C.GLfloat(x), C.GLfloat(y), C.GLfloat(z))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glTranslated.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTranslate.xml
 func Translated(x Double, y Double, z Double) {
 	C.glTranslated(C.GLdouble(x), C.GLdouble(y), C.GLdouble(z))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glTranslatef.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTranslate.xml
 func Translatef(x Float, y Float, z Float) {
 	C.glTranslatef(C.GLfloat(x), C.GLfloat(y), C.GLfloat(z))
 }
@@ -1224,7 +1228,103 @@ func Vertex4s(x Short, y Short, z Short, w Short) {
 	C.glVertex4s(C.GLshort(x), C.GLshort(y), C.GLshort(z), C.GLshort(w))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glNormal3b.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
+func Vertex2dv(v []Double) {
+	if len(v) > 2 {
+		panic("parameter v has incorrect length")
+	}
+	C.glVertex2dv((*C.GLdouble)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
+func Vertex2fv(v []Float) {
+	if len(v) > 2 {
+		panic("parameter v has incorrect length")
+	}
+	C.glVertex2fv((*C.GLfloat)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
+func Vertex2iv(v []Int) {
+	if len(v) > 2 {
+		panic("parameter v has incorrect length")
+	}
+	C.glVertex2iv((*C.GLint)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
+func Vertex2sv(v []Short) {
+	if len(v) > 2 {
+		panic("parameter v has incorrect length")
+	}
+	C.glVertex2sv((*C.GLshort)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
+func Vertex3dv(v []Double) {
+	if len(v) > 3 {
+		panic("parameter v has incorrect length")
+	}
+	C.glVertex3dv((*C.GLdouble)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
+func Vertex3fv(v []Float) {
+	if len(v) > 3 {
+		panic("parameter v has incorrect length")
+	}
+	C.glVertex3fv((*C.GLfloat)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
+func Vertex3iv(v []Int) {
+	if len(v) > 3 {
+		panic("parameter v has incorrect length")
+	}
+	C.glVertex3iv((*C.GLint)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
+func Vertex3sv(v []Short) {
+	if len(v) > 3 {
+		panic("parameter v has incorrect length")
+	}
+	C.glVertex3sv((*C.GLshort)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
+func Vertex4dv(v []Double) {
+	if len(v) > 4 {
+		panic("parameter v has incorrect length")
+	}
+	C.glVertex4dv((*C.GLdouble)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
+func Vertex4fv(v []Float) {
+	if len(v) > 4 {
+		panic("parameter v has incorrect length")
+	}
+	C.glVertex4fv((*C.GLfloat)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
+func Vertex4iv(v []Int) {
+	if len(v) > 4 {
+		panic("parameter v has incorrect length")
+	}
+	C.glVertex4iv((*C.GLint)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
+func Vertex4sv(v []Short) {
+	if len(v) > 4 {
+		panic("parameter v has incorrect length")
+	}
+	C.glVertex4sv((*C.GLshort)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glNormal.xml
 func Normal3b(nx Byte, ny Byte, nz Byte) {
 	C.glNormal3b(C.GLbyte(nx), C.GLbyte(ny), C.GLbyte(nz))
 }
@@ -1249,32 +1349,69 @@ func Normal3s(nx Short, ny Short, nz Short) {
 	C.glNormal3s(C.GLshort(nx), C.GLshort(ny), C.GLshort(nz))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glIndexd.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glNormal.xml
+func Normal3bv(v []Byte) {
+	C.glNormal3bv((*C.GLbyte)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glNormal.xml
+func Normal3dv(v []Double) {
+	if len(v) > 3 {
+		panic("parameter v has incorrect length")
+	}
+	C.glNormal3dv((*C.GLdouble)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glNormal.xml
+func Normal3fv(v []Float) {
+	if len(v) > 3 {
+		panic("parameter v has incorrect length")
+	}
+	C.glNormal3fv((*C.GLfloat)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glNormal.xml
+func Normal3iv(v []Int) {
+	if len(v) > 3 {
+		panic("parameter v has incorrect length")
+	}
+	C.glNormal3iv((*C.GLint)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glNormal.xml
+func Normal3sv(v []Short) {
+	if len(v) > 3 {
+		panic("parameter v has incorrect length")
+	}
+	C.glNormal3sv((*C.GLshort)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glIndex.xml
 func Indexd(c Double) {
 	C.glIndexd(C.GLdouble(c))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glIndexf.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glIndex.xml
 func Indexf(c Float) {
 	C.glIndexf(C.GLfloat(c))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glIndexi.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glIndex.xml
 func Indexi(c Int) {
 	C.glIndexi(C.GLint(c))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glIndexs.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glIndex.xml
 func Indexs(c Short) {
 	C.glIndexs(C.GLshort(c))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glIndexub.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glIndex.xml
 func Indexub(c Ubyte) {
 	C.glIndexub(C.GLubyte(c))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor3b.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
 func Color3b(red Byte, green Byte, blue Byte) {
 	C.glColor3b(C.GLbyte(red), C.GLbyte(green), C.GLbyte(blue))
 }
@@ -1299,22 +1436,22 @@ func Color3s(red Short, green Short, blue Short) {
 	C.glColor3s(C.GLshort(red), C.GLshort(green), C.GLshort(blue))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor3ub.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
 func Color3ub(red Ubyte, green Ubyte, blue Ubyte) {
 	C.glColor3ub(C.GLubyte(red), C.GLubyte(green), C.GLubyte(blue))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor3ui.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
 func Color3ui(red Uint, green Uint, blue Uint) {
 	C.glColor3ui(C.GLuint(red), C.GLuint(green), C.GLuint(blue))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor3us.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
 func Color3us(red Ushort, green Ushort, blue Ushort) {
 	C.glColor3us(C.GLushort(red), C.GLushort(green), C.GLushort(blue))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor4b.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
 func Color4b(red Byte, green Byte, blue Byte, alpha Byte) {
 	C.glColor4b(C.GLbyte(red), C.GLbyte(green), C.GLbyte(blue), C.GLbyte(alpha))
 }
@@ -1339,17 +1476,17 @@ func Color4s(red Short, green Short, blue Short, alpha Short) {
 	C.glColor4s(C.GLshort(red), C.GLshort(green), C.GLshort(blue), C.GLshort(alpha))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor4ub.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
 func Color4ub(red Ubyte, green Ubyte, blue Ubyte, alpha Ubyte) {
 	C.glColor4ub(C.GLubyte(red), C.GLubyte(green), C.GLubyte(blue), C.GLubyte(alpha))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor4ui.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
 func Color4ui(red Uint, green Uint, blue Uint, alpha Uint) {
 	C.glColor4ui(C.GLuint(red), C.GLuint(green), C.GLuint(blue), C.GLuint(alpha))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor4us.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
 func Color4us(red Ushort, green Ushort, blue Ushort, alpha Ushort) {
 	C.glColor4us(C.GLushort(red), C.GLushort(green), C.GLushort(blue), C.GLushort(alpha))
 }
@@ -1494,22 +1631,22 @@ func RasterPos4s(x Short, y Short, z Short, w Short) {
 	C.glRasterPos4s(C.GLshort(x), C.GLshort(y), C.GLshort(z), C.GLshort(w))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glRectd.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glRect.xml
 func Rectd(x1 Double, y1 Double, x2 Double, y2 Double) {
 	C.glRectd(C.GLdouble(x1), C.GLdouble(y1), C.GLdouble(x2), C.GLdouble(y2))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glRectf.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glRect.xml
 func Rectf(x1 Float, y1 Float, x2 Float, y2 Float) {
 	C.glRectf(C.GLfloat(x1), C.GLfloat(y1), C.GLfloat(x2), C.GLfloat(y2))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glRecti.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glRect.xml
 func Recti(x1 Int, y1 Int, x2 Int, y2 Int) {
 	C.glRecti(C.GLint(x1), C.GLint(y1), C.GLint(x2), C.GLint(y2))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glRects.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glRect.xml
 func Rects(x1 Short, y1 Short, x2 Short, y2 Short) {
 	C.glRects(C.GLshort(x1), C.GLshort(y1), C.GLshort(x2), C.GLshort(y2))
 }
@@ -1529,32 +1666,32 @@ func ShadeModel(mode Enum) {
 	C.glShadeModel(C.GLenum(mode))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glLightf.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glLight.xml
 func Lightf(light Enum, pname Enum, param Float) {
 	C.glLightf(C.GLenum(light), C.GLenum(pname), C.GLfloat(param))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glLighti.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glLight.xml
 func Lighti(light Enum, pname Enum, param Int) {
 	C.glLighti(C.GLenum(light), C.GLenum(pname), C.GLint(param))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glLightModelf.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glLightModel.xml
 func LightModelf(pname Enum, param Float) {
 	C.glLightModelf(C.GLenum(pname), C.GLfloat(param))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glLightModeli.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glLightModel.xml
 func LightModeli(pname Enum, param Int) {
 	C.glLightModeli(C.GLenum(pname), C.GLint(param))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glMaterialf.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glMaterial.xml
 func Materialf(face Enum, pname Enum, param Float) {
 	C.glMaterialf(C.GLenum(face), C.GLenum(pname), C.GLfloat(param))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glMateriali.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glMaterial.xml
 func Materiali(face Enum, pname Enum, param Int) {
 	C.glMateriali(C.GLenum(face), C.GLenum(pname), C.GLint(param))
 }
@@ -1569,22 +1706,22 @@ func PixelZoom(xfactor Float, yfactor Float) {
 	C.glPixelZoom(C.GLfloat(xfactor), C.GLfloat(yfactor))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glPixelStoref.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glPixelStore.xml
 func PixelStoref(pname Enum, param Float) {
 	C.glPixelStoref(C.GLenum(pname), C.GLfloat(param))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glPixelStorei.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glPixelStore.xml
 func PixelStorei(pname Enum, param Int) {
 	C.glPixelStorei(C.GLenum(pname), C.GLint(param))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glPixelTransferf.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glPixelTransfer.xml
 func PixelTransferf(pname Enum, param Float) {
 	C.glPixelTransferf(C.GLenum(pname), C.GLfloat(param))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glPixelTransferi.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glPixelTransfer.xml
 func PixelTransferi(pname Enum, param Int) {
 	C.glPixelTransferi(C.GLenum(pname), C.GLint(param))
 }
@@ -1614,37 +1751,37 @@ func ClearStencil(s Int) {
 	C.glClearStencil(C.GLint(s))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexGend.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexGen.xml
 func TexGend(coord Enum, pname Enum, param Double) {
 	C.glTexGend(C.GLenum(coord), C.GLenum(pname), C.GLdouble(param))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexGenf.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexGen.xml
 func TexGenf(coord Enum, pname Enum, param Float) {
 	C.glTexGenf(C.GLenum(coord), C.GLenum(pname), C.GLfloat(param))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexGeni.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexGen.xml
 func TexGeni(coord Enum, pname Enum, param Int) {
 	C.glTexGeni(C.GLenum(coord), C.GLenum(pname), C.GLint(param))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexEnvf.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexEnv.xml
 func TexEnvf(target Enum, pname Enum, param Float) {
 	C.glTexEnvf(C.GLenum(target), C.GLenum(pname), C.GLfloat(param))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexEnvi.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexEnv.xml
 func TexEnvi(target Enum, pname Enum, param Int) {
 	C.glTexEnvi(C.GLenum(target), C.GLenum(pname), C.GLint(param))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexParameterf.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexParameter.xml
 func TexParameterf(target Enum, pname Enum, param Float) {
 	C.glTexParameterf(C.GLenum(target), C.GLenum(pname), C.GLfloat(param))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexParameteri.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexParameter.xml
 func TexParameteri(target Enum, pname Enum, param Int) {
 	C.glTexParameteri(C.GLenum(target), C.GLenum(pname), C.GLint(param))
 }
@@ -1739,12 +1876,12 @@ func EvalMesh2(mode Enum, i1 Int, i2 Int, j1 Int, j2 Int) {
 	C.glEvalMesh2(C.GLenum(mode), C.GLint(i1), C.GLint(i2), C.GLint(j1), C.GLint(j2))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glFogf.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glFog.xml
 func Fogf(pname Enum, param Float) {
 	C.glFogf(C.GLenum(pname), C.GLfloat(param))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glFogi.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glFog.xml
 func Fogi(pname Enum, param Int) {
 	C.glFogi(C.GLenum(pname), C.GLint(param))
 }
@@ -1819,12 +1956,12 @@ func ResetMinmax(target Enum) {
 	C.glResetMinmax(C.GLenum(target))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glConvolutionParameterf.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glConvolutionParameter.xml
 func ConvolutionParameterf(target Enum, pname Enum, params Float) {
 	C.glConvolutionParameterf(C.GLenum(target), C.GLenum(pname), C.GLfloat(params))
 }
 
-// See http://www.opengl.org/sdk/docs/man2/xhtml/glConvolutionParameteri.xml
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glConvolutionParameter.xml
 func ConvolutionParameteri(target Enum, pname Enum, params Int) {
 	C.glConvolutionParameteri(C.GLenum(target), C.GLenum(pname), C.GLint(params))
 }

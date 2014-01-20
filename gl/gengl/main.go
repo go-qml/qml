@@ -68,6 +68,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	initFuncNameDocCount(&header)
 	buf := &bytes.Buffer{}
 	err = tmpl.Execute(buf, &header)
 	if err != nil {
@@ -112,22 +113,39 @@ func funcName(cfuncName string) string {
 	return cfuncName[2:]
 }
 
-func funcDocName(cfuncName string) string {
-	switch cfuncName[len(cfuncName)-1] {
-	case 'i', 'f', 'd', 's':
-		switch cfuncName[len(cfuncName)-2] {
-		case '1', '2', '3', '4':
-			return cfuncName[:len(cfuncName)-2]
-		}
+var funcNameDocCount = make(map[string]int)
+
+func initFuncNameDocCount(header *Header) {
+	for _, f := range header.Func {
+		funcNameDocCount[funcNameDocPrefix(f.Name)]++
 	}
-	return cfuncName
 }
 
-func paramName(cparamName string) string {
-	if token.Lookup(cparamName) != token.IDENT {
-		return cparamName + "_"
+func funcNameDocPrefix(cfuncName string) string {
+	k := len(cfuncName)-1
+	if cfuncName[k] == 'v' {
+		k--
 	}
-	return cparamName
+	switch cfuncName[k] {
+	case 'i', 'f', 'd', 's', 'b':
+		k--
+		if cfuncName[k] == 'u' {
+			k--
+		}
+		switch cfuncName[k] {
+		case '1', '2', '3', '4':
+			k--
+		}
+	}
+	return cfuncName[:k+1]
+}
+
+func funcNameDoc(cfuncName string) string {
+	prefix := funcNameDocPrefix(cfuncName)
+	if funcNameDocCount[prefix] > 1 {
+		return prefix
+	}
+	return cfuncName
 }
 
 func funcParams(f Func) string {
@@ -139,7 +157,7 @@ func funcParams(f Func) string {
 		buf = append(buf, paramName(param.Name)...)
 		buf = append(buf, ' ')
 		for j := 0; j < param.Addr; j++ {
-			buf = append(buf, '*')
+			buf = append(buf, "[]"...)
 		}
 		if param.Array > 0 {
 			buf = append(buf, '[')
@@ -152,18 +170,51 @@ func funcParams(f Func) string {
 }
 
 func funcCallParams(f Func) string {
-	var buf []byte
+	var buf bytes.Buffer
 	for i, param := range f.Param {
 		if i > 0 {
-			buf = append(buf, ", "...)
+			buf.WriteString(", ")
 		}
-		buf = append(buf, "C."...)
-		buf = append(buf, param.Type...)
-		buf = append(buf, '(')
-		buf = append(buf, paramName(param.Name)...)
-		buf = append(buf, ')')
+		if param.Addr > 0 {
+			buf.WriteString("(*")
+		}
+		buf.WriteString("C.")
+		buf.WriteString(param.Type)
+		if param.Addr > 0 {
+			buf.WriteString(")")
+		}
+		buf.WriteByte('(')
+		if param.Addr > 0 {
+			buf.WriteString("unsafe.Pointer(&")
+		}
+		buf.WriteString(paramName(param.Name))
+		if param.Addr > 0 {
+			buf.WriteString("[0])")
+		}
+		buf.WriteByte(')')
 	}
-	return string(buf)
+	return buf.String()
+}
+
+func paramName(cparamName string) string {
+	if token.Lookup(cparamName) != token.IDENT {
+		return cparamName + "_"
+	}
+	return cparamName
+}
+
+func paramMaxLen(f Func, param Param) string {
+	if param.Addr == 0 || len(f.Name) < 3 || f.Name[len(f.Name)-1] != 'v' {
+		return ""
+	}
+	switch f.Name[len(f.Name)-2] {
+	case 'i', 'f', 'd', 's':
+		switch c := f.Name[len(f.Name)-3]; c {
+		case '2', '3', '4':
+			return string(c)
+		}
+	}
+	return ""
 }
 
 // funcSupported returns whether the given function has wrapping
@@ -176,10 +227,10 @@ func funcSupported(f Func) bool {
 		if param.Type == "GLvoid" {
 			return false
 		}
-		if param.Addr > 0 {
+		if param.Array > 0 {
 			return false
 		}
-		if param.Array > 0 {
+		if param.Addr > 0 && !strings.HasPrefix(f.Name, "glVertex") && !strings.HasPrefix(f.Name, "glNormal") {
 			return false
 		}
 	}
@@ -191,11 +242,12 @@ var funcs = template.FuncMap{
 	"constName":      constName,
 	"constNewLine":   constNewLine,
 	"funcName":       funcName,
-	"funcDocName":    funcDocName,
+	"funcNameDoc":    funcNameDoc,
 	"funcParams":     funcParams,
 	"funcCallParams": funcCallParams,
 	"funcSupported":  funcSupported,
 	"paramName":      paramName,
+	"paramMaxLen":    paramMaxLen,
 	"repeat":         strings.Repeat,
 }
 
@@ -211,6 +263,10 @@ package gl
 //
 import "C"
 
+import (
+	"unsafe"
+)
+
 type (
 {{range $type := $.Type}}{{if $type.Name | ne "GLvoid"}}	{{$type.Name | typeName}} C.{{$type.Name}}{{if $type.Comment}} /* {{$type.Comment}} */{{end}}
 {{end}}{{end}})
@@ -221,9 +277,11 @@ const (
 {{end}}	{{$define.Name | constName}} = C.{{$define.Name}}
 {{end}})
 {{ range $func := $.Func }}{{if $func | funcSupported}}
-// See http://www.opengl.org/sdk/docs/man2/xhtml/{{$func.Name | funcDocName}}.xml
-func {{$func.Name | funcName}}({{funcParams $func}}) {{if $func.Type}}{{repeat "*" $func.Addr}}{{$func.Type | typeName}} {{end}}{
-	{{if $func.Type}}return {{$func.Type | typeName}}({{end}}C.{{$func.Name}}({{funcCallParams $func}}){{if $func.Type}}){{end}}
+// See http://www.opengl.org/sdk/docs/man2/xhtml/{{$func.Name | funcNameDoc}}.xml
+func {{$func.Name | funcName}}({{funcParams $func}}) {{if $func.Type}}{{repeat "*" $func.Addr}}{{$func.Type | typeName}} {{end}}{ {{range $param := $func.Param}}{{with $max := paramMaxLen $func $param}}{{if $max}}if len({{$param.Name | paramName}}) > {{$max}} {
+		panic("parameter {{$param.Name | paramName}} has incorrect length")
+	}{{end}}
+	{{end}}{{end}}{{if $func.Type}}return {{$func.Type | typeName}}({{end}}C.{{$func.Name}}({{funcCallParams $func}}){{if $func.Type}}){{end}}
 }
 {{end}}{{end}}
 `))
