@@ -681,8 +681,8 @@ func hookQMLRenderGL(xf, yf, widthf, heightf float64) {
 	//var buffers [1]gl.GLuint
 	//gl.GenBuffers(1, buffers[:])
 
-	width := gl.GLfloat(widthf)
-	height := gl.GLfloat(heightf)
+	width := gl.Float(widthf)
+	height := gl.Float(heightf)
 
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
