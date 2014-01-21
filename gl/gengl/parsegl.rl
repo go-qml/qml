@@ -1,17 +1,13 @@
-// -*-go-*-
 //
 // To compile:
 //
-//   ragel -Z -G2 -o atoi.go atoi.rl
-//   6g -o atoi.6 atoi.go
-//   6l -o atoi atoi.6
-//   ./atoi
+//   ragel -Z -G2 -o parsegl.go parsegl.rl
 //
-// To show a diagram of your state machine:
+// To show a diagram of the state machine:
 //
-//   ragel -V -G2 -p -o atoi.dot atoi.rl
-//   dot -Tpng -o atoi.png atoi.dot
-//   chrome atoi.png
+//   ragel -V -G2 -p -o parsegl.dot parsegl.rl
+//   dot -Tsvg -o parsegl.svg parsegl.dot
+//   chrome parsegl.svg
 //
 
 package main
