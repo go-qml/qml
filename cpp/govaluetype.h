@@ -15,7 +15,7 @@ public:
     {
         typeInfo = info;
         typeSpec = spec;
-        static_cast<QMetaObject &>(staticMetaObject) = *GoValue::metaObjectFor(typeInfo);
+        static_cast<QMetaObject &>(staticMetaObject) = *metaObjectFor(typeInfo);
     };
 
     static GoTypeSpec_ *typeSpec;

@@ -27,7 +27,7 @@ GoValueMetaObject::GoValueMetaObject(GoValue *value, GoTypeInfo *typeInfo)
     : value(value)
 {
     //d->parent = static_cast<QAbstractDynamicMetaObject *>(priv->metaObject);
-    *static_cast<QMetaObject *>(this) = *GoValue::metaObjectFor(typeInfo);
+    *static_cast<QMetaObject *>(this) = *metaObjectFor(typeInfo);
 
     QObjectPrivate *objPriv = QObjectPrivate::get(value);
     objPriv->metaObject = this;
@@ -117,7 +117,6 @@ GoValue::GoValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject *parent)
     setParent(parent);
 
     QQuickItem::setFlag(QQuickItem::ItemHasContents, true);
-
     QQuickPaintedItem::setRenderTarget(QQuickPaintedItem::FramebufferObject);
 }
 
@@ -141,7 +140,7 @@ void GoValue::paint(QPainter *painter)
     painter->endNativePainting();
 }
 
-QMetaObject *GoValue::metaObjectFor(GoTypeInfo *typeInfo)
+QMetaObject *metaObjectFor(GoTypeInfo *typeInfo)
 {
     if (typeInfo->metaObject) {
             return reinterpret_cast<QMetaObject *>(typeInfo->metaObject);

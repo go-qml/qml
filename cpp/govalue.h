@@ -6,17 +6,16 @@
 // away, and without it this package wouldn't exist.
 #include <private/qmetaobject_p.h>
 
+#include <QQuickPaintedItem>
+#include <QPainter>
+
 #include "capi.h"
 
 class GoValueMetaObject;
 
-// TODO Painting.
-#include <QQuickPaintedItem>
-#include <QPainter>
-#include <QtQuick/QQuickItem>
-#include <QtQuick/qsgnode.h>
+QMetaObject *metaObjectFor(GoTypeInfo *typeInfo);
+
 class GoValue : public QQuickPaintedItem
-//class GoValue : public QObject
 {
     Q_OBJECT
 
@@ -28,20 +27,12 @@ public:
 
     void activate(int propIndex);
 
-    // TODO Painting.
-    virtual void paint(QPainter *painter);
-    //virtual QSGNode *updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *updatePaintNodeData);
-    //virtual void itemChange(ItemChange, const ItemChangeData &){};
-
-    static QMetaObject *metaObjectFor(GoTypeInfo *typeInfo);
-
     virtual ~GoValue();
+
+    virtual void paint(QPainter *painter);
 
 private:
     GoValueMetaObject *valueMeta;
-
-//public slots:
-//    virtual void paint();
 };
 
 #endif // GOVALUE_H
