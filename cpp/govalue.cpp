@@ -16,6 +16,8 @@ class GoValueMetaObject : public QAbstractDynamicMetaObject
 public:
     GoValueMetaObject(QObject* value, GoAddr *addr, GoTypeInfo *typeInfo);
 
+    void activatePropIndex(int propIndex);
+
 protected:
     int metaCall(QMetaObject::Call c, int id, void **a);
 
@@ -112,6 +114,14 @@ int GoValueMetaObject::metaCall(QMetaObject::Call c, int idx, void **a)
     return -1;
 }
 
+void GoValueMetaObject::activatePropIndex(int propIndex)
+{
+    // Properties are added first, so the first fieldLen methods are in
+    // fact the signals of the respective properties.
+    int relativeIndex = propIndex - propertyOffset();
+    activate(value, methodOffset() + relativeIndex, 0);
+}
+
 GoValue::GoValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject *parent)
     : addr(addr), typeInfo(typeInfo)
 {
@@ -129,10 +139,7 @@ GoValue::~GoValue()
 
 void GoValue::activate(int propIndex)
 {
-    // Properties are added first, so the first fieldLen methods are in
-    // fact the signals of the respective properties.
-    int relativeIndex = propIndex - valueMeta->propertyOffset();
-    valueMeta->activate(this, valueMeta->methodOffset() + relativeIndex, 0);
+    valueMeta->activatePropIndex(propIndex);
 }
 
 void GoValue::paint(QPainter *painter)
