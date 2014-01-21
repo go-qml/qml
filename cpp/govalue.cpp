@@ -173,9 +173,11 @@ QMetaObject *metaObjectFor(GoTypeInfo *typeInfo)
     }
 
     QMetaObjectBuilder mob;
-    // TODO Painting.
-    mob.setSuperClass(&QQuickPaintedItem::staticMetaObject);
-    //mob.setSuperClass(&QObject::staticMetaObject);
+    if (typeInfo->paint) {
+        mob.setSuperClass(&QQuickPaintedItem::staticMetaObject);
+    } else {
+        mob.setSuperClass(&QObject::staticMetaObject);
+    }
     mob.setClassName(typeInfo->typeName);
     mob.setFlags(QMetaObjectBuilder::DynamicMetaObject);
 

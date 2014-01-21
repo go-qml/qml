@@ -314,6 +314,10 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 		memberInfo.numOut = C.int(method.Type.NumOut())
 		membersi += 1
 		mnamesi += uintptr(len(method.Name)) + 1
+
+		if method.Name == "Paint" && memberInfo.numIn == 0 && memberInfo.numOut == 0 {
+			typeInfo.paint = memberInfo
+		}
 	}
 	typeInfo.members = (*C.GoMemberInfo)(unsafe.Pointer(members))
 	typeInfo.membersLen = C.int(membersLen)

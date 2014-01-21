@@ -82,6 +82,7 @@ typedef struct {
     GoMemberInfo *fields;
     GoMemberInfo *methods;
     GoMemberInfo *members; // fields + methods
+    GoMemberInfo *paint;   // in methods too
     int fieldsLen;
     int methodsLen;
     int membersLen;

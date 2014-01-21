@@ -494,6 +494,11 @@ error *objectGoAddr(QObject_ *object, GoAddr **addr)
         *addr = goValue->addr;
         return 0;
     }
+    GoPaintedValue *goPaintedValue = dynamic_cast<GoPaintedValue *>(qobject);
+    if (goPaintedValue) {
+        *addr = goPaintedValue->addr;
+        return 0;
+    }
     return errorf("QML object is not backed by a Go value");
 }
 
@@ -512,6 +517,9 @@ void delString(QString_ *s)
 GoValue_ *newGoValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject_ *parent)
 {
     QObject *qparent = reinterpret_cast<QObject *>(parent);
+    if (typeInfo->paint) {
+        return new GoPaintedValue(addr, typeInfo, qparent);
+    }
     return new GoValue(addr, typeInfo, qparent);
 }
 
@@ -520,8 +528,18 @@ void goValueActivate(GoValue_ *value, GoTypeInfo *typeInfo, int addrOffset)
     GoMemberInfo *fieldInfo = typeInfo->fields;
     for (int i = 0; i < typeInfo->fieldsLen; i++) {
         if (fieldInfo->addrOffset == addrOffset) {
-            reinterpret_cast<GoValue *>(value)->activate(fieldInfo->metaIndex);
-            return;
+            QObject *qvalue = reinterpret_cast<QObject *>(value);
+            GoValue *goValue = dynamic_cast<GoValue *>(qvalue);
+            if (goValue) {
+                goValue->activate(fieldInfo->metaIndex);
+                return;
+            }
+            GoPaintedValue *goPaintedValue = dynamic_cast<GoPaintedValue *>(qvalue);
+            if (goPaintedValue) {
+                goPaintedValue->activate(fieldInfo->metaIndex);
+                return;
+            }
+            panicf("invalid GoValue address");
         }
         fieldInfo++;
     }
@@ -636,14 +654,20 @@ void packDataValue(QVariant_ *var, DataValue *value)
     default:
         if (qvar->type() == (int)QMetaType::QObjectStar || qvar->canConvert<QObject *>()) {
             QObject *qobject = qvar->value<QObject *>();
-            GoValue *govalue = dynamic_cast<GoValue *>(qobject);
-            if (govalue) {
+            GoValue *goValue = dynamic_cast<GoValue *>(qobject);
+            if (goValue) {
                 value->dataType = DTGoAddr;
-                *(void **)(value->data) = govalue->addr;
-            } else {
-                value->dataType = DTObject;
-                *(void **)(value->data) = qobject;
+                *(void **)(value->data) = goValue->addr;
+                break;
             }
+            GoPaintedValue *goPaintedValue = dynamic_cast<GoPaintedValue *>(qobject);
+            if (goPaintedValue) {
+                value->dataType = DTGoAddr;
+                *(void **)(value->data) = goPaintedValue->addr;
+                break;
+            }
+            value->dataType = DTObject;
+            *(void **)(value->data) = qobject;
             break;
         }
         {
