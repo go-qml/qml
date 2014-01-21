@@ -14,17 +14,19 @@
 class GoValueMetaObject : public QAbstractDynamicMetaObject
 {
 public:
-    GoValueMetaObject(GoValue* value, GoTypeInfo *typeInfo);
+    GoValueMetaObject(QObject* value, GoAddr *addr, GoTypeInfo *typeInfo);
 
 protected:
     int metaCall(QMetaObject::Call c, int id, void **a);
 
 private:
-    GoValue *value;
+    QObject *value;
+    GoAddr *addr;
+    GoTypeInfo *typeInfo;
 };
 
-GoValueMetaObject::GoValueMetaObject(GoValue *value, GoTypeInfo *typeInfo)
-    : value(value)
+GoValueMetaObject::GoValueMetaObject(QObject *value, GoAddr *addr, GoTypeInfo *typeInfo)
+    : value(value), addr(addr), typeInfo(typeInfo)
 {
     //d->parent = static_cast<QAbstractDynamicMetaObject *>(priv->metaObject);
     *static_cast<QMetaObject *>(this) = *metaObjectFor(typeInfo);
@@ -45,12 +47,12 @@ int GoValueMetaObject::metaCall(QMetaObject::Call c, int idx, void **a)
             if (idx < propOffset) {
                 return value->qt_metacall(c, idx, a);
             }
-            GoMemberInfo *memberInfo = value->typeInfo->fields;
-            for (int i = 0; i < value->typeInfo->fieldsLen; i++) {
+            GoMemberInfo *memberInfo = typeInfo->fields;
+            for (int i = 0; i < typeInfo->fieldsLen; i++) {
                 if (memberInfo->metaIndex == idx) {
                     if (c == QMetaObject::ReadProperty) {
                         DataValue result;
-                        hookGoValueReadField(qmlEngine(value), value->addr, memberInfo->reflectIndex, memberInfo->reflectChangedIndex, &result);
+                        hookGoValueReadField(qmlEngine(value), addr, memberInfo->reflectIndex, memberInfo->reflectChangedIndex, &result);
                         if (memberInfo->memberType == DTListProperty) {
                             if (result.dataType != DTListProperty) {
                                 panicf("reading DTListProperty field returned non-DTListProperty result");
@@ -68,7 +70,7 @@ int GoValueMetaObject::metaCall(QMetaObject::Call c, int idx, void **a)
                         DataValue assign;
                         QVariant *in = reinterpret_cast<QVariant *>(a[0]);
                         packDataValue(in, &assign);
-                        hookGoValueWriteField(qmlEngine(value), value->addr, memberInfo->reflectIndex, memberInfo->reflectChangedIndex, &assign);
+                        hookGoValueWriteField(qmlEngine(value), addr, memberInfo->reflectIndex, memberInfo->reflectChangedIndex, &assign);
                         activate(value, methodOffset() + (idx - propOffset), 0);
                     }
                     return -1;
@@ -84,15 +86,15 @@ int GoValueMetaObject::metaCall(QMetaObject::Call c, int idx, void **a)
             if (idx < methodOffset()) {
                 return value->qt_metacall(c, idx, a);
             }
-            GoMemberInfo *memberInfo = value->typeInfo->methods;
-            for (int i = 0; i < value->typeInfo->methodsLen; i++) {
+            GoMemberInfo *memberInfo = typeInfo->methods;
+            for (int i = 0; i < typeInfo->methodsLen; i++) {
                 if (memberInfo->metaIndex == idx) {
                     // args[0] is the result if any.
                     DataValue args[1 + MaxParams];
                     for (int i = 1; i < memberInfo->numIn+1; i++) {
                         packDataValue(reinterpret_cast<QVariant *>(a[i]), &args[i]);
                     }
-                    hookGoValueCallMethod(qmlEngine(value), value->addr, memberInfo->reflectIndex, args);
+                    hookGoValueCallMethod(qmlEngine(value), addr, memberInfo->reflectIndex, args);
                     if (memberInfo->numOut > 0) {
                         unpackDataValue(&args[0], reinterpret_cast<QVariant *>(a[0]));
                     }
@@ -113,7 +115,7 @@ int GoValueMetaObject::metaCall(QMetaObject::Call c, int idx, void **a)
 GoValue::GoValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject *parent)
     : addr(addr), typeInfo(typeInfo)
 {
-    valueMeta = new GoValueMetaObject(this, typeInfo);
+    valueMeta = new GoValueMetaObject(this, addr, typeInfo);
     setParent(parent);
 
     QQuickItem::setFlag(QQuickItem::ItemHasContents, true);
