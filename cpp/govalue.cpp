@@ -127,9 +127,6 @@ GoValue::GoValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject *parent)
 {
     valueMeta = new GoValueMetaObject(this, addr, typeInfo);
     setParent(parent);
-
-    QQuickItem::setFlag(QQuickItem::ItemHasContents, true);
-    QQuickPaintedItem::setRenderTarget(QQuickPaintedItem::FramebufferObject);
 }
 
 GoValue::~GoValue()
@@ -142,7 +139,27 @@ void GoValue::activate(int propIndex)
     valueMeta->activatePropIndex(propIndex);
 }
 
-void GoValue::paint(QPainter *painter)
+GoPaintedValue::GoPaintedValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject *parent)
+    : addr(addr), typeInfo(typeInfo)
+{
+    valueMeta = new GoValueMetaObject(this, addr, typeInfo);
+    setParent(parent);
+
+    QQuickItem::setFlag(QQuickItem::ItemHasContents, true);
+    QQuickPaintedItem::setRenderTarget(QQuickPaintedItem::FramebufferObject);
+}
+
+GoPaintedValue::~GoPaintedValue()
+{
+    hookGoValueDestroyed(qmlEngine(this), addr);
+}
+
+void GoPaintedValue::activate(int propIndex)
+{
+    valueMeta->activatePropIndex(propIndex);
+}
+
+void GoPaintedValue::paint(QPainter *painter)
 {
     painter->beginNativePainting();
     hookQMLRenderGL(x(), y(), width(), height());

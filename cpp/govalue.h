@@ -15,7 +15,7 @@ class GoValueMetaObject;
 
 QMetaObject *metaObjectFor(GoTypeInfo *typeInfo);
 
-class GoValue : public QQuickPaintedItem
+class GoValue : public QObject
 {
     Q_OBJECT
 
@@ -24,10 +24,26 @@ public:
     GoTypeInfo *typeInfo;
 
     GoValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject *parent);
+    virtual ~GoValue();
 
     void activate(int propIndex);
 
-    virtual ~GoValue();
+private:
+    GoValueMetaObject *valueMeta;
+};
+
+class GoPaintedValue : public QQuickPaintedItem
+{
+    Q_OBJECT
+
+public:
+    GoAddr *addr;
+    GoTypeInfo *typeInfo;
+
+    GoPaintedValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject *parent);
+    virtual ~GoPaintedValue();
+
+    void activate(int propIndex);
 
     virtual void paint(QPainter *painter);
 
