@@ -4,15 +4,14 @@ package qml
 // #cgo CPPFLAGS: -I/usr/include/qt5/QtCore/5.0.2/QtCore
 // #cgo CPPFLAGS: -I/usr/include/qt5/QtCore/5.1.1/QtCore
 // #cgo CPPFLAGS: -I/usr/include/qt5/QtCore/5.2.0/QtCore
+// #cgo CPPFLAGS: -I/usr/include/qt5/QtQuick/5.0.2/QtQuick
+// #cgo CPPFLAGS: -I/usr/include/qt5/QtQuick/5.1.1/QtQuick
+// #cgo CPPFLAGS: -I/usr/include/qt5/QtQuick/5.2.0/QtQuick
 // #cgo CPPFLAGS: -I/usr/include/qt/QtCore/5.1.1/QtCore
-// #cgo CPPFLAGS: -I/usr/include/qt5/QtQuick/5.2.0/QtQuick/
-// #cgo CPPFLAGS: -I/usr/include/qt5/QtQuick/5.0.2/QtQuick/
-// // #cgo CPPFLAGS: -I/home/niemeyer/Qt5.2.0/5.2.0/gcc_64/include/QtCore/5.2.0/QtCore
-// // #cgo CPPFLAGS: -I/home/niemeyer/Qt5.2.0/5.2.0/gcc_64/include/QtQuick/5.2.0/QtQuick
+// #cgo CPPFLAGS: -I/usr/include/qt/QtQuick/5.1.1/QtQuick
 // #cgo CXXFLAGS: -std=c++0x -pedantic-errors -Wall -fno-strict-aliasing -DGL_GLEXT_PROTOTYPES
 // #cgo LDFLAGS: -lstdc++ -lGL
 // #cgo pkg-config: Qt5Core Qt5Widgets Qt5Quick Qt5OpenGL
-//
 //
 // #include <stdlib.h>
 //
@@ -23,7 +22,6 @@ import "C"
 import (
 	"fmt"
 	"github.com/niemeyer/qml/tref"
-	"github.com/niemeyer/qml/gl"
 	"reflect"
 	"runtime"
 	"strings"
@@ -473,6 +471,15 @@ func convertParam(methodName string, index int, param reflect.Value, argt reflec
 	return param.Convert(argt), nil
 }
 
+//export hookGoValuePaint
+func hookGoValuePaint(enginep, foldp unsafe.Pointer, reflectIndex C.intptr_t) {
+	fold := ensureEngine(enginep, foldp)
+	v := reflect.ValueOf(fold.gvalue)
+
+	method := v.Method(int(reflectIndex))
+	method.Call(nil)
+}
+
 func ensureEngine(enginep, foldp unsafe.Pointer) *valueFold {
 	fold := (*valueFold)(foldp)
 	if fold.engine != nil {
@@ -555,29 +562,4 @@ func hookListPropertyClear(foldp unsafe.Pointer, reflectIndex, onChangedIndex C.
 		// TODO Must probably dereference the ptr here. Test it.
 		reflect.ValueOf(fold.gvalue).Method(int(onChangedIndex)).Call(nil)
 	}
-}
-
-//export hookQMLRenderGL
-func hookQMLRenderGL(xf, yf, widthf, heightf float64) {
-	width := gl.Float(widthf)
-	height := gl.Float(heightf)
-
-	gl.Enable(gl.BLEND)
-	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-	gl.Color4f(1.0, 1.0, 1.0, 0.8)
-	gl.Begin(gl.QUADS)
-	gl.Vertex2f(0, 0)
-	gl.Vertex2f(width, 0)
-	gl.Vertex2f(width, height)
-	gl.Vertex2f(0, height)
-	gl.End()
-
-	gl.LineWidth(2.5)
-	gl.Color4f(0.0, 0.0, 0.0, 1.0)
-	gl.Begin(gl.LINES)
-	gl.Vertex2f(0, 0)
-	gl.Vertex2f(width, height)
-	gl.Vertex2f(width, 0)
-	gl.Vertex2f(0, height)
-	gl.End()
 }

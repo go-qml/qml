@@ -178,6 +178,7 @@ void hookGoValueReadField(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, in
 void hookGoValueWriteField(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, int onChangedIndex, DataValue *assign);
 void hookGoValueCallMethod(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, DataValue *result);
 void hookGoValueDestroyed(QQmlEngine_ *engine, GoAddr *addr);
+void hookGoValuePaint(QQmlEngine_ *engine, GoAddr *addr, intptr_t reflextIndex);
 QImage_ *hookRequestImage(void *imageFunc, char *id, int idLen, int width, int height);
 GoAddr *hookGoValueTypeNew(GoValue_ *value, GoTypeSpec_ *spec);
 void hookWindowHidden(QObject_ *addr);
@@ -188,7 +189,6 @@ int hookListPropertyCount(GoAddr *addr, intptr_t reflectIndex, intptr_t onChange
 QObject_ *hookListPropertyAt(GoAddr *addr, intptr_t reflectIndex, intptr_t onChangedIndex, int i);
 void hookListPropertyAppend(GoAddr *addr, intptr_t reflectIndex, intptr_t onChangedIndex, QObject_ *obj);
 void hookListPropertyClear(GoAddr *addr, intptr_t reflectIndex, intptr_t onChangedIndex);
-void hookQMLRenderGL(double x, double y, double width, double height);
 
 #ifdef __cplusplus
 } // extern "C"
