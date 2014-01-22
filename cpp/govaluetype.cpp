@@ -102,7 +102,7 @@ int registerPaintedSingletonN(char *location, int major, int minor, char *name, 
 
 int registerSingleton(char *location, int major, int minor, char *name, GoTypeInfo *info, GoTypeSpec_ *spec)
 {
-    if (info->paint) {
+    if (!info->paint) {
         switch (++goValueTypeN) {
         GOVALUETYPE_CASE_SINGLETON(1)
         GOVALUETYPE_CASE_SINGLETON(2)
@@ -180,7 +180,7 @@ int registerSingleton(char *location, int major, int minor, char *name, GoTypeIn
 
 int registerType(char *location, int major, int minor, char *name, GoTypeInfo *info, GoTypeSpec_ *spec)
 {
-    if (info->paint) {
+    if (!info->paint) {
         switch (++goValueTypeN) {
         GOVALUETYPE_CASE(1)
         GOVALUETYPE_CASE(2)
