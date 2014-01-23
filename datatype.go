@@ -208,6 +208,7 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	typeInfo = (*C.GoTypeInfo)(C.malloc(typeInfoSize))
 	typeInfo.typeName = C.CString(vt.Name())
 	typeInfo.metaObject = nilPtr
+	typeInfo.paint = (*C.GoMemberInfo)(nilPtr)
 
 	var onChanged map[string]int
 
