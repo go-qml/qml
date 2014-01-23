@@ -246,6 +246,7 @@ func wrapGoValue(engine *Engine, gvalue interface{}, owner valueOwner) (cvalue u
 	} else {
 		engine.values[gvalue] = fold
 	}
+	//fmt.Printf("[DEBUG] value alive (wrapped): %x/%#v\n", fold.cvalue, fold.gvalue)
 	stats.valuesAlive(+1)
 	C.engineSetContextForObject(engine.addr, fold.cvalue)
 	switch owner {
@@ -272,12 +273,15 @@ var typeNew = make(map[*valueFold]bool)
 
 //export hookGoValueTypeNew
 func hookGoValueTypeNew(cvalue unsafe.Pointer, specp unsafe.Pointer) (foldp unsafe.Pointer) {
+	// TODO Do some basic validation on the created gvalue. Pointer-of-pointer is
+	//      not okay, etc. See wrapGoValue for the list of checks, possibly refactoring.
 	fold := &valueFold{
 		gvalue: (*TypeSpec)(specp).New(),
 		cvalue: cvalue,
 		owner:  jsOwner,
 	}
 	typeNew[fold] = true
+	//fmt.Printf("[DEBUG] value alive (type-created): %x/%#v\n", fold.cvalue, fold.gvalue)
 	stats.valuesAlive(+1)
 	return unsafe.Pointer(fold)
 }
@@ -320,6 +324,7 @@ func hookGoValueDestroyed(enginep unsafe.Pointer, foldp unsafe.Pointer) {
 			}
 		}
 	}
+	//fmt.Printf("[DEBUG] value destroyed: %x/%#v\n", fold.cvalue, fold.gvalue)
 	stats.valuesAlive(-1)
 }
 

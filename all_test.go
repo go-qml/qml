@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/niemeyer/qml"
+	"github.com/niemeyer/qml/gl"
 	"image"
 	"image/color"
 	"io/ioutil"
@@ -71,6 +72,26 @@ func (s *S) TearDownTest(c *C) {
 	}
 
 	qml.SetLogger(nil)
+}
+
+type RectType struct {
+	PaintCount int
+}
+
+func (r *RectType) Paint() {
+	r.PaintCount++
+
+	// TODO Dynamically compute this.
+	width := gl.Float(100)
+	height := gl.Float(100)
+
+	gl.Color3f(1.0, 0.0, 0.0)
+	gl.Begin(gl.QUADS)
+	gl.Vertex2f(0, 0)
+	gl.Vertex2f(width, 0)
+	gl.Vertex2f(width, height)
+	gl.Vertex2f(0, height)
+	gl.End()
 }
 
 type TestType struct {
@@ -223,11 +244,13 @@ type TestData struct {
 	component qml.Object
 	root      qml.Object
 	value     *TestType
+	rect      *RectType
 }
 
 var tests = []struct {
 	Summary string
 	Value   TestType
+	Rect    RectType
 
 	Init func(d *TestData)
 
@@ -893,16 +916,49 @@ var tests = []struct {
 		QML:     `Item{}`,
 		Done:    func(d *TestData) { d.Assert(d.root.TypeName(), Equals, "QQuickItem") },
 	},
+	{
+		Summary: "Custom Go type with painting",
+		QML: `
+			import GoTypes 4.2
+			Rectangle {
+				width: 200; height: 200
+				color: "black"
+				GoRect {
+					width: 100; height: 100; x: 50; y: 50
+				}
+			}
+		`,
+		Done: func(d *TestData) {
+			d.Assert(d.rect.PaintCount, Equals, 0)
+
+			window := d.component.CreateWindow(nil)
+			defer window.Destroy()
+			window.Show()
+
+			// Qt doesn't hide the Window if we call it too quickly. :-(
+			time.Sleep(100 * time.Millisecond)
+
+			d.Assert(d.rect.PaintCount, Equals, 1)
+
+			image := window.Snapshot()
+			d.Assert(image.At(25, 25), Equals, color.RGBA{0, 0, 0, 255})
+			d.Assert(image.At(100, 100), Equals, color.RGBA{255, 0, 0, 255})
+		},
+	},
 }
 
 var tablef = flag.String("tablef", "", "if provided, TestTable only runs tests with a summary matching the regexp")
 
 func (s *S) TestTable(c *C) {
-	var goTypeValue *TestType = &TestType{}
+	var goTypeValue *TestType
+	var goRectValue *RectType
 
 	types := []qml.TypeSpec{{
 		Name: "GoType",
 		New:  func() interface{} { return goTypeValue },
+	}, {
+		Name: "GoRect",
+		New:  func() interface{} { return goRectValue },
 	}, {
 		Name:      "GoSingleton",
 		New:       func() interface{} { return goTypeValue },
@@ -930,9 +986,13 @@ func (s *S) TestTable(c *C) {
 		goTypeValue = &value
 		s.context.SetVar("value", &value)
 
+		rect := t.Rect
+		goRectValue = &rect
+
 		testData := TestData{
 			C:       c,
 			value:   &value,
+			rect:    &rect,
 			engine:  s.engine,
 			context: s.context,
 		}
