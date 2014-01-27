@@ -78,12 +78,13 @@ type RectType struct {
 	PaintCount int
 }
 
-func (r *RectType) Paint() {
+func (r *RectType) Paint(p *qml.Painter) {
 	r.PaintCount++
 
-	// TODO Dynamically compute this.
-	width := gl.Float(100)
-	height := gl.Float(100)
+	obj := p.Object()
+
+	width := gl.Float(obj.Int("width"))
+	height := gl.Float(obj.Int("height"))
 
 	gl.Color3f(1.0, 0.0, 0.0)
 	gl.Begin(gl.QUADS)
@@ -988,6 +989,7 @@ func (s *S) TestTable(c *C) {
 
 		rect := t.Rect
 		goRectValue = &rect
+		rect.engine = s.engine
 
 		testData := TestData{
 			C:       c,

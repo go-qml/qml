@@ -194,6 +194,30 @@ func (e *Engine) Context() *Context {
 	return &ctx
 }
 
+// TODO ObjectOf is probably still worth it, but turned out unnecessary
+//      for GL functionality. Test it properly before introducing it.
+
+// ObjectOf returns the QML Object representation of the provided Go value
+// within the e engine.
+//func (e *Engine) ObjectOf(value interface{}) Object {
+//	// TODO Would be good to preserve identity on the Go side. See unpackDataValue as well.
+//	return &Common{
+//		engine: e,
+//		addr:   wrapGoValue(e, value, cppOwner),
+//	}
+//}
+
+// Painter is provided to Paint methods on Go types that have displayable content.
+type Painter struct {
+	enigne *Engine
+	obj    Object
+}
+
+// Object returns the underlying object being painted.
+func (p *Painter) Object() Object {
+	return p.obj
+}
+
 // AddImageProvider registers f to be called when an image is requested by QML code
 // with the specified provider identifier. It is a runtime error to register the same
 // provider identifier multiple times.
@@ -318,8 +342,6 @@ func (ctx *Context) Var(name string) interface{} {
 }
 
 // TODO Context.Spawn() => Context
-
-// TODO engine.ObjectOf(&value) => *Common for the Go value
 
 // Object is the common interface implemented by all QML types.
 //
@@ -786,6 +808,18 @@ func (win *Window) Wait() {
 	m.Lock()
 }
 
+var waitingWindows = make(map[unsafe.Pointer]*sync.Mutex)
+
+//export hookWindowHidden
+func hookWindowHidden(addr unsafe.Pointer) {
+	m, ok := waitingWindows[addr]
+	if !ok {
+		panic("window is not waiting")
+	}
+	delete(waitingWindows, addr)
+	m.Unlock()
+}
+
 // Snapshot returns an image with the visible contents of the window.
 // The main GUI thread is paused while the data is being acquired.
 func (win *Window) Snapshot() image.Image {
@@ -816,18 +850,6 @@ func (win *Window) Snapshot() image.Image {
 		image.Pix[i+3] = byte(c >> 24)
 	}
 	return image
-}
-
-var waitingWindows = make(map[unsafe.Pointer]*sync.Mutex)
-
-//export hookWindowHidden
-func hookWindowHidden(addr unsafe.Pointer) {
-	m, ok := waitingWindows[addr]
-	if !ok {
-		panic("window is not waiting")
-	}
-	delete(waitingWindows, addr)
-	m.Unlock()
 }
 
 // TypeSpec holds the specification of a QML type that is backed by Go logic.

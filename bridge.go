@@ -48,12 +48,14 @@ var (
 	guiLock      = 0
 	guiLoopReady sync.Mutex
 	guiLoopRef   uintptr
+	guiPaintRef  uintptr
 )
 
 // gui runs f in the main GUI thread and waits for f to return.
 func gui(f func()) {
-	if tref.Ref() == guiLoopRef {
-		// Already within the GUI thread. Attempting to wait would deadlock.
+	ref := tref.Ref()
+	if ref == guiLoopRef || ref == atomic.LoadUintptr(&guiPaintRef) {
+		// Already within the GUI or render threads. Attempting to wait would deadlock.
 		f()
 		return
 	}
@@ -225,9 +227,15 @@ func wrapGoValue(engine *Engine, gvalue interface{}, owner valueOwner) (cvalue u
 		panic("cannot hand pointer of pointer to QML logic; use a simple pointer instead")
 	}
 
+	painting := tref.Ref() == atomic.LoadUintptr(&guiPaintRef)
+
 	prev, ok := engine.values[gvalue]
-	if ok && (prev.owner == owner || owner != cppOwner) {
+	if ok && (prev.owner == owner || owner != cppOwner || painting) {
 		return prev.cvalue
+	}
+
+	if painting {
+		panic("cannot allocate new objects while painting")
 	}
 
 	parent := nilPtr
@@ -246,7 +254,7 @@ func wrapGoValue(engine *Engine, gvalue interface{}, owner valueOwner) (cvalue u
 	} else {
 		engine.values[gvalue] = fold
 	}
-	//fmt.Printf("[DEBUG] value alive (wrapped): %x/%#v\n", fold.cvalue, fold.gvalue)
+	//fmt.Printf("[DEBUG] value alive (wrapped): cvalue=%x gvalue=%x/%#v\n", fold.cvalue, addrOf(fold.gvalue), fold.gvalue)
 	stats.valuesAlive(+1)
 	C.engineSetContextForObject(engine.addr, fold.cvalue)
 	switch owner {
@@ -256,6 +264,10 @@ func wrapGoValue(engine *Engine, gvalue interface{}, owner valueOwner) (cvalue u
 		C.engineSetOwnershipJS(engine.addr, fold.cvalue)
 	}
 	return fold.cvalue
+}
+
+func addrOf(gvalue interface{}) uintptr {
+	return reflect.ValueOf(gvalue).Pointer()
 }
 
 // typeNew holds fold values that are created by registered types.
@@ -281,7 +293,7 @@ func hookGoValueTypeNew(cvalue unsafe.Pointer, specp unsafe.Pointer) (foldp unsa
 		owner:  jsOwner,
 	}
 	typeNew[fold] = true
-	//fmt.Printf("[DEBUG] value alive (type-created): %x/%#v\n", fold.cvalue, fold.gvalue)
+	//fmt.Printf("[DEBUG] value alive (type-created): cvalue=%x gvalue=%x/%#v\n", fold.cvalue, addrOf(fold.gvalue), fold.gvalue)
 	stats.valuesAlive(+1)
 	return unsafe.Pointer(fold)
 }
@@ -324,7 +336,7 @@ func hookGoValueDestroyed(enginep unsafe.Pointer, foldp unsafe.Pointer) {
 			}
 		}
 	}
-	//fmt.Printf("[DEBUG] value destroyed: %x/%#v\n", fold.cvalue, fold.gvalue)
+	//fmt.Printf("[DEBUG] value destroyed: cvalue=%x gvalue=%x/%#v\n", fold.cvalue, addrOf(fold.gvalue), fold.gvalue)
 	stats.valuesAlive(-1)
 }
 
@@ -481,8 +493,16 @@ func hookGoValuePaint(enginep, foldp unsafe.Pointer, reflectIndex C.intptr_t) {
 	fold := ensureEngine(enginep, foldp)
 	v := reflect.ValueOf(fold.gvalue)
 
+	// The main GUI thread is mutex-locked while paint methods are called,
+	// so no two paintings should be happening at the same time.
+	atomic.StoreUintptr(&guiPaintRef, tref.Ref())
+
+	painter := &Painter{fold.engine, &Common{fold.cvalue, fold.engine}}
+
 	method := v.Method(int(reflectIndex))
-	method.Call(nil)
+	method.Call([]reflect.Value{reflect.ValueOf(painter)})
+
+	atomic.StoreUintptr(&guiPaintRef, 0)
 }
 
 func ensureEngine(enginep, foldp unsafe.Pointer) *valueFold {
