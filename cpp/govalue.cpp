@@ -1,5 +1,4 @@
 #include <private/qmetaobjectbuilder_p.h>
-#include <private/qsgrendernode_p.h>
 
 #include <QtOpenGL/QtOpenGL>
 #include <QtOpenGL/QGLFunctions>

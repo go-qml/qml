@@ -989,7 +989,6 @@ func (s *S) TestTable(c *C) {
 
 		rect := t.Rect
 		goRectValue = &rect
-		rect.engine = s.engine
 
 		testData := TestData{
 			C:       c,
