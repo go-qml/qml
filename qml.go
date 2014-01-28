@@ -782,13 +782,16 @@ func (win *Window) Hide() {
 	})
 }
 
-// WinId gets the native window handle.
-func (win *Window) WinId() uintptr {
-	var winId uintptr
+// PlatformId returns the window's platform id.
+//
+// For platforms where this id might be useful, the value returned will
+// uniquely represent the window inside the corresponding screen.
+func (win *Window) PlatformId() uintptr {
+	var id uintptr
 	gui(func() {
-		 winId = uintptr(C.windowWinId(win.addr))
+		 id = uintptr(C.windowPlatformId(win.addr))
 	})
-	return winId
+	return id
 }
 
 // Root returns the root object being rendered.

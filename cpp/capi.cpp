@@ -224,7 +224,7 @@ void windowHide(QQuickWindow_ *win)
     reinterpret_cast<QQuickWindow *>(win)->hide();
 }
 
-uintptr_t windowWinId(QQuickWindow_ *win)
+uintptr_t windowPlatformId(QQuickWindow_ *win)
 {
     return reinterpret_cast<QQuickWindow *>(win)->winId();
 }
