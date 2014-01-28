@@ -9,9 +9,9 @@ package qml
 // #cgo CPPFLAGS: -I/usr/include/qt5/QtQuick/5.2.0/QtQuick
 // #cgo CPPFLAGS: -I/usr/include/qt/QtCore/5.1.1/QtCore
 // #cgo CPPFLAGS: -I/usr/include/qt/QtQuick/5.1.1/QtQuick
-// #cgo CXXFLAGS: -std=c++0x -pedantic-errors -Wall -fno-strict-aliasing -DGL_GLEXT_PROTOTYPES
-// #cgo LDFLAGS: -lstdc++ -lGL
-// #cgo pkg-config: Qt5Core Qt5Widgets Qt5Quick Qt5OpenGL
+// #cgo CXXFLAGS: -std=c++0x -pedantic-errors -Wall -fno-strict-aliasing
+// #cgo LDFLAGS: -lstdc++
+// #cgo pkg-config: Qt5Core Qt5Widgets Qt5Quick
 //
 // #include <stdlib.h>
 //
