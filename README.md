@@ -83,7 +83,7 @@ Something along these lines should be effective:
     $ brew install gcc48 qt5
 
     $ export PKG_CONFIG_PATH=`brew --prefix qt5`/lib/pkgconfig
-    $ QT5VERSION=`pkg-config --cflags Qt5Core | sed 's/^.*\(5\..\..\).*/\1/g'`
+    $ QT5VERSION=`pkg-config --modversion Qt5Core`
     $ # For "private/qmetaobject_p.h" inclusion
     $ export CGO_CPPFLAGS=-I`brew --prefix qt5`/include/QtCore/$QT5VERSION/QtCore
     $ CXX=g++-4.8 go get github.com/niemeyer/qml
