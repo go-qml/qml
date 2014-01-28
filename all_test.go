@@ -233,6 +233,10 @@ func (s *S) TestComponentCreateWindow(c *C) {
 	// TODO How to test this more effectively?
 	window := component.CreateWindow(nil)
 	window.Show()
+
+	// Just a smoke test, as there isn't much to assert.
+	c.Assert(window.PlatformId(), Not(Equals), uintptr(0))
+
 	// Qt doesn't hide the Window if we call it too quickly. :-(
 	time.Sleep(100 * time.Millisecond)
 	window.Hide()
