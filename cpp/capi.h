@@ -112,6 +112,7 @@ void *appThread();
 
 QQmlEngine_ *newEngine(QObject_ *parent);
 QQmlContext_ *engineRootContext(QQmlEngine_ *engine);
+void clearComponentCache(QQmlEngine_ *engine);
 void engineSetOwnershipCPP(QQmlEngine_ *engine, QObject_ *object);
 void engineSetOwnershipJS(QQmlEngine_ *engine, QObject_ *object);
 void engineSetContextForObject(QQmlEngine_ *engine, QObject_ *object);
