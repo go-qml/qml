@@ -58,9 +58,9 @@ func run() error {
 		return err
 	}
 
-	value := component.CreateWindow(nil)
-	value.Show()
-	value.Wait()
+	win := component.CreateWindow(nil)
+	win.Show()
+	win.Wait()
 
 	return nil
 }
