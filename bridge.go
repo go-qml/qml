@@ -541,7 +541,7 @@ func hookPanic(message *C.char) {
 }
 
 //export hookListPropertyAt
-func hookListPropertyAt(foldp unsafe.Pointer, reflectIndex, onChangedIndex C.intptr_t, index C.int) (objp unsafe.Pointer) { 
+func hookListPropertyAt(foldp unsafe.Pointer, reflectIndex, onChangedIndex C.intptr_t, index C.int) (objp unsafe.Pointer) {
 	fold := (*valueFold)(foldp)
 	field := fold.gfield(int(reflectIndex))
 	slice := field.Addr().Interface().(*[]Object)
@@ -576,7 +576,7 @@ func hookListPropertyClear(foldp unsafe.Pointer, reflectIndex, onChangedIndex C.
 	fold := (*valueFold)(foldp)
 	field := fold.gfield(int(reflectIndex))
 	slice := field.Addr().Interface().(*[]Object)
-	for i := range (*slice) {
+	for i := range *slice {
 		(*slice)[i] = nil
 	}
 	*slice = (*slice)[0:0]

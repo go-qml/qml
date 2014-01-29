@@ -122,7 +122,7 @@ func initFuncNameDocCount(header *Header) {
 }
 
 func funcNameDocPrefix(cfuncName string) string {
-	k := len(cfuncName)-1
+	k := len(cfuncName) - 1
 	if cfuncName[k] == 'v' {
 		k--
 	}

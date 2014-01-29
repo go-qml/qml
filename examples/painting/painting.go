@@ -25,7 +25,7 @@ func (r *GoRect) Paint(p *qml.Painter) {
 	height := gl.Float(obj.Int("height"))
 
 	gl.Enable(gl.BLEND)
-	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 	gl.Color4f(1.0, 1.0, 1.0, 0.8)
 	gl.Begin(gl.QUADS)
 	gl.Vertex2f(0, 0)
@@ -49,7 +49,7 @@ func run() error {
 
 	qml.RegisterTypes("GoExtensions", 1, 0, []qml.TypeSpec{{
 		Name: "GoRect",
-		New: func() interface{} { return &GoRect{} },
+		New:  func() interface{} { return &GoRect{} },
 	}})
 
 	engine := qml.NewEngine()

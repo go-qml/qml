@@ -554,7 +554,6 @@ func (obj *Common) Color(property string) color.RGBA {
 	return c
 }
 
-
 // Object returns the object value of the named property.
 // Object panics if the property is not a QML object.
 func (obj *Common) Object(property string) Object {
@@ -789,7 +788,7 @@ func (win *Window) Hide() {
 func (win *Window) PlatformId() uintptr {
 	var id uintptr
 	gui(func() {
-		 id = uintptr(C.windowPlatformId(win.addr))
+		id = uintptr(C.windowPlatformId(win.addr))
 	})
 	return id
 }

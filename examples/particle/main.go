@@ -40,9 +40,9 @@ func (ctrl *Control) TextReleased(text qml.Object) {
 	width := text.Int("width")
 	height := text.Int("height")
 
-	ctrl.Emit(x + 15, y + height/2)
-	ctrl.Emit(x + width / 2, 1.0 * y + height/2)
-	ctrl.Emit(x + width - 15, 1.0 * y + height/2)
+	ctrl.Emit(x+15, y+height/2)
+	ctrl.Emit(x+width/2, 1.0*y+height/2)
+	ctrl.Emit(x+width-15, 1.0*y+height/2)
 
 	go func() {
 		time.Sleep(500 * time.Millisecond)
@@ -58,10 +58,10 @@ func (ctrl *Control) Emit(x, y int) {
 		emitter := component.Create(nil)
 		emitter.Set("x", x)
 		emitter.Set("y", y)
-		emitter.Set("targetX", rand.Intn(240) - 120 + x)
-		emitter.Set("targetY", rand.Intn(240) - 120 + y)
-		emitter.Set("life", rand.Intn(2400) + 200)
-		emitter.Set("emitRate", rand.Intn(32) + 32)
+		emitter.Set("targetX", rand.Intn(240)-120+x)
+		emitter.Set("targetY", rand.Intn(240)-120+y)
+		emitter.Set("life", rand.Intn(2400)+200)
+		emitter.Set("emitRate", rand.Intn(32)+32)
 		emitter.ObjectByName("xAnim").Call("start")
 		emitter.ObjectByName("yAnim").Call("start")
 		emitter.Set("enabled", true)
