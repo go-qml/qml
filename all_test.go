@@ -949,6 +949,26 @@ var tests = []struct {
 			d.Assert(image.At(25, 25), Equals, color.RGBA{0, 0, 0, 255})
 			d.Assert(image.At(100, 100), Equals, color.RGBA{255, 0, 0, 255})
 		},
+	}, {
+		Summary: "Set a property with the wrong type",
+		QML: `
+			import QtQuick.Window 2.0
+			Window { Rectangle { objectName: "rect" } }
+		`,
+		Done: func(d *TestData) {
+			window := d.component.CreateWindow(nil)
+			defer window.Destroy()
+
+			root := window.Root() // It's the window itself in this case
+			rect := root.ObjectByName("rect")
+
+			d.Assert(func() { rect.Set("parent", root) }, Panics,
+				`cannot set property "parent" with type QQuickItem* to value of QQuickWindow*`)
+			d.Assert(func() { rect.Set("parent", 42) }, Panics,
+				`cannot set property "parent" with type QQuickItem* to value of int`)
+			d.Assert(func() { rect.Set("non_existent", 0) }, Panics,
+				`cannot set non-existent property "non_existent" on type QQuickRectangle`)
+		},
 	},
 }
 

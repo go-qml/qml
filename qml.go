@@ -350,7 +350,7 @@ type Object interface {
 	Common() *Common
 	TypeName() string
 	Interface() interface{}
-	Set(property string, value interface{}) error
+	Set(property string, value interface{})
 	Property(name string) interface{}
 	Int(property string) int
 	Int64(property string) int64
@@ -438,16 +438,16 @@ func (obj *Common) Interface() interface{} {
 }
 
 // Set changes the named object property to the given value.
-func (obj *Common) Set(property string, value interface{}) error {
+func (obj *Common) Set(property string, value interface{}) {
 	cproperty := C.CString(property)
 	defer C.free(unsafe.Pointer(cproperty))
+	var cerr *C.error
 	gui(func() {
 		var dvalue C.DataValue
 		packDataValue(value, &dvalue, obj.engine, cppOwner)
-		C.objectSetProperty(obj.addr, cproperty, &dvalue)
+		cerr = C.objectSetProperty(obj.addr, cproperty, &dvalue)
 	})
-	// TODO Return an error if the value cannot be set.
-	return nil
+	cmust(cerr)
 }
 
 // Property returns the current value for a property of the object.

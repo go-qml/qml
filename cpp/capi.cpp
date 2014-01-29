@@ -352,7 +352,7 @@ int objectGetProperty(QObject_ *object, const char *name, DataValue *result)
     return 1;
 }
 
-void objectSetProperty(QObject_ *object, const char *name, DataValue *value)
+error *objectSetProperty(QObject_ *object, const char *name, DataValue *value)
 {
     QObject *qobject = reinterpret_cast<QObject *>(object);
     QVariant var;
@@ -367,7 +367,31 @@ void objectSetProperty(QObject_ *object, const char *name, DataValue *value)
         }
     }
 
+    // Check that the types are compatible. There's probably more to be done here.
+    const QMetaObject *metaObject = qobject->metaObject();
+    int propIndex = metaObject->indexOfProperty(name);
+    if (propIndex == -1) {
+            return errorf("cannot set non-existent property \"%s\" on type %s", name, qobject->metaObject()->className());
+    }
+
+    QMetaProperty prop = metaObject->property(propIndex);
+    int propType = prop.userType();
+    int varType = var.userType();
+    QVariant saved = var;
+    if (propType != varType && propType != QMetaType::QVariant && !var.convert(propType)) {
+        if (varType == QMetaType::QObjectStar) {
+            return errorf("cannot set property \"%s\" with type %s to value of %s*",
+                    name, QMetaType::typeName(propType), saved.value<QObject*>()->metaObject()->className());
+        } else {
+            return errorf("cannot set property \"%s\" with type %s to value of %s",
+                    name, QMetaType::typeName(propType), QMetaType::typeName(varType));
+        }
+    }
+
+    // TODO The name was already resolved to a property index
+    //      above. Use it instead of asking Qt to do so again.
     qobject->setProperty(name, var);
+    return 0;
 }
 
 error *objectInvoke(QObject_ *object, const char *method, int methodLen, DataValue *resultdv, DataValue *paramsdv, int paramsLen)
