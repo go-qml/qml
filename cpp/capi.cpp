@@ -376,21 +376,28 @@ error *objectSetProperty(QObject_ *object, const char *name, DataValue *value)
 
     QMetaProperty prop = metaObject->property(propIndex);
     int propType = prop.userType();
-    int varType = var.userType();
-    QVariant saved = var;
-    if (propType != varType && propType != QMetaType::QVariant && !var.convert(propType)) {
-        if (varType == QMetaType::QObjectStar) {
-            return errorf("cannot set property \"%s\" with type %s to value of %s*",
-                    name, QMetaType::typeName(propType), saved.value<QObject*>()->metaObject()->className());
-        } else {
-            return errorf("cannot set property \"%s\" with type %s to value of %s",
-                    name, QMetaType::typeName(propType), QMetaType::typeName(varType));
+    void *valueArg;
+    if (propType == QMetaType::QVariant) {
+        valueArg = (void *)&var;
+    } else {
+        int varType = var.userType();
+        QVariant saved = var;
+        if (propType != varType && !var.convert(propType)) {
+            if (varType == QMetaType::QObjectStar) {
+                return errorf("cannot set property \"%s\" with type %s to value of %s*",
+                        name, QMetaType::typeName(propType), saved.value<QObject*>()->metaObject()->className());
+            } else {
+                return errorf("cannot set property \"%s\" with type %s to value of %s",
+                        name, QMetaType::typeName(propType), QMetaType::typeName(varType));
+            }
         }
+        valueArg = (void *)var.constData();
     }
 
-    // TODO The name was already resolved to a property index
-    //      above. Use it instead of asking Qt to do so again.
-    qobject->setProperty(name, var);
+    int status = -1;
+    int flags = 0;
+    void *args[] = {valueArg, 0, &status, &flags};
+    QMetaObject::metacall(qobject, QMetaObject::WriteProperty, propIndex, args);
     return 0;
 }
 
