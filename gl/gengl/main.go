@@ -19,6 +19,8 @@ type Define struct {
 	Value     string
 	Heading   string
 	LineBlock int
+
+	GoName string
 }
 
 type Func struct {
@@ -26,6 +28,10 @@ type Func struct {
 	Type  string
 	Addr  int
 	Param []Param
+
+	GoName  string
+	GoType  string
+	DocName string
 }
 
 type Param struct {
@@ -33,12 +39,17 @@ type Param struct {
 	Type  string
 	Addr  int
 	Array int
+
+	GoName string
+	GoType string
 }
 
 type Type struct {
 	Name    string
 	Type    string
 	Comment string
+
+	GoName string
 }
 
 type Header struct {
@@ -68,7 +79,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	initFuncNameDocCount(&header)
+	prepareHeader(&header)
 	buf := &bytes.Buffer{}
 	err = tmpl.Execute(buf, &header)
 	if err != nil {
@@ -82,42 +93,72 @@ func run() error {
 	return nil
 }
 
-func typeName(ctypeName string) string {
+func goTypeName(ctypeName string) string {
 	if !strings.HasPrefix(ctypeName, "GL") || len(ctypeName) < 3 {
 		panic("unexpected C type name: " + ctypeName)
 	}
 	return string(ctypeName[2]-('a'-'A')) + ctypeName[3:]
 }
 
-func constName(defineName string) string {
-	if '0' <= defineName[3] && defineName[3] <= '9' {
-		return "N" + defineName[3:]
+func prepareHeader(header *Header) {
+	funcNameDocCount := make(map[string]int)
+
+	for fi, f := range header.Func {
+		docPrefix := funcNameDocPrefix(f.Name)
+		if docPrefix != f.Name {
+			funcNameDocCount[docPrefix]++
+		}
+
+		if !strings.HasPrefix(f.Name, "gl") || len(f.Name) < 3 {
+			panic("unexpected C function name: " + f.Name)
+		}
+		f.GoName = f.Name[2:]
+		if f.Type != "void" {
+			f.GoType = goTypeName(f.Type)
+		}
+
+		for pi, p := range f.Param {
+			switch p.Name {
+			case "type", "func", "map":
+				p.GoName = "gl" + p.Name
+			default:
+				if token.Lookup(p.Name) != token.IDENT {
+					p.GoName = p.Name + "_"
+				} else {
+					p.GoName = p.Name
+				}
+			}
+			p.GoType = goTypeName(p.Type)
+			f.Param[pi] = p
+		}
+		header.Func[fi] = f
 	}
-	return defineName[3:]
-}
 
-var constLineBlock = -1
-
-func constNewLine(lineBlock int) bool {
-	if lineBlock == constLineBlock {
-		return false
+	for fi, f := range header.Func {
+		prefix := funcNameDocPrefix(f.Name)
+		if funcNameDocCount[prefix] > 1 {
+			f.DocName = prefix
+		} else {
+			f.DocName = f.Name
+		}
+		header.Func[fi] = f
 	}
-	constLineBlock = lineBlock
-	return true
-}
 
-func funcName(cfuncName string) string {
-	if !strings.HasPrefix(cfuncName, "gl") || len(cfuncName) < 3 {
-		panic("unexpected C function name: " + cfuncName)
+	for ti, t := range header.Type {
+		t.GoName = goTypeName(t.Name)
+		header.Type[ti] = t
 	}
-	return cfuncName[2:]
-}
 
-var funcNameDocCount = make(map[string]int)
-
-func initFuncNameDocCount(header *Header) {
-	for _, f := range header.Func {
-		funcNameDocCount[funcNameDocPrefix(f.Name)]++
+	for di, d := range header.Define {
+		if !strings.HasPrefix(d.Name, "GL") || len(d.Name) < 3 {
+			panic("unexpected C define name: " + d.Name)
+		}
+		if d.Name[3] >= '0' && d.Name[3] <= '9' {
+			d.GoName = "N" + d.Name[3:]
+		} else {
+			d.GoName = d.Name[3:]
+		}
+		header.Define[di] = d
 	}
 }
 
@@ -140,33 +181,40 @@ func funcNameDocPrefix(cfuncName string) string {
 	return cfuncName[:k+1]
 }
 
-func funcNameDoc(cfuncName string) string {
-	prefix := funcNameDocPrefix(cfuncName)
-	if funcNameDocCount[prefix] > 1 {
-		return prefix
+var constLineBlock = -1
+
+func constNewLine(lineBlock int) bool {
+	if lineBlock == constLineBlock {
+		return false
 	}
-	return cfuncName
+	constLineBlock = lineBlock
+	return true
 }
 
+
 func funcParams(f Func) string {
-	var buf []byte
+	var buf bytes.Buffer
 	for i, param := range f.Param {
 		if i > 0 {
-			buf = append(buf, ", "...)
+			buf.WriteString(", ")
 		}
-		buf = append(buf, paramName(param.Name)...)
-		buf = append(buf, ' ')
+		buf.WriteString(param.GoName)
+		buf.WriteByte(' ')
+		if param.Type == "GLvoid" && param.Addr > 0 {
+			buf.WriteString("interface{}")
+			continue
+		}
 		for j := 0; j < param.Addr; j++ {
-			buf = append(buf, "[]"...)
+			buf.WriteString("[]")
 		}
 		if param.Array > 0 {
-			buf = append(buf, '[')
-			buf = append(buf, strconv.Itoa(param.Array)...)
-			buf = append(buf, ']')
+			buf.WriteByte('[')
+			buf.WriteString(strconv.Itoa(param.Array))
+			buf.WriteByte(']')
 		}
-		buf = append(buf, typeName(param.Type)...)
+		buf.WriteString(param.GoType)
 	}
-	return string(buf)
+	return buf.String()
 }
 
 func funcCallParams(f Func) string {
@@ -175,32 +223,25 @@ func funcCallParams(f Func) string {
 		if i > 0 {
 			buf.WriteString(", ")
 		}
-		if param.Addr > 0 {
-			buf.WriteString("(*")
+		if param.Type == "GLvoid" {
+			buf.WriteString("unsafe.Pointer(")
+			buf.WriteString(param.GoName)
+			buf.WriteString("_v.Index(0).Addr().Pointer())")
+		} else if param.Addr > 0 {
+			buf.WriteString("(*C.")
+			buf.WriteString(param.Type)
+			buf.WriteString(")(unsafe.Pointer(&")
+			buf.WriteString(param.GoName)
+			buf.WriteString("[0]))")
+		} else {
+			buf.WriteString("C.")
+			buf.WriteString(param.Type)
+			buf.WriteByte('(')
+			buf.WriteString(param.GoName)
+			buf.WriteByte(')')
 		}
-		buf.WriteString("C.")
-		buf.WriteString(param.Type)
-		if param.Addr > 0 {
-			buf.WriteString(")")
-		}
-		buf.WriteByte('(')
-		if param.Addr > 0 {
-			buf.WriteString("unsafe.Pointer(&")
-		}
-		buf.WriteString(paramName(param.Name))
-		if param.Addr > 0 {
-			buf.WriteString("[0])")
-		}
-		buf.WriteByte(')')
 	}
 	return buf.String()
-}
-
-func paramName(cparamName string) string {
-	if token.Lookup(cparamName) != token.IDENT {
-		return cparamName + "_"
-	}
-	return cparamName
 }
 
 func paramMaxLen(f Func, param Param) string {
@@ -224,13 +265,10 @@ func funcSupported(f Func) bool {
 		return false
 	}
 	for _, param := range f.Param {
-		if param.Type == "GLvoid" {
-			return false
-		}
 		if param.Array > 0 {
 			return false
 		}
-		if param.Addr > 0 && !strings.HasPrefix(f.Name, "glVertex") && !strings.HasPrefix(f.Name, "glNormal") {
+		if param.Addr > 1 {
 			return false
 		}
 	}
@@ -238,15 +276,10 @@ func funcSupported(f Func) bool {
 }
 
 var funcs = template.FuncMap{
-	"typeName":       typeName,
-	"constName":      constName,
 	"constNewLine":   constNewLine,
-	"funcName":       funcName,
-	"funcNameDoc":    funcNameDoc,
 	"funcParams":     funcParams,
 	"funcCallParams": funcCallParams,
 	"funcSupported":  funcSupported,
-	"paramName":      paramName,
 	"paramMaxLen":    paramMaxLen,
 	"repeat":         strings.Repeat,
 }
@@ -264,24 +297,39 @@ package gl
 import "C"
 
 import (
+	"reflect"
 	"unsafe"
 )
 
 type (
-{{range $type := $.Type}}{{if $type.Name | ne "GLvoid"}}	{{$type.Name | typeName}} C.{{$type.Name}}{{if $type.Comment}} /* {{$type.Comment}} */{{end}}
+{{range $type := $.Type}}{{if $type.Name | ne "GLvoid"}}	{{$type.GoName}} C.{{$type.Name}}{{if $type.Comment}} /* {{$type.Comment}} */{{end}}
 {{end}}{{end}})
 
 const (
 {{range $define := $.Define}}{{if $define.LineBlock | constNewLine}}
 {{end}}{{if $define.Heading}}	// {{$define.Heading}}
-{{end}}	{{$define.Name | constName}} = C.{{$define.Name}}
+{{end}}	{{$define.GoName}} = C.{{$define.Name}}
 {{end}})
+
 {{ range $func := $.Func }}{{if $func | funcSupported}}
-// See http://www.opengl.org/sdk/docs/man2/xhtml/{{$func.Name | funcNameDoc}}.xml
-func {{$func.Name | funcName}}({{funcParams $func}}) {{if $func.Type}}{{repeat "*" $func.Addr}}{{$func.Type | typeName}} {{end}}{ {{range $param := $func.Param}}{{with $max := paramMaxLen $func $param}}{{if $max}}if len({{$param.Name | paramName}}) > {{$max}} {
-		panic("parameter {{$param.Name | paramName}} has incorrect length")
-	}{{end}}
-	{{end}}{{end}}{{if $func.Type}}return {{$func.Type | typeName}}({{end}}C.{{$func.Name}}({{funcCallParams $func}}){{if $func.Type}}){{end}}
+// See http://www.opengl.org/sdk/docs/man2/xhtml/{{$func.DocName}}.xml
+func {{$func.GoName}}({{funcParams $func}}) {{if $func.GoType}}{{repeat "*" $func.Addr}}{{$func.GoType}} {{end}}{
+	{{range $param := $func.Param}}
+		{{with $max := paramMaxLen $func $param}}
+			{{if $max}}
+				if len({{$param.GoName}}) > {{$max}} {
+					panic("parameter {{$param.GoName}} has incorrect length")
+				}
+			{{end}}
+		{{end}}
+		{{if $param.Type | eq "GLvoid"}}
+			{{$param.GoName}}_v := reflect.ValueOf({{$param.GoName}})
+			if {{$param.GoName}}_v.Kind() != reflect.Slice {
+				panic("parameter {{$param.GoName}} must be a slice")
+			}
+		{{end}}
+	{{end}}
+	{{if $func.GoType}}return {{$func.GoType}}({{end}}C.{{$func.Name}}({{funcCallParams $func}}){{if $func.GoType}}){{end}}
 }
 {{end}}{{end}}
 `))

@@ -9,6 +9,7 @@ package gl
 import "C"
 
 import (
+	"reflect"
 	"unsafe"
 )
 
@@ -865,1208 +866,2927 @@ const (
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glClearIndex.xml
 func ClearIndex(c Float) {
+
 	C.glClearIndex(C.GLfloat(c))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glClearColor.xml
 func ClearColor(red Clampf, green Clampf, blue Clampf, alpha Clampf) {
+
 	C.glClearColor(C.GLclampf(red), C.GLclampf(green), C.GLclampf(blue), C.GLclampf(alpha))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glClear.xml
 func Clear(mask Bitfield) {
+
 	C.glClear(C.GLbitfield(mask))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glIndexMask.xml
 func IndexMask(mask Uint) {
+
 	C.glIndexMask(C.GLuint(mask))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glColorMask.xml
 func ColorMask(red Boolean, green Boolean, blue Boolean, alpha Boolean) {
+
 	C.glColorMask(C.GLboolean(red), C.GLboolean(green), C.GLboolean(blue), C.GLboolean(alpha))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glAlphaFunc.xml
-func AlphaFunc(func_ Enum, ref Clampf) {
-	C.glAlphaFunc(C.GLenum(func_), C.GLclampf(ref))
+func AlphaFunc(glfunc Enum, ref Clampf) {
+
+	C.glAlphaFunc(C.GLenum(glfunc), C.GLclampf(ref))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glBlendFunc.xml
 func BlendFunc(sfactor Enum, dfactor Enum) {
+
 	C.glBlendFunc(C.GLenum(sfactor), C.GLenum(dfactor))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glLogicOp.xml
 func LogicOp(opcode Enum) {
+
 	C.glLogicOp(C.GLenum(opcode))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glCullFace.xml
 func CullFace(mode Enum) {
+
 	C.glCullFace(C.GLenum(mode))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glFrontFace.xml
 func FrontFace(mode Enum) {
+
 	C.glFrontFace(C.GLenum(mode))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glPointSize.xml
 func PointSize(size Float) {
+
 	C.glPointSize(C.GLfloat(size))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glLineWidth.xml
 func LineWidth(width Float) {
+
 	C.glLineWidth(C.GLfloat(width))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glLineStipple.xml
 func LineStipple(factor Int, pattern Ushort) {
+
 	C.glLineStipple(C.GLint(factor), C.GLushort(pattern))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glPolygonMode.xml
 func PolygonMode(face Enum, mode Enum) {
+
 	C.glPolygonMode(C.GLenum(face), C.GLenum(mode))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glPolygonOffset.xml
 func PolygonOffset(factor Float, units Float) {
+
 	C.glPolygonOffset(C.GLfloat(factor), C.GLfloat(units))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glPolygonStipple.xml
+func PolygonStipple(mask []Ubyte) {
+
+	C.glPolygonStipple((*C.GLubyte)(unsafe.Pointer(&mask[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetPolygonStipple.xml
+func GetPolygonStipple(mask []Ubyte) {
+
+	C.glGetPolygonStipple((*C.GLubyte)(unsafe.Pointer(&mask[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glEdgeFlag.xml
 func EdgeFlag(flag Boolean) {
+
 	C.glEdgeFlag(C.GLboolean(flag))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glEdgeFlagv.xml
+func EdgeFlagv(flag []Boolean) {
+
+	C.glEdgeFlagv((*C.GLboolean)(unsafe.Pointer(&flag[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glScissor.xml
 func Scissor(x Int, y Int, width Sizei, height Sizei) {
+
 	C.glScissor(C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glClipPlane.xml
+func ClipPlane(plane Enum, equation []Double) {
+
+	C.glClipPlane(C.GLenum(plane), (*C.GLdouble)(unsafe.Pointer(&equation[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetClipPlane.xml
+func GetClipPlane(plane Enum, equation []Double) {
+
+	C.glGetClipPlane(C.GLenum(plane), (*C.GLdouble)(unsafe.Pointer(&equation[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glDrawBuffer.xml
 func DrawBuffer(mode Enum) {
+
 	C.glDrawBuffer(C.GLenum(mode))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glReadBuffer.xml
 func ReadBuffer(mode Enum) {
+
 	C.glReadBuffer(C.GLenum(mode))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glEnable.xml
 func Enable(cap Enum) {
+
 	C.glEnable(C.GLenum(cap))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glDisable.xml
 func Disable(cap Enum) {
+
 	C.glDisable(C.GLenum(cap))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glIsEnabled.xml
 func IsEnabled(cap Enum) Boolean {
+
 	return Boolean(C.glIsEnabled(C.GLenum(cap)))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glEnableClientState.xml
 func EnableClientState(cap Enum) {
+
 	C.glEnableClientState(C.GLenum(cap))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glDisableClientState.xml
 func DisableClientState(cap Enum) {
+
 	C.glDisableClientState(C.GLenum(cap))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetBooleanv.xml
+func GetBooleanv(pname Enum, params []Boolean) {
+
+	C.glGetBooleanv(C.GLenum(pname), (*C.GLboolean)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetDoublev.xml
+func GetDoublev(pname Enum, params []Double) {
+
+	C.glGetDoublev(C.GLenum(pname), (*C.GLdouble)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetFloatv.xml
+func GetFloatv(pname Enum, params []Float) {
+
+	C.glGetFloatv(C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetIntegerv.xml
+func GetIntegerv(pname Enum, params []Int) {
+
+	C.glGetIntegerv(C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glPushAttrib.xml
 func PushAttrib(mask Bitfield) {
+
 	C.glPushAttrib(C.GLbitfield(mask))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glPopAttrib.xml
 func PopAttrib() {
+
 	C.glPopAttrib()
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glPushClientAttrib.xml
 func PushClientAttrib(mask Bitfield) {
+
 	C.glPushClientAttrib(C.GLbitfield(mask))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glPopClientAttrib.xml
 func PopClientAttrib() {
+
 	C.glPopClientAttrib()
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glRenderMode.xml
 func RenderMode(mode Enum) Int {
+
 	return Int(C.glRenderMode(C.GLenum(mode)))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glGetError.xml
 func GetError() Enum {
+
 	return Enum(C.glGetError())
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glFinish.xml
 func Finish() {
+
 	C.glFinish()
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glFlush.xml
 func Flush() {
+
 	C.glFlush()
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glHint.xml
 func Hint(target Enum, mode Enum) {
+
 	C.glHint(C.GLenum(target), C.GLenum(mode))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glClearDepth.xml
 func ClearDepth(depth Clampd) {
+
 	C.glClearDepth(C.GLclampd(depth))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glDepthFunc.xml
-func DepthFunc(func_ Enum) {
-	C.glDepthFunc(C.GLenum(func_))
+func DepthFunc(glfunc Enum) {
+
+	C.glDepthFunc(C.GLenum(glfunc))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glDepthMask.xml
 func DepthMask(flag Boolean) {
+
 	C.glDepthMask(C.GLboolean(flag))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glDepthRange.xml
 func DepthRange(near_val Clampd, far_val Clampd) {
+
 	C.glDepthRange(C.GLclampd(near_val), C.GLclampd(far_val))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glClearAccum.xml
 func ClearAccum(red Float, green Float, blue Float, alpha Float) {
+
 	C.glClearAccum(C.GLfloat(red), C.GLfloat(green), C.GLfloat(blue), C.GLfloat(alpha))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glAccum.xml
 func Accum(op Enum, value Float) {
+
 	C.glAccum(C.GLenum(op), C.GLfloat(value))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glMatrixMode.xml
 func MatrixMode(mode Enum) {
+
 	C.glMatrixMode(C.GLenum(mode))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glOrtho.xml
 func Ortho(left Double, right Double, bottom Double, top Double, near_val Double, far_val Double) {
+
 	C.glOrtho(C.GLdouble(left), C.GLdouble(right), C.GLdouble(bottom), C.GLdouble(top), C.GLdouble(near_val), C.GLdouble(far_val))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glFrustum.xml
 func Frustum(left Double, right Double, bottom Double, top Double, near_val Double, far_val Double) {
+
 	C.glFrustum(C.GLdouble(left), C.GLdouble(right), C.GLdouble(bottom), C.GLdouble(top), C.GLdouble(near_val), C.GLdouble(far_val))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glViewport.xml
 func Viewport(x Int, y Int, width Sizei, height Sizei) {
+
 	C.glViewport(C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glPushMatrix.xml
 func PushMatrix() {
+
 	C.glPushMatrix()
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glPopMatrix.xml
 func PopMatrix() {
+
 	C.glPopMatrix()
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glLoadIdentity.xml
 func LoadIdentity() {
+
 	C.glLoadIdentity()
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glLoadMatrix.xml
+func LoadMatrixd(m []Double) {
+
+	C.glLoadMatrixd((*C.GLdouble)(unsafe.Pointer(&m[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glLoadMatrix.xml
+func LoadMatrixf(m []Float) {
+
+	C.glLoadMatrixf((*C.GLfloat)(unsafe.Pointer(&m[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glMultMatrix.xml
+func MultMatrixd(m []Double) {
+
+	C.glMultMatrixd((*C.GLdouble)(unsafe.Pointer(&m[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glMultMatrix.xml
+func MultMatrixf(m []Float) {
+
+	C.glMultMatrixf((*C.GLfloat)(unsafe.Pointer(&m[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glRotate.xml
 func Rotated(angle Double, x Double, y Double, z Double) {
+
 	C.glRotated(C.GLdouble(angle), C.GLdouble(x), C.GLdouble(y), C.GLdouble(z))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glRotate.xml
 func Rotatef(angle Float, x Float, y Float, z Float) {
+
 	C.glRotatef(C.GLfloat(angle), C.GLfloat(x), C.GLfloat(y), C.GLfloat(z))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glScale.xml
 func Scaled(x Double, y Double, z Double) {
+
 	C.glScaled(C.GLdouble(x), C.GLdouble(y), C.GLdouble(z))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glScale.xml
 func Scalef(x Float, y Float, z Float) {
+
 	C.glScalef(C.GLfloat(x), C.GLfloat(y), C.GLfloat(z))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glTranslate.xml
 func Translated(x Double, y Double, z Double) {
+
 	C.glTranslated(C.GLdouble(x), C.GLdouble(y), C.GLdouble(z))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glTranslate.xml
 func Translatef(x Float, y Float, z Float) {
+
 	C.glTranslatef(C.GLfloat(x), C.GLfloat(y), C.GLfloat(z))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glIsList.xml
 func IsList(list Uint) Boolean {
+
 	return Boolean(C.glIsList(C.GLuint(list)))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glDeleteLists.xml
 func DeleteLists(list Uint, range_ Sizei) {
+
 	C.glDeleteLists(C.GLuint(list), C.GLsizei(range_))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glGenLists.xml
 func GenLists(range_ Sizei) Uint {
+
 	return Uint(C.glGenLists(C.GLsizei(range_)))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glNewList.xml
 func NewList(list Uint, mode Enum) {
+
 	C.glNewList(C.GLuint(list), C.GLenum(mode))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glEndList.xml
 func EndList() {
+
 	C.glEndList()
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glCallList.xml
 func CallList(list Uint) {
+
 	C.glCallList(C.GLuint(list))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glCallLists.xml
+func CallLists(n Sizei, gltype Enum, lists interface{}) {
+
+	lists_v := reflect.ValueOf(lists)
+	if lists_v.Kind() != reflect.Slice {
+		panic("parameter lists must be a slice")
+	}
+
+	C.glCallLists(C.GLsizei(n), C.GLenum(gltype), unsafe.Pointer(lists_v.Index(0).Addr().Pointer()))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glListBase.xml
 func ListBase(base Uint) {
+
 	C.glListBase(C.GLuint(base))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glBegin.xml
 func Begin(mode Enum) {
+
 	C.glBegin(C.GLenum(mode))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glEnd.xml
 func End() {
+
 	C.glEnd()
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
 func Vertex2d(x Double, y Double) {
+
 	C.glVertex2d(C.GLdouble(x), C.GLdouble(y))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
 func Vertex2f(x Float, y Float) {
+
 	C.glVertex2f(C.GLfloat(x), C.GLfloat(y))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
 func Vertex2i(x Int, y Int) {
+
 	C.glVertex2i(C.GLint(x), C.GLint(y))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
 func Vertex2s(x Short, y Short) {
+
 	C.glVertex2s(C.GLshort(x), C.GLshort(y))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
 func Vertex3d(x Double, y Double, z Double) {
+
 	C.glVertex3d(C.GLdouble(x), C.GLdouble(y), C.GLdouble(z))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
 func Vertex3f(x Float, y Float, z Float) {
+
 	C.glVertex3f(C.GLfloat(x), C.GLfloat(y), C.GLfloat(z))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
 func Vertex3i(x Int, y Int, z Int) {
+
 	C.glVertex3i(C.GLint(x), C.GLint(y), C.GLint(z))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
 func Vertex3s(x Short, y Short, z Short) {
+
 	C.glVertex3s(C.GLshort(x), C.GLshort(y), C.GLshort(z))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
 func Vertex4d(x Double, y Double, z Double, w Double) {
+
 	C.glVertex4d(C.GLdouble(x), C.GLdouble(y), C.GLdouble(z), C.GLdouble(w))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
 func Vertex4f(x Float, y Float, z Float, w Float) {
+
 	C.glVertex4f(C.GLfloat(x), C.GLfloat(y), C.GLfloat(z), C.GLfloat(w))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
 func Vertex4i(x Int, y Int, z Int, w Int) {
+
 	C.glVertex4i(C.GLint(x), C.GLint(y), C.GLint(z), C.GLint(w))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
 func Vertex4s(x Short, y Short, z Short, w Short) {
+
 	C.glVertex4s(C.GLshort(x), C.GLshort(y), C.GLshort(z), C.GLshort(w))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
 func Vertex2dv(v []Double) {
+
 	if len(v) > 2 {
 		panic("parameter v has incorrect length")
 	}
+
 	C.glVertex2dv((*C.GLdouble)(unsafe.Pointer(&v[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
 func Vertex2fv(v []Float) {
+
 	if len(v) > 2 {
 		panic("parameter v has incorrect length")
 	}
+
 	C.glVertex2fv((*C.GLfloat)(unsafe.Pointer(&v[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
 func Vertex2iv(v []Int) {
+
 	if len(v) > 2 {
 		panic("parameter v has incorrect length")
 	}
+
 	C.glVertex2iv((*C.GLint)(unsafe.Pointer(&v[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
 func Vertex2sv(v []Short) {
+
 	if len(v) > 2 {
 		panic("parameter v has incorrect length")
 	}
+
 	C.glVertex2sv((*C.GLshort)(unsafe.Pointer(&v[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
 func Vertex3dv(v []Double) {
+
 	if len(v) > 3 {
 		panic("parameter v has incorrect length")
 	}
+
 	C.glVertex3dv((*C.GLdouble)(unsafe.Pointer(&v[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
 func Vertex3fv(v []Float) {
+
 	if len(v) > 3 {
 		panic("parameter v has incorrect length")
 	}
+
 	C.glVertex3fv((*C.GLfloat)(unsafe.Pointer(&v[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
 func Vertex3iv(v []Int) {
+
 	if len(v) > 3 {
 		panic("parameter v has incorrect length")
 	}
+
 	C.glVertex3iv((*C.GLint)(unsafe.Pointer(&v[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
 func Vertex3sv(v []Short) {
+
 	if len(v) > 3 {
 		panic("parameter v has incorrect length")
 	}
+
 	C.glVertex3sv((*C.GLshort)(unsafe.Pointer(&v[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
 func Vertex4dv(v []Double) {
+
 	if len(v) > 4 {
 		panic("parameter v has incorrect length")
 	}
+
 	C.glVertex4dv((*C.GLdouble)(unsafe.Pointer(&v[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
 func Vertex4fv(v []Float) {
+
 	if len(v) > 4 {
 		panic("parameter v has incorrect length")
 	}
+
 	C.glVertex4fv((*C.GLfloat)(unsafe.Pointer(&v[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
 func Vertex4iv(v []Int) {
+
 	if len(v) > 4 {
 		panic("parameter v has incorrect length")
 	}
+
 	C.glVertex4iv((*C.GLint)(unsafe.Pointer(&v[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glVertex.xml
 func Vertex4sv(v []Short) {
+
 	if len(v) > 4 {
 		panic("parameter v has incorrect length")
 	}
+
 	C.glVertex4sv((*C.GLshort)(unsafe.Pointer(&v[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glNormal.xml
 func Normal3b(nx Byte, ny Byte, nz Byte) {
+
 	C.glNormal3b(C.GLbyte(nx), C.GLbyte(ny), C.GLbyte(nz))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glNormal.xml
 func Normal3d(nx Double, ny Double, nz Double) {
+
 	C.glNormal3d(C.GLdouble(nx), C.GLdouble(ny), C.GLdouble(nz))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glNormal.xml
 func Normal3f(nx Float, ny Float, nz Float) {
+
 	C.glNormal3f(C.GLfloat(nx), C.GLfloat(ny), C.GLfloat(nz))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glNormal.xml
 func Normal3i(nx Int, ny Int, nz Int) {
+
 	C.glNormal3i(C.GLint(nx), C.GLint(ny), C.GLint(nz))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glNormal.xml
 func Normal3s(nx Short, ny Short, nz Short) {
+
 	C.glNormal3s(C.GLshort(nx), C.GLshort(ny), C.GLshort(nz))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glNormal.xml
 func Normal3bv(v []Byte) {
+
 	C.glNormal3bv((*C.GLbyte)(unsafe.Pointer(&v[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glNormal.xml
 func Normal3dv(v []Double) {
+
 	if len(v) > 3 {
 		panic("parameter v has incorrect length")
 	}
+
 	C.glNormal3dv((*C.GLdouble)(unsafe.Pointer(&v[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glNormal.xml
 func Normal3fv(v []Float) {
+
 	if len(v) > 3 {
 		panic("parameter v has incorrect length")
 	}
+
 	C.glNormal3fv((*C.GLfloat)(unsafe.Pointer(&v[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glNormal.xml
 func Normal3iv(v []Int) {
+
 	if len(v) > 3 {
 		panic("parameter v has incorrect length")
 	}
+
 	C.glNormal3iv((*C.GLint)(unsafe.Pointer(&v[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glNormal.xml
 func Normal3sv(v []Short) {
+
 	if len(v) > 3 {
 		panic("parameter v has incorrect length")
 	}
+
 	C.glNormal3sv((*C.GLshort)(unsafe.Pointer(&v[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glIndex.xml
 func Indexd(c Double) {
+
 	C.glIndexd(C.GLdouble(c))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glIndex.xml
 func Indexf(c Float) {
+
 	C.glIndexf(C.GLfloat(c))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glIndex.xml
 func Indexi(c Int) {
+
 	C.glIndexi(C.GLint(c))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glIndex.xml
 func Indexs(c Short) {
+
 	C.glIndexs(C.GLshort(c))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glIndex.xml
 func Indexub(c Ubyte) {
+
 	C.glIndexub(C.GLubyte(c))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glIndex.xml
+func Indexdv(c []Double) {
+
+	C.glIndexdv((*C.GLdouble)(unsafe.Pointer(&c[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glIndex.xml
+func Indexfv(c []Float) {
+
+	C.glIndexfv((*C.GLfloat)(unsafe.Pointer(&c[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glIndex.xml
+func Indexiv(c []Int) {
+
+	C.glIndexiv((*C.GLint)(unsafe.Pointer(&c[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glIndex.xml
+func Indexsv(c []Short) {
+
+	C.glIndexsv((*C.GLshort)(unsafe.Pointer(&c[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glIndex.xml
+func Indexubv(c []Ubyte) {
+
+	C.glIndexubv((*C.GLubyte)(unsafe.Pointer(&c[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
 func Color3b(red Byte, green Byte, blue Byte) {
+
 	C.glColor3b(C.GLbyte(red), C.GLbyte(green), C.GLbyte(blue))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
 func Color3d(red Double, green Double, blue Double) {
+
 	C.glColor3d(C.GLdouble(red), C.GLdouble(green), C.GLdouble(blue))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
 func Color3f(red Float, green Float, blue Float) {
+
 	C.glColor3f(C.GLfloat(red), C.GLfloat(green), C.GLfloat(blue))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
 func Color3i(red Int, green Int, blue Int) {
+
 	C.glColor3i(C.GLint(red), C.GLint(green), C.GLint(blue))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
 func Color3s(red Short, green Short, blue Short) {
+
 	C.glColor3s(C.GLshort(red), C.GLshort(green), C.GLshort(blue))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
 func Color3ub(red Ubyte, green Ubyte, blue Ubyte) {
+
 	C.glColor3ub(C.GLubyte(red), C.GLubyte(green), C.GLubyte(blue))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
 func Color3ui(red Uint, green Uint, blue Uint) {
+
 	C.glColor3ui(C.GLuint(red), C.GLuint(green), C.GLuint(blue))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
 func Color3us(red Ushort, green Ushort, blue Ushort) {
+
 	C.glColor3us(C.GLushort(red), C.GLushort(green), C.GLushort(blue))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
 func Color4b(red Byte, green Byte, blue Byte, alpha Byte) {
+
 	C.glColor4b(C.GLbyte(red), C.GLbyte(green), C.GLbyte(blue), C.GLbyte(alpha))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
 func Color4d(red Double, green Double, blue Double, alpha Double) {
+
 	C.glColor4d(C.GLdouble(red), C.GLdouble(green), C.GLdouble(blue), C.GLdouble(alpha))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
 func Color4f(red Float, green Float, blue Float, alpha Float) {
+
 	C.glColor4f(C.GLfloat(red), C.GLfloat(green), C.GLfloat(blue), C.GLfloat(alpha))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
 func Color4i(red Int, green Int, blue Int, alpha Int) {
+
 	C.glColor4i(C.GLint(red), C.GLint(green), C.GLint(blue), C.GLint(alpha))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
 func Color4s(red Short, green Short, blue Short, alpha Short) {
+
 	C.glColor4s(C.GLshort(red), C.GLshort(green), C.GLshort(blue), C.GLshort(alpha))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
 func Color4ub(red Ubyte, green Ubyte, blue Ubyte, alpha Ubyte) {
+
 	C.glColor4ub(C.GLubyte(red), C.GLubyte(green), C.GLubyte(blue), C.GLubyte(alpha))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
 func Color4ui(red Uint, green Uint, blue Uint, alpha Uint) {
+
 	C.glColor4ui(C.GLuint(red), C.GLuint(green), C.GLuint(blue), C.GLuint(alpha))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
 func Color4us(red Ushort, green Ushort, blue Ushort, alpha Ushort) {
+
 	C.glColor4us(C.GLushort(red), C.GLushort(green), C.GLushort(blue), C.GLushort(alpha))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
+func Color3bv(v []Byte) {
+
+	C.glColor3bv((*C.GLbyte)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
+func Color3dv(v []Double) {
+
+	if len(v) > 3 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glColor3dv((*C.GLdouble)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
+func Color3fv(v []Float) {
+
+	if len(v) > 3 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glColor3fv((*C.GLfloat)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
+func Color3iv(v []Int) {
+
+	if len(v) > 3 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glColor3iv((*C.GLint)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
+func Color3sv(v []Short) {
+
+	if len(v) > 3 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glColor3sv((*C.GLshort)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
+func Color3ubv(v []Ubyte) {
+
+	C.glColor3ubv((*C.GLubyte)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
+func Color3uiv(v []Uint) {
+
+	C.glColor3uiv((*C.GLuint)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
+func Color3usv(v []Ushort) {
+
+	C.glColor3usv((*C.GLushort)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
+func Color4bv(v []Byte) {
+
+	C.glColor4bv((*C.GLbyte)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
+func Color4dv(v []Double) {
+
+	if len(v) > 4 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glColor4dv((*C.GLdouble)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
+func Color4fv(v []Float) {
+
+	if len(v) > 4 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glColor4fv((*C.GLfloat)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
+func Color4iv(v []Int) {
+
+	if len(v) > 4 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glColor4iv((*C.GLint)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
+func Color4sv(v []Short) {
+
+	if len(v) > 4 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glColor4sv((*C.GLshort)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
+func Color4ubv(v []Ubyte) {
+
+	C.glColor4ubv((*C.GLubyte)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
+func Color4uiv(v []Uint) {
+
+	C.glColor4uiv((*C.GLuint)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glColor.xml
+func Color4usv(v []Ushort) {
+
+	C.glColor4usv((*C.GLushort)(unsafe.Pointer(&v[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
 func TexCoord1d(s Double) {
+
 	C.glTexCoord1d(C.GLdouble(s))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
 func TexCoord1f(s Float) {
+
 	C.glTexCoord1f(C.GLfloat(s))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
 func TexCoord1i(s Int) {
+
 	C.glTexCoord1i(C.GLint(s))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
 func TexCoord1s(s Short) {
+
 	C.glTexCoord1s(C.GLshort(s))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
 func TexCoord2d(s Double, t Double) {
+
 	C.glTexCoord2d(C.GLdouble(s), C.GLdouble(t))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
 func TexCoord2f(s Float, t Float) {
+
 	C.glTexCoord2f(C.GLfloat(s), C.GLfloat(t))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
 func TexCoord2i(s Int, t Int) {
+
 	C.glTexCoord2i(C.GLint(s), C.GLint(t))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
 func TexCoord2s(s Short, t Short) {
+
 	C.glTexCoord2s(C.GLshort(s), C.GLshort(t))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
 func TexCoord3d(s Double, t Double, r Double) {
+
 	C.glTexCoord3d(C.GLdouble(s), C.GLdouble(t), C.GLdouble(r))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
 func TexCoord3f(s Float, t Float, r Float) {
+
 	C.glTexCoord3f(C.GLfloat(s), C.GLfloat(t), C.GLfloat(r))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
 func TexCoord3i(s Int, t Int, r Int) {
+
 	C.glTexCoord3i(C.GLint(s), C.GLint(t), C.GLint(r))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
 func TexCoord3s(s Short, t Short, r Short) {
+
 	C.glTexCoord3s(C.GLshort(s), C.GLshort(t), C.GLshort(r))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
 func TexCoord4d(s Double, t Double, r Double, q Double) {
+
 	C.glTexCoord4d(C.GLdouble(s), C.GLdouble(t), C.GLdouble(r), C.GLdouble(q))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
 func TexCoord4f(s Float, t Float, r Float, q Float) {
+
 	C.glTexCoord4f(C.GLfloat(s), C.GLfloat(t), C.GLfloat(r), C.GLfloat(q))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
 func TexCoord4i(s Int, t Int, r Int, q Int) {
+
 	C.glTexCoord4i(C.GLint(s), C.GLint(t), C.GLint(r), C.GLint(q))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
 func TexCoord4s(s Short, t Short, r Short, q Short) {
+
 	C.glTexCoord4s(C.GLshort(s), C.GLshort(t), C.GLshort(r), C.GLshort(q))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
+func TexCoord1dv(v []Double) {
+
+	C.glTexCoord1dv((*C.GLdouble)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
+func TexCoord1fv(v []Float) {
+
+	C.glTexCoord1fv((*C.GLfloat)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
+func TexCoord1iv(v []Int) {
+
+	C.glTexCoord1iv((*C.GLint)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
+func TexCoord1sv(v []Short) {
+
+	C.glTexCoord1sv((*C.GLshort)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
+func TexCoord2dv(v []Double) {
+
+	if len(v) > 2 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glTexCoord2dv((*C.GLdouble)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
+func TexCoord2fv(v []Float) {
+
+	if len(v) > 2 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glTexCoord2fv((*C.GLfloat)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
+func TexCoord2iv(v []Int) {
+
+	if len(v) > 2 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glTexCoord2iv((*C.GLint)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
+func TexCoord2sv(v []Short) {
+
+	if len(v) > 2 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glTexCoord2sv((*C.GLshort)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
+func TexCoord3dv(v []Double) {
+
+	if len(v) > 3 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glTexCoord3dv((*C.GLdouble)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
+func TexCoord3fv(v []Float) {
+
+	if len(v) > 3 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glTexCoord3fv((*C.GLfloat)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
+func TexCoord3iv(v []Int) {
+
+	if len(v) > 3 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glTexCoord3iv((*C.GLint)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
+func TexCoord3sv(v []Short) {
+
+	if len(v) > 3 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glTexCoord3sv((*C.GLshort)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
+func TexCoord4dv(v []Double) {
+
+	if len(v) > 4 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glTexCoord4dv((*C.GLdouble)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
+func TexCoord4fv(v []Float) {
+
+	if len(v) > 4 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glTexCoord4fv((*C.GLfloat)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
+func TexCoord4iv(v []Int) {
+
+	if len(v) > 4 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glTexCoord4iv((*C.GLint)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoord.xml
+func TexCoord4sv(v []Short) {
+
+	if len(v) > 4 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glTexCoord4sv((*C.GLshort)(unsafe.Pointer(&v[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos.xml
 func RasterPos2d(x Double, y Double) {
+
 	C.glRasterPos2d(C.GLdouble(x), C.GLdouble(y))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos.xml
 func RasterPos2f(x Float, y Float) {
+
 	C.glRasterPos2f(C.GLfloat(x), C.GLfloat(y))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos.xml
 func RasterPos2i(x Int, y Int) {
+
 	C.glRasterPos2i(C.GLint(x), C.GLint(y))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos.xml
 func RasterPos2s(x Short, y Short) {
+
 	C.glRasterPos2s(C.GLshort(x), C.GLshort(y))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos.xml
 func RasterPos3d(x Double, y Double, z Double) {
+
 	C.glRasterPos3d(C.GLdouble(x), C.GLdouble(y), C.GLdouble(z))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos.xml
 func RasterPos3f(x Float, y Float, z Float) {
+
 	C.glRasterPos3f(C.GLfloat(x), C.GLfloat(y), C.GLfloat(z))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos.xml
 func RasterPos3i(x Int, y Int, z Int) {
+
 	C.glRasterPos3i(C.GLint(x), C.GLint(y), C.GLint(z))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos.xml
 func RasterPos3s(x Short, y Short, z Short) {
+
 	C.glRasterPos3s(C.GLshort(x), C.GLshort(y), C.GLshort(z))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos.xml
 func RasterPos4d(x Double, y Double, z Double, w Double) {
+
 	C.glRasterPos4d(C.GLdouble(x), C.GLdouble(y), C.GLdouble(z), C.GLdouble(w))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos.xml
 func RasterPos4f(x Float, y Float, z Float, w Float) {
+
 	C.glRasterPos4f(C.GLfloat(x), C.GLfloat(y), C.GLfloat(z), C.GLfloat(w))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos.xml
 func RasterPos4i(x Int, y Int, z Int, w Int) {
+
 	C.glRasterPos4i(C.GLint(x), C.GLint(y), C.GLint(z), C.GLint(w))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos.xml
 func RasterPos4s(x Short, y Short, z Short, w Short) {
+
 	C.glRasterPos4s(C.GLshort(x), C.GLshort(y), C.GLshort(z), C.GLshort(w))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos.xml
+func RasterPos2dv(v []Double) {
+
+	if len(v) > 2 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glRasterPos2dv((*C.GLdouble)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos.xml
+func RasterPos2fv(v []Float) {
+
+	if len(v) > 2 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glRasterPos2fv((*C.GLfloat)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos.xml
+func RasterPos2iv(v []Int) {
+
+	if len(v) > 2 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glRasterPos2iv((*C.GLint)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos.xml
+func RasterPos2sv(v []Short) {
+
+	if len(v) > 2 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glRasterPos2sv((*C.GLshort)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos.xml
+func RasterPos3dv(v []Double) {
+
+	if len(v) > 3 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glRasterPos3dv((*C.GLdouble)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos.xml
+func RasterPos3fv(v []Float) {
+
+	if len(v) > 3 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glRasterPos3fv((*C.GLfloat)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos.xml
+func RasterPos3iv(v []Int) {
+
+	if len(v) > 3 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glRasterPos3iv((*C.GLint)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos.xml
+func RasterPos3sv(v []Short) {
+
+	if len(v) > 3 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glRasterPos3sv((*C.GLshort)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos.xml
+func RasterPos4dv(v []Double) {
+
+	if len(v) > 4 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glRasterPos4dv((*C.GLdouble)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos.xml
+func RasterPos4fv(v []Float) {
+
+	if len(v) > 4 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glRasterPos4fv((*C.GLfloat)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos.xml
+func RasterPos4iv(v []Int) {
+
+	if len(v) > 4 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glRasterPos4iv((*C.GLint)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos.xml
+func RasterPos4sv(v []Short) {
+
+	if len(v) > 4 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glRasterPos4sv((*C.GLshort)(unsafe.Pointer(&v[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glRect.xml
 func Rectd(x1 Double, y1 Double, x2 Double, y2 Double) {
+
 	C.glRectd(C.GLdouble(x1), C.GLdouble(y1), C.GLdouble(x2), C.GLdouble(y2))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glRect.xml
 func Rectf(x1 Float, y1 Float, x2 Float, y2 Float) {
+
 	C.glRectf(C.GLfloat(x1), C.GLfloat(y1), C.GLfloat(x2), C.GLfloat(y2))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glRect.xml
 func Recti(x1 Int, y1 Int, x2 Int, y2 Int) {
+
 	C.glRecti(C.GLint(x1), C.GLint(y1), C.GLint(x2), C.GLint(y2))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glRect.xml
 func Rects(x1 Short, y1 Short, x2 Short, y2 Short) {
+
 	C.glRects(C.GLshort(x1), C.GLshort(y1), C.GLshort(x2), C.GLshort(y2))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glRect.xml
+func Rectdv(v1 []Double, v2 []Double) {
+
+	C.glRectdv((*C.GLdouble)(unsafe.Pointer(&v1[0])), (*C.GLdouble)(unsafe.Pointer(&v2[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glRect.xml
+func Rectfv(v1 []Float, v2 []Float) {
+
+	C.glRectfv((*C.GLfloat)(unsafe.Pointer(&v1[0])), (*C.GLfloat)(unsafe.Pointer(&v2[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glRect.xml
+func Rectiv(v1 []Int, v2 []Int) {
+
+	C.glRectiv((*C.GLint)(unsafe.Pointer(&v1[0])), (*C.GLint)(unsafe.Pointer(&v2[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glRect.xml
+func Rectsv(v1 []Short, v2 []Short) {
+
+	C.glRectsv((*C.GLshort)(unsafe.Pointer(&v1[0])), (*C.GLshort)(unsafe.Pointer(&v2[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glVertexPointer.xml
+func VertexPointer(size Int, gltype Enum, stride Sizei, ptr interface{}) {
+
+	ptr_v := reflect.ValueOf(ptr)
+	if ptr_v.Kind() != reflect.Slice {
+		panic("parameter ptr must be a slice")
+	}
+
+	C.glVertexPointer(C.GLint(size), C.GLenum(gltype), C.GLsizei(stride), unsafe.Pointer(ptr_v.Index(0).Addr().Pointer()))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glNormalPointer.xml
+func NormalPointer(gltype Enum, stride Sizei, ptr interface{}) {
+
+	ptr_v := reflect.ValueOf(ptr)
+	if ptr_v.Kind() != reflect.Slice {
+		panic("parameter ptr must be a slice")
+	}
+
+	C.glNormalPointer(C.GLenum(gltype), C.GLsizei(stride), unsafe.Pointer(ptr_v.Index(0).Addr().Pointer()))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glColorPointer.xml
+func ColorPointer(size Int, gltype Enum, stride Sizei, ptr interface{}) {
+
+	ptr_v := reflect.ValueOf(ptr)
+	if ptr_v.Kind() != reflect.Slice {
+		panic("parameter ptr must be a slice")
+	}
+
+	C.glColorPointer(C.GLint(size), C.GLenum(gltype), C.GLsizei(stride), unsafe.Pointer(ptr_v.Index(0).Addr().Pointer()))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glIndexPointer.xml
+func IndexPointer(gltype Enum, stride Sizei, ptr interface{}) {
+
+	ptr_v := reflect.ValueOf(ptr)
+	if ptr_v.Kind() != reflect.Slice {
+		panic("parameter ptr must be a slice")
+	}
+
+	C.glIndexPointer(C.GLenum(gltype), C.GLsizei(stride), unsafe.Pointer(ptr_v.Index(0).Addr().Pointer()))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexCoordPointer.xml
+func TexCoordPointer(size Int, gltype Enum, stride Sizei, ptr interface{}) {
+
+	ptr_v := reflect.ValueOf(ptr)
+	if ptr_v.Kind() != reflect.Slice {
+		panic("parameter ptr must be a slice")
+	}
+
+	C.glTexCoordPointer(C.GLint(size), C.GLenum(gltype), C.GLsizei(stride), unsafe.Pointer(ptr_v.Index(0).Addr().Pointer()))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glEdgeFlagPointer.xml
+func EdgeFlagPointer(stride Sizei, ptr interface{}) {
+
+	ptr_v := reflect.ValueOf(ptr)
+	if ptr_v.Kind() != reflect.Slice {
+		panic("parameter ptr must be a slice")
+	}
+
+	C.glEdgeFlagPointer(C.GLsizei(stride), unsafe.Pointer(ptr_v.Index(0).Addr().Pointer()))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glArrayElement.xml
 func ArrayElement(i Int) {
+
 	C.glArrayElement(C.GLint(i))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glDrawArrays.xml
 func DrawArrays(mode Enum, first Int, count Sizei) {
+
 	C.glDrawArrays(C.GLenum(mode), C.GLint(first), C.GLsizei(count))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glDrawElements.xml
+func DrawElements(mode Enum, count Sizei, gltype Enum, indices interface{}) {
+
+	indices_v := reflect.ValueOf(indices)
+	if indices_v.Kind() != reflect.Slice {
+		panic("parameter indices must be a slice")
+	}
+
+	C.glDrawElements(C.GLenum(mode), C.GLsizei(count), C.GLenum(gltype), unsafe.Pointer(indices_v.Index(0).Addr().Pointer()))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glInterleavedArrays.xml
+func InterleavedArrays(format Enum, stride Sizei, pointer interface{}) {
+
+	pointer_v := reflect.ValueOf(pointer)
+	if pointer_v.Kind() != reflect.Slice {
+		panic("parameter pointer must be a slice")
+	}
+
+	C.glInterleavedArrays(C.GLenum(format), C.GLsizei(stride), unsafe.Pointer(pointer_v.Index(0).Addr().Pointer()))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glShadeModel.xml
 func ShadeModel(mode Enum) {
+
 	C.glShadeModel(C.GLenum(mode))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glLight.xml
 func Lightf(light Enum, pname Enum, param Float) {
+
 	C.glLightf(C.GLenum(light), C.GLenum(pname), C.GLfloat(param))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glLight.xml
 func Lighti(light Enum, pname Enum, param Int) {
+
 	C.glLighti(C.GLenum(light), C.GLenum(pname), C.GLint(param))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glLight.xml
+func Lightfv(light Enum, pname Enum, params []Float) {
+
+	C.glLightfv(C.GLenum(light), C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glLight.xml
+func Lightiv(light Enum, pname Enum, params []Int) {
+
+	C.glLightiv(C.GLenum(light), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetLight.xml
+func GetLightfv(light Enum, pname Enum, params []Float) {
+
+	C.glGetLightfv(C.GLenum(light), C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetLight.xml
+func GetLightiv(light Enum, pname Enum, params []Int) {
+
+	C.glGetLightiv(C.GLenum(light), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glLightModel.xml
 func LightModelf(pname Enum, param Float) {
+
 	C.glLightModelf(C.GLenum(pname), C.GLfloat(param))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glLightModel.xml
 func LightModeli(pname Enum, param Int) {
+
 	C.glLightModeli(C.GLenum(pname), C.GLint(param))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glLightModel.xml
+func LightModelfv(pname Enum, params []Float) {
+
+	C.glLightModelfv(C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glLightModel.xml
+func LightModeliv(pname Enum, params []Int) {
+
+	C.glLightModeliv(C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glMaterial.xml
 func Materialf(face Enum, pname Enum, param Float) {
+
 	C.glMaterialf(C.GLenum(face), C.GLenum(pname), C.GLfloat(param))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glMaterial.xml
 func Materiali(face Enum, pname Enum, param Int) {
+
 	C.glMateriali(C.GLenum(face), C.GLenum(pname), C.GLint(param))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glMaterial.xml
+func Materialfv(face Enum, pname Enum, params []Float) {
+
+	C.glMaterialfv(C.GLenum(face), C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glMaterial.xml
+func Materialiv(face Enum, pname Enum, params []Int) {
+
+	C.glMaterialiv(C.GLenum(face), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetMaterial.xml
+func GetMaterialfv(face Enum, pname Enum, params []Float) {
+
+	C.glGetMaterialfv(C.GLenum(face), C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetMaterial.xml
+func GetMaterialiv(face Enum, pname Enum, params []Int) {
+
+	C.glGetMaterialiv(C.GLenum(face), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glColorMaterial.xml
 func ColorMaterial(face Enum, mode Enum) {
+
 	C.glColorMaterial(C.GLenum(face), C.GLenum(mode))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glPixelZoom.xml
 func PixelZoom(xfactor Float, yfactor Float) {
+
 	C.glPixelZoom(C.GLfloat(xfactor), C.GLfloat(yfactor))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glPixelStore.xml
 func PixelStoref(pname Enum, param Float) {
+
 	C.glPixelStoref(C.GLenum(pname), C.GLfloat(param))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glPixelStore.xml
 func PixelStorei(pname Enum, param Int) {
+
 	C.glPixelStorei(C.GLenum(pname), C.GLint(param))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glPixelTransfer.xml
 func PixelTransferf(pname Enum, param Float) {
+
 	C.glPixelTransferf(C.GLenum(pname), C.GLfloat(param))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glPixelTransfer.xml
 func PixelTransferi(pname Enum, param Int) {
+
 	C.glPixelTransferi(C.GLenum(pname), C.GLint(param))
 }
 
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glPixelMap.xml
+func PixelMapfv(glmap Enum, mapsize Sizei, values []Float) {
+
+	C.glPixelMapfv(C.GLenum(glmap), C.GLsizei(mapsize), (*C.GLfloat)(unsafe.Pointer(&values[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glPixelMap.xml
+func PixelMapuiv(glmap Enum, mapsize Sizei, values []Uint) {
+
+	C.glPixelMapuiv(C.GLenum(glmap), C.GLsizei(mapsize), (*C.GLuint)(unsafe.Pointer(&values[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glPixelMap.xml
+func PixelMapusv(glmap Enum, mapsize Sizei, values []Ushort) {
+
+	C.glPixelMapusv(C.GLenum(glmap), C.GLsizei(mapsize), (*C.GLushort)(unsafe.Pointer(&values[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetPixelMap.xml
+func GetPixelMapfv(glmap Enum, values []Float) {
+
+	C.glGetPixelMapfv(C.GLenum(glmap), (*C.GLfloat)(unsafe.Pointer(&values[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetPixelMap.xml
+func GetPixelMapuiv(glmap Enum, values []Uint) {
+
+	C.glGetPixelMapuiv(C.GLenum(glmap), (*C.GLuint)(unsafe.Pointer(&values[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetPixelMap.xml
+func GetPixelMapusv(glmap Enum, values []Ushort) {
+
+	C.glGetPixelMapusv(C.GLenum(glmap), (*C.GLushort)(unsafe.Pointer(&values[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glBitmap.xml
+func Bitmap(width Sizei, height Sizei, xorig Float, yorig Float, xmove Float, ymove Float, bitmap []Ubyte) {
+
+	C.glBitmap(C.GLsizei(width), C.GLsizei(height), C.GLfloat(xorig), C.GLfloat(yorig), C.GLfloat(xmove), C.GLfloat(ymove), (*C.GLubyte)(unsafe.Pointer(&bitmap[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glReadPixels.xml
+func ReadPixels(x Int, y Int, width Sizei, height Sizei, format Enum, gltype Enum, pixels interface{}) {
+
+	pixels_v := reflect.ValueOf(pixels)
+	if pixels_v.Kind() != reflect.Slice {
+		panic("parameter pixels must be a slice")
+	}
+
+	C.glReadPixels(C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(pixels_v.Index(0).Addr().Pointer()))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glDrawPixels.xml
+func DrawPixels(width Sizei, height Sizei, format Enum, gltype Enum, pixels interface{}) {
+
+	pixels_v := reflect.ValueOf(pixels)
+	if pixels_v.Kind() != reflect.Slice {
+		panic("parameter pixels must be a slice")
+	}
+
+	C.glDrawPixels(C.GLsizei(width), C.GLsizei(height), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(pixels_v.Index(0).Addr().Pointer()))
+}
+
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glCopyPixels.xml
-func CopyPixels(x Int, y Int, width Sizei, height Sizei, type_ Enum) {
-	C.glCopyPixels(C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height), C.GLenum(type_))
+func CopyPixels(x Int, y Int, width Sizei, height Sizei, gltype Enum) {
+
+	C.glCopyPixels(C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height), C.GLenum(gltype))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glStencilFunc.xml
-func StencilFunc(func_ Enum, ref Int, mask Uint) {
-	C.glStencilFunc(C.GLenum(func_), C.GLint(ref), C.GLuint(mask))
+func StencilFunc(glfunc Enum, ref Int, mask Uint) {
+
+	C.glStencilFunc(C.GLenum(glfunc), C.GLint(ref), C.GLuint(mask))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glStencilMask.xml
 func StencilMask(mask Uint) {
+
 	C.glStencilMask(C.GLuint(mask))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glStencilOp.xml
 func StencilOp(fail Enum, zfail Enum, zpass Enum) {
+
 	C.glStencilOp(C.GLenum(fail), C.GLenum(zfail), C.GLenum(zpass))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glClearStencil.xml
 func ClearStencil(s Int) {
+
 	C.glClearStencil(C.GLint(s))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glTexGen.xml
 func TexGend(coord Enum, pname Enum, param Double) {
+
 	C.glTexGend(C.GLenum(coord), C.GLenum(pname), C.GLdouble(param))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glTexGen.xml
 func TexGenf(coord Enum, pname Enum, param Float) {
+
 	C.glTexGenf(C.GLenum(coord), C.GLenum(pname), C.GLfloat(param))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glTexGen.xml
 func TexGeni(coord Enum, pname Enum, param Int) {
+
 	C.glTexGeni(C.GLenum(coord), C.GLenum(pname), C.GLint(param))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexGen.xml
+func TexGendv(coord Enum, pname Enum, params []Double) {
+
+	C.glTexGendv(C.GLenum(coord), C.GLenum(pname), (*C.GLdouble)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexGen.xml
+func TexGenfv(coord Enum, pname Enum, params []Float) {
+
+	C.glTexGenfv(C.GLenum(coord), C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexGen.xml
+func TexGeniv(coord Enum, pname Enum, params []Int) {
+
+	C.glTexGeniv(C.GLenum(coord), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetTexGen.xml
+func GetTexGendv(coord Enum, pname Enum, params []Double) {
+
+	C.glGetTexGendv(C.GLenum(coord), C.GLenum(pname), (*C.GLdouble)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetTexGen.xml
+func GetTexGenfv(coord Enum, pname Enum, params []Float) {
+
+	C.glGetTexGenfv(C.GLenum(coord), C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetTexGen.xml
+func GetTexGeniv(coord Enum, pname Enum, params []Int) {
+
+	C.glGetTexGeniv(C.GLenum(coord), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glTexEnv.xml
 func TexEnvf(target Enum, pname Enum, param Float) {
+
 	C.glTexEnvf(C.GLenum(target), C.GLenum(pname), C.GLfloat(param))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glTexEnv.xml
 func TexEnvi(target Enum, pname Enum, param Int) {
+
 	C.glTexEnvi(C.GLenum(target), C.GLenum(pname), C.GLint(param))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexEnv.xml
+func TexEnvfv(target Enum, pname Enum, params []Float) {
+
+	C.glTexEnvfv(C.GLenum(target), C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexEnv.xml
+func TexEnviv(target Enum, pname Enum, params []Int) {
+
+	C.glTexEnviv(C.GLenum(target), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetTexEnv.xml
+func GetTexEnvfv(target Enum, pname Enum, params []Float) {
+
+	C.glGetTexEnvfv(C.GLenum(target), C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetTexEnv.xml
+func GetTexEnviv(target Enum, pname Enum, params []Int) {
+
+	C.glGetTexEnviv(C.GLenum(target), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glTexParameter.xml
 func TexParameterf(target Enum, pname Enum, param Float) {
+
 	C.glTexParameterf(C.GLenum(target), C.GLenum(pname), C.GLfloat(param))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glTexParameter.xml
 func TexParameteri(target Enum, pname Enum, param Int) {
+
 	C.glTexParameteri(C.GLenum(target), C.GLenum(pname), C.GLint(param))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexParameter.xml
+func TexParameterfv(target Enum, pname Enum, params []Float) {
+
+	C.glTexParameterfv(C.GLenum(target), C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexParameter.xml
+func TexParameteriv(target Enum, pname Enum, params []Int) {
+
+	C.glTexParameteriv(C.GLenum(target), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetTexParameter.xml
+func GetTexParameterfv(target Enum, pname Enum, params []Float) {
+
+	C.glGetTexParameterfv(C.GLenum(target), C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetTexParameter.xml
+func GetTexParameteriv(target Enum, pname Enum, params []Int) {
+
+	C.glGetTexParameteriv(C.GLenum(target), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetTexLevelParameter.xml
+func GetTexLevelParameterfv(target Enum, level Int, pname Enum, params []Float) {
+
+	C.glGetTexLevelParameterfv(C.GLenum(target), C.GLint(level), C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetTexLevelParameter.xml
+func GetTexLevelParameteriv(target Enum, level Int, pname Enum, params []Int) {
+
+	C.glGetTexLevelParameteriv(C.GLenum(target), C.GLint(level), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexImage1D.xml
+func TexImage1D(target Enum, level Int, internalFormat Int, width Sizei, border Int, format Enum, gltype Enum, pixels interface{}) {
+
+	pixels_v := reflect.ValueOf(pixels)
+	if pixels_v.Kind() != reflect.Slice {
+		panic("parameter pixels must be a slice")
+	}
+
+	C.glTexImage1D(C.GLenum(target), C.GLint(level), C.GLint(internalFormat), C.GLsizei(width), C.GLint(border), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(pixels_v.Index(0).Addr().Pointer()))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexImage2D.xml
+func TexImage2D(target Enum, level Int, internalFormat Int, width Sizei, height Sizei, border Int, format Enum, gltype Enum, pixels interface{}) {
+
+	pixels_v := reflect.ValueOf(pixels)
+	if pixels_v.Kind() != reflect.Slice {
+		panic("parameter pixels must be a slice")
+	}
+
+	C.glTexImage2D(C.GLenum(target), C.GLint(level), C.GLint(internalFormat), C.GLsizei(width), C.GLsizei(height), C.GLint(border), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(pixels_v.Index(0).Addr().Pointer()))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetTexImage.xml
+func GetTexImage(target Enum, level Int, format Enum, gltype Enum, pixels interface{}) {
+
+	pixels_v := reflect.ValueOf(pixels)
+	if pixels_v.Kind() != reflect.Slice {
+		panic("parameter pixels must be a slice")
+	}
+
+	C.glGetTexImage(C.GLenum(target), C.GLint(level), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(pixels_v.Index(0).Addr().Pointer()))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGenTextures.xml
+func GenTextures(n Sizei, textures []Uint) {
+
+	C.glGenTextures(C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glDeleteTextures.xml
+func DeleteTextures(n Sizei, textures []Uint) {
+
+	C.glDeleteTextures(C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glBindTexture.xml
 func BindTexture(target Enum, texture Uint) {
+
 	C.glBindTexture(C.GLenum(target), C.GLuint(texture))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glPrioritizeTextures.xml
+func PrioritizeTextures(n Sizei, textures []Uint, priorities []Clampf) {
+
+	C.glPrioritizeTextures(C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])), (*C.GLclampf)(unsafe.Pointer(&priorities[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glAreTexturesResident.xml
+func AreTexturesResident(n Sizei, textures []Uint, residences []Boolean) Boolean {
+
+	return Boolean(C.glAreTexturesResident(C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])), (*C.GLboolean)(unsafe.Pointer(&residences[0]))))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glIsTexture.xml
 func IsTexture(texture Uint) Boolean {
+
 	return Boolean(C.glIsTexture(C.GLuint(texture)))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexSubImage1D.xml
+func TexSubImage1D(target Enum, level Int, xoffset Int, width Sizei, format Enum, gltype Enum, pixels interface{}) {
+
+	pixels_v := reflect.ValueOf(pixels)
+	if pixels_v.Kind() != reflect.Slice {
+		panic("parameter pixels must be a slice")
+	}
+
+	C.glTexSubImage1D(C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLsizei(width), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(pixels_v.Index(0).Addr().Pointer()))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexSubImage2D.xml
+func TexSubImage2D(target Enum, level Int, xoffset Int, yoffset Int, width Sizei, height Sizei, format Enum, gltype Enum, pixels interface{}) {
+
+	pixels_v := reflect.ValueOf(pixels)
+	if pixels_v.Kind() != reflect.Slice {
+		panic("parameter pixels must be a slice")
+	}
+
+	C.glTexSubImage2D(C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLint(yoffset), C.GLsizei(width), C.GLsizei(height), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(pixels_v.Index(0).Addr().Pointer()))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glCopyTexImage1D.xml
 func CopyTexImage1D(target Enum, level Int, internalformat Enum, x Int, y Int, width Sizei, border Int) {
+
 	C.glCopyTexImage1D(C.GLenum(target), C.GLint(level), C.GLenum(internalformat), C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLint(border))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glCopyTexImage2D.xml
 func CopyTexImage2D(target Enum, level Int, internalformat Enum, x Int, y Int, width Sizei, height Sizei, border Int) {
+
 	C.glCopyTexImage2D(C.GLenum(target), C.GLint(level), C.GLenum(internalformat), C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height), C.GLint(border))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glCopyTexSubImage1D.xml
 func CopyTexSubImage1D(target Enum, level Int, xoffset Int, x Int, y Int, width Sizei) {
+
 	C.glCopyTexSubImage1D(C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLint(x), C.GLint(y), C.GLsizei(width))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glCopyTexSubImage2D.xml
 func CopyTexSubImage2D(target Enum, level Int, xoffset Int, yoffset Int, x Int, y Int, width Sizei, height Sizei) {
+
 	C.glCopyTexSubImage2D(C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLint(yoffset), C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glMap.xml
+func Map1d(target Enum, u1 Double, u2 Double, stride Int, order Int, points []Double) {
+
+	C.glMap1d(C.GLenum(target), C.GLdouble(u1), C.GLdouble(u2), C.GLint(stride), C.GLint(order), (*C.GLdouble)(unsafe.Pointer(&points[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glMap.xml
+func Map1f(target Enum, u1 Float, u2 Float, stride Int, order Int, points []Float) {
+
+	C.glMap1f(C.GLenum(target), C.GLfloat(u1), C.GLfloat(u2), C.GLint(stride), C.GLint(order), (*C.GLfloat)(unsafe.Pointer(&points[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glMap.xml
+func Map2d(target Enum, u1 Double, u2 Double, ustride Int, uorder Int, v1 Double, v2 Double, vstride Int, vorder Int, points []Double) {
+
+	C.glMap2d(C.GLenum(target), C.GLdouble(u1), C.GLdouble(u2), C.GLint(ustride), C.GLint(uorder), C.GLdouble(v1), C.GLdouble(v2), C.GLint(vstride), C.GLint(vorder), (*C.GLdouble)(unsafe.Pointer(&points[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glMap.xml
+func Map2f(target Enum, u1 Float, u2 Float, ustride Int, uorder Int, v1 Float, v2 Float, vstride Int, vorder Int, points []Float) {
+
+	C.glMap2f(C.GLenum(target), C.GLfloat(u1), C.GLfloat(u2), C.GLint(ustride), C.GLint(uorder), C.GLfloat(v1), C.GLfloat(v2), C.GLint(vstride), C.GLint(vorder), (*C.GLfloat)(unsafe.Pointer(&points[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetMap.xml
+func GetMapdv(target Enum, query Enum, v []Double) {
+
+	C.glGetMapdv(C.GLenum(target), C.GLenum(query), (*C.GLdouble)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetMap.xml
+func GetMapfv(target Enum, query Enum, v []Float) {
+
+	C.glGetMapfv(C.GLenum(target), C.GLenum(query), (*C.GLfloat)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetMap.xml
+func GetMapiv(target Enum, query Enum, v []Int) {
+
+	C.glGetMapiv(C.GLenum(target), C.GLenum(query), (*C.GLint)(unsafe.Pointer(&v[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glEvalCoord.xml
 func EvalCoord1d(u Double) {
+
 	C.glEvalCoord1d(C.GLdouble(u))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glEvalCoord.xml
 func EvalCoord1f(u Float) {
+
 	C.glEvalCoord1f(C.GLfloat(u))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glEvalCoord.xml
+func EvalCoord1dv(u []Double) {
+
+	C.glEvalCoord1dv((*C.GLdouble)(unsafe.Pointer(&u[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glEvalCoord.xml
+func EvalCoord1fv(u []Float) {
+
+	C.glEvalCoord1fv((*C.GLfloat)(unsafe.Pointer(&u[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glEvalCoord.xml
 func EvalCoord2d(u Double, v Double) {
+
 	C.glEvalCoord2d(C.GLdouble(u), C.GLdouble(v))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glEvalCoord.xml
 func EvalCoord2f(u Float, v Float) {
+
 	C.glEvalCoord2f(C.GLfloat(u), C.GLfloat(v))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glEvalCoord.xml
+func EvalCoord2dv(u []Double) {
+
+	if len(u) > 2 {
+		panic("parameter u has incorrect length")
+	}
+
+	C.glEvalCoord2dv((*C.GLdouble)(unsafe.Pointer(&u[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glEvalCoord.xml
+func EvalCoord2fv(u []Float) {
+
+	if len(u) > 2 {
+		panic("parameter u has incorrect length")
+	}
+
+	C.glEvalCoord2fv((*C.GLfloat)(unsafe.Pointer(&u[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glMapGrid.xml
 func MapGrid1d(un Int, u1 Double, u2 Double) {
+
 	C.glMapGrid1d(C.GLint(un), C.GLdouble(u1), C.GLdouble(u2))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glMapGrid.xml
 func MapGrid1f(un Int, u1 Float, u2 Float) {
+
 	C.glMapGrid1f(C.GLint(un), C.GLfloat(u1), C.GLfloat(u2))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glMapGrid.xml
 func MapGrid2d(un Int, u1 Double, u2 Double, vn Int, v1 Double, v2 Double) {
+
 	C.glMapGrid2d(C.GLint(un), C.GLdouble(u1), C.GLdouble(u2), C.GLint(vn), C.GLdouble(v1), C.GLdouble(v2))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glMapGrid.xml
 func MapGrid2f(un Int, u1 Float, u2 Float, vn Int, v1 Float, v2 Float) {
+
 	C.glMapGrid2f(C.GLint(un), C.GLfloat(u1), C.GLfloat(u2), C.GLint(vn), C.GLfloat(v1), C.GLfloat(v2))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glEvalPoint1.xml
 func EvalPoint1(i Int) {
+
 	C.glEvalPoint1(C.GLint(i))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glEvalPoint2.xml
 func EvalPoint2(i Int, j Int) {
+
 	C.glEvalPoint2(C.GLint(i), C.GLint(j))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glEvalMesh1.xml
 func EvalMesh1(mode Enum, i1 Int, i2 Int) {
+
 	C.glEvalMesh1(C.GLenum(mode), C.GLint(i1), C.GLint(i2))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glEvalMesh2.xml
 func EvalMesh2(mode Enum, i1 Int, i2 Int, j1 Int, j2 Int) {
+
 	C.glEvalMesh2(C.GLenum(mode), C.GLint(i1), C.GLint(i2), C.GLint(j1), C.GLint(j2))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glFog.xml
 func Fogf(pname Enum, param Float) {
+
 	C.glFogf(C.GLenum(pname), C.GLfloat(param))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glFog.xml
 func Fogi(pname Enum, param Int) {
+
 	C.glFogi(C.GLenum(pname), C.GLint(param))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glFog.xml
+func Fogfv(pname Enum, params []Float) {
+
+	C.glFogfv(C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glFog.xml
+func Fogiv(pname Enum, params []Int) {
+
+	C.glFogiv(C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glFeedbackBuffer.xml
+func FeedbackBuffer(size Sizei, gltype Enum, buffer []Float) {
+
+	C.glFeedbackBuffer(C.GLsizei(size), C.GLenum(gltype), (*C.GLfloat)(unsafe.Pointer(&buffer[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glPassThrough.xml
 func PassThrough(token Float) {
+
 	C.glPassThrough(C.GLfloat(token))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glSelectBuffer.xml
+func SelectBuffer(size Sizei, buffer []Uint) {
+
+	C.glSelectBuffer(C.GLsizei(size), (*C.GLuint)(unsafe.Pointer(&buffer[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glInitNames.xml
 func InitNames() {
+
 	C.glInitNames()
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glLoadName.xml
 func LoadName(name Uint) {
+
 	C.glLoadName(C.GLuint(name))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glPushName.xml
 func PushName(name Uint) {
+
 	C.glPushName(C.GLuint(name))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glPopName.xml
 func PopName() {
+
 	C.glPopName()
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glDrawRangeElements.xml
+func DrawRangeElements(mode Enum, start Uint, end Uint, count Sizei, gltype Enum, indices interface{}) {
+
+	indices_v := reflect.ValueOf(indices)
+	if indices_v.Kind() != reflect.Slice {
+		panic("parameter indices must be a slice")
+	}
+
+	C.glDrawRangeElements(C.GLenum(mode), C.GLuint(start), C.GLuint(end), C.GLsizei(count), C.GLenum(gltype), unsafe.Pointer(indices_v.Index(0).Addr().Pointer()))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexImage3D.xml
+func TexImage3D(target Enum, level Int, internalFormat Int, width Sizei, height Sizei, depth Sizei, border Int, format Enum, gltype Enum, pixels interface{}) {
+
+	pixels_v := reflect.ValueOf(pixels)
+	if pixels_v.Kind() != reflect.Slice {
+		panic("parameter pixels must be a slice")
+	}
+
+	C.glTexImage3D(C.GLenum(target), C.GLint(level), C.GLint(internalFormat), C.GLsizei(width), C.GLsizei(height), C.GLsizei(depth), C.GLint(border), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(pixels_v.Index(0).Addr().Pointer()))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glTexSubImage3D.xml
+func TexSubImage3D(target Enum, level Int, xoffset Int, yoffset Int, zoffset Int, width Sizei, height Sizei, depth Sizei, format Enum, gltype Enum, pixels interface{}) {
+
+	pixels_v := reflect.ValueOf(pixels)
+	if pixels_v.Kind() != reflect.Slice {
+		panic("parameter pixels must be a slice")
+	}
+
+	C.glTexSubImage3D(C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLint(yoffset), C.GLint(zoffset), C.GLsizei(width), C.GLsizei(height), C.GLsizei(depth), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(pixels_v.Index(0).Addr().Pointer()))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glCopyTexSubImage3D.xml
 func CopyTexSubImage3D(target Enum, level Int, xoffset Int, yoffset Int, zoffset Int, x Int, y Int, width Sizei, height Sizei) {
+
 	C.glCopyTexSubImage3D(C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLint(yoffset), C.GLint(zoffset), C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glColorTable.xml
+func ColorTable(target Enum, internalformat Enum, width Sizei, format Enum, gltype Enum, table interface{}) {
+
+	table_v := reflect.ValueOf(table)
+	if table_v.Kind() != reflect.Slice {
+		panic("parameter table must be a slice")
+	}
+
+	C.glColorTable(C.GLenum(target), C.GLenum(internalformat), C.GLsizei(width), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(table_v.Index(0).Addr().Pointer()))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glColorSubTable.xml
+func ColorSubTable(target Enum, start Sizei, count Sizei, format Enum, gltype Enum, data interface{}) {
+
+	data_v := reflect.ValueOf(data)
+	if data_v.Kind() != reflect.Slice {
+		panic("parameter data must be a slice")
+	}
+
+	C.glColorSubTable(C.GLenum(target), C.GLsizei(start), C.GLsizei(count), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(data_v.Index(0).Addr().Pointer()))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glColorTableParameter.xml
+func ColorTableParameteriv(target Enum, pname Enum, params []Int) {
+
+	C.glColorTableParameteriv(C.GLenum(target), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glColorTableParameter.xml
+func ColorTableParameterfv(target Enum, pname Enum, params []Float) {
+
+	C.glColorTableParameterfv(C.GLenum(target), C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glCopyColorSubTable.xml
 func CopyColorSubTable(target Enum, start Sizei, x Int, y Int, width Sizei) {
+
 	C.glCopyColorSubTable(C.GLenum(target), C.GLsizei(start), C.GLint(x), C.GLint(y), C.GLsizei(width))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glCopyColorTable.xml
 func CopyColorTable(target Enum, internalformat Enum, x Int, y Int, width Sizei) {
+
 	C.glCopyColorTable(C.GLenum(target), C.GLenum(internalformat), C.GLint(x), C.GLint(y), C.GLsizei(width))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetColorTable.xml
+func GetColorTable(target Enum, format Enum, gltype Enum, table interface{}) {
+
+	table_v := reflect.ValueOf(table)
+	if table_v.Kind() != reflect.Slice {
+		panic("parameter table must be a slice")
+	}
+
+	C.glGetColorTable(C.GLenum(target), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(table_v.Index(0).Addr().Pointer()))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetColorTableParameter.xml
+func GetColorTableParameterfv(target Enum, pname Enum, params []Float) {
+
+	C.glGetColorTableParameterfv(C.GLenum(target), C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetColorTableParameter.xml
+func GetColorTableParameteriv(target Enum, pname Enum, params []Int) {
+
+	C.glGetColorTableParameteriv(C.GLenum(target), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glBlendEquation.xml
 func BlendEquation(mode Enum) {
+
 	C.glBlendEquation(C.GLenum(mode))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glBlendColor.xml
 func BlendColor(red Clampf, green Clampf, blue Clampf, alpha Clampf) {
+
 	C.glBlendColor(C.GLclampf(red), C.GLclampf(green), C.GLclampf(blue), C.GLclampf(alpha))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glHistogram.xml
 func Histogram(target Enum, width Sizei, internalformat Enum, sink Boolean) {
+
 	C.glHistogram(C.GLenum(target), C.GLsizei(width), C.GLenum(internalformat), C.GLboolean(sink))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glResetHistogram.xml
 func ResetHistogram(target Enum) {
+
 	C.glResetHistogram(C.GLenum(target))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetHistogram.xml
+func GetHistogram(target Enum, reset Boolean, format Enum, gltype Enum, values interface{}) {
+
+	values_v := reflect.ValueOf(values)
+	if values_v.Kind() != reflect.Slice {
+		panic("parameter values must be a slice")
+	}
+
+	C.glGetHistogram(C.GLenum(target), C.GLboolean(reset), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(values_v.Index(0).Addr().Pointer()))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetHistogramParameter.xml
+func GetHistogramParameterfv(target Enum, pname Enum, params []Float) {
+
+	C.glGetHistogramParameterfv(C.GLenum(target), C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetHistogramParameter.xml
+func GetHistogramParameteriv(target Enum, pname Enum, params []Int) {
+
+	C.glGetHistogramParameteriv(C.GLenum(target), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glMinmax.xml
 func Minmax(target Enum, internalformat Enum, sink Boolean) {
+
 	C.glMinmax(C.GLenum(target), C.GLenum(internalformat), C.GLboolean(sink))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glResetMinmax.xml
 func ResetMinmax(target Enum) {
+
 	C.glResetMinmax(C.GLenum(target))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetMinmax.xml
+func GetMinmax(target Enum, reset Boolean, format Enum, types Enum, values interface{}) {
+
+	values_v := reflect.ValueOf(values)
+	if values_v.Kind() != reflect.Slice {
+		panic("parameter values must be a slice")
+	}
+
+	C.glGetMinmax(C.GLenum(target), C.GLboolean(reset), C.GLenum(format), C.GLenum(types), unsafe.Pointer(values_v.Index(0).Addr().Pointer()))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetMinmaxParameter.xml
+func GetMinmaxParameterfv(target Enum, pname Enum, params []Float) {
+
+	C.glGetMinmaxParameterfv(C.GLenum(target), C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetMinmaxParameter.xml
+func GetMinmaxParameteriv(target Enum, pname Enum, params []Int) {
+
+	C.glGetMinmaxParameteriv(C.GLenum(target), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glConvolutionFilter1D.xml
+func ConvolutionFilter1D(target Enum, internalformat Enum, width Sizei, format Enum, gltype Enum, image interface{}) {
+
+	image_v := reflect.ValueOf(image)
+	if image_v.Kind() != reflect.Slice {
+		panic("parameter image must be a slice")
+	}
+
+	C.glConvolutionFilter1D(C.GLenum(target), C.GLenum(internalformat), C.GLsizei(width), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(image_v.Index(0).Addr().Pointer()))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glConvolutionFilter2D.xml
+func ConvolutionFilter2D(target Enum, internalformat Enum, width Sizei, height Sizei, format Enum, gltype Enum, image interface{}) {
+
+	image_v := reflect.ValueOf(image)
+	if image_v.Kind() != reflect.Slice {
+		panic("parameter image must be a slice")
+	}
+
+	C.glConvolutionFilter2D(C.GLenum(target), C.GLenum(internalformat), C.GLsizei(width), C.GLsizei(height), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(image_v.Index(0).Addr().Pointer()))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glConvolutionParameter.xml
 func ConvolutionParameterf(target Enum, pname Enum, params Float) {
+
 	C.glConvolutionParameterf(C.GLenum(target), C.GLenum(pname), C.GLfloat(params))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glConvolutionParameter.xml
+func ConvolutionParameterfv(target Enum, pname Enum, params []Float) {
+
+	C.glConvolutionParameterfv(C.GLenum(target), C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glConvolutionParameter.xml
 func ConvolutionParameteri(target Enum, pname Enum, params Int) {
+
 	C.glConvolutionParameteri(C.GLenum(target), C.GLenum(pname), C.GLint(params))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glConvolutionParameter.xml
+func ConvolutionParameteriv(target Enum, pname Enum, params []Int) {
+
+	C.glConvolutionParameteriv(C.GLenum(target), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glCopyConvolutionFilter1D.xml
 func CopyConvolutionFilter1D(target Enum, internalformat Enum, x Int, y Int, width Sizei) {
+
 	C.glCopyConvolutionFilter1D(C.GLenum(target), C.GLenum(internalformat), C.GLint(x), C.GLint(y), C.GLsizei(width))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glCopyConvolutionFilter2D.xml
 func CopyConvolutionFilter2D(target Enum, internalformat Enum, x Int, y Int, width Sizei, height Sizei) {
+
 	C.glCopyConvolutionFilter2D(C.GLenum(target), C.GLenum(internalformat), C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetConvolutionFilter.xml
+func GetConvolutionFilter(target Enum, format Enum, gltype Enum, image interface{}) {
+
+	image_v := reflect.ValueOf(image)
+	if image_v.Kind() != reflect.Slice {
+		panic("parameter image must be a slice")
+	}
+
+	C.glGetConvolutionFilter(C.GLenum(target), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(image_v.Index(0).Addr().Pointer()))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetConvolutionParameter.xml
+func GetConvolutionParameterfv(target Enum, pname Enum, params []Float) {
+
+	C.glGetConvolutionParameterfv(C.GLenum(target), C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetConvolutionParameter.xml
+func GetConvolutionParameteriv(target Enum, pname Enum, params []Int) {
+
+	C.glGetConvolutionParameteriv(C.GLenum(target), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glSeparableFilter2D.xml
+func SeparableFilter2D(target Enum, internalformat Enum, width Sizei, height Sizei, format Enum, gltype Enum, row interface{}, column interface{}) {
+
+	row_v := reflect.ValueOf(row)
+	if row_v.Kind() != reflect.Slice {
+		panic("parameter row must be a slice")
+	}
+
+	column_v := reflect.ValueOf(column)
+	if column_v.Kind() != reflect.Slice {
+		panic("parameter column must be a slice")
+	}
+
+	C.glSeparableFilter2D(C.GLenum(target), C.GLenum(internalformat), C.GLsizei(width), C.GLsizei(height), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(row_v.Index(0).Addr().Pointer()), unsafe.Pointer(column_v.Index(0).Addr().Pointer()))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetSeparableFilter.xml
+func GetSeparableFilter(target Enum, format Enum, gltype Enum, row interface{}, column interface{}, span interface{}) {
+
+	row_v := reflect.ValueOf(row)
+	if row_v.Kind() != reflect.Slice {
+		panic("parameter row must be a slice")
+	}
+
+	column_v := reflect.ValueOf(column)
+	if column_v.Kind() != reflect.Slice {
+		panic("parameter column must be a slice")
+	}
+
+	span_v := reflect.ValueOf(span)
+	if span_v.Kind() != reflect.Slice {
+		panic("parameter span must be a slice")
+	}
+
+	C.glGetSeparableFilter(C.GLenum(target), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(row_v.Index(0).Addr().Pointer()), unsafe.Pointer(column_v.Index(0).Addr().Pointer()), unsafe.Pointer(span_v.Index(0).Addr().Pointer()))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glActiveTexture.xml
 func ActiveTexture(texture Enum) {
+
 	C.glActiveTexture(C.GLenum(texture))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glClientActiveTexture.xml
 func ClientActiveTexture(texture Enum) {
+
 	C.glClientActiveTexture(C.GLenum(texture))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glCompressedTexImage1D.xml
+func CompressedTexImage1D(target Enum, level Int, internalformat Enum, width Sizei, border Int, imageSize Sizei, data interface{}) {
+
+	data_v := reflect.ValueOf(data)
+	if data_v.Kind() != reflect.Slice {
+		panic("parameter data must be a slice")
+	}
+
+	C.glCompressedTexImage1D(C.GLenum(target), C.GLint(level), C.GLenum(internalformat), C.GLsizei(width), C.GLint(border), C.GLsizei(imageSize), unsafe.Pointer(data_v.Index(0).Addr().Pointer()))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glCompressedTexImage2D.xml
+func CompressedTexImage2D(target Enum, level Int, internalformat Enum, width Sizei, height Sizei, border Int, imageSize Sizei, data interface{}) {
+
+	data_v := reflect.ValueOf(data)
+	if data_v.Kind() != reflect.Slice {
+		panic("parameter data must be a slice")
+	}
+
+	C.glCompressedTexImage2D(C.GLenum(target), C.GLint(level), C.GLenum(internalformat), C.GLsizei(width), C.GLsizei(height), C.GLint(border), C.GLsizei(imageSize), unsafe.Pointer(data_v.Index(0).Addr().Pointer()))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glCompressedTexImage3D.xml
+func CompressedTexImage3D(target Enum, level Int, internalformat Enum, width Sizei, height Sizei, depth Sizei, border Int, imageSize Sizei, data interface{}) {
+
+	data_v := reflect.ValueOf(data)
+	if data_v.Kind() != reflect.Slice {
+		panic("parameter data must be a slice")
+	}
+
+	C.glCompressedTexImage3D(C.GLenum(target), C.GLint(level), C.GLenum(internalformat), C.GLsizei(width), C.GLsizei(height), C.GLsizei(depth), C.GLint(border), C.GLsizei(imageSize), unsafe.Pointer(data_v.Index(0).Addr().Pointer()))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glCompressedTexSubImage1D.xml
+func CompressedTexSubImage1D(target Enum, level Int, xoffset Int, width Sizei, format Enum, imageSize Sizei, data interface{}) {
+
+	data_v := reflect.ValueOf(data)
+	if data_v.Kind() != reflect.Slice {
+		panic("parameter data must be a slice")
+	}
+
+	C.glCompressedTexSubImage1D(C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLsizei(width), C.GLenum(format), C.GLsizei(imageSize), unsafe.Pointer(data_v.Index(0).Addr().Pointer()))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glCompressedTexSubImage2D.xml
+func CompressedTexSubImage2D(target Enum, level Int, xoffset Int, yoffset Int, width Sizei, height Sizei, format Enum, imageSize Sizei, data interface{}) {
+
+	data_v := reflect.ValueOf(data)
+	if data_v.Kind() != reflect.Slice {
+		panic("parameter data must be a slice")
+	}
+
+	C.glCompressedTexSubImage2D(C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLint(yoffset), C.GLsizei(width), C.GLsizei(height), C.GLenum(format), C.GLsizei(imageSize), unsafe.Pointer(data_v.Index(0).Addr().Pointer()))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glCompressedTexSubImage3D.xml
+func CompressedTexSubImage3D(target Enum, level Int, xoffset Int, yoffset Int, zoffset Int, width Sizei, height Sizei, depth Sizei, format Enum, imageSize Sizei, data interface{}) {
+
+	data_v := reflect.ValueOf(data)
+	if data_v.Kind() != reflect.Slice {
+		panic("parameter data must be a slice")
+	}
+
+	C.glCompressedTexSubImage3D(C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLint(yoffset), C.GLint(zoffset), C.GLsizei(width), C.GLsizei(height), C.GLsizei(depth), C.GLenum(format), C.GLsizei(imageSize), unsafe.Pointer(data_v.Index(0).Addr().Pointer()))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glGetCompressedTexImage.xml
+func GetCompressedTexImage(target Enum, lod Int, img interface{}) {
+
+	img_v := reflect.ValueOf(img)
+	if img_v.Kind() != reflect.Slice {
+		panic("parameter img must be a slice")
+	}
+
+	C.glGetCompressedTexImage(C.GLenum(target), C.GLint(lod), unsafe.Pointer(img_v.Index(0).Addr().Pointer()))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
 func MultiTexCoord1d(target Enum, s Double) {
+
 	C.glMultiTexCoord1d(C.GLenum(target), C.GLdouble(s))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
+func MultiTexCoord1dv(target Enum, v []Double) {
+
+	C.glMultiTexCoord1dv(C.GLenum(target), (*C.GLdouble)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
 func MultiTexCoord1f(target Enum, s Float) {
+
 	C.glMultiTexCoord1f(C.GLenum(target), C.GLfloat(s))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
+func MultiTexCoord1fv(target Enum, v []Float) {
+
+	C.glMultiTexCoord1fv(C.GLenum(target), (*C.GLfloat)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
 func MultiTexCoord1i(target Enum, s Int) {
+
 	C.glMultiTexCoord1i(C.GLenum(target), C.GLint(s))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
+func MultiTexCoord1iv(target Enum, v []Int) {
+
+	C.glMultiTexCoord1iv(C.GLenum(target), (*C.GLint)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
 func MultiTexCoord1s(target Enum, s Short) {
+
 	C.glMultiTexCoord1s(C.GLenum(target), C.GLshort(s))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
+func MultiTexCoord1sv(target Enum, v []Short) {
+
+	C.glMultiTexCoord1sv(C.GLenum(target), (*C.GLshort)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
 func MultiTexCoord2d(target Enum, s Double, t Double) {
+
 	C.glMultiTexCoord2d(C.GLenum(target), C.GLdouble(s), C.GLdouble(t))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
+func MultiTexCoord2dv(target Enum, v []Double) {
+
+	if len(v) > 2 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glMultiTexCoord2dv(C.GLenum(target), (*C.GLdouble)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
 func MultiTexCoord2f(target Enum, s Float, t Float) {
+
 	C.glMultiTexCoord2f(C.GLenum(target), C.GLfloat(s), C.GLfloat(t))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
+func MultiTexCoord2fv(target Enum, v []Float) {
+
+	if len(v) > 2 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glMultiTexCoord2fv(C.GLenum(target), (*C.GLfloat)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
 func MultiTexCoord2i(target Enum, s Int, t Int) {
+
 	C.glMultiTexCoord2i(C.GLenum(target), C.GLint(s), C.GLint(t))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
+func MultiTexCoord2iv(target Enum, v []Int) {
+
+	if len(v) > 2 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glMultiTexCoord2iv(C.GLenum(target), (*C.GLint)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
 func MultiTexCoord2s(target Enum, s Short, t Short) {
+
 	C.glMultiTexCoord2s(C.GLenum(target), C.GLshort(s), C.GLshort(t))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
+func MultiTexCoord2sv(target Enum, v []Short) {
+
+	if len(v) > 2 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glMultiTexCoord2sv(C.GLenum(target), (*C.GLshort)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
 func MultiTexCoord3d(target Enum, s Double, t Double, r Double) {
+
 	C.glMultiTexCoord3d(C.GLenum(target), C.GLdouble(s), C.GLdouble(t), C.GLdouble(r))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
+func MultiTexCoord3dv(target Enum, v []Double) {
+
+	if len(v) > 3 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glMultiTexCoord3dv(C.GLenum(target), (*C.GLdouble)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
 func MultiTexCoord3f(target Enum, s Float, t Float, r Float) {
+
 	C.glMultiTexCoord3f(C.GLenum(target), C.GLfloat(s), C.GLfloat(t), C.GLfloat(r))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
+func MultiTexCoord3fv(target Enum, v []Float) {
+
+	if len(v) > 3 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glMultiTexCoord3fv(C.GLenum(target), (*C.GLfloat)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
 func MultiTexCoord3i(target Enum, s Int, t Int, r Int) {
+
 	C.glMultiTexCoord3i(C.GLenum(target), C.GLint(s), C.GLint(t), C.GLint(r))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
+func MultiTexCoord3iv(target Enum, v []Int) {
+
+	if len(v) > 3 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glMultiTexCoord3iv(C.GLenum(target), (*C.GLint)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
 func MultiTexCoord3s(target Enum, s Short, t Short, r Short) {
+
 	C.glMultiTexCoord3s(C.GLenum(target), C.GLshort(s), C.GLshort(t), C.GLshort(r))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
+func MultiTexCoord3sv(target Enum, v []Short) {
+
+	if len(v) > 3 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glMultiTexCoord3sv(C.GLenum(target), (*C.GLshort)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
 func MultiTexCoord4d(target Enum, s Double, t Double, r Double, q Double) {
+
 	C.glMultiTexCoord4d(C.GLenum(target), C.GLdouble(s), C.GLdouble(t), C.GLdouble(r), C.GLdouble(q))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
+func MultiTexCoord4dv(target Enum, v []Double) {
+
+	if len(v) > 4 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glMultiTexCoord4dv(C.GLenum(target), (*C.GLdouble)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
 func MultiTexCoord4f(target Enum, s Float, t Float, r Float, q Float) {
+
 	C.glMultiTexCoord4f(C.GLenum(target), C.GLfloat(s), C.GLfloat(t), C.GLfloat(r), C.GLfloat(q))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
+func MultiTexCoord4fv(target Enum, v []Float) {
+
+	if len(v) > 4 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glMultiTexCoord4fv(C.GLenum(target), (*C.GLfloat)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
 func MultiTexCoord4i(target Enum, s Int, t Int, r Int, q Int) {
+
 	C.glMultiTexCoord4i(C.GLenum(target), C.GLint(s), C.GLint(t), C.GLint(r), C.GLint(q))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
+func MultiTexCoord4iv(target Enum, v []Int) {
+
+	if len(v) > 4 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glMultiTexCoord4iv(C.GLenum(target), (*C.GLint)(unsafe.Pointer(&v[0])))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
 func MultiTexCoord4s(target Enum, s Short, t Short, r Short, q Short) {
+
 	C.glMultiTexCoord4s(C.GLenum(target), C.GLshort(s), C.GLshort(t), C.GLshort(r), C.GLshort(q))
+}
+
+// See http://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoord.xml
+func MultiTexCoord4sv(target Enum, v []Short) {
+
+	if len(v) > 4 {
+		panic("parameter v has incorrect length")
+	}
+
+	C.glMultiTexCoord4sv(C.GLenum(target), (*C.GLshort)(unsafe.Pointer(&v[0])))
 }
 
 // See http://www.opengl.org/sdk/docs/man2/xhtml/glSampleCoverage.xml
 func SampleCoverage(value Clampf, invert Boolean) {
+
 	C.glSampleCoverage(C.GLclampf(value), C.GLboolean(invert))
 }

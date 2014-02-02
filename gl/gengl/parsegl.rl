@@ -92,7 +92,7 @@ func parse(data string, header *Header) error {
 			{
 				// Ignore defines within conditional blocks other than the top level ifndef.
 				if ifblock == 1 && strings.HasPrefix(data[m0:m1], "GL_") {
-					header.Define = append(header.Define, Define{data[m0:m1], data[m2:m3], heading, lineblock})
+					header.Define = append(header.Define, Define{Name: data[m0:m1], Value: data[m2:m3], Heading: heading, LineBlock: lineblock})
 					heading = ""
 				}
 			};
@@ -102,7 +102,7 @@ func parse(data string, header *Header) error {
 				( sp* ( comment ) >{ m4 = p+2 } @{ m5 = p-2 } sp* nl )?
 			{
 				if (ifblock == 1) {
-					header.Type = append(header.Type, Type{data[m2:m3], data[m0:m1], strings.TrimSpace(data[m4:m5])})
+					header.Type = append(header.Type, Type{Name: data[m2:m3], Type: data[m0:m1], Comment: strings.TrimSpace(data[m4:m5])})
 				}
 			};
 
@@ -112,16 +112,13 @@ func parse(data string, header *Header) error {
 			# Record function prototypes.
 			'GLAPI' spnl+ ( 'const' spnl+ )? id >{ m0 = p; m4 = 0 } spnl+ >{ m1 = p } ( '*'+ ${ m4++ } spnl* )? 'GL'? 'APIENTRY' spnl+
 				# Name
-				'gl' >{ m2 = p } id ( spnl* '(' ) >{ m3 = p; f = Func{data[m2:m3], data[m0:m1], m4, nil} } spnl*
+				'gl' >{ m2 = p } id ( spnl* '(' ) >{ m3 = p; f = Func{Name: data[m2:m3], Type: data[m0:m1], Addr: m4} } spnl*
 				# Parameters
 				( 'void' spnl* ')' | ( ( 'const' spnl+ )? id >{ m0 = p; m4 = 0 } spnl+ >{ m1 = p } ( '*'+ ${ m4++ } spnl* )? id >{ m2 = p; m5 = 0 } @{ m3 = p+1 } ( '[' [0-9]+ ${ m5 = m5*10 + (int(data[p]) - '0') } ']' )? spnl* [,)]
-					>{ f.Param = append(f.Param, Param{data[m2:m3], data[m0:m1], m4, m5}) } spnl* )+ )
+					>{ f.Param = append(f.Param, Param{Name: data[m2:m3], Type: data[m0:m1], Addr: m4, Array: m5}) } spnl* )+ )
 				spnl* ';'
 			{
 				if (ifblock == 1) {
-					if f.Type == "void" && f.Addr == 0 {
-						f.Type = ""
-					}
 					header.Func = append(header.Func, f)
 				}
 			};
