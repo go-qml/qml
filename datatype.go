@@ -195,6 +195,26 @@ var memberInfoSize = C.size_t(unsafe.Sizeof(C.GoMemberInfo{}))
 
 var typeInfoCache = make(map[reflect.Type]*C.GoTypeInfo)
 
+func appendLoweredName(buf []byte, name string) []byte {
+	var last rune
+	var lasti int
+	for i, rune := range name {
+		if !unicode.IsUpper(rune) {
+			if lasti == 0 {
+				last = unicode.ToLower(last)
+			}
+			buf = append(buf, string(last)...)
+			buf = append(buf, name[i:]...)
+			return buf
+		}
+		if i > 0 {
+			buf = append(buf, string(unicode.ToLower(last))...)
+		}
+		lasti, last = i, rune
+	}
+	return append(buf, string(unicode.ToLower(last))...)
+}
+
 func typeInfo(v interface{}) *C.GoTypeInfo {
 	vt := reflect.TypeOf(v)
 	for vt.Kind() == reflect.Ptr {
@@ -239,27 +259,12 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 		if field.PkgPath != "" {
 			continue // not exported
 		}
-		name := field.Name
-		for i, rune := range name {
-			if i == 0 {
-				names = append(names, string(unicode.ToLower(rune))...)
-			} else {
-				names = append(names, name[i:]...)
-				break
-			}
-		}
+		names = appendLoweredName(names, field.Name)
 		names = append(names, 0)
 	}
 	for i := 0; i < numMethod; i++ {
 		name := vtptr.Method(i).Name
-		for i, rune := range name {
-			if i == 0 {
-				names = append(names, string(unicode.ToLower(rune))...)
-			} else {
-				names = append(names, name[i:]...)
-				break
-			}
-		}
+		names = appendLoweredName(names, name)
 		names = append(names, 0)
 
 		// Track "On*Changed" notification methods.

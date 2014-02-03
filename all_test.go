@@ -334,6 +334,15 @@ var tests = []struct {
 		},
 	},
 	{
+		Summary: "Lowercasing of object properties",
+		Init: func(c *TestData) {
+			obj := struct{ THE, THEName, Name, N string }{"<a>", "<b>", "<c>", "<d>"}
+			c.context.SetVar("obj", &obj)
+		},
+		QML: `Item { Component.onCompleted: console.log("Names are", obj.the, obj.theName, obj.name, obj.n) }`,
+		QMLLog: "Names are <a> <b> <c> <d>",
+	},
+	{
 		Summary: "No access to private fields",
 		Value:   TestType{private: true},
 		QML:     `Item { Component.onCompleted: console.log("Private is", value.private); }`,
