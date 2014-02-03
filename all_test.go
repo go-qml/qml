@@ -267,7 +267,7 @@ var tests = []struct {
 
 	// The function provided is run with the post-QML state above,
 	// and then checks are made to ensure the provided state is found.
-	Done      func(d *TestData)
+	Done      func(c *TestData)
 	DoneLog   string
 	DoneValue TestType
 }{
@@ -294,7 +294,7 @@ var tests = []struct {
 	{
 		Summary: "Read a native property",
 		QML:     `Item { width: 123 }`,
-		Done:    func(d *TestData) { d.Check(d.root.Int("width"), Equals, 123) },
+		Done:    func(c *TestData) { c.Check(c.root.Int("width"), Equals, 123) },
 	},
 	{
 		Summary: "Read object properties",
@@ -310,27 +310,27 @@ var tests = []struct {
 				property var nilp: null
 			}
 		`,
-		Done: func(d *TestData) {
-			obj := d.root
-			d.Check(obj.Bool("boolp"), Equals, true)
-			d.Check(obj.Int("intp"), Equals, 1)
-			d.Check(obj.Int64("intp"), Equals, int64(1))
-			d.Check(obj.Int64("int64p"), Equals, int64(4294967296))
-			d.Check(obj.Float64("intp"), Equals, float64(1))
-			d.Check(obj.Float64("int64p"), Equals, float64(4294967296))
-			d.Check(obj.Float64("float32p"), Equals, float64(1.1))
-			d.Check(obj.Float64("float64p"), Equals, float64(1.1))
-			d.Check(obj.String("stringp"), Equals, "<content>")
-			d.Check(obj.Object("objectp").Int("width"), Equals, 123)
-			d.Check(obj.Property("nilp"), Equals, nil)
+		Done: func(c *TestData) {
+			obj := c.root
+			c.Check(obj.Bool("boolp"), Equals, true)
+			c.Check(obj.Int("intp"), Equals, 1)
+			c.Check(obj.Int64("intp"), Equals, int64(1))
+			c.Check(obj.Int64("int64p"), Equals, int64(4294967296))
+			c.Check(obj.Float64("intp"), Equals, float64(1))
+			c.Check(obj.Float64("int64p"), Equals, float64(4294967296))
+			c.Check(obj.Float64("float32p"), Equals, float64(1.1))
+			c.Check(obj.Float64("float64p"), Equals, float64(1.1))
+			c.Check(obj.String("stringp"), Equals, "<content>")
+			c.Check(obj.Object("objectp").Int("width"), Equals, 123)
+			c.Check(obj.Property("nilp"), Equals, nil)
 
-			d.Check(func() { obj.Bool("intp") }, Panics, `value of property "intp" is not a bool: 1`)
-			d.Check(func() { obj.Int("boolp") }, Panics, `value of property "boolp" cannot be represented as an int: true`)
-			d.Check(func() { obj.Int64("boolp") }, Panics, `value of property "boolp" cannot be represented as an int64: true`)
-			d.Check(func() { obj.Float64("boolp") }, Panics, `value of property "boolp" cannot be represented as a float64: true`)
-			d.Check(func() { obj.String("boolp") }, Panics, `value of property "boolp" is not a string: true`)
-			d.Check(func() { obj.Object("boolp") }, Panics, `value of property "boolp" is not a QML object: true`)
-			d.Check(func() { obj.Property("missing") }, Panics, `object does not have a "missing" property`)
+			c.Check(func() { obj.Bool("intp") }, Panics, `value of property "intp" is not a bool: 1`)
+			c.Check(func() { obj.Int("boolp") }, Panics, `value of property "boolp" cannot be represented as an int: true`)
+			c.Check(func() { obj.Int64("boolp") }, Panics, `value of property "boolp" cannot be represented as an int64: true`)
+			c.Check(func() { obj.Float64("boolp") }, Panics, `value of property "boolp" cannot be represented as a float64: true`)
+			c.Check(func() { obj.String("boolp") }, Panics, `value of property "boolp" is not a string: true`)
+			c.Check(func() { obj.Object("boolp") }, Panics, `value of property "boolp" is not a QML object: true`)
+			c.Check(func() { obj.Property("missing") }, Panics, `object does not have a "missing" property`)
 		},
 	},
 	{
@@ -350,39 +350,39 @@ var tests = []struct {
 				onHeightChanged:  console.log("Height is", height)
 			}
 		`,
-		Done: func(d *TestData) {
+		Done: func(c *TestData) {
 			value := TestType{StringValue: "<content>"}
-			d.root.Set("obj", &value)
-			d.root.Set("width", 300)
-			d.root.Set("height", 200)
+			c.root.Set("obj", &value)
+			c.root.Set("width", 300)
+			c.root.Set("height", 200)
 		},
 		DoneLog: "String is <content>.*Width is 300.*Height is 200",
 	},
 	{
 		Summary: "Read and set a QUrl property",
 		QML:     `import QtWebKit 3.0; WebView {}`,
-		Done: func(d *TestData) {
-			d.Check(d.root.String("url"), Equals, "")
+		Done: func(c *TestData) {
+			c.Check(c.root.String("url"), Equals, "")
 			url := "http://localhost:54321"
-			d.root.Set("url", url)
-			d.Check(d.root.String("url"), Equals, url)
+			c.root.Set("url", url)
+			c.Check(c.root.String("url"), Equals, url)
 		},
 	},
 	{
 		Summary: "Read and set a QColor property",
 		QML:     `Text{ color: Qt.rgba(1/16, 1/8, 1/4, 1/2); function hasColor(c) { return Qt.colorEqual(color, c) }}`,
-		Done: func(d *TestData) {
-			d.Assert(d.root.Color("color"), Equals, color.RGBA{256 / 16, 256 / 8, 256 / 4, 256 / 2})
-			d.root.Set("color", color.RGBA{256 / 2, 256 / 4, 256 / 8, 256 / 16})
-			d.Assert(d.root.Call("hasColor", color.RGBA{256 / 2, 256 / 4, 256 / 8, 256 / 16}), Equals, true)
+		Done: func(c *TestData) {
+			c.Assert(c.root.Color("color"), Equals, color.RGBA{256 / 16, 256 / 8, 256 / 4, 256 / 2})
+			c.root.Set("color", color.RGBA{256 / 2, 256 / 4, 256 / 8, 256 / 16})
+			c.Assert(c.root.Call("hasColor", color.RGBA{256 / 2, 256 / 4, 256 / 8, 256 / 16}), Equals, true)
 		},
 	},
 	{
 		Summary: "Read and set a QColor property from a Go field",
-		Init:    func(d *TestData) { d.value.ColorValue = color.RGBA{256 / 16, 256 / 8, 256 / 4, 256 / 2} },
+		Init:    func(c *TestData) { c.value.ColorValue = color.RGBA{256 / 16, 256 / 8, 256 / 4, 256 / 2} },
 		QML:     `Text{ property var c: value.colorValue; Component.onCompleted: { console.log(value.colorValue); } }`,
-		Done: func(d *TestData) {
-			d.Assert(d.root.Color("c"), Equals, color.RGBA{256 / 16, 256 / 8, 256 / 4, 256 / 2})
+		Done: func(c *TestData) {
+			c.Assert(c.root.Color("c"), Equals, color.RGBA{256 / 16, 256 / 8, 256 / 4, 256 / 2})
 		},
 	},
 	{
@@ -395,13 +395,13 @@ var tests = []struct {
 				]
 			}
 		`,
-		Done: func(d *TestData) {
+		Done: func(c *TestData) {
 			var states []qml.Object
-			d.root.Slice("states", &states)
-			d.Assert(states[0].String("name"), Equals, "on")
-			d.Assert(states[1].String("name"), Equals, "off")
-			d.Assert(len(states), Equals, 2)
-			d.Assert(d.root.Property("states").(*qml.List).Len(), Equals, 2)
+			c.root.Slice("states", &states)
+			c.Assert(states[0].String("name"), Equals, "on")
+			c.Assert(states[1].String("name"), Equals, "off")
+			c.Assert(len(states), Equals, 2)
+			c.Assert(c.root.Property("states").(*qml.List).Len(), Equals, 2)
 		},
 	},
 	{
@@ -415,13 +415,13 @@ var tests = []struct {
 				Component.onCompleted: value.objectsValue = mystates
 			}
 		`,
-		Done: func(d *TestData) {
+		Done: func(c *TestData) {
 			var states []qml.Object
-			d.root.Slice("mystates", &states)
-			d.Assert(states[0].String("name"), Equals, "on")
-			d.Assert(states[1].String("name"), Equals, "off")
-			d.Assert(len(states), Equals, 2)
-			d.Assert(d.value.objectsValueChanged, Equals, 3)
+			c.root.Slice("mystates", &states)
+			c.Assert(states[0].String("name"), Equals, "on")
+			c.Assert(states[1].String("name"), Equals, "off")
+			c.Assert(len(states), Equals, 2)
+			c.Assert(c.value.objectsValueChanged, Equals, 3)
 		},
 	},
 	{
@@ -433,12 +433,12 @@ var tests = []struct {
 				property var mystates: [on, off]
 			}
 		`,
-		Done: func(d *TestData) {
+		Done: func(c *TestData) {
 			var states []qml.Object
-			d.root.Slice("mystates", &states)
-			d.Assert(states[0].String("name"), Equals, "on")
-			d.Assert(states[1].String("name"), Equals, "off")
-			d.Assert(len(states), Equals, 2)
+			c.root.Slice("mystates", &states)
+			c.Assert(states[0].String("name"), Equals, "on")
+			c.Assert(states[1].String("name"), Equals, "off")
+			c.Assert(len(states), Equals, 2)
 		},
 	},
 	{
@@ -455,17 +455,17 @@ var tests = []struct {
 				Component.onCompleted: value.objectsValue = [on, off]
 			}
 		`,
-		Done: func(d *TestData) {
-			d.Assert(d.value.ObjectsValue[0].String("name"), Equals, "on")
-			d.Assert(d.value.ObjectsValue[1].String("name"), Equals, "off")
-			d.Assert(len(d.value.ObjectsValue), Equals, 2)
+		Done: func(c *TestData) {
+			c.Assert(c.value.ObjectsValue[0].String("name"), Equals, "on")
+			c.Assert(c.value.ObjectsValue[1].String("name"), Equals, "off")
+			c.Assert(len(c.value.ObjectsValue), Equals, 2)
 		},
 	},
 	{
 		Summary: "Identical values remain identical when possible",
-		Init: func(d *TestData) {
-			d.context.SetVar("a", d.value)
-			d.context.SetVar("b", d.value)
+		Init: func(c *TestData) {
+			c.context.SetVar("a", c.value)
+			c.context.SetVar("b", c.value)
 		},
 		QML:    `Item { Component.onCompleted: console.log('Identical:', a === b); }`,
 		QMLLog: "Identical: true",
@@ -473,10 +473,10 @@ var tests = []struct {
 	{
 		Summary: "Object finding via objectName",
 		QML:     `Item { Item { objectName: "subitem"; property string s: "<found>" } }`,
-		Done: func(d *TestData) {
-			obj := d.root.ObjectByName("subitem")
-			d.Check(obj.String("s"), Equals, "<found>")
-			d.Check(func() { d.root.ObjectByName("foo") }, Panics, `cannot find descendant with objectName == "foo"`)
+		Done: func(c *TestData) {
+			obj := c.root.ObjectByName("subitem")
+			c.Check(obj.String("s"), Equals, "<found>")
+			c.Check(func() { c.root.ObjectByName("foo") }, Panics, `cannot find descendant with objectName == "foo"`)
 		},
 	},
 	{
@@ -495,8 +495,8 @@ var tests = []struct {
 			GoType { stringValue: "<content>"; intValue: 300 }
 		`,
 		QMLValue: TestType{StringValue: "<content>", IntValue: 300},
-		Done: func(d *TestData) {
-			d.Assert(d.value.stringValueChanged, Equals, 1)
+		Done: func(c *TestData) {
+			c.Assert(c.value.stringValueChanged, Equals, 1)
 		},
 	},
 	{
@@ -512,11 +512,11 @@ var tests = []struct {
 			}
 		`,
 		QMLLog: "Length: 2.*Name: on",
-		Done: func(d *TestData) {
-			d.Assert(d.value.ObjectsValue[0].String("name"), Equals, "on")
-			d.Assert(d.value.ObjectsValue[1].String("name"), Equals, "off")
-			d.Assert(len(d.value.ObjectsValue), Equals, 2)
-			d.Assert(d.value.objectsValueChanged, Equals, 2)
+		Done: func(c *TestData) {
+			c.Assert(c.value.ObjectsValue[0].String("name"), Equals, "on")
+			c.Assert(c.value.ObjectsValue[1].String("name"), Equals, "off")
+			c.Assert(len(c.value.ObjectsValue), Equals, 2)
+			c.Assert(c.value.objectsValueChanged, Equals, 2)
 		},
 	},
 	{
@@ -528,9 +528,9 @@ var tests = []struct {
 				Component.onCompleted: objectsValue = []
 			}
 		`,
-		Done: func(d *TestData) {
-			d.Assert(len(d.value.ObjectsValue), Equals, 0)
-			d.Assert(d.value.objectsValueChanged, Equals, 3)
+		Done: func(c *TestData) {
+			c.Assert(len(c.value.ObjectsValue), Equals, 0)
+			c.Assert(c.value.objectsValueChanged, Equals, 3)
 		},
 	},
 	{
@@ -539,9 +539,9 @@ var tests = []struct {
 			import GoTypes 4.2
 			GoType { stringValue: "<content>" }
 		`,
-		Done: func(d *TestData) {
-			d.Assert(d.root.Interface().(*TestType).StringValue, Equals, "<content>")
-			d.Assert(d.context.Interface, Panics, "QML object is not backed by a Go value")
+		Done: func(c *TestData) {
+			c.Assert(c.root.Interface().(*TestType).StringValue, Equals, "<content>")
+			c.Assert(c.context.Interface, Panics, "QML object is not backed by a Go value")
 		},
 	},
 	{
@@ -569,7 +569,7 @@ var tests = []struct {
 	{
 		Summary: "qml.Changed on unknown value is okay",
 		Value:   TestType{StringValue: "<old>"},
-		Init: func(d *TestData) {
+		Init: func(c *TestData) {
 			value := &TestType{}
 			qml.Changed(&value, &value.StringValue)
 		},
@@ -586,9 +586,9 @@ var tests = []struct {
 		QMLLog:   "!String is",
 		QMLValue: TestType{StringValue: "<old>"},
 
-		Done: func(d *TestData) {
-			d.value.StringValue = "<new>"
-			qml.Changed(d.value, &d.value.StringValue)
+		Done: func(c *TestData) {
+			c.value.StringValue = "<new>"
+			qml.Changed(c.value, &c.value.StringValue)
 		},
 		DoneLog:   "String is <new>",
 		DoneValue: TestType{StringValue: "<new>"},
@@ -600,19 +600,19 @@ var tests = []struct {
 			import GoTypes 4.2
 			GoType { onStringValueChanged: console.log("String is", stringValue) }
 		`,
-		Done: func(d *TestData) {
-			d.value.StringValue = "<new>"
-			qml.Changed(d.value, &d.value.IntValue)
+		Done: func(c *TestData) {
+			c.value.StringValue = "<new>"
+			qml.Changed(c.value, &c.value.IntValue)
 		},
 		DoneLog: "!String is",
 	},
 	{
 		Summary: "qml.Changed triggers multiple wrappers of the same value",
 		Value:   TestType{StringValue: "<old>"},
-		Init: func(d *TestData) {
-			d.context.SetVar("v1", d.value)
-			d.context.SetVar("v2", d.value)
-			d.context.SetVar("v3", d.value)
+		Init: func(c *TestData) {
+			c.context.SetVar("v1", c.value)
+			c.context.SetVar("v2", c.value)
+			c.context.SetVar("v3", c.value)
 		},
 
 		QML: `
@@ -629,9 +629,9 @@ var tests = []struct {
 		QMLLog:   "![pv][123] has <old>",
 		QMLValue: TestType{StringValue: "<old>"},
 
-		Done: func(d *TestData) {
-			d.value.StringValue = "<new>"
-			qml.Changed(d.value, &d.value.StringValue)
+		Done: func(c *TestData) {
+			c.value.StringValue = "<new>"
+			qml.Changed(c.value, &c.value.StringValue)
 		},
 		// Why are v3-v1 reversed? Is QML registering connections in reversed order?
 		DoneLog: "v3 has <new>.*v2 has <new>.*v1 has <new>.*p1 has <new>.*p2 has <new>.*p3 has <new>.*",
@@ -640,10 +640,10 @@ var tests = []struct {
 		Summary: "qml.Changed updates bindings",
 		Value:   TestType{StringValue: "<old>"},
 		QML:     `Item { property string s: "String is " + value.stringValue }`,
-		Done: func(d *TestData) {
-			d.value.StringValue = "<new>"
-			qml.Changed(d.value, &d.value.StringValue)
-			d.Check(d.root.String("s"), Equals, "String is <new>")
+		Done: func(c *TestData) {
+			c.value.StringValue = "<new>"
+			qml.Changed(c.value, &c.value.StringValue)
+			c.Check(c.root.String("s"), Equals, "String is <new>")
 		},
 	},
 	{
@@ -717,19 +717,19 @@ var tests = []struct {
 	{
 		Summary: "Call a QML method with no result or parameters from Go",
 		QML:     `Item { function f() { console.log("f was called"); } }`,
-		Done:    func(d *TestData) { d.Check(d.root.Call("f"), IsNil) },
+		Done:    func(c *TestData) { c.Check(c.root.Call("f"), IsNil) },
 		DoneLog: "f was called",
 	},
 	{
 		Summary: "Call a QML method with result and parameters from Go",
 		QML:     `Item { function add(a, b) { return a+b; } }`,
-		Done:    func(d *TestData) { d.Check(d.root.Call("add", 1, 2.1), Equals, float64(3.1)) },
+		Done:    func(c *TestData) { c.Check(c.root.Call("add", 1, 2.1), Equals, float64(3.1)) },
 	},
 	{
 		Summary: "Call a QML method with a custom type",
 		Value:   TestType{StringValue: "<content>"},
 		QML:     `Item { function log(value) { console.log("String is", value.stringValue) } }`,
-		Done:    func(d *TestData) { d.root.Call("log", d.value) },
+		Done:    func(c *TestData) { c.root.Call("log", c.value) },
 		DoneLog: "String is <content>",
 	},
 	{
@@ -740,8 +740,8 @@ var tests = []struct {
 				function f() { return custom }
 			}
 		`,
-		Done: func(d *TestData) {
-			d.Check(d.root.Call("f").(qml.Object).Int("width"), Equals, 300)
+		Done: func(c *TestData) {
+			c.Check(c.root.Call("f").(qml.Object).Int("width"), Equals, 300)
 		},
 	},
 	{
@@ -752,45 +752,45 @@ var tests = []struct {
 				function hold(v) { held = v; gc(); gc(); }
 				function log()   { console.log("String is", held.stringValue) }
 			}`,
-		Done: func(d *TestData) {
+		Done: func(c *TestData) {
 			value := TestType{StringValue: "<content>"}
 			stats := qml.Stats()
-			d.root.Call("hold", &value)
-			d.Check(qml.Stats().ValuesAlive, Equals, stats.ValuesAlive+1)
-			d.root.Call("log")
-			d.root.Call("hold", nil)
-			d.Check(qml.Stats().ValuesAlive, Equals, stats.ValuesAlive)
+			c.root.Call("hold", &value)
+			c.Check(qml.Stats().ValuesAlive, Equals, stats.ValuesAlive+1)
+			c.root.Call("log")
+			c.root.Call("hold", nil)
+			c.Check(qml.Stats().ValuesAlive, Equals, stats.ValuesAlive)
 		},
 		DoneLog: "String is <content>",
 	},
 	{
 		Summary: "Call a non-existent QML method",
 		QML:     `Item {}`,
-		Done: func(d *TestData) {
-			d.Check(func() { d.root.Call("add", 1, 2) }, Panics, `object does not expose a method "add"`)
+		Done: func(c *TestData) {
+			c.Check(func() { c.root.Call("add", 1, 2) }, Panics, `object does not expose a method "add"`)
 		},
 	},
 	{
 		Summary: "Ensure URL of provided file is correct by loading a local file",
-		Init: func(d *TestData) {
+		Init: func(c *TestData) {
 			data, err := base64.StdEncoding.DecodeString("R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==")
-			d.Assert(err, IsNil)
+			c.Assert(err, IsNil)
 			err = ioutil.WriteFile("test.gif", data, 0644)
-			d.Check(err, IsNil)
+			c.Check(err, IsNil)
 		},
 		QML:    `Image { source: "test.gif"; Component.onCompleted: console.log("Ready:", status == Image.Ready) }`,
 		QMLLog: "Ready: true",
-		Done:   func(d *TestData) { os.Remove("test.gif") },
+		Done:   func(c *TestData) { os.Remove("test.gif") },
 	},
 	{
 		Summary: "Create window with non-window root object",
 		QML:     `Rectangle { width: 300; height: 200; function inc(x) { return x+1 } }`,
-		Done: func(d *TestData) {
-			win := d.component.CreateWindow(nil)
+		Done: func(c *TestData) {
+			win := c.component.CreateWindow(nil)
 			root := win.Root()
-			d.Check(root.Int("width"), Equals, 300)
-			d.Check(root.Int("height"), Equals, 200)
-			d.Check(root.Call("inc", 42.5), Equals, float64(43.5))
+			c.Check(root.Int("width"), Equals, 300)
+			c.Check(root.Int("height"), Equals, 200)
+			c.Check(root.Call("inc", 42.5), Equals, float64(43.5))
 			root.Destroy()
 		},
 	},
@@ -800,44 +800,44 @@ var tests = []struct {
 			import QtQuick.Window 2.0
 			Window { title: "<title>"; width: 300; height: 200 }
 		`,
-		Done: func(d *TestData) {
-			win := d.component.CreateWindow(nil)
+		Done: func(c *TestData) {
+			win := c.component.CreateWindow(nil)
 			root := win.Root()
-			d.Check(root.String("title"), Equals, "<title>")
-			d.Check(root.Int("width"), Equals, 300)
-			d.Check(root.Int("height"), Equals, 200)
+			c.Check(root.String("title"), Equals, "<title>")
+			c.Check(root.Int("width"), Equals, 300)
+			c.Check(root.Int("height"), Equals, 200)
 		},
 	},
 	{
 		Summary: "Window is object",
 		QML:     `Item {}`,
-		Done: func(d *TestData) {
-			win := d.component.CreateWindow(nil)
-			d.Assert(win.Int("status"), Equals, 1) // Ready
+		Done: func(c *TestData) {
+			win := c.component.CreateWindow(nil)
+			c.Assert(win.Int("status"), Equals, 1) // Ready
 		},
 	},
 	{
 		Summary: "Pass a *Value back into a method",
 		QML:     `Rectangle { width: 300; function log(r) { console.log("Width is", r.width) } }`,
-		Done:    func(d *TestData) { d.root.Call("log", d.root) },
+		Done:    func(c *TestData) { c.root.Call("log", c.root) },
 		DoneLog: "Width is 300",
 	},
 	{
 		Summary: "Create a QML-defined component in Go",
 		QML:     `Item { property var comp: Component { Rectangle { width: 300 } } }`,
-		Done: func(d *TestData) {
-			rect := d.root.Object("comp").Create(nil)
-			d.Check(rect.Int("width"), Equals, 300)
-			d.Check(func() { d.root.Create(nil) }, Panics, "object is not a component")
-			d.Check(func() { d.root.CreateWindow(nil) }, Panics, "object is not a component")
+		Done: func(c *TestData) {
+			rect := c.root.Object("comp").Create(nil)
+			c.Check(rect.Int("width"), Equals, 300)
+			c.Check(func() { c.root.Create(nil) }, Panics, "object is not a component")
+			c.Check(func() { c.root.CreateWindow(nil) }, Panics, "object is not a component")
 		},
 	},
 	{
 		Summary: "Call a Qt method that has no result",
 		QML:     `Item { Component.onDestruction: console.log("item destroyed") }`,
-		Done: func(d *TestData) {
+		Done: func(c *TestData) {
 			// Create a local instance to avoid double-destroying it.
-			root := d.component.Create(nil)
+			root := c.component.Create(nil)
 			root.Call("deleteLater")
 			time.Sleep(100 * time.Millisecond)
 		},
@@ -846,9 +846,9 @@ var tests = []struct {
 	{
 		Summary: "Errors connecting to QML signals",
 		QML:     `Item { signal doIt() }`,
-		Done: func(d *TestData) {
-			d.Check(func() { d.root.On("missing", func() {}) }, Panics, `object does not expose a "missing" signal`)
-			d.Check(func() { d.root.On("doIt", func(s string) {}) }, Panics, `signal "doIt" has too few parameters for provided function`)
+		Done: func(c *TestData) {
+			c.Check(func() { c.root.On("missing", func() {}) }, Panics, `object does not expose a "missing" signal`)
+			c.Check(func() { c.root.On("doIt", func(s string) {}) }, Panics, `signal "doIt" has too few parameters for provided function`)
 		},
 	},
 	{
@@ -860,12 +860,12 @@ var tests = []struct {
 				function emitDoIt() { item.doIt() }
 			}
 		`,
-		Done: func(d *TestData) {
+		Done: func(c *TestData) {
 			itWorks := false
-			d.root.On("doIt", func() { itWorks = true })
-			d.Check(itWorks, Equals, false)
-			d.root.Call("emitDoIt")
-			d.Check(itWorks, Equals, true)
+			c.root.On("doIt", func() { itWorks = true })
+			c.Check(itWorks, Equals, false)
+			c.root.Call("emitDoIt")
+			c.Check(itWorks, Equals, true)
 		},
 	},
 	{
@@ -877,34 +877,34 @@ var tests = []struct {
 				function emitDoIt() { item.doIt("<arg>", 123) }
 			}
 		`,
-		Done: func(d *TestData) {
+		Done: func(c *TestData) {
 			var stack []interface{}
-			d.root.On("doIt", func() { stack = append(stack, "A") })
-			d.root.On("doIt", func(s string) { stack = append(stack, "B", s) })
-			d.root.On("doIt", func(s string, i int) { stack = append(stack, "C", s, i) })
-			d.Check(stack, IsNil)
-			d.root.Call("emitDoIt")
-			d.Check(stack, DeepEquals, []interface{}{"A", "B", "<arg>", "C", "<arg>", 123})
+			c.root.On("doIt", func() { stack = append(stack, "A") })
+			c.root.On("doIt", func(s string) { stack = append(stack, "B", s) })
+			c.root.On("doIt", func(s string, i int) { stack = append(stack, "C", s, i) })
+			c.Check(stack, IsNil)
+			c.root.Call("emitDoIt")
+			c.Check(stack, DeepEquals, []interface{}{"A", "B", "<arg>", "C", "<arg>", 123})
 		},
 	},
 	{
 		Summary: "Connect to a QML signal with an object parameter",
 		QML:     `import QtWebKit 3.0; WebView{}`,
-		Done: func(d *TestData) {
+		Done: func(c *TestData) {
 			url := "http://localhost:54321/"
 			done := make(chan bool)
-			d.root.On("navigationRequested", func(request qml.Object) {
-				d.Check(request.String("url"), Equals, url)
+			c.root.On("navigationRequested", func(request qml.Object) {
+				c.Check(request.String("url"), Equals, url)
 				done <- true
 			})
-			d.root.Set("url", url)
+			c.root.Set("url", url)
 			<-done
 		},
 	},
 	{
 		Summary: "Load image from Go provider",
-		Init: func(d *TestData) {
-			d.engine.AddImageProvider("myprov", func(id string, width, height int) image.Image {
+		Init: func(c *TestData) {
+			c.engine.AddImageProvider("myprov", func(id string, width, height int) image.Image {
 				return image.NewRGBA(image.Rect(0, 0, 200, 100))
 			})
 		},
@@ -919,7 +919,7 @@ var tests = []struct {
 	{
 		Summary: "TypeName",
 		QML:     `Item{}`,
-		Done:    func(d *TestData) { d.Assert(d.root.TypeName(), Equals, "QQuickItem") },
+		Done:    func(c *TestData) { c.Assert(c.root.TypeName(), Equals, "QQuickItem") },
 	},
 	{
 		Summary: "Custom Go type with painting",
@@ -933,21 +933,21 @@ var tests = []struct {
 				}
 			}
 		`,
-		Done: func(d *TestData) {
-			d.Assert(d.rect.PaintCount, Equals, 0)
+		Done: func(c *TestData) {
+			c.Assert(c.rect.PaintCount, Equals, 0)
 
-			window := d.component.CreateWindow(nil)
+			window := c.component.CreateWindow(nil)
 			defer window.Destroy()
 			window.Show()
 
 			// Qt doesn't hide the Window if we call it too quickly. :-(
 			time.Sleep(100 * time.Millisecond)
 
-			d.Assert(d.rect.PaintCount, Equals, 1)
+			c.Assert(c.rect.PaintCount, Equals, 1)
 
 			image := window.Snapshot()
-			d.Assert(image.At(25, 25), Equals, color.RGBA{0, 0, 0, 255})
-			d.Assert(image.At(100, 100), Equals, color.RGBA{255, 0, 0, 255})
+			c.Assert(image.At(25, 25), Equals, color.RGBA{0, 0, 0, 255})
+			c.Assert(image.At(100, 100), Equals, color.RGBA{255, 0, 0, 255})
 		},
 	}, {
 		Summary: "Set a property with the wrong type",
@@ -955,18 +955,18 @@ var tests = []struct {
 			import QtQuick.Window 2.0
 			Window { Rectangle { objectName: "rect" } }
 		`,
-		Done: func(d *TestData) {
-			window := d.component.CreateWindow(nil)
+		Done: func(c *TestData) {
+			window := c.component.CreateWindow(nil)
 			defer window.Destroy()
 
 			root := window.Root() // It's the window itself in this case
 			rect := root.ObjectByName("rect")
 
-			d.Assert(func() { rect.Set("parent", root) }, Panics,
+			c.Assert(func() { rect.Set("parent", root) }, Panics,
 				`cannot set property "parent" with type QQuickItem* to value of QQuickWindow*`)
-			d.Assert(func() { rect.Set("parent", 42) }, Panics,
+			c.Assert(func() { rect.Set("parent", 42) }, Panics,
 				`cannot set property "parent" with type QQuickItem* to value of int`)
-			d.Assert(func() { rect.Set("non_existent", 0) }, Panics,
+			c.Assert(func() { rect.Set("non_existent", 0) }, Panics,
 				`cannot set non-existent property "non_existent" on type QQuickRectangle`)
 		},
 	},
