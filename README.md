@@ -55,7 +55,7 @@ If you are using Ubuntu, the [Ubuntu SDK](http://developer.ubuntu.com/get-starte
 
     $ sudo add-apt-repository ppa:ubuntu-sdk-team/ppa
     $ sudo apt-get update
-    $ sudo apt-get install ubuntu-sdk qtbase5-private-dev qtdeclarative5-private-dev
+    $ sudo apt-get install ubuntu-sdk qtbase5-private-dev qtdeclarative5-private-dev libqt5opengl5-dev
 
 and Go 1.2 may be installed using [godeb](http://blog.labix.org/2013/06/15/in-flight-deb-packages-of-go):
 
