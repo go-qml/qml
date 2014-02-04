@@ -390,7 +390,7 @@ func (list *List) Slice(sliceAddr interface{}) {
 	if toPtr.Kind() != reflect.Ptr || toPtr.Type().Elem().Kind() != reflect.Slice {
 		panic(fmt.Sprintf("Slice got a sliceAddr parameter that is not a slice address: %#v", sliceAddr))
 	}
-	convertAndSet(toPtr.Elem(), reflect.ValueOf(list))
+	convertAndSet(toPtr.Elem(), reflect.ValueOf(list), reflect.Value{})
 }
 
 // Common implements the common behavior of all QML objects.
@@ -867,16 +867,53 @@ func (win *Window) Snapshot() image.Image {
 //
 // The type specification must be registered with the RegisterTypes function
 // before it will be visible to QML code.
+//
+// Methods and fields
+//
+// Methods and fields that are exported in the Go value returned by TypeSpec.New
+// are available to QML logic as methods and properties of the respective
+// QML object. As required by the QML environment, the Go method and field names
+// are lowercased according to the following scheme when being accesed from QML:
+//
+//     value.Name      => value.name
+//     value.UPPERName => value.upperName
+//     value.UPPER     => value.upper
+//
+// Exported fields may also be set while the object is being declared inside
+// QML content. For example:
+//
+//     import GoExtensions 1.0
+//     Person {
+//         lastName: "value"
+//     }
+//
+// Setters
+//
+// In addition to directly reading and writing value fields from QML code, as
+// described above, Go values may also intercept writes to specific fields by
+// declaring a setter method according to common Go conventions.
+//
+// For example:
+//
+//     type Person struct {
+//         Name string
+//     }
+//
+//     func (p *Person) SetName(name string) {
+//         fmt.Println("Old name is", p.Name)
+//         p.Name = name
+//         fmt.Println("New name is", p.Name)
+//     }
+//
+// In the example above, when QML logic writes to the Person.Name field via any
+// means, the SetName method will be invoked.
+//
 type TypeSpec struct {
 	// Name holds the identifier the type is known as.
 	Name string
 
 	// New is called when QML code requests the creation of a new value of
 	// this type. All returned values must be backed by the same Go type.
-	//
-	// If the returned value is a struct containing a field such as FieldName
-	// and a respective method OnFieldNameChanged, the latter method will
-	// be called whenever QML logic writes into the former field.
 	New func() interface{}
 
 	// Singleton defines whether a single instance of the type should be used

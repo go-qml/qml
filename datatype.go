@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"image/color"
 	"reflect"
-	"strings"
 	"unicode"
 	"unsafe"
 )
@@ -231,7 +230,7 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	typeInfo.metaObject = nilPtr
 	typeInfo.paint = (*C.GoMemberInfo)(nilPtr)
 
-	var onChanged map[string]int
+	var setMethodIndex map[string]int
 
 	// TODO Only do that if it's a struct?
 	vtptr := reflect.PtrTo(vt)
@@ -267,12 +266,12 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 		names = appendLoweredName(names, name)
 		names = append(names, 0)
 
-		// Track "On*Changed" notification methods.
-		if len(name) > 9 && name[0] == 'O' && name[1] == 'n' && strings.HasSuffix(name, "Changed") {
-			if onChanged == nil {
-				onChanged = make(map[string]int)
+		// Track "Set*" modification methods.
+		if len(name) > 3 && name[:3] == "Set" {
+			if setMethodIndex == nil {
+				setMethodIndex = make(map[string]int)
 			}
-			onChanged[name[2:len(name)-7]] = i
+			setMethodIndex[name[3:]] = i
 		}
 	}
 	if len(names) != namesLen {
@@ -296,11 +295,12 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 		memberInfo.memberType = dataTypeOf(field.Type)
 		memberInfo.reflectIndex = C.int(i)
 		memberInfo.reflectChangedIndex = -1
+		memberInfo.reflectSetIndex = -1
 		memberInfo.addrOffset = C.int(field.Offset)
 		membersi += 1
 		mnamesi += uintptr(len(field.Name)) + 1
-		if methodIndex, ok := onChanged[field.Name]; ok {
-			memberInfo.reflectChangedIndex = C.int(methodIndex)
+		if methodIndex, ok := setMethodIndex[field.Name]; ok {
+			memberInfo.reflectSetIndex = C.int(methodIndex)
 		}
 	}
 	for i := 0; i < numMethod; i++ {

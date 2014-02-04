@@ -338,7 +338,7 @@ func hookGoValueDestroyed(enginep unsafe.Pointer, foldp unsafe.Pointer) {
 }
 
 //export hookGoValueReadField
-func hookGoValueReadField(enginep, foldp unsafe.Pointer, reflectIndex, onChangedIndex C.int, resultdv *C.DataValue) {
+func hookGoValueReadField(enginep, foldp unsafe.Pointer, reflectIndex, setIndex C.int, resultdv *C.DataValue) {
 	fold := ensureEngine(enginep, foldp)
 	field := fold.gfield(int(reflectIndex))
 
@@ -346,7 +346,7 @@ func hookGoValueReadField(enginep, foldp unsafe.Pointer, reflectIndex, onChanged
 	if field.Kind() == reflect.Slice && field.Type() == typeObjSlice {
 		// TODO Handle other GoValue slices (!= []qml.Object).
 		resultdv.dataType = C.DTListProperty
-		*(*unsafe.Pointer)(unsafe.Pointer(&resultdv.data)) = C.newListProperty(foldp, C.intptr_t(reflectIndex), C.intptr_t(onChangedIndex))
+		*(*unsafe.Pointer)(unsafe.Pointer(&resultdv.data)) = C.newListProperty(foldp, C.intptr_t(reflectIndex), C.intptr_t(setIndex))
 		return
 	}
 
@@ -376,7 +376,7 @@ func hookGoValueReadField(enginep, foldp unsafe.Pointer, reflectIndex, onChanged
 }
 
 //export hookGoValueWriteField
-func hookGoValueWriteField(enginep, foldp unsafe.Pointer, reflectIndex, onChangedIndex C.int, assigndv *C.DataValue) {
+func hookGoValueWriteField(enginep, foldp unsafe.Pointer, reflectIndex, setIndex C.int, assigndv *C.DataValue) {
 	fold := ensureEngine(enginep, foldp)
 	v := reflect.ValueOf(fold.gvalue)
 	ve := v
@@ -386,17 +386,18 @@ func hookGoValueWriteField(enginep, foldp unsafe.Pointer, reflectIndex, onChange
 	field := ve.Field(int(reflectIndex))
 	assign := unpackDataValue(assigndv, fold.engine)
 
-	// TODO Return false to the call site if it fails. That's how Qt seems to handle it internally.
-	convertAndSet(field, reflect.ValueOf(assign))
-
-	if onChangedIndex != -1 {
-		v.Method(int(onChangedIndex)).Call(nil)
+	var setMethod reflect.Value
+	if setIndex >= 0 {
+		setMethod = v.Method(int(setIndex))
 	}
+
+	// TODO Return false to the call site if it fails. That's how Qt seems to handle it internally.
+	convertAndSet(field, reflect.ValueOf(assign), setMethod)
 }
 
 var listType = reflect.TypeOf(&List{})
 
-func convertAndSet(to, from reflect.Value) {
+func convertAndSet(to, from reflect.Value, setMethod reflect.Value) {
 	defer func() {
 		if v := recover(); v != nil {
 			// TODO This should be an error. Test and fix.
@@ -405,17 +406,20 @@ func convertAndSet(to, from reflect.Value) {
 	}()
 	toType := to.Type()
 	fromType := from.Type()
-	if toType == fromType {
-		to.Set(from)
-	} else if fromType == listType && to.Kind() == reflect.Slice {
+	if fromType == listType && to.Kind() == reflect.Slice {
 		list := from.Interface().(*List)
-		to.Set(reflect.MakeSlice(toType, len(list.data), len(list.data)))
+		from = reflect.MakeSlice(toType, len(list.data), len(list.data))
 		elemType := toType.Elem()
 		for i, elem := range list.data {
-			to.Index(i).Set(reflect.ValueOf(elem).Convert(elemType))
+			from.Index(i).Set(reflect.ValueOf(elem).Convert(elemType))
 		}
+	} else if toType != fromType {
+		from = from.Convert(toType)
+	}
+	if setMethod.IsValid() {
+		setMethod.Call([]reflect.Value{from})
 	} else {
-		to.Set(from.Convert(toType))
+		to.Set(from)
 	}
 }
 
@@ -541,7 +545,7 @@ func hookPanic(message *C.char) {
 }
 
 //export hookListPropertyAt
-func hookListPropertyAt(foldp unsafe.Pointer, reflectIndex, onChangedIndex C.intptr_t, index C.int) (objp unsafe.Pointer) {
+func hookListPropertyAt(foldp unsafe.Pointer, reflectIndex, setIndex C.intptr_t, index C.int) (objp unsafe.Pointer) {
 	fold := (*valueFold)(foldp)
 	field := fold.gfield(int(reflectIndex))
 	slice := field.Addr().Interface().(*[]Object)
@@ -549,7 +553,7 @@ func hookListPropertyAt(foldp unsafe.Pointer, reflectIndex, onChangedIndex C.int
 }
 
 //export hookListPropertyCount
-func hookListPropertyCount(foldp unsafe.Pointer, reflectIndex, onChangedIndex C.intptr_t) C.int {
+func hookListPropertyCount(foldp unsafe.Pointer, reflectIndex, setIndex C.intptr_t) C.int {
 	fold := (*valueFold)(foldp)
 	field := fold.gfield(int(reflectIndex))
 	slice := field.Addr().Interface().(*[]Object)
@@ -557,31 +561,33 @@ func hookListPropertyCount(foldp unsafe.Pointer, reflectIndex, onChangedIndex C.
 }
 
 //export hookListPropertyAppend
-func hookListPropertyAppend(foldp unsafe.Pointer, reflectIndex, onChangedIndex C.intptr_t, objp unsafe.Pointer) {
+func hookListPropertyAppend(foldp unsafe.Pointer, reflectIndex, setIndex C.intptr_t, objp unsafe.Pointer) {
 	fold := (*valueFold)(foldp)
 	field := fold.gfield(int(reflectIndex))
 	slice := field.Addr().Interface().(*[]Object)
 	var objdv C.DataValue
 	objdv.dataType = C.DTObject
 	*(*unsafe.Pointer)(unsafe.Pointer(&objdv.data)) = objp
-	*slice = append(*slice, unpackDataValue(&objdv, fold.engine).(Object))
-	if onChangedIndex != -1 {
-		// TODO Must probably dereference the ptr here. Test it.
-		reflect.ValueOf(fold.gvalue).Method(int(onChangedIndex)).Call(nil)
+	newslice := append(*slice, unpackDataValue(&objdv, fold.engine).(Object))
+	if setIndex >= 0 {
+		reflect.ValueOf(fold.gvalue).Method(int(setIndex)).Call([]reflect.Value{reflect.ValueOf(newslice)})
+	} else {
+		*slice = newslice
 	}
 }
 
 //export hookListPropertyClear
-func hookListPropertyClear(foldp unsafe.Pointer, reflectIndex, onChangedIndex C.intptr_t) {
+func hookListPropertyClear(foldp unsafe.Pointer, reflectIndex, setIndex C.intptr_t) {
 	fold := (*valueFold)(foldp)
 	field := fold.gfield(int(reflectIndex))
 	slice := field.Addr().Interface().(*[]Object)
-	for i := range *slice {
-		(*slice)[i] = nil
-	}
-	*slice = (*slice)[0:0]
-	if onChangedIndex != -1 {
-		// TODO Must probably dereference the ptr here. Test it.
-		reflect.ValueOf(fold.gvalue).Method(int(onChangedIndex)).Call(nil)
+	newslice := (*slice)[0:0]
+	if setIndex >= 0 {
+		reflect.ValueOf(fold.gvalue).Method(int(setIndex)).Call([]reflect.Value{reflect.ValueOf(newslice)})
+	} else {
+		for i := range *slice {
+			(*slice)[i] = nil
+		}
+		*slice = newslice
 	}
 }

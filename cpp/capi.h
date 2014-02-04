@@ -69,6 +69,7 @@ typedef struct {
     DataType memberType;
     int reflectIndex;
     int reflectChangedIndex;
+    int reflectSetIndex;
     int metaIndex;
     int addrOffset;
     char *methodSignature;
@@ -166,7 +167,7 @@ void unpackDataValue(DataValue *value, QVariant_ *result);
 
 QVariantList_ *newVariantList(DataValue *list, int len);
 
-QQmlListProperty_ *newListProperty(GoAddr *addr, intptr_t reflectIndex, intptr_t onChangedIndex);
+QQmlListProperty_ *newListProperty(GoAddr *addr, intptr_t reflectIndex, intptr_t setIndex);
 
 int registerType(char *location, int major, int minor, char *name, GoTypeInfo *typeInfo, GoTypeSpec_ *spec);
 int registerSingleton(char *location, int major, int minor, char *name, GoTypeInfo *typeInfo, GoTypeSpec_ *spec);
@@ -175,8 +176,8 @@ void installLogHandler();
 
 void hookIdleTimer();
 void hookLogHandler(LogMessage *message);
-void hookGoValueReadField(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, int onChangedIndex, DataValue *result);
-void hookGoValueWriteField(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, int onChangedIndex, DataValue *assign);
+void hookGoValueReadField(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, int setIndex, DataValue *result);
+void hookGoValueWriteField(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, int setIndex, DataValue *assign);
 void hookGoValueCallMethod(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, DataValue *result);
 void hookGoValueDestroyed(QQmlEngine_ *engine, GoAddr *addr);
 void hookGoValuePaint(QQmlEngine_ *engine, GoAddr *addr, intptr_t reflextIndex);
@@ -186,10 +187,10 @@ void hookWindowHidden(QObject_ *addr);
 void hookSignalCall(QQmlEngine_ *engine, void *func, DataValue *params);
 void hookSignalDisconnect(void *func);
 void hookPanic(char *message);
-int hookListPropertyCount(GoAddr *addr, intptr_t reflectIndex, intptr_t onChangedIndex);
-QObject_ *hookListPropertyAt(GoAddr *addr, intptr_t reflectIndex, intptr_t onChangedIndex, int i);
-void hookListPropertyAppend(GoAddr *addr, intptr_t reflectIndex, intptr_t onChangedIndex, QObject_ *obj);
-void hookListPropertyClear(GoAddr *addr, intptr_t reflectIndex, intptr_t onChangedIndex);
+int hookListPropertyCount(GoAddr *addr, intptr_t reflectIndex, intptr_t setIndex);
+QObject_ *hookListPropertyAt(GoAddr *addr, intptr_t reflectIndex, intptr_t setIndex, int i);
+void hookListPropertyAppend(GoAddr *addr, intptr_t reflectIndex, intptr_t setIndex, QObject_ *obj);
+void hookListPropertyClear(GoAddr *addr, intptr_t reflectIndex, intptr_t setIndex);
 
 #ifdef __cplusplus
 } // extern "C"

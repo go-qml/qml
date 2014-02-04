@@ -17,8 +17,9 @@ type GoType struct {
 	Text string
 }
 
-func (v *GoType) OnTextChanged() {
-	fmt.Println("Text changed...")
+func (v *GoType) SetText(text string) {
+	fmt.Println("Text changing to:", text)
+	v.Text = text
 }
 
 type GoSingleton struct {

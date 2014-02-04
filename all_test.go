@@ -111,20 +111,27 @@ type TestType struct {
 	IntsValue    []int
 	ObjectsValue []qml.Object
 
-	stringValueChanged  int
-	objectsValueChanged int
+	SetterStringValue  string
+	SetterObjectsValue []qml.Object
+
+	setterStringValueChanged  int
+	setterStringValueSet      string
+	setterObjectsValueChanged int
+	setterObjectsValueSet     []qml.Object
 }
 
 func (ts *TestType) StringMethod() string {
 	return ts.StringValue
 }
 
-func (ts *TestType) OnStringValueChanged() {
-	ts.stringValueChanged++
+func (ts *TestType) SetSetterStringValue(s string) {
+	ts.setterStringValueChanged++
+	ts.setterStringValueSet = s
 }
 
-func (ts *TestType) OnObjectsValueChanged() {
-	ts.objectsValueChanged++
+func (ts *TestType) SetSetterObjectsValue(v []qml.Object) {
+	ts.setterObjectsValueChanged++
+	ts.setterObjectsValueSet = v
 }
 
 func (ts *TestType) Mod(dividend, divisor int) (int, error) {
@@ -339,7 +346,7 @@ var tests = []struct {
 			obj := struct{ THE, THEName, Name, N string }{"<a>", "<b>", "<c>", "<d>"}
 			c.context.SetVar("obj", &obj)
 		},
-		QML: `Item { Component.onCompleted: console.log("Names are", obj.the, obj.theName, obj.name, obj.n) }`,
+		QML:    `Item { Component.onCompleted: console.log("Names are", obj.the, obj.theName, obj.name, obj.n) }`,
 		QMLLog: "Names are <a> <b> <c> <d>",
 	},
 	{
@@ -430,7 +437,7 @@ var tests = []struct {
 			c.Assert(states[0].String("name"), Equals, "on")
 			c.Assert(states[1].String("name"), Equals, "off")
 			c.Assert(len(states), Equals, 2)
-			c.Assert(c.value.objectsValueChanged, Equals, 3)
+			c.Assert(len(c.value.ObjectsValue), Equals, 2)
 		},
 	},
 	{
@@ -504,8 +511,17 @@ var tests = []struct {
 			GoType { stringValue: "<content>"; intValue: 300 }
 		`,
 		QMLValue: TestType{StringValue: "<content>", IntValue: 300},
+	},
+	{
+		Summary: "Write Go type property that has a setter",
+		QML: `
+			import GoTypes 4.2
+			GoType { setterStringValue: "<content>" }
+		`,
 		Done: func(c *TestData) {
-			c.Assert(c.value.stringValueChanged, Equals, 1)
+			c.Assert(c.value.SetterStringValue, Equals, "")
+			c.Assert(c.value.setterStringValueChanged, Equals, 1)
+			c.Assert(c.value.setterStringValueSet, Equals, "<content>")
 		},
 	},
 	{
@@ -525,7 +541,22 @@ var tests = []struct {
 			c.Assert(c.value.ObjectsValue[0].String("name"), Equals, "on")
 			c.Assert(c.value.ObjectsValue[1].String("name"), Equals, "off")
 			c.Assert(len(c.value.ObjectsValue), Equals, 2)
-			c.Assert(c.value.objectsValueChanged, Equals, 2)
+		},
+	},
+	{
+		Summary: "Write an inline object list to a Go type property that has a setter",
+		QML: `
+			import GoTypes 4.2
+			GoType {
+				setterObjectsValue: [State{ name: "on" }, State{ name: "off" }]
+			}
+		`,
+		Done: func(c *TestData) {
+			// Note that the setter is not actually updating the field value, for testing purposes.
+			c.Assert(c.value.SetterObjectsValue, IsNil)
+			c.Assert(c.value.setterObjectsValueChanged, Equals, 2)
+			c.Assert(len(c.value.setterObjectsValueSet), Equals, 1)
+			c.Assert(c.value.setterObjectsValueSet[0].String("name"), Equals, "off")
 		},
 	},
 	{
@@ -539,7 +570,21 @@ var tests = []struct {
 		`,
 		Done: func(c *TestData) {
 			c.Assert(len(c.value.ObjectsValue), Equals, 0)
-			c.Assert(c.value.objectsValueChanged, Equals, 3)
+		},
+	},
+	{
+		Summary: "Clear an object list in a Go type property that has a setter",
+		Value: TestType{SetterObjectsValue: []qml.Object{nil, nil}},
+		QML: `
+			import GoTypes 4.2
+			GoType { Component.onCompleted: setterObjectsValue = [] }
+		`,
+		Done: func(c *TestData) {
+			// Note that the setter is not actually updating the field value, for testing purposes.
+			c.Assert(len(c.value.SetterObjectsValue), Equals, 2)
+			c.Assert(c.value.setterObjectsValueChanged, Equals, 1)
+			c.Assert(c.value.setterObjectsValueSet, DeepEquals, []qml.Object{})
+			c.Assert(cap(c.value.setterObjectsValueSet), Equals, 2)
 		},
 	},
 	{

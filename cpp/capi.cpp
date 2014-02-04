@@ -775,12 +775,12 @@ void listPropertyClear(QQmlListProperty<QObject> *list)
     hookListPropertyClear(list->data, (intptr_t)list->dummy1, (intptr_t)list->dummy2);
 }
 
-QQmlListProperty_ *newListProperty(GoAddr *addr, intptr_t reflectIndex, intptr_t onChangedIndex)
+QQmlListProperty_ *newListProperty(GoAddr *addr, intptr_t reflectIndex, intptr_t setIndex)
 {
     QQmlListProperty<QObject> *list = new QQmlListProperty<QObject>();
     list->data = addr;
     list->dummy1 = (void*)reflectIndex;
-    list->dummy2 = (void*)onChangedIndex;
+    list->dummy2 = (void*)setIndex;
     list->at = listPropertyAt;
     list->count = listPropertyCount;
     list->append = listPropertyAppend;
