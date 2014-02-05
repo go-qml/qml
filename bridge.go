@@ -177,6 +177,7 @@ type valueFold struct {
 	engine *Engine
 	gvalue interface{}
 	cvalue unsafe.Pointer
+	init   reflect.Value
 	prev   *valueFold
 	next   *valueFold
 	owner  valueOwner
@@ -265,10 +266,12 @@ var typeNew = make(map[*valueFold]bool)
 
 //export hookGoValueTypeNew
 func hookGoValueTypeNew(cvalue unsafe.Pointer, specp unsafe.Pointer) (foldp unsafe.Pointer) {
-	// TODO Do some basic validation on the created gvalue. Pointer-of-pointer is
-	//      not okay, etc. See wrapGoValue for the list of checks, possibly refactoring.
+	// Initialization is postponed until the engine is available, so that
+	// we can hand Init the qml.Object that represents the object.
+	init := reflect.ValueOf((*TypeSpec)(specp).Init)
 	fold := &valueFold{
-		gvalue: (*TypeSpec)(specp).New(),
+		init:   init,
+		gvalue: reflect.New(init.Type().In(0).Elem()).Interface(),
 		cvalue: cvalue,
 		owner:  jsOwner,
 	}
@@ -414,7 +417,7 @@ func convertAndSet(to, from reflect.Value, setMethod reflect.Value) {
 	fromType := from.Type()
 	defer func() {
 		if v := recover(); v != nil {
-			panic(fmt.Sprintf("cannot use %s as a %s", fromType.Name(), toType.Name()))
+			panic(fmt.Sprintf("cannot use %s as a %s", fromType, toType))
 		}
 	}()
 	if fromType == listType && toType.Kind() == reflect.Slice {
@@ -546,6 +549,11 @@ func ensureEngine(enginep, foldp unsafe.Pointer) *valueFold {
 	if len(typeNew) == before {
 		panic("value had no engine, but was not created by a registered type; who created the value?")
 	}
+
+	// TODO Would be good to preserve identity on the Go side. See unpackDataValue as well.
+	obj := &Common{engine: fold.engine, addr: fold.cvalue}
+	fold.init.Call([]reflect.Value{reflect.ValueOf(fold.gvalue), reflect.ValueOf(obj)})
+
 	return fold
 }
 

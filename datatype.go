@@ -32,6 +32,7 @@ var (
 	typeIface    = reflect.TypeOf(new(interface{})).Elem()
 	typeRGBA     = reflect.TypeOf(color.RGBA{})
 	typeObjSlice = reflect.TypeOf([]Object(nil))
+	typeObject   = reflect.TypeOf([]Object(nil)).Elem()
 	typePainter  = reflect.TypeOf(&Painter{})
 )
 
@@ -140,7 +141,7 @@ func unpackDataValue(dvalue *C.DataValue, engine *Engine) interface{} {
 	case C.DTInvalid:
 		return nil
 	case C.DTObject:
-		// TODO Would be good to preserve identity on the Go side. See Engine.ObjectOf as well.
+		// TODO Would be good to preserve identity on the Go side. See ensureEngine as well.
 		return &Common{
 			engine: engine,
 			addr:   *(*unsafe.Pointer)(datap),

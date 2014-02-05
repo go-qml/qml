@@ -940,9 +940,15 @@ type TypeSpec struct {
 	// Name holds the identifier the type is known as.
 	Name string
 
-	// New is called when QML code requests the creation of a new value of
-	// this type. All returned values must be backed by the same Go type.
-	New func() interface{}
+	// Init must be set to a function that is called when QML code requests
+	// the creation of a new value of this type. The provided function must
+	// have the following type:
+	//
+	//     func(value *CustomType, object qml.Object)
+	//
+	// Where CustomType is the custom type being registered. The function will
+	// be called with a newly created *CustomType and its respective qml.Object.
+	Init interface{}
 
 	// Singleton defines whether a single instance of the type should be used
 	// for all accesses, as a singleton value. If true, all properties of the
@@ -980,23 +986,32 @@ func registerType(location string, major, minor int, spec *TypeSpec) error {
 	// Copy and hold a reference to the spec data.
 	localSpec := *spec
 
-	// TODO Validate localSpec fields.
+	f := reflect.ValueOf(localSpec.Init)
+	ft := f.Type()
+	if ft.Kind() != reflect.Func {
+		return fmt.Errorf("TypeSpec.Init must be a function, got %#v", localSpec.Init)
+	}
+	if ft.NumIn() != 2 {
+		return fmt.Errorf("TypeSpec.Init's function must accept two arguments: %s", ft)
+	}
+	firstArg := ft.In(0)
+	if firstArg.Kind() != reflect.Ptr || firstArg.Elem().Kind() == reflect.Ptr {
+		return fmt.Errorf("TypeSpec.Init's function must take a pointer type as the second argument: %s", ft)
+	}
+	if ft.In(1) != typeObject {
+		return fmt.Errorf("TypeSpec.Init's function must take qml.Object as the second argument: %s", ft)
+	}
+	customType := typeInfo(reflect.New(firstArg.Elem()).Interface())
 
 	var err error
 	gui(func() {
-		sample := spec.New()
-		if sample == nil {
-			err = fmt.Errorf("TypeSpec.New for type %q returned nil", spec.Name)
-			return
-		}
-
 		cloc := C.CString(location)
 		cname := C.CString(localSpec.Name)
 		cres := C.int(0)
 		if localSpec.Singleton {
-			cres = C.registerSingleton(cloc, C.int(major), C.int(minor), cname, typeInfo(sample), unsafe.Pointer(&localSpec))
+			cres = C.registerSingleton(cloc, C.int(major), C.int(minor), cname, customType, unsafe.Pointer(&localSpec))
 		} else {
-			cres = C.registerType(cloc, C.int(major), C.int(minor), cname, typeInfo(sample), unsafe.Pointer(&localSpec))
+			cres = C.registerType(cloc, C.int(major), C.int(minor), cname, customType, unsafe.Pointer(&localSpec))
 		}
 		// It doesn't look like it keeps references to these, but it's undocumented and unclear.
 		C.free(unsafe.Pointer(cloc))

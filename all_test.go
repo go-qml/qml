@@ -121,6 +121,9 @@ type TestType struct {
 
 	getterStringValue        string
 	getterStringValueChanged int
+
+	// The object representing this value, on custom type tests.
+	object qml.Object
 }
 
 func (ts *TestType) StringMethod() string {
@@ -263,12 +266,14 @@ func (s *S) TestComponentCreateWindow(c *C) {
 
 type TestData struct {
 	*C
-	engine    *qml.Engine
-	context   *qml.Context
-	component qml.Object
-	root      qml.Object
-	value     *TestType
-	rect      *RectType
+	engine           *qml.Engine
+	context          *qml.Context
+	component        qml.Object
+	root             qml.Object
+	value            *TestType
+	createdValue     []*TestType
+	createdRect      []*RectType
+	createdSingleton []*TestType
 }
 
 var tests = []struct {
@@ -509,37 +514,35 @@ var tests = []struct {
 	},
 	{
 		Summary: "Register Go type",
-		Value:   TestType{StringValue: "<content>"},
-		QML: `
-			import GoTypes 4.2
-			GoType { Component.onCompleted: console.log("String is", stringValue) }
-		`,
-		QMLLog: "String is <content>",
+		QML:     `GoType { objectName: "test"; Component.onCompleted: console.log("String is", stringValue) }`,
+		QMLLog:  "String is <initial>",
+		Done: func(c *TestData) {
+			c.Assert(c.createdValue, HasLen, 1)
+			c.Assert(c.createdValue[0].object.String("objectName"), Equals, "test")
+		},
 	},
 	{
 		Summary: "Write Go type property",
-		QML: `
-			import GoTypes 4.2
-			GoType { stringValue: "<content>"; intValue: 300 }
-		`,
-		QMLValue: TestType{StringValue: "<content>", IntValue: 300},
+		QML:     `GoType { stringValue: "<content>"; intValue: 300 }`,
+		Done: func(c *TestData) {
+			c.Assert(c.createdValue, HasLen, 1)
+			c.Assert(c.createdValue[0].StringValue, Equals, "<content>")
+			c.Assert(c.createdValue[0].IntValue, Equals, 300)
+		},
 	},
 	{
 		Summary: "Write Go type property that has a setter",
-		QML: `
-			import GoTypes 4.2
-			GoType { setterStringValue: "<content>" }
-		`,
+		QML:     `GoType { setterStringValue: "<content>" }`,
 		Done: func(c *TestData) {
-			c.Assert(c.value.SetterStringValue, Equals, "")
-			c.Assert(c.value.setterStringValueChanged, Equals, 1)
-			c.Assert(c.value.setterStringValueSet, Equals, "<content>")
+			c.Assert(c.createdValue, HasLen, 1)
+			c.Assert(c.createdValue[0].SetterStringValue, Equals, "")
+			c.Assert(c.createdValue[0].setterStringValueChanged, Equals, 1)
+			c.Assert(c.createdValue[0].setterStringValueSet, Equals, "<content>")
 		},
 	},
 	{
 		Summary: "Write Go type property that has a setter and a getter",
 		QML: `
-			import GoTypes 4.2
 			GoType {
 				getterStringValue: "<content>"
 				Component.onCompleted: console.log("Getter returned", getterStringValue)
@@ -547,14 +550,14 @@ var tests = []struct {
 		`,
 		QMLLog: `Getter returned <content>`,
 		Done: func(c *TestData) {
-			c.Assert(c.value.getterStringValue, Equals, "<content>")
-			c.Assert(c.value.getterStringValueChanged, Equals, 1)
+			c.Assert(c.createdValue, HasLen, 1)
+			c.Assert(c.createdValue[0].getterStringValue, Equals, "<content>")
+			c.Assert(c.createdValue[0].getterStringValueChanged, Equals, 1)
 		},
 	},
 	{
 		Summary: "Write an inline object list to a Go type property",
 		QML: `
-			import GoTypes 4.2
 			GoType {
 				objectsValue: [State{ name: "on" }, State{ name: "off" }]
 				Component.onCompleted: {
@@ -565,61 +568,62 @@ var tests = []struct {
 		`,
 		QMLLog: "Length: 2.*Name: on",
 		Done: func(c *TestData) {
-			c.Assert(c.value.ObjectsValue[0].String("name"), Equals, "on")
-			c.Assert(c.value.ObjectsValue[1].String("name"), Equals, "off")
-			c.Assert(len(c.value.ObjectsValue), Equals, 2)
+			c.Assert(c.createdValue, HasLen, 1)
+			c.Assert(c.createdValue[0].ObjectsValue[0].String("name"), Equals, "on")
+			c.Assert(c.createdValue[0].ObjectsValue[1].String("name"), Equals, "off")
+			c.Assert(c.createdValue[0].ObjectsValue, HasLen, 2)
 		},
 	},
 	{
 		Summary: "Write an inline object list to a Go type property that has a setter",
-		QML: `
-			import GoTypes 4.2
-			GoType {
-				setterObjectsValue: [State{ name: "on" }, State{ name: "off" }]
-			}
-		`,
+		QML:     `GoType { setterObjectsValue: [State{ name: "on" }, State{ name: "off" }] }`,
 		Done: func(c *TestData) {
 			// Note that the setter is not actually updating the field value, for testing purposes.
-			c.Assert(c.value.SetterObjectsValue, IsNil)
-			c.Assert(c.value.setterObjectsValueChanged, Equals, 2)
-			c.Assert(len(c.value.setterObjectsValueSet), Equals, 1)
-			c.Assert(c.value.setterObjectsValueSet[0].String("name"), Equals, "off")
+			c.Assert(c.createdValue, HasLen, 1)
+			c.Assert(c.createdValue[0].SetterObjectsValue, IsNil)
+			c.Assert(c.createdValue[0].setterObjectsValueChanged, Equals, 2)
+			c.Assert(c.createdValue[0].setterObjectsValueSet, HasLen, 1)
+			c.Assert(c.createdValue[0].setterObjectsValueSet[0].String("name"), Equals, "off")
 		},
 	},
 	{
 		Summary: "Clear an object list in a Go type property",
 		QML: `
-			import GoTypes 4.2
 			GoType {
 				objectsValue: [State{ name: "on" }, State{ name: "off" }]
 				Component.onCompleted: objectsValue = []
 			}
 		`,
 		Done: func(c *TestData) {
-			c.Assert(len(c.value.ObjectsValue), Equals, 0)
+			c.Assert(c.createdValue, HasLen, 1)
+			c.Assert(c.createdValue[0].ObjectsValue, HasLen, 0)
 		},
 	},
 	{
 		Summary: "Clear an object list in a Go type property that has a setter",
 		Value:   TestType{SetterObjectsValue: []qml.Object{nil, nil}},
 		QML: `
-			import GoTypes 4.2
-			GoType { Component.onCompleted: setterObjectsValue = [] }
+			GoType {
+				objectsValue: [State{ name: "on" }, State{ name: "off" }]
+				function clear() { setterObjectsValue = [] }
+			}
 		`,
 		Done: func(c *TestData) {
 			// Note that the setter is not actually updating the field value, for testing purposes.
-			c.Assert(len(c.value.SetterObjectsValue), Equals, 2)
-			c.Assert(c.value.setterObjectsValueChanged, Equals, 1)
-			c.Assert(c.value.setterObjectsValueSet, DeepEquals, []qml.Object{})
-			c.Assert(cap(c.value.setterObjectsValueSet), Equals, 2)
+			c.Assert(c.createdValue, HasLen, 1)
+			c.createdValue[0].SetterObjectsValue = c.createdValue[0].ObjectsValue
+
+			c.createdValue[0].object.Call("clear")
+
+			c.Assert(c.createdValue[0].SetterObjectsValue, HasLen, 2)
+			c.Assert(c.createdValue[0].setterObjectsValueChanged, Equals, 1)
+			c.Assert(c.createdValue[0].setterObjectsValueSet, DeepEquals, []qml.Object{})
+			c.Assert(&c.createdValue[0].SetterObjectsValue[0], Equals, &c.createdValue[0].ObjectsValue[0])
 		},
 	},
 	{
 		Summary: "Access underlying Go value with Interface",
-		QML: `
-			import GoTypes 4.2
-			GoType { stringValue: "<content>" }
-		`,
+		QML:     `GoType { stringValue: "<content>" }`,
 		Done: func(c *TestData) {
 			c.Assert(c.root.Interface().(*TestType).StringValue, Equals, "<content>")
 			c.Assert(c.context.Interface, Panics, "QML object is not backed by a Go value")
@@ -628,7 +632,6 @@ var tests = []struct {
 	{
 		Summary: "Notification signals on custom Go type",
 		QML: `
-			import GoTypes 4.2
 			GoType {
 				id: custom
 				stringValue: "<old>"
@@ -636,16 +639,15 @@ var tests = []struct {
 				Component.onCompleted: custom.stringValue = "<new>"
 			}
 		`,
-		QMLValue: TestType{StringValue: "<newest>"},
+		Done: func(c *TestData) {
+			c.Assert(c.createdValue, HasLen, 1)
+			c.Assert(c.createdValue[0].StringValue, Equals, "<newest>")
+		},
 	},
 	{
 		Summary: "Singleton type registration",
-		Value:   TestType{StringValue: "<content>"},
-		QML: `
-			import GoTypes 4.2
-			Item { Component.onCompleted: console.log("String is", GoSingleton.stringValue) }
-		`,
-		QMLLog: "String is <content>",
+		QML:     `Item { Component.onCompleted: console.log("String is", GoSingleton.stringValue) }`,
+		QMLLog:  "String is <initial>",
 	},
 	{
 		Summary: "qml.Changed on unknown value is okay",
@@ -658,64 +660,36 @@ var tests = []struct {
 	},
 	{
 		Summary: "qml.Changed triggers a QML slot",
-		Value:   TestType{StringValue: "<old>"},
-
 		QML: `
-			import GoTypes 4.2
-			GoType { onStringValueChanged: console.log("String is", stringValue) }
+			GoType {
+				stringValue: "<old>"
+				onStringValueChanged: console.log("String is", stringValue)
+			}
 		`,
-		QMLLog:   "!String is",
-		QMLValue: TestType{StringValue: "<old>"},
-
+		QMLLog: "!String is",
 		Done: func(c *TestData) {
-			c.value.StringValue = "<new>"
-			qml.Changed(c.value, &c.value.StringValue)
+			c.Assert(c.createdValue, HasLen, 1)
+			value := c.createdValue[0]
+			value.StringValue = "<new>"
+			qml.Changed(value, &value.StringValue)
 		},
-		DoneLog:   "String is <new>",
-		DoneValue: TestType{StringValue: "<new>"},
+		DoneLog: "String is <new>",
 	},
 	{
 		Summary: "qml.Changed must not trigger on the wrong field",
-		Value:   TestType{StringValue: "<old>"},
-		QML: `
-			import GoTypes 4.2
-			GoType { onStringValueChanged: console.log("String is", stringValue) }
-		`,
-		Done: func(c *TestData) {
-			c.value.StringValue = "<new>"
-			qml.Changed(c.value, &c.value.IntValue)
-		},
-		DoneLog: "!String is",
-	},
-	{
-		Summary: "qml.Changed triggers multiple wrappers of the same value",
-		Value:   TestType{StringValue: "<old>"},
-		Init: func(c *TestData) {
-			c.context.SetVar("v1", c.value)
-			c.context.SetVar("v2", c.value)
-			c.context.SetVar("v3", c.value)
-		},
-
-		QML: `
-			import GoTypes 4.2
-			Item {
-				property var p1: GoType { onStringValueChanged: console.log("p1 has", stringValue) }
-				property var p2: GoType { onStringValueChanged: console.log("p2 has", stringValue) }
-				property var p3: GoType { onStringValueChanged: console.log("p3 has", stringValue) }
-				Connections { target: v1; onStringValueChanged: console.log("v1 has", v1.stringValue) }
-				Connections { target: v2; onStringValueChanged: console.log("v2 has", v2.stringValue) }
-				Connections { target: v3; onStringValueChanged: console.log("v3 has", v3.stringValue) }
+		QML:     `
+			GoType {
+				stringValue: "<old>"
+				onStringValueChanged: console.log("String is", stringValue)
 			}
 		`,
-		QMLLog:   "![pv][123] has <old>",
-		QMLValue: TestType{StringValue: "<old>"},
-
 		Done: func(c *TestData) {
-			c.value.StringValue = "<new>"
-			qml.Changed(c.value, &c.value.StringValue)
+			c.Assert(c.createdValue, HasLen, 1)
+			value := c.createdValue[0]
+			value.StringValue = "<new>"
+			qml.Changed(value, &value.IntValue)
 		},
-		// Why are v3-v1 reversed? Is QML registering connections in reversed order?
-		DoneLog: "v3 has <new>.*v2 has <new>.*v1 has <new>.*p1 has <new>.*p2 has <new>.*p3 has <new>.*",
+		DoneLog: "!String is",
 	},
 	{
 		Summary: "qml.Changed updates bindings",
@@ -1005,7 +979,6 @@ var tests = []struct {
 	{
 		Summary: "Custom Go type with painting",
 		QML: `
-			import GoTypes 4.2
 			Rectangle {
 				width: 200; height: 200
 				color: "black"
@@ -1015,7 +988,7 @@ var tests = []struct {
 			}
 		`,
 		Done: func(c *TestData) {
-			c.Assert(c.rect.PaintCount, Equals, 0)
+			c.Assert(c.createdRect, HasLen, 0)
 
 			window := c.component.CreateWindow(nil)
 			defer window.Destroy()
@@ -1024,7 +997,8 @@ var tests = []struct {
 			// Qt doesn't hide the Window if we call it too quickly. :-(
 			time.Sleep(100 * time.Millisecond)
 
-			c.Assert(c.rect.PaintCount, Equals, 1)
+			c.Assert(c.createdRect, HasLen, 1)
+			c.Assert(c.createdRect[0].PaintCount, Equals, 1)
 
 			image := window.Snapshot()
 			c.Assert(image.At(25, 25), Equals, color.RGBA{0, 0, 0, 255})
@@ -1056,19 +1030,28 @@ var tests = []struct {
 var tablef = flag.String("tablef", "", "if provided, TestTable only runs tests with a summary matching the regexp")
 
 func (s *S) TestTable(c *C) {
-	var goTypeValue *TestType
-	var goRectValue *RectType
+	var testData TestData
 
 	types := []qml.TypeSpec{{
 		Name: "GoType",
-		New:  func() interface{} { return goTypeValue },
+		Init: func(v *TestType, obj qml.Object) {
+			v.object = obj
+			v.StringValue = "<initial>"
+			testData.createdValue = append(testData.createdValue, v)
+		},
+	}, {
+		Name: "GoSingleton",
+		Init: func(v *TestType, obj qml.Object) {
+			v.object = obj
+			v.StringValue = "<initial>"
+			testData.createdSingleton = append(testData.createdSingleton, v)
+		},
+		Singleton: true,
 	}, {
 		Name: "GoRect",
-		New:  func() interface{} { return goRectValue },
-	}, {
-		Name:      "GoSingleton",
-		New:       func() interface{} { return goTypeValue },
-		Singleton: true,
+		Init: func(v *RectType, obj qml.Object) {
+			testData.createdRect = append(testData.createdRect, v)
+		},
 	}}
 
 	qml.RegisterTypes("GoTypes", 4, 2, types)
@@ -1089,16 +1072,11 @@ func (s *S) TestTable(c *C) {
 		s.SetUpTest(c)
 
 		value := t.Value
-		goTypeValue = &value
 		s.context.SetVar("value", &value)
 
-		rect := t.Rect
-		goRectValue = &rect
-
-		testData := TestData{
+		testData = TestData{
 			C:       c,
 			value:   &value,
-			rect:    &rect,
 			engine:  s.engine,
 			context: s.context,
 		}
@@ -1110,7 +1088,7 @@ func (s *S) TestTable(c *C) {
 			}
 		}
 
-		component, err := s.engine.LoadString("file.qml", "import QtQuick 2.0\n"+strings.TrimSpace(t.QML))
+		component, err := s.engine.LoadString("file.qml", "import QtQuick 2.0\nimport GoTypes 4.2\n"+strings.TrimSpace(t.QML))
 		c.Assert(err, IsNil)
 
 		logMark := c.GetTestLog()
