@@ -182,23 +182,6 @@ type valueFold struct {
 	owner  valueOwner
 }
 
-func (fold *valueFold) gfield(reflectIndex int) reflect.Value {
-	v := reflect.ValueOf(fold.gvalue)
-	for v.Type().Kind() == reflect.Ptr {
-		v = v.Elem()
-	}
-	field := v.Field(reflectIndex)
-	for {
-		switch field.Kind() {
-		case reflect.Ptr, reflect.Interface:
-			field = field.Elem()
-			continue
-		}
-		return field
-	}
-	panic("cannot happen")
-}
-
 type valueOwner uint8
 
 const (
@@ -337,13 +320,33 @@ func hookGoValueDestroyed(enginep unsafe.Pointer, foldp unsafe.Pointer) {
 	stats.valuesAlive(-1)
 }
 
+func deref(value reflect.Value) reflect.Value {
+	for {
+		switch value.Kind() {
+		case reflect.Ptr, reflect.Interface:
+			value = value.Elem()
+			continue
+		}
+		return value
+	}
+	panic("cannot happen")
+}
+
 //export hookGoValueReadField
-func hookGoValueReadField(enginep, foldp unsafe.Pointer, reflectIndex, setIndex C.int, resultdv *C.DataValue) {
+func hookGoValueReadField(enginep, foldp unsafe.Pointer, reflectIndex, getIndex, setIndex C.int, resultdv *C.DataValue) {
 	fold := ensureEngine(enginep, foldp)
-	field := fold.gfield(int(reflectIndex))
+
+	var field reflect.Value
+	if getIndex >= 0 {
+		field = reflect.ValueOf(fold.gvalue).Method(int(getIndex)).Call(nil)[0]
+	} else {
+		field = deref(reflect.ValueOf(fold.gvalue)).Field(int(reflectIndex))
+	}
+	field = deref(field)
 
 	// Cannot compare Type directly as field may be invalid (nil).
 	if field.Kind() == reflect.Slice && field.Type() == typeObjSlice {
+		// TODO Handle getters that return []qml.Object.
 		// TODO Handle other GoValue slices (!= []qml.Object).
 		resultdv.dataType = C.DTListProperty
 		*(*unsafe.Pointer)(unsafe.Pointer(&resultdv.data)) = C.newListProperty(foldp, C.intptr_t(reflectIndex), C.intptr_t(setIndex))
@@ -383,13 +386,17 @@ func hookGoValueWriteField(enginep, foldp unsafe.Pointer, reflectIndex, setIndex
 	for ve.Type().Kind() == reflect.Ptr {
 		ve = ve.Elem()
 	}
-	field := ve.Field(int(reflectIndex))
-	assign := unpackDataValue(assigndv, fold.engine)
-
-	var setMethod reflect.Value
+	var field, setMethod reflect.Value
+	if reflectIndex >= 0 {
+		// It's a real field rather than a getter.
+		field = ve.Field(int(reflectIndex))
+	}
 	if setIndex >= 0 {
+		// It has a setter.
 		setMethod = v.Method(int(setIndex))
 	}
+
+	assign := unpackDataValue(assigndv, fold.engine)
 
 	// TODO Return false to the call site if it fails. That's how Qt seems to handle it internally.
 	convertAndSet(field, reflect.ValueOf(assign), setMethod)
@@ -398,15 +405,19 @@ func hookGoValueWriteField(enginep, foldp unsafe.Pointer, reflectIndex, setIndex
 var listType = reflect.TypeOf(&List{})
 
 func convertAndSet(to, from reflect.Value, setMethod reflect.Value) {
+	var toType reflect.Type
+	if setMethod.IsValid() {
+		toType = setMethod.Type().In(0)
+	} else {
+		toType = to.Type()
+	}
+	fromType := from.Type()
 	defer func() {
 		if v := recover(); v != nil {
-			// TODO This should be an error. Test and fix.
-			panic("FIXME attempted to set a field with the wrong type; this should be an error")
+			panic(fmt.Sprintf("cannot use %s as a %s", fromType.Name(), toType.Name()))
 		}
 	}()
-	toType := to.Type()
-	fromType := from.Type()
-	if fromType == listType && to.Kind() == reflect.Slice {
+	if fromType == listType && toType.Kind() == reflect.Slice {
 		list := from.Interface().(*List)
 		from = reflect.MakeSlice(toType, len(list.data), len(list.data))
 		elemType := toType.Elem()
@@ -544,27 +555,29 @@ func hookPanic(message *C.char) {
 	panic(C.GoString(message))
 }
 
+func listSlice(fold *valueFold, reflectIndex C.intptr_t) *[]Object {
+	field := deref(reflect.ValueOf(fold.gvalue)).Field(int(reflectIndex))
+	return field.Addr().Interface().(*[]Object)
+}
+
 //export hookListPropertyAt
 func hookListPropertyAt(foldp unsafe.Pointer, reflectIndex, setIndex C.intptr_t, index C.int) (objp unsafe.Pointer) {
 	fold := (*valueFold)(foldp)
-	field := fold.gfield(int(reflectIndex))
-	slice := field.Addr().Interface().(*[]Object)
+	slice := listSlice(fold, reflectIndex)
 	return (*slice)[int(index)].Common().addr
 }
 
 //export hookListPropertyCount
 func hookListPropertyCount(foldp unsafe.Pointer, reflectIndex, setIndex C.intptr_t) C.int {
 	fold := (*valueFold)(foldp)
-	field := fold.gfield(int(reflectIndex))
-	slice := field.Addr().Interface().(*[]Object)
+	slice := listSlice(fold, reflectIndex)
 	return C.int(len(*slice))
 }
 
 //export hookListPropertyAppend
 func hookListPropertyAppend(foldp unsafe.Pointer, reflectIndex, setIndex C.intptr_t, objp unsafe.Pointer) {
 	fold := (*valueFold)(foldp)
-	field := fold.gfield(int(reflectIndex))
-	slice := field.Addr().Interface().(*[]Object)
+	slice := listSlice(fold, reflectIndex)
 	var objdv C.DataValue
 	objdv.dataType = C.DTObject
 	*(*unsafe.Pointer)(unsafe.Pointer(&objdv.data)) = objp
@@ -579,8 +592,7 @@ func hookListPropertyAppend(foldp unsafe.Pointer, reflectIndex, setIndex C.intpt
 //export hookListPropertyClear
 func hookListPropertyClear(foldp unsafe.Pointer, reflectIndex, setIndex C.intptr_t) {
 	fold := (*valueFold)(foldp)
-	field := fold.gfield(int(reflectIndex))
-	slice := field.Addr().Interface().(*[]Object)
+	slice := listSlice(fold, reflectIndex)
 	newslice := (*slice)[0:0]
 	if setIndex >= 0 {
 		reflect.ValueOf(fold.gvalue).Method(int(setIndex)).Call([]reflect.Value{reflect.ValueOf(newslice)})

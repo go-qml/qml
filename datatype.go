@@ -230,27 +230,44 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	typeInfo.metaObject = nilPtr
 	typeInfo.paint = (*C.GoMemberInfo)(nilPtr)
 
-	var setMethodIndex map[string]int
+	var setters map[string]int
+	var getters map[string]int
 
 	// TODO Only do that if it's a struct?
 	vtptr := reflect.PtrTo(vt)
 
 	numField := vt.NumField()
-	prvField := 0
 	numMethod := vtptr.NumMethod()
+	privateFields := 0
 
 	// struct { FooBar T; Baz T } => "fooBar\0baz\0"
 	namesLen := 0
 	for i := 0; i < numField; i++ {
 		field := vt.Field(i)
 		if field.PkgPath != "" {
-			prvField++ // not exported
+			privateFields++
 			continue
 		}
 		namesLen += len(field.Name) + 1
 	}
 	for i := 0; i < numMethod; i++ {
-		namesLen += len(vtptr.Method(i).Name) + 1
+		method := vtptr.Method(i)
+		namesLen += len(method.Name) + 1
+
+		// Track setters and getters.
+		if len(method.Name) > 3 && method.Name[:3] == "Set" {
+			if method.Type.NumIn() == 2 {
+				if setters == nil {
+					setters = make(map[string]int)
+				}
+				setters[method.Name[3:]] = i
+			}
+		} else if method.Type.NumIn() == 1 && method.Type.NumOut() == 1 {
+			if getters == nil {
+				getters = make(map[string]int)
+			}
+			getters[method.Name] = i
+		}
 	}
 	names := make([]byte, 0, namesLen)
 	for i := 0; i < numField; i++ {
@@ -263,16 +280,24 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	}
 	for i := 0; i < numMethod; i++ {
 		name := vtptr.Method(i).Name
+		if _, ok := getters[name]; !ok {
+			continue
+		}
+		if _, ok := setters[name]; !ok {
+			delete(getters, name)
+			continue
+		}
 		names = appendLoweredName(names, name)
 		names = append(names, 0)
-
-		// Track "Set*" modification methods.
-		if len(name) > 3 && name[:3] == "Set" {
-			if setMethodIndex == nil {
-				setMethodIndex = make(map[string]int)
-			}
-			setMethodIndex[name[3:]] = i
+	}
+	for i := 0; i < numMethod; i++ {
+		name := vtptr.Method(i).Name
+		// TODO Ignore private methods. Test it first.
+		if _, ok := getters[name]; ok {
+			continue
 		}
+		names = appendLoweredName(names, name)
+		names = append(names, 0)
 	}
 	if len(names) != namesLen {
 		panic("pre-allocated buffer size was wrong")
@@ -280,7 +305,7 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	typeInfo.memberNames = C.CString(string(names))
 
 	// Assemble information on members.
-	membersLen := numField - prvField + numMethod
+	membersLen := numField - privateFields + numMethod
 	membersi := uintptr(0)
 	mnamesi := uintptr(0)
 	members := uintptr(C.malloc(memberInfoSize * C.size_t(membersLen)))
@@ -294,22 +319,42 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 		memberInfo.memberName = (*C.char)(unsafe.Pointer(mnames + mnamesi))
 		memberInfo.memberType = dataTypeOf(field.Type)
 		memberInfo.reflectIndex = C.int(i)
-		memberInfo.reflectChangedIndex = -1
+		memberInfo.reflectGetIndex = -1
 		memberInfo.reflectSetIndex = -1
 		memberInfo.addrOffset = C.int(field.Offset)
 		membersi += 1
 		mnamesi += uintptr(len(field.Name)) + 1
-		if methodIndex, ok := setMethodIndex[field.Name]; ok {
+		if methodIndex, ok := setters[field.Name]; ok {
 			memberInfo.reflectSetIndex = C.int(methodIndex)
 		}
 	}
 	for i := 0; i < numMethod; i++ {
 		method := vtptr.Method(i)
+		if _, ok := getters[method.Name]; !ok || method.PkgPath != "" {
+			continue // not a getter or not exported
+		}
+		memberInfo := (*C.GoMemberInfo)(unsafe.Pointer(members + uintptr(memberInfoSize)*membersi))
+		memberInfo.memberName = (*C.char)(unsafe.Pointer(mnames + mnamesi))
+		memberInfo.memberType = dataTypeOf(method.Type.Out(0))
+		memberInfo.reflectIndex = -1
+		memberInfo.reflectGetIndex = C.int(getters[method.Name])
+		memberInfo.reflectSetIndex = C.int(setters[method.Name])
+		memberInfo.addrOffset = 0
+		membersi += 1
+		mnamesi += uintptr(len(method.Name)) + 1
+	}
+	for i := 0; i < numMethod; i++ {
+		method := vtptr.Method(i)
+		// TODO Ignore private methods. Test it first.
+		if _, ok := getters[method.Name]; ok {
+			continue // either a getter or not exported
+		}
 		memberInfo := (*C.GoMemberInfo)(unsafe.Pointer(members + uintptr(memberInfoSize)*membersi))
 		memberInfo.memberName = (*C.char)(unsafe.Pointer(mnames + mnamesi))
 		memberInfo.memberType = C.DTMethod
 		memberInfo.reflectIndex = C.int(i)
-		memberInfo.reflectChangedIndex = -1
+		memberInfo.reflectGetIndex = -1
+		memberInfo.reflectSetIndex = -1
 		memberInfo.addrOffset = 0
 		signature, result := methodQtSignature(method)
 		// TODO The signature data might be embedded in the same array as the member names.
@@ -330,9 +375,9 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	typeInfo.membersLen = C.int(membersLen)
 
 	typeInfo.fields = typeInfo.members
-	typeInfo.fieldsLen = C.int(numField - prvField)
+	typeInfo.fieldsLen = C.int(numField - privateFields + len(getters))
 	typeInfo.methods = (*C.GoMemberInfo)(unsafe.Pointer(members + uintptr(memberInfoSize)*uintptr(typeInfo.fieldsLen)))
-	typeInfo.methodsLen = C.int(numMethod)
+	typeInfo.methodsLen = C.int(numMethod - len(getters))
 
 	if int(membersi) != membersLen {
 		panic("used more space than allocated for member names")

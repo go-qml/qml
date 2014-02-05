@@ -53,7 +53,7 @@ int GoValueMetaObject::metaCall(QMetaObject::Call c, int idx, void **a)
                 if (memberInfo->metaIndex == idx) {
                     if (c == QMetaObject::ReadProperty) {
                         DataValue result;
-                        hookGoValueReadField(qmlEngine(value), addr, memberInfo->reflectIndex, memberInfo->reflectSetIndex, &result);
+                        hookGoValueReadField(qmlEngine(value), addr, memberInfo->reflectIndex, memberInfo->reflectGetIndex, memberInfo->reflectSetIndex, &result);
                         if (memberInfo->memberType == DTListProperty) {
                             if (result.dataType != DTListProperty) {
                                 panicf("reading DTListProperty field returned non-DTListProperty result");

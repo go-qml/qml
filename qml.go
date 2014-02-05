@@ -887,7 +887,7 @@ func (win *Window) Snapshot() image.Image {
 //         lastName: "value"
 //     }
 //
-// Setters
+// Setters and getters
 //
 // In addition to directly reading and writing value fields from QML code, as
 // described above, Go values may also intercept writes to specific fields by
@@ -905,8 +905,36 @@ func (win *Window) Snapshot() image.Image {
 //         fmt.Println("New name is", p.Name)
 //     }
 //
-// In the example above, when QML logic writes to the Person.Name field via any
-// means, the SetName method will be invoked.
+// In the example above, whenever QML logic writes to the Person.Name field via
+// any means (including object declarations) the SetName method is invoked.
+//
+// A setter method may also be used in conjunction with a getter method rather
+// than a real type field. A method is only considered a getter in the presence
+// of the respective setter, and according to common Go conventions it must not
+// have the Get prefix.
+//
+// Inside QML logic, the getter and setter pair is seen as a single object property.
+//
+// For example:
+//
+//     type Person struct{}
+//
+//     func (p *Person) Name() string {
+//         return p.loadName()
+//     }
+//
+//     func (p *Person) SetName(name string) {
+//         p.saveName(name)
+//     }
+//
+// The type above could be used within QML as follows:
+//
+//     import GoExtensions 1.0
+//     Person {
+//         id: person
+//         name: "Ale"
+//         Component.onCompleted: console.log("Name is", person.name)
+//     }
 //
 type TypeSpec struct {
 	// Name holds the identifier the type is known as.

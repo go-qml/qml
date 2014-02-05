@@ -118,6 +118,9 @@ type TestType struct {
 	setterStringValueSet      string
 	setterObjectsValueChanged int
 	setterObjectsValueSet     []qml.Object
+
+	getterStringValue        string
+	getterStringValueChanged int
 }
 
 func (ts *TestType) StringMethod() string {
@@ -132,6 +135,15 @@ func (ts *TestType) SetSetterStringValue(s string) {
 func (ts *TestType) SetSetterObjectsValue(v []qml.Object) {
 	ts.setterObjectsValueChanged++
 	ts.setterObjectsValueSet = v
+}
+
+func (ts *TestType) GetterStringValue() string {
+	return ts.getterStringValue
+}
+
+func (ts *TestType) SetGetterStringValue(s string) {
+	ts.getterStringValueChanged++
+	ts.getterStringValue = s
 }
 
 func (ts *TestType) Mod(dividend, divisor int) (int, error) {
@@ -525,6 +537,21 @@ var tests = []struct {
 		},
 	},
 	{
+		Summary: "Write Go type property that has a setter and a getter",
+		QML: `
+			import GoTypes 4.2
+			GoType {
+				getterStringValue: "<content>"
+				Component.onCompleted: console.log("Getter returned", getterStringValue)
+			}
+		`,
+		QMLLog: `Getter returned <content>`,
+		Done: func(c *TestData) {
+			c.Assert(c.value.getterStringValue, Equals, "<content>")
+			c.Assert(c.value.getterStringValueChanged, Equals, 1)
+		},
+	},
+	{
 		Summary: "Write an inline object list to a Go type property",
 		QML: `
 			import GoTypes 4.2
@@ -574,7 +601,7 @@ var tests = []struct {
 	},
 	{
 		Summary: "Clear an object list in a Go type property that has a setter",
-		Value: TestType{SetterObjectsValue: []qml.Object{nil, nil}},
+		Value:   TestType{SetterObjectsValue: []qml.Object{nil, nil}},
 		QML: `
 			import GoTypes 4.2
 			GoType { Component.onCompleted: setterObjectsValue = [] }
