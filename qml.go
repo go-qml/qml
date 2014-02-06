@@ -1,17 +1,3 @@
-// Package qml offers graphical QML application support for the Go language.
-//
-// Warning
-//
-// This package is in an alpha stage, and still in heavy development. APIs may
-// change, and things may break.
-//
-// At this time contributors and developers that are interested in tracking the
-// development closely are encouraged to use it. If you'd prefer a more stable
-// release, please hold on a bit and subscribe to the mailing list for news. It's
-// in a pretty good state, so it shall not take too long.
-//
-// See http://github.com/niemeyer/qml for details.
-//
 package qml
 
 // #include <stdlib.h>
@@ -866,75 +852,14 @@ func (win *Window) Snapshot() image.Image {
 // TypeSpec holds the specification of a QML type that is backed by Go logic.
 //
 // The type specification must be registered with the RegisterTypes function
-// before it will be visible to QML code.
+// before it will be visible to QML code, as in:
 //
-// Methods and fields
+//     qml.RegisterTypes("GoExtensions", 1, 0, []qml.TypeSpec{{
+//		Name: "Person",
+//		Init: func(p *Person, obj qml.Object) {},
+//     }})
 //
-// Methods and fields that are exported in the Go value returned by TypeSpec.New
-// are available to QML logic as methods and properties of the respective
-// QML object. As required by the QML environment, the Go method and field names
-// are lowercased according to the following scheme when being accesed from QML:
-//
-//     value.Name      => value.name
-//     value.UPPERName => value.upperName
-//     value.UPPER     => value.upper
-//
-// Exported fields may also be set while the object is being declared inside
-// QML content. For example:
-//
-//     import GoExtensions 1.0
-//     Person {
-//         lastName: "value"
-//     }
-//
-// Setters and getters
-//
-// In addition to directly reading and writing value fields from QML code, as
-// described above, Go values may also intercept writes to specific fields by
-// declaring a setter method according to common Go conventions.
-//
-// For example:
-//
-//     type Person struct {
-//         Name string
-//     }
-//
-//     func (p *Person) SetName(name string) {
-//         fmt.Println("Old name is", p.Name)
-//         p.Name = name
-//         fmt.Println("New name is", p.Name)
-//     }
-//
-// In the example above, whenever QML logic writes to the Person.Name field via
-// any means (including object declarations) the SetName method is invoked.
-//
-// A setter method may also be used in conjunction with a getter method rather
-// than a real type field. A method is only considered a getter in the presence
-// of the respective setter, and according to common Go conventions it must not
-// have the Get prefix.
-//
-// Inside QML logic, the getter and setter pair is seen as a single object property.
-//
-// For example:
-//
-//     type Person struct{}
-//
-//     func (p *Person) Name() string {
-//         return p.loadName()
-//     }
-//
-//     func (p *Person) SetName(name string) {
-//         p.saveName(name)
-//     }
-//
-// The type above could be used within QML as follows:
-//
-//     import GoExtensions 1.0
-//     Person {
-//         id: person
-//         name: "Ale"
-//         Component.onCompleted: console.log("Name is", person.name)
-//     }
+// See the package documentation for more details.
 //
 type TypeSpec struct {
 	// Name holds the identifier the type is known as.
