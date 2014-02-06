@@ -1,6 +1,6 @@
 // Package qml offers graphical QML application support for the Go language.
 //
-// Warning
+// Attention
 //
 // This package is in an alpha stage, and still in heavy development. APIs may
 // change, and things may break.
@@ -11,6 +11,7 @@
 // in a pretty good state, so it shall not take too long.
 //
 // See http://github.com/niemeyer/qml for details.
+//
 //
 // Introduction
 //
@@ -36,33 +37,64 @@
 //
 //   https://github.com/niemeyer/qml/tree/master/examples
 //
-// Making Go values available to QML
+//
+// Handling QML objects in Go
+//
+// Any QML object may be manipulated by Go via the Object interface. That
+// interface is implemented both by dynamic QML values obtained from a running
+// engine, and by Go types in the qml package that represent QML values, such as
+// Window, Context, and Engine.
+//
+// For example, the following logic creates a window and prints its width
+// whenever it's made visible:
+//
+//    win := component.CreateWindow(nil)
+//    win.On("visibleChanged", func(visible bool) {
+//        if (visible) {
+//            fmt.Println("Width:", win.Int("width"))
+//        }
+//    })
+//
+// Information about the methods, properties, and signals that are available for QML
+// objects may be obtained in the Qt documentation. As a reference, the "visibleChanged"
+// signal and the "width" property used in the example above are described at:
+//
+//    http://qt-project.org/doc/qt-5.0/qtgui/qwindow.html
+//
+// When in doubt about what type is being manipulated, the Object.TypeName method
+// provides the type name of the underlying value.
+//
+//
+// Publishing Go values to QML
 //
 // The simplest way of making a Go value available to QML code is setting it
 // as a variable of the engine's root context, as in:
 //
-//     context := engine.Context()
-//     context.SetVar("person", &Person{Name: "Ale"})
+//    context := engine.Context()
+//    context.SetVar("person", &Person{Name: "Ale"})
 //
 // This logic would enable the following QML code to successfully run:
 //
-//     import QtQuick 2.0
-//     Item {
-//         Component.onCompleted: console.log("Name is", person.name)
-//     }
+//    import QtQuick 2.0
+//    Item {
+//        Component.onCompleted: console.log("Name is", person.name)
+//    }
 //
-// While this method is a quick way to get started, it is also fairly limited.
-// For more flexibility, a Go type may be registered so that QML code can
-// natively create new instances in an arbitrary position of the structure.
-// This may be achieved by simply registering the desired type via the RegisterType
-// function:
+//
+// Publishing Go types to QML
+//
+// While registering an individual Go value as described above is a quick way to get
+// started, it is also fairly limited. For more flexibility, a Go type may be
+// registered so that QML code can natively create new instances in an arbitrary
+// position of the structure. This may be achieved via the RegisterType function, as
+// the following example demonstrates:
 //
 //    qml.RegisterTypes("GoExtensions", 1, 0, []qml.TypeSpec{{
 //        Name: "Person",
 //        Init: func(p *Person, obj qml.Object) { p.Name = "<none>" },
 //    }})
 //
-// With this in place, QML code can create new instances of Person by itself:     
+// With this logic in place, QML code can create new instances of Person by itself:     
 //
 //    import QtQuick 2.0
 //    import GoExtensions 1.0
@@ -73,36 +105,43 @@
 //        }
 //        Component.onCompleted: console.log("Name is", person.name)
 //    }
-// 
-// Using either mechanism, the methods and fields from Go values are available
-// to QML logic as methods and properties of the respective QML object. As
-// required by QML, the Go method and field names are lowercased according to
-// the following scheme when being accesed from QML:
 //
-//     value.Name      => value.name
-//     value.UPPERName => value.upperName
-//     value.UPPER     => value.upper
+//
+// Lowercasing of names
+// 
+// Independently from the mechanism used to publish a Go value to QML code, its methods
+// and fields are available to QML logic as methods and properties of the
+// respective QML object representing it. As required by QML, though, the Go
+// method and field names are lowercased according to the following scheme when
+// being accesed from QML:
+//
+//    value.Name      => value.name
+//    value.UPPERName => value.upperName
+//    value.UPPER     => value.upper
+//
 //
 // Setters and getters
 //
-// In addition to directly reading and writing value fields from QML code, as
-// described above, Go values may also intercept writes to specific fields by
-// declaring a setter method according to common Go conventions.
+// While QML code can directly read and write exported fields of Go values, as described
+// above, a Go type can also intercept writes to specific fields by declaring a setter
+// method according to common Go conventions. This is often useful for updating the
+// internal state or the visible content of a Go-defined type.
 //
 // For example:
 //
-//     type Person struct {
-//         Name string
-//     }
+//    type Person struct {
+//        Name string
+//    }
 //
-//     func (p *Person) SetName(name string) {
-//         fmt.Println("Old name is", p.Name)
-//         p.Name = name
-//         fmt.Println("New name is", p.Name)
-//     }
+//    func (p *Person) SetName(name string) {
+//        fmt.Println("Old name is", p.Name)
+//        p.Name = name
+//        fmt.Println("New name is", p.Name)
+//    }
 //
-// In the example above, whenever QML logic writes to the Person.Name field via
-// any means (including object declarations) the SetName method is invoked.
+// In the example above, whenever QML code attempts to update the Person.Name field
+// via any means (direct assignment, object declarations, etc) the SetName method
+// is invoked with the provided value instead.
 //
 // A setter method may also be used in conjunction with a getter method rather
 // than a real type field. A method is only considered a getter in the presence
@@ -111,38 +150,18 @@
 //
 // Inside QML logic, the getter and setter pair is seen as a single object property.
 //
-// For example:
-//
-//     type Person struct{}
-//
-//     func (p *Person) Name() string {
-//         return p.loadName()
-//     }
-//
-//     func (p *Person) SetName(name string) {
-//         p.saveName(name)
-//     }
-//
-// The type above could be used within QML as follows:
-//
-//     import GoExtensions 1.0
-//     Person {
-//         id: person
-//         name: "Ale"
-//         Component.onCompleted: console.log("Name is", person.name)
-//     }
 //
 // Painting
 //
 // Custom types implemented in Go may have displayable content by defining
 // a Paint method such as:
 //
-//     func (p *Person) Paint(painter *qml.Painter) {
-//         // ... OpenGL calls with the github.com/niemeyer/qml/gl package ...
-//     }
+//    func (p *Person) Paint(painter *qml.Painter) {
+//        // ... OpenGL calls with the github.com/niemeyer/qml/gl package ...
+//    }
 //
 // A simple example is available at:
 //
-//     https://github.com/niemeyer/qml/tree/master/examples/painting
+//   https://github.com/niemeyer/qml/tree/master/examples/painting
 //
 package qml
