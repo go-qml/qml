@@ -31,10 +31,11 @@ func run() error {
 
 	qml.RegisterTypes("GoExtensions", 1, 0, []qml.TypeSpec{{
 		Name: "GoType",
-		New:  func() interface{} { return &GoType{} },
+		Init: func(v *GoType, obj qml.Object) {},
 	}, {
-		Name:      "GoSingleton",
-		New:       func() interface{} { return &GoSingleton{Event: "birthday"} },
+		Name: "GoSingleton",
+		Init: func(v *GoSingleton, obj qml.Object) { v.Event = "birthday" },
+
 		Singleton: true,
 	}})
 

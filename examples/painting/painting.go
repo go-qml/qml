@@ -15,14 +15,12 @@ func main() {
 }
 
 type GoRect struct {
-	Objects []qml.Object
+	qml.Object
 }
 
 func (r *GoRect) Paint(p *qml.Painter) {
-	obj := p.Object()
-
-	width := gl.Float(obj.Int("width"))
-	height := gl.Float(obj.Int("height"))
+	width := gl.Float(r.Int("width"))
+	height := gl.Float(r.Int("height"))
 
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
@@ -49,7 +47,7 @@ func run() error {
 
 	qml.RegisterTypes("GoExtensions", 1, 0, []qml.TypeSpec{{
 		Name: "GoRect",
-		New:  func() interface{} { return &GoRect{} },
+		Init: func(r *GoRect, obj qml.Object) { r.Object = obj },
 	}})
 
 	engine := qml.NewEngine()
