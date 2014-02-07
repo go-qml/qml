@@ -90,7 +90,6 @@
 // the following example demonstrates:
 //
 //    qml.RegisterTypes("GoExtensions", 1, 0, []qml.TypeSpec{{
-//        Name: "Person",
 //        Init: func(p *Person, obj qml.Object) { p.Name = "<none>" },
 //    }})
 //

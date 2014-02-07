@@ -855,16 +855,12 @@ func (win *Window) Snapshot() image.Image {
 // before it will be visible to QML code, as in:
 //
 //     qml.RegisterTypes("GoExtensions", 1, 0, []qml.TypeSpec{{
-//		Name: "Person",
 //		Init: func(p *Person, obj qml.Object) {},
 //     }})
 //
 // See the package documentation for more details.
 //
 type TypeSpec struct {
-	// Name holds the identifier the type is known as.
-	Name string
-
 	// Init must be set to a function that is called when QML code requests
 	// the creation of a new value of this type. The provided function must
 	// have the following type:
@@ -874,6 +870,11 @@ type TypeSpec struct {
 	// Where CustomType is the custom type being registered. The function will
 	// be called with a newly created *CustomType and its respective qml.Object.
 	Init interface{}
+
+	// Name optionally holds the identifier the type is known as within QML code,
+	// when the registered extension module is imported. If not specified, the
+	// name of the Go type provided as the first argument of Init is used instead.
+	Name string
 
 	// Singleton defines whether a single instance of the type should be used
 	// for all accesses, as a singleton value. If true, all properties of the
@@ -927,6 +928,12 @@ func registerType(location string, major, minor int, spec *TypeSpec) error {
 		return fmt.Errorf("TypeSpec.Init's function must take qml.Object as the second argument: %s", ft)
 	}
 	customType := typeInfo(reflect.New(firstArg.Elem()).Interface())
+	if localSpec.Name == "" {
+		localSpec.Name = firstArg.Elem().Name()
+		if localSpec.Name == "" {
+			panic("cannot determine registered type name; please provide one explicitly")
+		}
+	}
 
 	var err error
 	gui(func() {

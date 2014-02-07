@@ -74,11 +74,11 @@ func (s *S) TearDownTest(c *C) {
 	qml.SetLogger(nil)
 }
 
-type RectType struct {
+type GoRect struct {
 	PaintCount int
 }
 
-func (r *RectType) Paint(p *qml.Painter) {
+func (r *GoRect) Paint(p *qml.Painter) {
 	r.PaintCount++
 
 	obj := p.Object()
@@ -95,7 +95,7 @@ func (r *RectType) Paint(p *qml.Painter) {
 	gl.End()
 }
 
-type TestType struct {
+type GoType struct {
 	private bool // Besides being private, also adds a gap in the reflect field index.
 
 	StringValue  string
@@ -126,47 +126,47 @@ type TestType struct {
 	object qml.Object
 }
 
-func (ts *TestType) StringMethod() string {
+func (ts *GoType) StringMethod() string {
 	return ts.StringValue
 }
 
-func (ts *TestType) SetSetterStringValue(s string) {
+func (ts *GoType) SetSetterStringValue(s string) {
 	ts.setterStringValueChanged++
 	ts.setterStringValueSet = s
 }
 
-func (ts *TestType) SetSetterObjectsValue(v []qml.Object) {
+func (ts *GoType) SetSetterObjectsValue(v []qml.Object) {
 	ts.setterObjectsValueChanged++
 	ts.setterObjectsValueSet = v
 }
 
-func (ts *TestType) GetterStringValue() string {
+func (ts *GoType) GetterStringValue() string {
 	return ts.getterStringValue
 }
 
-func (ts *TestType) SetGetterStringValue(s string) {
+func (ts *GoType) SetGetterStringValue(s string) {
 	ts.getterStringValueChanged++
 	ts.getterStringValue = s
 }
 
-func (ts *TestType) Mod(dividend, divisor int) (int, error) {
+func (ts *GoType) Mod(dividend, divisor int) (int, error) {
 	if divisor == 0 {
 		return 0, fmt.Errorf("<division by zero>")
 	}
 	return dividend % divisor, nil
 }
 
-func (ts *TestType) ChangeString(new string) (old string) {
+func (ts *GoType) ChangeString(new string) (old string) {
 	old = ts.StringValue
 	ts.StringValue = new
 	return
 }
 
-func (ts *TestType) NotifyStringChanged() {
+func (ts *GoType) NotifyStringChanged() {
 	qml.Changed(ts, &ts.StringValue)
 }
 
-func (ts *TestType) IncrementInt() {
+func (ts *GoType) IncrementInt() {
 	ts.IntValue++
 }
 
@@ -185,7 +185,7 @@ var getSetTests = []struct{ set, get interface{} }{
 	{int64(42), int64(42)},
 	{float64(42), same},
 	{float32(42), same},
-	{new(TestType), same},
+	{new(GoType), same},
 	{nil, same},
 	{42, same},
 }
@@ -211,7 +211,7 @@ func (s *S) TestContextSetVars(c *C) {
 	c.Assert(err, IsNil)
 	root := component.Create(nil)
 
-	vars := TestType{
+	vars := GoType{
 		StringValue:  "<content>",
 		BoolValue:    true,
 		IntValue:     42,
@@ -270,16 +270,16 @@ type TestData struct {
 	context          *qml.Context
 	component        qml.Object
 	root             qml.Object
-	value            *TestType
-	createdValue     []*TestType
-	createdRect      []*RectType
-	createdSingleton []*TestType
+	value            *GoType
+	createdValue     []*GoType
+	createdRect      []*GoRect
+	createdSingleton []*GoType
 }
 
 var tests = []struct {
 	Summary string
-	Value   TestType
-	Rect    RectType
+	Value   GoType
+	Rect    GoRect
 
 	Init func(d *TestData)
 
@@ -287,17 +287,17 @@ var tests = []struct {
 	// then checks are made to ensure the provided state is found.
 	QML      string
 	QMLLog   string
-	QMLValue TestType
+	QMLValue GoType
 
 	// The function provided is run with the post-QML state above,
 	// and then checks are made to ensure the provided state is found.
 	Done      func(c *TestData)
 	DoneLog   string
-	DoneValue TestType
+	DoneValue GoType
 }{
 	{
 		Summary: "Read a context variable and its fields",
-		Value:   TestType{StringValue: "<content>", IntValue: 42},
+		Value:   GoType{StringValue: "<content>", IntValue: 42},
 		QML: `
 			Item {
 				Component.onCompleted: {
@@ -311,7 +311,7 @@ var tests = []struct {
 	},
 	{
 		Summary: "Read a nested field via a value (not pointer) in an interface",
-		Value:   TestType{AnyValue: struct{ StringValue string }{"<content>"}},
+		Value:   GoType{AnyValue: struct{ StringValue string }{"<content>"}},
 		QML:     `Item { Component.onCompleted: console.log("String is", value.anyValue.stringValue) }`,
 		QMLLog:  "String is <content>",
 	},
@@ -368,7 +368,7 @@ var tests = []struct {
 	},
 	{
 		Summary: "No access to private fields",
-		Value:   TestType{private: true},
+		Value:   GoType{private: true},
 		QML:     `Item { Component.onCompleted: console.log("Private is", value.private); }`,
 		QMLLog:  "Private is undefined",
 	},
@@ -384,7 +384,7 @@ var tests = []struct {
 			}
 		`,
 		Done: func(c *TestData) {
-			value := TestType{StringValue: "<content>"}
+			value := GoType{StringValue: "<content>"}
 			c.root.Set("obj", &value)
 			c.root.Set("width", 300)
 			c.root.Set("height", 200)
@@ -477,7 +477,7 @@ var tests = []struct {
 	{
 		Summary:  "Set a Go slice property",
 		QML:      `Item { Component.onCompleted: value.intsValue = [1, 2, 3.5] }`,
-		QMLValue: TestType{IntsValue: []int{1, 2, 3}},
+		QMLValue: GoType{IntsValue: []int{1, 2, 3}},
 	},
 	{
 		Summary: "Set a Go slice property with objects",
@@ -515,6 +515,15 @@ var tests = []struct {
 	{
 		Summary: "Register Go type",
 		QML:     `GoType { objectName: "test"; Component.onCompleted: console.log("String is", stringValue) }`,
+		QMLLog:  "String is <initial>",
+		Done: func(c *TestData) {
+			c.Assert(c.createdValue, HasLen, 1)
+			c.Assert(c.createdValue[0].object.String("objectName"), Equals, "test")
+		},
+	},
+	{
+		Summary: "Register Go type with an explicit name",
+		QML:     `NamedGoType { objectName: "test"; Component.onCompleted: console.log("String is", stringValue) }`,
 		QMLLog:  "String is <initial>",
 		Done: func(c *TestData) {
 			c.Assert(c.createdValue, HasLen, 1)
@@ -601,7 +610,7 @@ var tests = []struct {
 	},
 	{
 		Summary: "Clear an object list in a Go type property that has a setter",
-		Value:   TestType{SetterObjectsValue: []qml.Object{nil, nil}},
+		Value:   GoType{SetterObjectsValue: []qml.Object{nil, nil}},
 		QML: `
 			GoType {
 				objectsValue: [State{ name: "on" }, State{ name: "off" }]
@@ -625,7 +634,7 @@ var tests = []struct {
 		Summary: "Access underlying Go value with Interface",
 		QML:     `GoType { stringValue: "<content>" }`,
 		Done: func(c *TestData) {
-			c.Assert(c.root.Interface().(*TestType).StringValue, Equals, "<content>")
+			c.Assert(c.root.Interface().(*GoType).StringValue, Equals, "<content>")
 			c.Assert(c.context.Interface, Panics, "QML object is not backed by a Go value")
 		},
 	},
@@ -651,9 +660,9 @@ var tests = []struct {
 	},
 	{
 		Summary: "qml.Changed on unknown value is okay",
-		Value:   TestType{StringValue: "<old>"},
+		Value:   GoType{StringValue: "<old>"},
 		Init: func(c *TestData) {
-			value := &TestType{}
+			value := &GoType{}
 			qml.Changed(&value, &value.StringValue)
 		},
 		QML: `Item{}`,
@@ -693,7 +702,7 @@ var tests = []struct {
 	},
 	{
 		Summary: "qml.Changed updates bindings",
-		Value:   TestType{StringValue: "<old>"},
+		Value:   GoType{StringValue: "<old>"},
 		QML:     `Item { property string s: "String is " + value.stringValue }`,
 		Done: func(c *TestData) {
 			c.value.StringValue = "<new>"
@@ -703,17 +712,17 @@ var tests = []struct {
 	},
 	{
 		Summary:  "Call a Go method without arguments or result",
-		Value:    TestType{IntValue: 42},
+		Value:    GoType{IntValue: 42},
 		QML:      `Item { Component.onCompleted: console.log("Undefined is", value.incrementInt()); }`,
 		QMLLog:   "Undefined is undefined",
-		QMLValue: TestType{IntValue: 43},
+		QMLValue: GoType{IntValue: 43},
 	},
 	{
 		Summary:  "Call a Go method with one argument and one result",
-		Value:    TestType{StringValue: "<old>"},
+		Value:    GoType{StringValue: "<old>"},
 		QML:      `Item { Component.onCompleted: console.log("String was", value.changeString("<new>")); }`,
 		QMLLog:   "String was <old>",
-		QMLValue: TestType{StringValue: "<new>"},
+		QMLValue: GoType{StringValue: "<new>"},
 	},
 	{
 		Summary: "Call a Go method with multiple results",
@@ -756,7 +765,7 @@ var tests = []struct {
 	},
 	{
 		Summary: "Connect a QML signal to a Go method",
-		Value:   TestType{StringValue: "<old>"},
+		Value:   GoType{StringValue: "<old>"},
 		QML: `
 			Item {
 				id: item
@@ -767,7 +776,7 @@ var tests = []struct {
 				}
 			}
 		`,
-		QMLValue: TestType{StringValue: "<new>"},
+		QMLValue: GoType{StringValue: "<new>"},
 	},
 	{
 		Summary: "Call a QML method with no result or parameters from Go",
@@ -782,7 +791,7 @@ var tests = []struct {
 	},
 	{
 		Summary: "Call a QML method with a custom type",
-		Value:   TestType{StringValue: "<content>"},
+		Value:   GoType{StringValue: "<content>"},
 		QML:     `Item { function log(value) { console.log("String is", value.stringValue) } }`,
 		Done:    func(c *TestData) { c.root.Call("log", c.value) },
 		DoneLog: "String is <content>",
@@ -808,7 +817,7 @@ var tests = []struct {
 				function log()   { console.log("String is", held.stringValue) }
 			}`,
 		Done: func(c *TestData) {
-			value := TestType{StringValue: "<content>"}
+			value := GoType{StringValue: "<content>"}
 			stats := qml.Stats()
 			c.root.Call("hold", &value)
 			c.Check(qml.Stats().ValuesAlive, Equals, stats.ValuesAlive+1)
@@ -1033,23 +1042,28 @@ func (s *S) TestTable(c *C) {
 	var testData TestData
 
 	types := []qml.TypeSpec{{
-		Name: "GoType",
-		Init: func(v *TestType, obj qml.Object) {
+		Init: func(v *GoType, obj qml.Object) {
+			v.object = obj
+			v.StringValue = "<initial>"
+			testData.createdValue = append(testData.createdValue, v)
+		},
+	}, {
+		Name: "NamedGoType",
+		Init: func(v *GoType, obj qml.Object) {
 			v.object = obj
 			v.StringValue = "<initial>"
 			testData.createdValue = append(testData.createdValue, v)
 		},
 	}, {
 		Name: "GoSingleton",
-		Init: func(v *TestType, obj qml.Object) {
+		Init: func(v *GoType, obj qml.Object) {
 			v.object = obj
 			v.StringValue = "<initial>"
 			testData.createdSingleton = append(testData.createdSingleton, v)
 		},
 		Singleton: true,
 	}, {
-		Name: "GoRect",
-		Init: func(v *RectType, obj qml.Object) {
+		Init: func(v *GoRect, obj qml.Object) {
 			testData.createdRect = append(testData.createdRect, v)
 		},
 	}}
@@ -1110,7 +1124,7 @@ func (s *S) TestTable(c *C) {
 			}
 		}
 
-		if !reflect.DeepEqual(t.QMLValue, TestType{}) {
+		if !reflect.DeepEqual(t.QMLValue, GoType{}) {
 			c.Check(value.StringValue, Equals, t.QMLValue.StringValue)
 			c.Check(value.BoolValue, Equals, t.QMLValue.BoolValue)
 			c.Check(value.IntValue, Equals, t.QMLValue.IntValue)
@@ -1138,7 +1152,7 @@ func (s *S) TestTable(c *C) {
 				}
 			}
 
-			if !reflect.DeepEqual(t.DoneValue, TestType{}) {
+			if !reflect.DeepEqual(t.DoneValue, GoType{}) {
 				c.Check(value.StringValue, Equals, t.DoneValue.StringValue)
 				c.Check(value.BoolValue, Equals, t.DoneValue.BoolValue)
 				c.Check(value.IntValue, Equals, t.DoneValue.IntValue)
