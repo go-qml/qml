@@ -15,7 +15,7 @@ for news. It's in a pretty good state, so it shall not take too long.
 Demos
 -----
 
-A few videos demonstrating the use of Go QML:
+These introductory videos demonstrate the use of Go QML:
 
   * [Initial demo and overview](http://youtu.be/FVQlMrPa7lI)
   * [Initial demo running on an Ubuntu Touch phone](http://youtu.be/HB-3o8Cysec)
