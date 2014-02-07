@@ -46,7 +46,6 @@ func run() error {
 	qml.Init(nil)
 
 	qml.RegisterTypes("GoExtensions", 1, 0, []qml.TypeSpec{{
-		Name: "GoRect",
 		Init: func(r *GoRect, obj qml.Object) { r.Object = obj },
 	}})
 

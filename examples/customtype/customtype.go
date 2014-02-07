@@ -30,10 +30,8 @@ func run() error {
 	qml.Init(nil)
 
 	qml.RegisterTypes("GoExtensions", 1, 0, []qml.TypeSpec{{
-		Name: "GoType",
 		Init: func(v *GoType, obj qml.Object) {},
 	}, {
-		Name: "GoSingleton",
 		Init: func(v *GoSingleton, obj qml.Object) { v.Event = "birthday" },
 
 		Singleton: true,
