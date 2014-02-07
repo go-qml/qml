@@ -12,11 +12,14 @@ stable release, please hold on a bit and subscribe to the mailing list
 for news. It's in a pretty good state, so it shall not take too long.
 
 
-Demo
-----
+Demos
+-----
 
-See [this video](http://youtu.be/FVQlMrPa7lI) for a quick demo and overview, and
-the [follow up](http://youtu.be/HB-3o8Cysec) to see it working on an Ubuntu Touch phone.
+A few videos demonstrating the use of Go QML:
+
+  * [Initial demo and overview](http://youtu.be/FVQlMrPa7lI)
+  * [Initial demo running on an Ubuntu Touch phone](http://youtu.be/HB-3o8Cysec)
+  * [SameGame QML tutorial in Go](http://youtu.be/z8noX48hiMI)
 
 
 Community
@@ -26,10 +29,11 @@ Please join the [mailing list](https://groups.google.com/forum/#!forum/go-qml) f
 following relevant development news and discussing project details.
 
 
-API documentation
-------------------
+Documentation
+-------------
 
-The [API documentation](http://godoc.org/github.com/niemeyer/qml) is available in the usual location.
+The introductory documentation as well as the detailed API documentation is
+available at [godoc.org](http://godoc.org/github.com/niemeyer/qml).
 
 
 Installation
