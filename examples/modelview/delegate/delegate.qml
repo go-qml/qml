@@ -8,7 +8,7 @@ Item {
         model: colors.len
         delegate: Text {
             text: "I am color number: " + index
-            color: colors.color(index)
+            color: colors.color(index).color
         }
         anchors.top: parent.top
         anchors.bottom: parent.bottom
