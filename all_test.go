@@ -126,6 +126,10 @@ type GoType struct {
 	object qml.Object
 }
 
+// Force a gap in the reflect method index and ensure the handling
+// of private methods is being done properly.
+func (ts *GoType) privateMethod() {}
+
 func (ts *GoType) StringMethod() string {
 	return ts.StringValue
 }

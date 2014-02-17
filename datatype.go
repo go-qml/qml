@@ -240,6 +240,7 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	numField := vt.NumField()
 	numMethod := vtptr.NumMethod()
 	privateFields := 0
+	privateMethods := 0
 
 	// struct { FooBar T; Baz T } => "fooBar\0baz\0"
 	namesLen := 0
@@ -253,6 +254,10 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	}
 	for i := 0; i < numMethod; i++ {
 		method := vtptr.Method(i)
+		if method.PkgPath != "" {
+			privateMethods++
+			continue
+		}
 		namesLen += len(method.Name) + 1
 
 		// Track setters and getters.
@@ -280,24 +285,30 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 		names = append(names, 0)
 	}
 	for i := 0; i < numMethod; i++ {
-		name := vtptr.Method(i).Name
-		if _, ok := getters[name]; !ok {
+		method := vtptr.Method(i)
+		if method.PkgPath != "" {
+			continue // not exported
+		}
+		if _, ok := getters[method.Name]; !ok {
 			continue
 		}
-		if _, ok := setters[name]; !ok {
-			delete(getters, name)
+		if _, ok := setters[method.Name]; !ok {
+			delete(getters, method.Name)
 			continue
 		}
-		names = appendLoweredName(names, name)
+		// This is a getter method
+		names = appendLoweredName(names, method.Name)
 		names = append(names, 0)
 	}
 	for i := 0; i < numMethod; i++ {
-		name := vtptr.Method(i).Name
-		// TODO Ignore private methods. Test it first.
-		if _, ok := getters[name]; ok {
-			continue
+		method := vtptr.Method(i)
+		if method.PkgPath != "" {
+			continue // not exported
 		}
-		names = appendLoweredName(names, name)
+		if _, ok := getters[method.Name]; ok {
+			continue // getter already handled above
+		}
+		names = appendLoweredName(names, method.Name)
 		names = append(names, 0)
 	}
 	if len(names) != namesLen {
@@ -306,7 +317,7 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	typeInfo.memberNames = C.CString(string(names))
 
 	// Assemble information on members.
-	membersLen := numField - privateFields + numMethod
+	membersLen := numField - privateFields + numMethod - privateMethods
 	membersi := uintptr(0)
 	mnamesi := uintptr(0)
 	members := uintptr(C.malloc(memberInfoSize * C.size_t(membersLen)))
@@ -331,8 +342,11 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	}
 	for i := 0; i < numMethod; i++ {
 		method := vtptr.Method(i)
-		if _, ok := getters[method.Name]; !ok || method.PkgPath != "" {
-			continue // not a getter or not exported
+		if method.PkgPath != "" {
+			continue // not exported
+		}
+		if _, ok := getters[method.Name]; !ok {
+			continue // not a getter
 		}
 		memberInfo := (*C.GoMemberInfo)(unsafe.Pointer(members + uintptr(memberInfoSize)*membersi))
 		memberInfo.memberName = (*C.char)(unsafe.Pointer(mnames + mnamesi))
@@ -346,9 +360,11 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	}
 	for i := 0; i < numMethod; i++ {
 		method := vtptr.Method(i)
-		// TODO Ignore private methods. Test it first.
+		if method.PkgPath != "" {
+			continue // not exported
+		}
 		if _, ok := getters[method.Name]; ok {
-			continue // either a getter or not exported
+			continue // getter already handled above
 		}
 		memberInfo := (*C.GoMemberInfo)(unsafe.Pointer(members + uintptr(memberInfoSize)*membersi))
 		memberInfo.memberName = (*C.char)(unsafe.Pointer(mnames + mnamesi))
@@ -378,7 +394,7 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	typeInfo.fields = typeInfo.members
 	typeInfo.fieldsLen = C.int(numField - privateFields + len(getters))
 	typeInfo.methods = (*C.GoMemberInfo)(unsafe.Pointer(members + uintptr(memberInfoSize)*uintptr(typeInfo.fieldsLen)))
-	typeInfo.methodsLen = C.int(numMethod - len(getters))
+	typeInfo.methodsLen = C.int(numMethod - privateMethods - len(getters))
 
 	if int(membersi) != membersLen {
 		panic("used more space than allocated for member names")
