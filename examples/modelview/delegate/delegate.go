@@ -27,16 +27,11 @@ func run() error {
 	}
 	window := component.CreateWindow(nil)
 	window.Show()
-	n := func() uint8 { return uint8(rand.Intn(256)) }
-	for i := 0; i < 5; i++ {
-		colors.Add(color.RGBA{n(), n(), n(), 0xff})
-	}
 	go func() {
-		for i := 0; i < 10; i++ {
-			for i := 0; i < 5; i++ {
-				colors.Change(i, color.RGBA{n(), n(), n(), 0xff})
-				time.Sleep(1 * time.Second)
-			}
+		n := func() uint8 { return uint8(rand.Intn(256)) }
+		for i := 0; i < 100; i++ {
+			colors.Add(color.RGBA{n(), n(), n(), 0xff})
+			time.Sleep(1 * time.Second)
 		}
 	}()
 	window.Wait()
@@ -44,26 +39,16 @@ func run() error {
 }
 
 type Colors struct {
-	list []*ColorItem
+	list []color.RGBA
 	Len  int
 }
 
-type ColorItem struct {
-	Color color.RGBA
-}
-
 func (colors *Colors) Add(c color.RGBA) {
-	colors.list = append(colors.list, &ColorItem{c})
+	colors.list = append(colors.list, c)
 	colors.Len = len(colors.list)
 	qml.Changed(colors, &colors.Len)
 }
 
-func (colors *Colors) Color(index int) *ColorItem {
+func (colors *Colors) Color(index int) color.RGBA {
 	return colors.list[index]
-}
-
-func (colors *Colors) Change(index int, c color.RGBA) {
-	item := colors.list[index]
-	item.Color = c
-	qml.Changed(item, &item.Color)
 }
