@@ -19,6 +19,7 @@ These introductory videos demonstrate the use of Go QML:
 
   * [Initial demo and overview](http://youtu.be/FVQlMrPa7lI)
   * [Initial demo running on an Ubuntu Touch phone](http://youtu.be/HB-3o8Cysec)
+  * [Spinning Gopher with Go + QML + OpenGL](http://youtu.be/qkH7_dtOyPk)
   * [SameGame QML tutorial in Go](http://youtu.be/z8noX48hiMI)
 
 
