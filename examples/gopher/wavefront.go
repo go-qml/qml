@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/niemeyer/qml/gl"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -16,17 +15,17 @@ type Object struct {
 }
 
 type Group struct {
-	Vertexes []gl.Float
-	Normals  []gl.Float
+	Vertexes []float32
+	Normals  []float32
 	Material *Material
 }
 
 type Material struct {
 	Name      string
-	Ambient   []gl.Float
-	Diffuse   []gl.Float
-	Specular  []gl.Float
-	Shininess gl.Float
+	Ambient   []float32
+	Diffuse   []float32
+	Specular  []float32
+	Shininess float32
 }
 
 func Read(filename string) (map[string]*Object, error) {
@@ -40,8 +39,8 @@ func Read(filename string) (map[string]*Object, error) {
 	var objects = make(map[string]*Object)
 	var object *Object
 	var group *Group
-	var vertex []gl.Float
-	var normal []gl.Float
+	var vertex []float32
+	var normal []float32
 
 	lno := 0
 	line := ""
@@ -111,7 +110,7 @@ func Read(filename string) (map[string]*Object, error) {
 				if err != nil {
 					return nil, fail("cannot parse float")
 				}
-				vertex = append(vertex, gl.Float(f))
+				vertex = append(vertex, float32(f))
 			}
 		case "vn":
 			if len(fields) != 4 {
@@ -122,7 +121,7 @@ func Read(filename string) (map[string]*Object, error) {
 				if err != nil {
 					return nil, fail("cannot parse float")
 				}
-				normal = append(normal, gl.Float(f))
+				normal = append(normal, float32(f))
 			}
 		case "f":
 			if len(fields) != 4 {
@@ -189,9 +188,9 @@ func readMaterials(filename string) (map[string]*Material, error) {
 				return nil, fail("unsupported material definition")
 			}
 			material = &Material{Name: fields[1]}
-			material.Ambient = []gl.Float{0.2, 0.2, 0.2, 1.0}
-			material.Diffuse = []gl.Float{0.8, 0.8, 0.8, 1.0}
-			material.Specular = []gl.Float{0.0, 0.0, 0.0, 1.0}
+			material.Ambient = []float32{0.2, 0.2, 0.2, 1.0}
+			material.Diffuse = []float32{0.8, 0.8, 0.8, 1.0}
+			material.Specular = []float32{0.0, 0.0, 0.0, 1.0}
 			materials[material.Name] = material
 			continue
 		}
@@ -210,7 +209,7 @@ func readMaterials(filename string) (map[string]*Material, error) {
 				if err != nil {
 					return nil, fail("cannot parse float")
 				}
-				material.Ambient[i] = gl.Float(f)
+				material.Ambient[i] = float32(f)
 			}
 		case "Kd":
 			if len(fields) != 4 {
@@ -221,7 +220,7 @@ func readMaterials(filename string) (map[string]*Material, error) {
 				if err != nil {
 					return nil, fail("cannot parse float")
 				}
-				material.Diffuse[i] = gl.Float(f)
+				material.Diffuse[i] = float32(f)
 			}
 		case "Ks":
 			if len(fields) != 4 {
@@ -232,7 +231,7 @@ func readMaterials(filename string) (map[string]*Material, error) {
 				if err != nil {
 					return nil, fail("cannot parse float")
 				}
-				material.Specular[i] = gl.Float(f)
+				material.Specular[i] = float32(f)
 			}
 		case "Ns":
 			if len(fields) != 2 {
@@ -242,7 +241,7 @@ func readMaterials(filename string) (map[string]*Material, error) {
 			if err != nil {
 				return nil, fail("cannot parse float")
 			}
-			material.Shininess = gl.Float(f / 1000 * 128)
+			material.Shininess = float32(f / 1000 * 128)
 		case "d":
 			if len(fields) != 2 {
 				return nil, fail("unsupported transparency line")
@@ -251,9 +250,9 @@ func readMaterials(filename string) (map[string]*Material, error) {
 			if err != nil {
 				return nil, fail("cannot parse float")
 			}
-			material.Ambient[3] = gl.Float(f)
-			material.Diffuse[3] = gl.Float(f)
-			material.Specular[3] = gl.Float(f)
+			material.Ambient[3] = float32(f)
+			material.Diffuse[3] = float32(f)
+			material.Specular[3] = float32(f)
 		}
 	}
 	if err := scanner.Err(); err != nil {
@@ -272,7 +271,7 @@ func readMaterials(filename string) (map[string]*Material, error) {
 		for i := 0; i < 3; i++ {
 			material.Diffuse[i] *= 1.3
 			if material.Diffuse[i] > 1 {
-				material.Diffuse[i]  = 1
+				material.Diffuse[i] = 1
 			}
 		}
 	}

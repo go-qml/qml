@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/niemeyer/qml"
-	"github.com/niemeyer/qml/gl"
+	"github.com/go-gl/gl"
 	"os"
 )
 
@@ -61,24 +61,24 @@ func (r *Gopher) SetRotation(rotation int) {
 }
 
 func (r *Gopher) Paint(p *qml.Painter) {
-	width := gl.Float(r.Int("width"))
+	width := float32(r.Int("width"))
 
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
 	gl.ShadeModel(gl.SMOOTH)
 	gl.Enable(gl.DEPTH_TEST)
-	gl.DepthMask(gl.TRUE)
+	gl.DepthMask(true)
 	gl.Enable(gl.NORMALIZE)
 
 	gl.Clear(gl.DEPTH_BUFFER_BIT)
 
 	gl.Scalef(width/3, width/3, width/3)
 
-	lka := []gl.Float{0.3, 0.3, 0.3, 1.0}
-	lkd := []gl.Float{1.0, 1.0, 1.0, 0.0}
-	lks := []gl.Float{1.0, 1.0, 1.0, 1.0}
-	lpos := []gl.Float{-2, 6, 3, 1.0}
+	lka := []float32{0.3, 0.3, 0.3, 1.0}
+	lkd := []float32{1.0, 1.0, 1.0, 0.0}
+	lks := []float32{1.0, 1.0, 1.0, 1.0}
+	lpos := []float32{-2, 6, 3, 1.0}
 
 	gl.Enable(gl.LIGHTING)
 	gl.Lightfv(gl.LIGHT0, gl.AMBIENT, lka)
@@ -92,7 +92,7 @@ func (r *Gopher) Paint(p *qml.Painter) {
 
 	gl.Translatef(1.5, 1.5, 0)
 	gl.Rotatef(-90, 0, 0, 1)
-	gl.Rotatef(gl.Float(90+((36000+r.Rotation)%360)), 1, 0, 0)
+	gl.Rotatef(float32(90+((36000+r.Rotation)%360)), 1, 0, 0)
 
 	gl.Disable(gl.COLOR_MATERIAL)
 
@@ -104,7 +104,7 @@ func (r *Gopher) Paint(p *qml.Painter) {
 			gl.Materialf(gl.FRONT, gl.SHININESS, group.Material.Shininess)
 			gl.VertexPointer(3, gl.FLOAT, 0, group.Vertexes)
 			gl.NormalPointer(gl.FLOAT, 0, group.Normals)
-			gl.DrawArrays(gl.TRIANGLES, 0, gl.Sizei(len(group.Vertexes)/3))
+			gl.DrawArrays(gl.TRIANGLES, 0, len(group.Vertexes)/3)
 		}
 	}
 
