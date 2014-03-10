@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/niemeyer/qml"
-	"github.com/niemeyer/qml/gl"
 	"os"
+
+	"github.com/go-gl/gl"
+	"github.com/niemeyer/qml"
 )
 
 func main() {
@@ -19,8 +20,8 @@ type GoRect struct {
 }
 
 func (r *GoRect) Paint(p *qml.Painter) {
-	width := gl.Float(r.Int("width"))
-	height := gl.Float(r.Int("height"))
+	width := float32(r.Int("width"))
+	height := float32(r.Int("height"))
 
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
