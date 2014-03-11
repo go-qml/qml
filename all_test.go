@@ -4,8 +4,8 @@ import (
 	"encoding/base64"
 	"flag"
 	"fmt"
-	"github.com/niemeyer/qml"
-	"github.com/niemeyer/qml/gl"
+	"gopkg.in/v0/qml"
+	"gopkg.in/v0/qml/gl"
 	"image"
 	"image/color"
 	"io/ioutil"
@@ -439,7 +439,7 @@ var tests = []struct {
 		`,
 		Done: func(c *TestData) {
 			var states []qml.Object
-			c.root.Slice("states", &states)
+			c.root.List("states").Convert(&states)
 			c.Assert(states[0].String("name"), Equals, "on")
 			c.Assert(states[1].String("name"), Equals, "off")
 			c.Assert(len(states), Equals, 2)
@@ -459,7 +459,7 @@ var tests = []struct {
 		`,
 		Done: func(c *TestData) {
 			var states []qml.Object
-			c.root.Slice("mystates", &states)
+			c.root.List("mystates").Convert(&states)
 			c.Assert(states[0].String("name"), Equals, "on")
 			c.Assert(states[1].String("name"), Equals, "off")
 			c.Assert(len(states), Equals, 2)
@@ -477,7 +477,7 @@ var tests = []struct {
 		`,
 		Done: func(c *TestData) {
 			var states []qml.Object
-			c.root.Slice("mystates", &states)
+			c.root.List("mystates").Convert(&states)
 			c.Assert(states[0].String("name"), Equals, "on")
 			c.Assert(states[1].String("name"), Equals, "off")
 			c.Assert(len(states), Equals, 2)
