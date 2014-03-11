@@ -362,6 +362,7 @@ type Object interface {
 	String(property string) string
 	Color(property string) color.RGBA
 	Object(property string) Object
+	Map(property string) *Map
 	Slice(property string, result interface{})
 	ObjectByName(objectName string) Object
 	Call(method string, params ...interface{}) interface{}
@@ -393,7 +394,37 @@ func (list *List) Slice(sliceAddr interface{}) {
 	if toPtr.Kind() != reflect.Ptr || toPtr.Type().Elem().Kind() != reflect.Slice {
 		panic(fmt.Sprintf("Slice got a sliceAddr parameter that is not a slice address: %#v", sliceAddr))
 	}
-	convertAndSet(toPtr.Elem(), reflect.ValueOf(list), reflect.Value{})
+	err := convertAndSet(toPtr.Elem(), reflect.ValueOf(list), reflect.Value{})
+	if err != nil {
+		panic(err.Error())
+	}
+}
+
+// Map holds a QML map.
+type Map struct {
+	// In the future this will be able to hold a reference to QML-owned
+	// maps, so they can be mutated.
+	data []interface{}
+}
+
+// Len returns the number of pairs in the map.
+func (m *Map) Len() int {
+	return len(m.data)/2
+}
+
+// Convert allocates a new map and copies the content of m property to it,
+// performing type conversions as possible, and then assigns the result to
+// the map pointed to by mapAddr. Map panics if m contains values that
+// cannot be converted to the type of the map at mapAddr.
+func (m *Map) Convert(mapAddr interface{}) {
+	toPtr := reflect.ValueOf(mapAddr)
+	if toPtr.Kind() != reflect.Ptr || toPtr.Type().Elem().Kind() != reflect.Map {
+		panic(fmt.Sprintf("Map.Convert got a mapAddr parameter that is not a map address: %#v", mapAddr))
+	}
+	err := convertAndSet(toPtr.Elem(), reflect.ValueOf(m), reflect.Value{})
+	if err != nil {
+		panic(err.Error())
+	}
 }
 
 // Common implements the common behavior of all QML objects.
@@ -579,6 +610,17 @@ func (obj *Common) Slice(property string, sliceAddr interface{}) {
 		panic(fmt.Sprintf("value of property %q is not a QML list: %#v", property, value))
 	}
 	list.Slice(sliceAddr)
+}
+
+// Map returns the map value of the named property.
+// Map panics if the property is not a map.
+func (obj *Common) Map(property string) *Map {
+	value := obj.Property(property)
+	m, ok := value.(*Map)
+	if !ok {
+		panic(fmt.Sprintf("value of property %q is not a QML map: %#v", property, value))
+	}
+	return m
 }
 
 // ObjectByName returns the Object value of the descendant object that

@@ -699,6 +699,27 @@ void packDataValue(QVariant_ *var, DataValue *value)
             *(DataValue**)(value->data) = dvlist;
         }
         break;
+    case QMetaType::QVariantMap:
+        {
+            QVariantMap varmap = qvar->toMap();
+            int len = varmap.size() * 2;
+            DataValue *dvlist = (DataValue *) malloc(sizeof(DataValue) * len);
+            QMapIterator<QString, QVariant> it(varmap);
+            for (int i = 0; i < len; i += 2) {
+                if (!it.hasNext()) {
+                    panicf("QVariantMap mutated during iteration");
+                }
+                it.next();
+                QVariant key = it.key();
+                QVariant val = it.value();
+                packDataValue((void*)&key, &dvlist[i]);
+                packDataValue((void*)&val, &dvlist[i+1]);
+            }
+            value->dataType = DTValueMap;
+            value->len = len;
+            *(DataValue**)(value->data) = dvlist;
+        }
+        break;
     default:
         if (qvar->type() == (int)QMetaType::QObjectStar || qvar->canConvert<QObject *>()) {
             QObject *qobject = qvar->value<QObject *>();

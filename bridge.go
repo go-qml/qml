@@ -23,7 +23,6 @@ import (
 	"github.com/niemeyer/qml/tref"
 	"reflect"
 	"runtime"
-	"strings"
 	"sync"
 	"sync/atomic"
 	"unsafe"
@@ -404,12 +403,13 @@ func hookGoValueWriteField(enginep, foldp unsafe.Pointer, reflectIndex, setIndex
 	assign := unpackDataValue(assigndv, fold.engine)
 
 	// TODO Return false to the call site if it fails. That's how Qt seems to handle it internally.
-	convertAndSet(field, reflect.ValueOf(assign), setMethod)
+	err := convertAndSet(field, reflect.ValueOf(assign), setMethod)
+	if err != nil {
+		panic(err.Error())
+	}
 }
 
-var listType = reflect.TypeOf(&List{})
-
-func convertAndSet(to, from reflect.Value, setMethod reflect.Value) {
+func convertAndSet(to, from reflect.Value, setMethod reflect.Value) (err error) {
 	var toType reflect.Type
 	if setMethod.IsValid() {
 		toType = setMethod.Type().In(0)
@@ -419,15 +419,27 @@ func convertAndSet(to, from reflect.Value, setMethod reflect.Value) {
 	fromType := from.Type()
 	defer func() {
 		if v := recover(); v != nil {
-			panic(fmt.Sprintf("cannot use %s as a %s", fromType, toType))
+			err = fmt.Errorf("cannot use %s as a %s", fromType, toType)
 		}
 	}()
-	if fromType == listType && toType.Kind() == reflect.Slice {
+	if fromType == typeList && toType.Kind() == reflect.Slice {
 		list := from.Interface().(*List)
 		from = reflect.MakeSlice(toType, len(list.data), len(list.data))
 		elemType := toType.Elem()
 		for i, elem := range list.data {
 			from.Index(i).Set(reflect.ValueOf(elem).Convert(elemType))
+		}
+	} else if fromType == typeMap && toType.Kind() == reflect.Map {
+		qmap := from.Interface().(*Map)
+		from = reflect.MakeMap(toType)
+		elemType := toType.Elem()
+		for i := 0; i < len(qmap.data); i += 2 {
+			key := reflect.ValueOf(qmap.data[i])
+			val := reflect.ValueOf(qmap.data[i+1])
+			if val.Type() != elemType {
+				val = val.Convert(elemType)
+			}
+			from.SetMapIndex(key, val)
 		}
 	} else if toType != fromType {
 		from = from.Convert(toType)
@@ -437,6 +449,7 @@ func convertAndSet(to, from reflect.Value, setMethod reflect.Value) {
 	} else {
 		to.Set(from)
 	}
+	return nil
 }
 
 var (
@@ -490,19 +503,15 @@ func hookGoValueCallMethod(enginep, foldp unsafe.Pointer, reflectIndex C.int, ar
 	}
 }
 
-func convertParam(methodName string, index int, param reflect.Value, argt reflect.Type) (newv reflect.Value, err error) {
-	defer func() {
-		if panicv := recover(); panicv != nil {
-			const prefix = "reflect.Value.Convert: "
-			if s, ok := panicv.(string); ok && strings.HasPrefix(s, prefix) {
-				err = fmt.Errorf("cannot convert parameter %d of method %s from %s to %s (got %#v)",
-					index, methodName, param.Type().Name(), argt.Name(), param.Interface())
-			} else {
-				panic(panicv)
-			}
-		}
-	}()
-	return param.Convert(argt), nil
+func convertParam(methodName string, index int, param reflect.Value, argt reflect.Type) (reflect.Value, error) {
+	out := reflect.New(argt).Elem()
+	err := convertAndSet(out, param, reflect.Value{})
+	if err != nil {
+		err = fmt.Errorf("cannot convert parameter %d of method %s from %s to %s; provided value: %#v",
+			index, methodName, param.Type(), argt, param.Interface())
+		return reflect.Value{}, err
+	}
+	return out, nil
 }
 
 //export hookGoValuePaint

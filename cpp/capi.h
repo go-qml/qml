@@ -49,9 +49,10 @@ typedef enum {
 
     DTGoAddr       = 100,
     DTObject       = 101,
-    DTValueList    = 102,
-    DTVariantList  = 103,
-    DTListProperty = 104,
+    DTValueMap     = 102,
+    DTValueList    = 103,
+    DTVariantList  = 104,
+    DTListProperty = 105,
 
     // Used in type information, not in an actual data value.
     DTAny     = 201, // Can hold any of the above types.

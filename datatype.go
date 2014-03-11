@@ -22,18 +22,21 @@ var (
 	nilPtr     = unsafe.Pointer(uintptr(0))
 	nilCharPtr = (*C.char)(nilPtr)
 
-	typeString   = reflect.TypeOf("")
-	typeBool     = reflect.TypeOf(false)
-	typeInt      = reflect.TypeOf(int(0))
-	typeInt64    = reflect.TypeOf(int64(0))
-	typeInt32    = reflect.TypeOf(int32(0))
-	typeFloat64  = reflect.TypeOf(float64(0))
-	typeFloat32  = reflect.TypeOf(float32(0))
-	typeIface    = reflect.TypeOf(new(interface{})).Elem()
-	typeRGBA     = reflect.TypeOf(color.RGBA{})
-	typeObjSlice = reflect.TypeOf([]Object(nil))
-	typeObject   = reflect.TypeOf([]Object(nil)).Elem()
-	typePainter  = reflect.TypeOf(&Painter{})
+	typeString     = reflect.TypeOf("")
+	typeBool       = reflect.TypeOf(false)
+	typeInt        = reflect.TypeOf(int(0))
+	typeInt64      = reflect.TypeOf(int64(0))
+	typeInt32      = reflect.TypeOf(int32(0))
+	typeFloat64    = reflect.TypeOf(float64(0))
+	typeFloat32    = reflect.TypeOf(float32(0))
+	typeIface      = reflect.TypeOf(new(interface{})).Elem()
+	typeRGBA       = reflect.TypeOf(color.RGBA{})
+	typeObjSlice   = reflect.TypeOf([]Object(nil))
+	typeObject     = reflect.TypeOf([]Object(nil)).Elem()
+	typePainter    = reflect.TypeOf(&Painter{})
+	typeList       = reflect.TypeOf(&List{})
+	typeMap        = reflect.TypeOf(&Map{})
+	typeGenericMap = reflect.TypeOf(map[string]interface{}(nil))
 )
 
 func init() {
@@ -146,7 +149,7 @@ func unpackDataValue(dvalue *C.DataValue, engine *Engine) interface{} {
 			engine: engine,
 			addr:   *(*unsafe.Pointer)(datap),
 		}
-	case C.DTValueList:
+	case C.DTValueList, C.DTValueMap:
 		var dvlist []C.DataValue
 		var dvlisth = (*reflect.SliceHeader)(unsafe.Pointer(&dvlist))
 		dvlisth.Data = uintptr(*(*unsafe.Pointer)(datap))
@@ -157,7 +160,11 @@ func unpackDataValue(dvalue *C.DataValue, engine *Engine) interface{} {
 			result[i] = unpackDataValue(&dvlist[i], engine)
 		}
 		C.free(*(*unsafe.Pointer)(datap))
-		return &List{result}
+		if dvalue.dataType == C.DTValueList {
+			return &List{result}
+		} else {
+			return &Map{result}
+		}
 	}
 	panic(fmt.Sprintf("unsupported data type: %d", dvalue.dataType))
 }

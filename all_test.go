@@ -110,6 +110,7 @@ type GoType struct {
 	ColorValue   color.RGBA
 	IntsValue    []int
 	ObjectsValue []qml.Object
+	MapValue     map[string]interface{}
 
 	SetterStringValue  string
 	SetterObjectsValue []qml.Object
@@ -151,6 +152,10 @@ func (ts *GoType) GetterStringValue() string {
 func (ts *GoType) SetGetterStringValue(s string) {
 	ts.getterStringValueChanged++
 	ts.getterStringValue = s
+}
+
+func (ts *GoType) SetMapValue(m map[string]interface{}) {
+	ts.MapValue = m
 }
 
 func (ts *GoType) Mod(dividend, divisor int) (int, error) {
@@ -499,6 +504,25 @@ var tests = []struct {
 		},
 	},
 	{
+		Summary: "Call a method with a JSON object (issue #48)",
+		QML:     `Item { Component.onCompleted: value.setMapValue({a: 1, b: 2}) }`,
+		QMLValue:  GoType{ MapValue: map[string]interface{}{"a": 1, "b": 2} },
+	},
+	{
+		Summary: "Read a map from a QML property",
+		QML:     `Item { property var m: {"a": 1, "b": 2} }`,
+		Done: func(c *TestData) {
+			var m1 map[string]interface{}
+			var m2 map[string]int
+			m := c.root.Map("m")
+			m.Convert(&m1)
+			m.Convert(&m2)
+			c.Assert(m1, DeepEquals, map[string]interface{}{"a": 1, "b": 2})
+			c.Assert(m2, DeepEquals, map[string]int{"a": 1, "b": 2})
+			c.Assert(m.Len(), Equals, 2)
+		},
+	},
+	{
 		Summary: "Identical values remain identical when possible",
 		Init: func(c *TestData) {
 			c.context.SetVar("a", c.value)
@@ -690,7 +714,7 @@ var tests = []struct {
 	},
 	{
 		Summary: "qml.Changed must not trigger on the wrong field",
-		QML:     `
+		QML: `
 			GoType {
 				stringValue: "<old>"
 				onStringValueChanged: console.log("String is", stringValue)
@@ -1138,6 +1162,7 @@ func (s *S) TestTable(c *C) {
 			c.Check(value.Float32Value, Equals, t.QMLValue.Float32Value)
 			c.Check(value.AnyValue, Equals, t.QMLValue.AnyValue)
 			c.Check(value.IntsValue, DeepEquals, t.QMLValue.IntsValue)
+			c.Check(value.MapValue, DeepEquals, t.QMLValue.MapValue)
 		}
 
 		if !c.Failed() {
@@ -1166,6 +1191,7 @@ func (s *S) TestTable(c *C) {
 				c.Check(value.Float32Value, Equals, t.DoneValue.Float32Value)
 				c.Check(value.AnyValue, Equals, t.DoneValue.AnyValue)
 				c.Check(value.IntsValue, DeepEquals, t.DoneValue.IntsValue)
+				c.Check(value.MapValue, DeepEquals, t.DoneValue.MapValue)
 			}
 		}
 
