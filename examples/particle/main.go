@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/niemeyer/qml"
+	"gopkg.in/v0/qml"
 	"math/rand"
 	"time"
 )

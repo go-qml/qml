@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/niemeyer/qml"
+	"gopkg.in/v0/qml"
 	"image/png"
 	"os"
 )

@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/niemeyer/qml"
-	"github.com/niemeyer/qml/gl"
+	"gopkg.in/v0/qml"
+	"gopkg.in/v0/qml/gl"
 	"os"
 )
 
