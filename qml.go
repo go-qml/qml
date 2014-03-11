@@ -372,7 +372,11 @@ type Object interface {
 	On(signal string, function interface{})
 }
 
-// List holds a QML list.
+// List holds a QML list which may be converted to a Go slice of an
+// appropriate type via Convert.
+//
+// In the future this will also be able to hold a reference
+// to QML-owned maps, so they can be mutated in place.
 type List struct {
 	// In the future this will be able to hold a reference to QML-owned
 	// lists, so they can be mutated.
@@ -400,10 +404,12 @@ func (l *List) Convert(sliceAddr interface{}) {
 	}
 }
 
-// Map holds a QML map.
+// Map holds a QML map which may be converted to a Go map of an
+// appropriate type via Convert.
+//
+// In the future this will also be able to hold a reference
+// to QML-owned maps, so they can be mutated in place.
 type Map struct {
-	// In the future this will be able to hold a reference to QML-owned
-	// maps, so they can be mutated.
 	data []interface{}
 }
 
