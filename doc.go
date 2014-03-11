@@ -1,5 +1,7 @@
 // Package qml offers graphical QML application support for the Go language.
 //
+// This package should be imported as gopkg.in/v0/qml
+//
 // Attention
 //
 // This package is in an alpha stage, and still in heavy development. APIs may
@@ -10,7 +12,7 @@
 // release, please hold on a bit and subscribe to the mailing list for news. It's
 // in a pretty good state, so it shall not take too long.
 //
-// See http://github.com/niemeyer/qml for details.
+// See http://github.com/go-qml/qml for details.
 //
 //
 // Introduction
@@ -35,7 +37,7 @@
 // Some of these topics are covered below, and may also be observed in practice
 // in the following examples:
 //
-//   https://github.com/niemeyer/qml/tree/master/examples
+//   https://github.com/go-qml/qml/tree/master/examples
 //
 //
 // Handling QML objects in Go
@@ -156,11 +158,11 @@
 // a Paint method such as:
 //
 //    func (p *Person) Paint(painter *qml.Painter) {
-//        // ... OpenGL calls with the github.com/niemeyer/qml/gl package ...
+//        // ... OpenGL calls with the gopkg.in/v0/qml/gl package ...
 //    }
 //
 // A simple example is available at:
 //
-//   https://github.com/niemeyer/qml/tree/master/examples/painting
+//   https://github.com/go-qml/qml/tree/master/examples/painting
 //
 package qml
