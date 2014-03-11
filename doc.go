@@ -1,7 +1,5 @@
 // Package qml offers graphical QML application support for the Go language.
 //
-// This package should be imported as gopkg.in/v0/qml
-//
 // Attention
 //
 // This package is in an alpha stage, and still in heavy development. APIs may
