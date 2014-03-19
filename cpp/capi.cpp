@@ -48,7 +48,7 @@ void newGuiApplication()
     static char empty[1] = {0};
     static char *argv[] = {empty};
     static int argc = 1;
-    new QGuiApplication(argc, argv);
+    new QApplication(argc, argv);
 
     // The event should never die.
     qApp->setQuitOnLastWindowClosed(false);
