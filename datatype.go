@@ -132,6 +132,8 @@ func unpackDataValue(dvalue *C.DataValue, engine *Engine) interface{} {
 		return *(*int64)(datap)
 	case C.DTInt32:
 		return int(*(*int32)(datap))
+	case C.DTUintptr:
+		return *(*uintptr)(datap)
 	case C.DTFloat64:
 		return *(*float64)(datap)
 	case C.DTFloat32:
@@ -145,10 +147,21 @@ func unpackDataValue(dvalue *C.DataValue, engine *Engine) interface{} {
 		return nil
 	case C.DTObject:
 		// TODO Would be good to preserve identity on the Go side. See ensureEngine as well.
-		return &Common{
+		obj := &Common{
 			engine: engine,
 			addr:   *(*unsafe.Pointer)(datap),
 		}
+		if len(converters) > 0 {
+			// TODO Embed the type name in DataValue to drop these calls.
+			typeName := obj.TypeName()
+			if typeName == "PlainObject" {
+				typeName = obj.String("typeName")
+			}
+			if f, ok := converters[typeName]; ok {
+				return f(engine, obj)
+			}
+		}
+		return obj
 	case C.DTValueList, C.DTValueMap:
 		var dvlist []C.DataValue
 		var dvlisth = (*reflect.SliceHeader)(unsafe.Pointer(&dvlist))

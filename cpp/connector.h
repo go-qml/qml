@@ -3,6 +3,8 @@
 
 #include <QObject>
 
+#include <stdint.h>
+
 class Connector : public QObject
 {
     Q_OBJECT
@@ -27,6 +29,28 @@ class Connector : public QObject
     QMetaMethod method;
     void *func;
     int argsLen;
+};
+
+class PlainObject : public QObject
+{
+    Q_OBJECT
+
+    Q_PROPERTY(QString typeName READ getTypeName)
+    Q_PROPERTY(void *valueAddr READ getValueAddr)
+
+    QString typeName;
+    void *valueAddr;
+
+    public:
+
+    PlainObject(QObject *parent = 0)
+        : QObject(parent) {};
+
+    PlainObject(const char *typeName, void *valueAddr, QObject *parent = 0)
+        : QObject(parent), typeName(typeName), valueAddr(valueAddr) {};
+
+    QString getTypeName() { return typeName; };
+    void *getValueAddr() { return valueAddr; };
 };
 
 #endif // CONNECTOR_H

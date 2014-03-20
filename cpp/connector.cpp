@@ -17,11 +17,22 @@ int Connector::qt_metacall(QMetaObject::Call c, int idx, void **a)
 {
     if (c == QMetaObject::InvokeMetaMethod && idx == metaObject()->methodOffset()) {
         DataValue args[MaxParams];
+        QObject *plain = NULL;
         for (int i = 0; i < argsLen; i++) {
-            QVariant var(method.parameterType(i), a[1 + i]);
-            packDataValue(&var, &args[i]);
+            int paramType = method.parameterType(i);
+            if (paramType == 0 && a[1 + i] != NULL) {
+                plain = new PlainObject(method.parameterTypes()[i].constData(), a[1 + i], plain);
+                QVariant var = QVariant::fromValue((QObject *)plain);
+                packDataValue(&var, &args[i]);
+            } else {
+                QVariant var(method.parameterType(i), a[1 + i]);
+                packDataValue(&var, &args[i]);
+            }
         }
         hookSignalCall(engine, func, args);
+        if (plain != NULL) {
+                delete plain;
+        }
         return -1;
     }
     return standard_qt_metacall(c, idx, a);

@@ -62,7 +62,7 @@ var engines = make(map[unsafe.Pointer]*Engine)
 // release any resources used.
 func NewEngine() *Engine {
 	engine := &Engine{values: make(map[interface{}]*valueFold)}
-	gui(func() {
+	RunMain(func() {
 		engine.addr = C.newEngine(nil)
 		engine.engine = engine
 		engine.imageProviders = make(map[string]*func(providerId string, width, height int) image.Image)
@@ -84,7 +84,7 @@ func (e *Engine) assertValid() {
 // It is safe to call Destroy more than once.
 func (e *Engine) Destroy() {
 	if !e.destroyed {
-		gui(func() {
+		RunMain(func() {
 			if !e.destroyed {
 				e.destroyed = true
 				C.delObjectLater(e.addr)
@@ -145,7 +145,7 @@ func (e *Engine) Load(location string, r io.Reader) (Object, error) {
 	cdata, cdatalen := unsafeBytesData(data)
 	cloc, cloclen := unsafeStringData(location)
 	comp := &Common{engine: e}
-	gui(func() {
+	RunMain(func() {
 		// TODO The component's parent should probably be the engine.
 		comp.addr = C.newComponent(e.addr, nilPtr)
 		C.componentSetData(comp.addr, cdata, cdatalen, cloc, cloclen)
@@ -191,7 +191,7 @@ func (e *Engine) Context() *Context {
 	e.assertValid()
 	var ctx Context
 	ctx.engine = e
-	gui(func() {
+	RunMain(func() {
 		ctx.addr = C.engineRootContext(e.addr)
 	})
 	return &ctx
@@ -243,7 +243,7 @@ func (e *Engine) AddImageProvider(prvId string, f func(imgId string, width, heig
 	}
 	e.imageProviders[prvId] = &f
 	cprvId, cprvIdLen := unsafeStringData(prvId)
-	gui(func() {
+	RunMain(func() {
 		qprvId := C.newString(cprvId, cprvIdLen)
 		defer C.delString(qprvId)
 		C.engineAddImageProvider(e.addr, qprvId, unsafe.Pointer(&f))
@@ -304,7 +304,7 @@ type Context struct {
 // value is unused or changed.
 func (ctx *Context) SetVar(name string, value interface{}) {
 	cname, cnamelen := unsafeStringData(name)
-	gui(func() {
+	RunMain(func() {
 		var dvalue C.DataValue
 		packDataValue(value, &dvalue, ctx.engine, cppOwner)
 
@@ -325,7 +325,7 @@ func (ctx *Context) SetVar(name string, value interface{}) {
 // not be garbage collected until the engine is destroyed, even if the
 // value is unused or changed.
 func (ctx *Context) SetVars(value interface{}) {
-	gui(func() {
+	RunMain(func() {
 		C.contextSetObject(ctx.addr, wrapGoValue(ctx.engine, value, cppOwner))
 	})
 }
@@ -335,7 +335,7 @@ func (ctx *Context) Var(name string) interface{} {
 	cname, cnamelen := unsafeStringData(name)
 
 	var dvalue C.DataValue
-	gui(func() {
+	RunMain(func() {
 		qname := C.newString(cname, cnamelen)
 		defer C.delString(qname)
 
@@ -351,6 +351,7 @@ func (ctx *Context) Var(name string) interface{} {
 // See the documentation of Common for details about this interface.
 type Object interface {
 	Common() *Common
+	Addr() uintptr
 	TypeName() string
 	Interface() interface{}
 	Set(property string, value interface{})
@@ -442,6 +443,14 @@ type Common struct {
 
 var _ Object = (*Common)(nil)
 
+// CommonOf returns the Common QML value for the QObject at addr.
+//
+// This is meant for extensions that integrate directly with the
+// underlying QML logic.
+func CommonOf(addr unsafe.Pointer, engine *Engine) *Common {
+	return &Common{addr, engine}
+}
+
 // Common returns obj itself.
 //
 // This provides access to the underlying *Common for types that
@@ -453,10 +462,18 @@ func (obj *Common) Common() *Common {
 // TypeName returns the underlying type name for the held value.
 func (obj *Common) TypeName() string {
 	var name string
-	gui(func() {
+	RunMain(func() {
 		name = C.GoString(C.objectTypeName(obj.addr))
 	})
 	return name
+}
+
+// Addr returns the QML object address.
+//
+// This is meant for extensions that integrate directly with the
+// underlying QML logic.
+func (obj *Common) Addr() uintptr {
+	return uintptr(obj.addr)
 }
 
 // Interface returns the underlying Go value that is being held by
@@ -467,7 +484,7 @@ func (obj *Common) TypeName() string {
 func (obj *Common) Interface() interface{} {
 	var result interface{}
 	var cerr *C.error
-	gui(func() {
+	RunMain(func() {
 		var fold *valueFold
 		if cerr = C.objectGoAddr(obj.addr, (*unsafe.Pointer)(unsafe.Pointer(&fold))); cerr == nil {
 			result = fold.gvalue
@@ -482,7 +499,7 @@ func (obj *Common) Set(property string, value interface{}) {
 	cproperty := C.CString(property)
 	defer C.free(unsafe.Pointer(cproperty))
 	var cerr *C.error
-	gui(func() {
+	RunMain(func() {
 		var dvalue C.DataValue
 		packDataValue(value, &dvalue, obj.engine, cppOwner)
 		cerr = C.objectSetProperty(obj.addr, cproperty, &dvalue)
@@ -500,7 +517,7 @@ func (obj *Common) Property(name string) interface{} {
 
 	var dvalue C.DataValue
 	var found C.int
-	gui(func() {
+	RunMain(func() {
 		found = C.objectGetProperty(obj.addr, cname, &dvalue)
 	})
 	if found == 0 {
@@ -520,6 +537,8 @@ func (obj *Common) Int(property string) int {
 			panic(fmt.Sprintf("value of property %q is too large for int: %#v", property, value))
 		}
 		return int(value)
+	case uintptr:
+		return int(value)
 	case float32:
 		return int(value)
 	case float64:
@@ -537,6 +556,8 @@ func (obj *Common) Int64(property string) int64 {
 		return int64(value)
 	case int64:
 		return value
+	case uintptr:
+		return int64(value)
 	case float32:
 		return int64(value)
 	case float64:
@@ -553,6 +574,8 @@ func (obj *Common) Float64(property string) float64 {
 	case int:
 		return float64(value)
 	case int64:
+		return float64(value)
+	case uintptr:
 		return float64(value)
 	case float32:
 		return float64(value)
@@ -634,7 +657,7 @@ func (obj *Common) Map(property string) *Map {
 func (obj *Common) ObjectByName(objectName string) Object {
 	cname, cnamelen := unsafeStringData(objectName)
 	var dvalue C.DataValue
-	gui(func() {
+	RunMain(func() {
 		qname := C.newString(cname, cnamelen)
 		defer C.delString(qname)
 		C.objectFindChild(obj.addr, qname, &dvalue)
@@ -655,7 +678,7 @@ func (obj *Common) Call(method string, params ...interface{}) interface{} {
 	cmethod, cmethodLen := unsafeStringData(method)
 	var result C.DataValue
 	var cerr *C.error
-	gui(func() {
+	RunMain(func() {
 		for i, param := range params {
 			packDataValue(param, &dataValueArray[i], obj.engine, jsOwner)
 		}
@@ -677,7 +700,7 @@ func (obj *Common) Create(ctx *Context) Object {
 	}
 	var root Common
 	root.engine = obj.engine
-	gui(func() {
+	RunMain(func() {
 		ctxaddr := nilPtr
 		if ctx != nil {
 			ctxaddr = ctx.addr
@@ -700,7 +723,7 @@ func (obj *Common) CreateWindow(ctx *Context) *Window {
 	}
 	var win Window
 	win.engine = obj.engine
-	gui(func() {
+	RunMain(func() {
 		ctxaddr := nilPtr
 		if ctx != nil {
 			ctxaddr = ctx.addr
@@ -715,7 +738,7 @@ func (obj *Common) CreateWindow(ctx *Context) *Window {
 func (obj *Common) Destroy() {
 	// TODO We might hook into the destroyed signal, and prevent this object
 	//      from being used in post-destruction crash-prone ways.
-	gui(func() {
+	RunMain(func() {
 		if obj.addr != nilPtr {
 			C.delObjectLater(obj.addr)
 			obj.addr = nilPtr
@@ -756,7 +779,7 @@ func (obj *Common) On(signal string, function interface{}) {
 	}
 	csignal, csignallen := unsafeStringData(signal)
 	var cerr *C.error
-	gui(func() {
+	RunMain(func() {
 		cerr = C.objectConnect(obj.addr, csignal, csignallen, obj.engine.addr, unsafe.Pointer(&function), C.int(funcv.Type().NumIn()))
 		if cerr == nil {
 			connectedFunction[&function] = true
@@ -819,14 +842,14 @@ type Window struct {
 
 // Show exposes the window.
 func (win *Window) Show() {
-	gui(func() {
+	RunMain(func() {
 		C.windowShow(win.addr)
 	})
 }
 
 // Hide hides the window.
 func (win *Window) Hide() {
-	gui(func() {
+	RunMain(func() {
 		C.windowHide(win.addr)
 	})
 }
@@ -837,7 +860,7 @@ func (win *Window) Hide() {
 // uniquely represent the window inside the corresponding screen.
 func (win *Window) PlatformId() uintptr {
 	var id uintptr
-	gui(func() {
+	RunMain(func() {
 		id = uintptr(C.windowPlatformId(win.addr))
 	})
 	return id
@@ -849,7 +872,7 @@ func (win *Window) PlatformId() uintptr {
 func (win *Window) Root() Object {
 	var obj Common
 	obj.engine = win.engine
-	gui(func() {
+	RunMain(func() {
 		obj.addr = C.windowRootObject(win.addr)
 	})
 	return &obj
@@ -860,7 +883,7 @@ func (win *Window) Wait() {
 	// XXX Test this.
 	var m sync.Mutex
 	m.Lock()
-	gui(func() {
+	RunMain(func() {
 		// TODO Must be able to wait for the same Window from multiple goroutines.
 		// TODO If the window is not visible, must return immediately.
 		waitingWindows[win.addr] = &m
@@ -886,7 +909,7 @@ func hookWindowHidden(addr unsafe.Pointer) {
 func (win *Window) Snapshot() image.Image {
 	// TODO Test this.
 	var cimage unsafe.Pointer
-	gui(func() {
+	RunMain(func() {
 		cimage = C.windowGrabWindow(win.addr)
 	})
 	defer C.delImage(cimage)
@@ -1000,7 +1023,7 @@ func registerType(location string, major, minor int, spec *TypeSpec) error {
 	}
 
 	var err error
-	gui(func() {
+	RunMain(func() {
 		cloc := C.CString(location)
 		cname := C.CString(localSpec.Name)
 		cres := C.int(0)
@@ -1021,3 +1044,12 @@ func registerType(location string, major, minor int, spec *TypeSpec) error {
 
 	return err
 }
+
+// RegisterConverter registers the convereter function to be called when a
+// value with the provided type name is obtained from QML logic. The function
+// must return the new value to be used in place of the original value.
+func RegisterConverter(typeName string, converter func(engine *Engine, obj Object) interface{}) {
+	converters[typeName] = converter
+}
+
+var converters = make(map[string]func(engine *Engine, obj Object) interface{})

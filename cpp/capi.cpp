@@ -674,6 +674,10 @@ void packDataValue(QVariant_ *var, DataValue *value)
         value->dataType = DTInt32;
         *(qint32*)(value->data) = qvar->toInt();
         break;
+    case QMetaType::VoidStar:
+        value->dataType = DTUintptr;
+        *(uintptr_t*)(value->data) = (uintptr_t)qvar->value<void *>();
+        break;
     case QMetaType::Double:
         value->dataType = DTFloat64;
         *(double*)(value->data) = qvar->toDouble();

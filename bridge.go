@@ -49,8 +49,11 @@ var (
 	guiPaintRef  uintptr
 )
 
-// gui runs f in the main GUI thread and waits for f to return.
-func gui(f func()) {
+// RunMain runs f in the main QML thread and waits for f to return.
+//
+// This is meant for extensions that integrate directly with the
+// underlying QML logic.
+func RunMain(f func()) {
 	ref := tref.Ref()
 	if ref == guiLoopRef || ref == atomic.LoadUintptr(&guiPaintRef) {
 		// Already within the GUI or render threads. Attempting to wait would deadlock.
@@ -84,14 +87,14 @@ func gui(f func()) {
 // Unlock is called a matching number of times.
 func Lock() {
 	// TODO Better testing for this.
-	gui(func() {
+	RunMain(func() {
 		guiLock++
 	})
 }
 
 // Unlock releases the QML event loop. See Lock for details.
 func Unlock() {
-	gui(func() {
+	RunMain(func() {
 		if guiLock == 0 {
 			panic("qml.Unlock called without lock being held")
 		}
@@ -102,7 +105,7 @@ func Unlock() {
 // Flush synchronously flushes all pending QML activities.
 func Flush() {
 	// TODO Better testing for this.
-	gui(func() {
+	RunMain(func() {
 		C.applicationFlushAll()
 	})
 }
@@ -130,7 +133,7 @@ func Changed(value, fieldAddr interface{}) {
 		panic("provided field is not a member of the given value")
 	}
 
-	gui(func() {
+	RunMain(func() {
 		tinfo := typeInfo(value)
 		for _, engine := range engines {
 			fold := engine.values[value]
