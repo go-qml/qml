@@ -89,6 +89,12 @@ func packDataValue(value interface{}, dvalue *C.DataValue, engine *Engine, owner
 	case int32:
 		dvalue.dataType = C.DTInt32
 		*(*int32)(datap) = value
+	case uint64:
+		dvalue.dataType = C.DTUint64
+		*(*uint64)(datap) = value
+	case uint32:
+		dvalue.dataType = C.DTUint32
+		*(*uint32)(datap) = value
 	case float64:
 		dvalue.dataType = C.DTFloat64
 		*(*float64)(datap) = value
@@ -132,6 +138,10 @@ func unpackDataValue(dvalue *C.DataValue, engine *Engine) interface{} {
 		return *(*int64)(datap)
 	case C.DTInt32:
 		return int(*(*int32)(datap))
+	case C.DTUint64:
+		return *(*uint64)(datap)
+	case C.DTUint32:
+		return *(*uint32)(datap)
 	case C.DTUintptr:
 		return *(*uintptr)(datap)
 	case C.DTFloat64:
@@ -256,6 +266,10 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 
 	// TODO Only do that if it's a struct?
 	vtptr := reflect.PtrTo(vt)
+
+	if vt.Kind() != reflect.Struct {
+		panic(fmt.Sprintf("handling of %s (%#v) is incomplete; please report to the developers", vt, v))
+	}
 
 	numField := vt.NumField()
 	numMethod := vtptr.NumMethod()

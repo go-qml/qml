@@ -530,12 +530,13 @@ func (obj *Common) Property(name string) interface{} {
 // Int panics if the property cannot be represented as an int.
 func (obj *Common) Int(property string) int {
 	switch value := obj.Property(property).(type) {
+	case int64:
+		return int(value)
 	case int:
 		return value
-	case int64:
-		if int64(int(value)) != value {
-			panic(fmt.Sprintf("value of property %q is too large for int: %#v", property, value))
-		}
+	case uint64:
+		return int(value)
+	case uint32:
 		return int(value)
 	case uintptr:
 		return int(value)
@@ -552,10 +553,14 @@ func (obj *Common) Int(property string) int {
 // Int64 panics if the property cannot be represented as an int64.
 func (obj *Common) Int64(property string) int64 {
 	switch value := obj.Property(property).(type) {
-	case int:
-		return int64(value)
 	case int64:
 		return value
+	case int:
+		return int64(value)
+	case uint64:
+		return int64(value)
+	case uint32:
+		return int64(value)
 	case uintptr:
 		return int64(value)
 	case float32:
@@ -571,9 +576,13 @@ func (obj *Common) Int64(property string) int64 {
 // Float64 panics if the property cannot be represented as float64.
 func (obj *Common) Float64(property string) float64 {
 	switch value := obj.Property(property).(type) {
+	case int64:
+		return float64(value)
 	case int:
 		return float64(value)
-	case int64:
+	case uint64:
+		return float64(value)
+	case uint32:
 		return float64(value)
 	case uintptr:
 		return float64(value)

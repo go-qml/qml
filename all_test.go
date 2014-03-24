@@ -103,6 +103,7 @@ type GoType struct {
 	IntValue     int
 	Int64Value   int64
 	Int32Value   int32
+	Uint32Value  uint32
 	Float64Value float64
 	Float32Value float32
 	AnyValue     interface{}
@@ -191,7 +192,11 @@ var getSetTests = []struct{ set, get interface{} }{
 	{"value", same},
 	{true, same},
 	{false, same},
-	{int64(42), int64(42)},
+	{int(42), same},
+	{int32(42), int(42)},
+	{int64(42), same},
+	{uint32(42), same},
+	{uint64(42), same},
 	{float64(42), same},
 	{float32(42), same},
 	{new(GoType), same},

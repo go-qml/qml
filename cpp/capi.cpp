@@ -611,6 +611,12 @@ void unpackDataValue(DataValue *value, QVariant_ *var)
     case DTInt32:
         *qvar = *(qint32*)(value->data);
         break;
+    case DTUint64:
+        *qvar = *(quint64*)(value->data);
+        break;
+    case DTUint32:
+        *qvar = *(quint32*)(value->data);
+        break;
     case DTFloat64:
         *qvar = *(double*)(value->data);
         break;
@@ -667,12 +673,22 @@ void packDataValue(QVariant_ *var, DataValue *value)
         *(qint8*)(value->data) = (qint8)qvar->toInt();
         break;
     case QMetaType::LongLong:
+        // Some of these entries will have to be fixed when handling platforms
+        // where sizeof(long long) != 8 or sizeof(int) != 4.
         value->dataType = DTInt64;
         *(qint64*)(value->data) = qvar->toLongLong();
+        break;
+    case QMetaType::ULongLong:
+        value->dataType = DTUint64;
+        *(quint64*)(value->data) = qvar->toLongLong();
         break;
     case QMetaType::Int:
         value->dataType = DTInt32;
         *(qint32*)(value->data) = qvar->toInt();
+        break;
+    case QMetaType::UInt:
+        value->dataType = DTUint32;
+        *(quint32*)(value->data) = qvar->toUInt();
         break;
     case QMetaType::VoidStar:
         value->dataType = DTUintptr;
