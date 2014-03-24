@@ -1046,7 +1046,8 @@ var tests = []struct {
 			c.Assert(image.At(25, 25), Equals, color.RGBA{0, 0, 0, 255})
 			c.Assert(image.At(100, 100), Equals, color.RGBA{255, 0, 0, 255})
 		},
-	}, {
+	},
+	{
 		Summary: "Set a property with the wrong type",
 		QML: `
 			import QtQuick.Window 2.0
@@ -1067,6 +1068,53 @@ var tests = []struct {
 				`cannot set non-existent property "non_existent" on type QQuickRectangle`)
 		},
 	},
+	{
+		Summary: "Register a type converter for a signal parameter",
+		QML: `
+			Item {
+				id: item
+				property Item self
+				signal testSignal(Item obj)
+				function emitSignal() { item.testSignal(item) }
+				function getSelf() { return item }
+				Component.onCompleted: { self = item }
+			}
+		`,
+		Done: func(c *TestData) {
+			type Wrapper struct { Item qml.Object }
+			qml.RegisterConverter(c.root.TypeName(), func(engine *qml.Engine, item qml.Object) interface{} {
+				return &Wrapper{item}
+			})
+			defer qml.RegisterConverter(c.root.TypeName(), nil)
+
+			// Check that it works on signal parameters...
+			c.root.On("testSignal", func(wrapped *Wrapper) {
+				c.Check(wrapped.Item.Addr(), Equals, c.root.Addr())
+				c.Logf("Signal has run.")
+			})
+			c.root.Call("emitSignal")
+
+			// ... on properties ...
+			wrapped, ok := c.root.Property("self").(*Wrapper)
+			if c.Check(ok, Equals, true) {
+				c.Check(wrapped.Item.Addr(), Equals, c.root.Addr())
+			}
+
+			// ... and on results.
+			wrapped, ok = c.root.Call("getSelf").(*Wrapper)
+			if c.Check(ok, Equals, true) {
+				c.Check(wrapped.Item.Addr(), Equals, c.root.Addr())
+			}
+
+			// Now unregister and ensure it got disabled.
+			qml.RegisterConverter(c.root.TypeName(), nil)
+			_, ok = c.root.Property("self").(*qml.Common)
+			c.Check(ok, Equals, true)
+		},
+		DoneLog: "Signal has run.",
+	},
+
+	// TODO Test RegisterConverter action on plain objects. Will need a C++ test extension for that.
 }
 
 var tablef = flag.String("tablef", "", "if provided, TestTable only runs tests with a summary matching the regexp")

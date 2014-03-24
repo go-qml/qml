@@ -1058,7 +1058,11 @@ func registerType(location string, major, minor int, spec *TypeSpec) error {
 // value with the provided type name is obtained from QML logic. The function
 // must return the new value to be used in place of the original value.
 func RegisterConverter(typeName string, converter func(engine *Engine, obj Object) interface{}) {
-	converters[typeName] = converter
+	if converter == nil {
+		delete(converters, typeName)
+	} else {
+		converters[typeName] = converter
+	}
 }
 
 var converters = make(map[string]func(engine *Engine, obj Object) interface{})
