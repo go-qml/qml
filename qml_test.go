@@ -4,12 +4,9 @@ import (
 	"encoding/base64"
 	"flag"
 	"fmt"
-	"gopkg.in/v0/qml"
-	"gopkg.in/v0/qml/gl"
 	"image"
 	"image/color"
 	"io/ioutil"
-	. "launchpad.net/gocheck"
 	"os"
 	"reflect"
 	"regexp"
@@ -17,6 +14,12 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	. "launchpad.net/gocheck"
+
+	"gopkg.in/v0/qml"
+	"gopkg.in/v0/qml/cpptest"
+	"gopkg.in/v0/qml/gl"
 )
 
 func Test(t *testing.T) { TestingT(t) }
@@ -278,6 +281,12 @@ func (s *S) TestComponentCreateWindow(c *C) {
 	window.Hide()
 }
 
+func (s *S) TestReadVoidAddrProperty(c *C) {
+	obj := cpptest.NewTestType(s.engine)
+	addr := obj.Property("voidAddr").(uintptr)
+	c.Assert(addr, Equals, uintptr(42))
+}
+
 type TestData struct {
 	*C
 	engine           *qml.Engine
@@ -509,9 +518,9 @@ var tests = []struct {
 		},
 	},
 	{
-		Summary: "Call a method with a JSON object (issue #48)",
-		QML:     `Item { Component.onCompleted: value.setMapValue({a: 1, b: 2}) }`,
-		QMLValue:  GoType{ MapValue: map[string]interface{}{"a": 1, "b": 2} },
+		Summary:  "Call a method with a JSON object (issue #48)",
+		QML:      `Item { Component.onCompleted: value.setMapValue({a: 1, b: 2}) }`,
+		QMLValue: GoType{MapValue: map[string]interface{}{"a": 1, "b": 2}},
 	},
 	{
 		Summary: "Read a map from a QML property",
@@ -1081,7 +1090,7 @@ var tests = []struct {
 			}
 		`,
 		Done: func(c *TestData) {
-			type Wrapper struct { Item qml.Object }
+			type Wrapper struct{ Item qml.Object }
 			qml.RegisterConverter(c.root.TypeName(), func(engine *qml.Engine, item qml.Object) interface{} {
 				return &Wrapper{item}
 			})
