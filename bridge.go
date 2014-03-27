@@ -122,9 +122,10 @@ func Changed(value, fieldAddr interface{}) {
 	for valuev.Kind() == reflect.Ptr {
 		valuev = valuev.Elem()
 	}
-	for fieldv.Kind() == reflect.Ptr {
-		fieldv = fieldv.Elem()
+	if fieldv.Kind() != reflect.Ptr {
+		panic("qml.Changed received non-address value as fieldAddr")
 	}
+	fieldv = fieldv.Elem()
 	if fieldv.Type().Size() == 0 {
 		panic("cannot report changes on zero-sized fields")
 	}

@@ -101,20 +101,21 @@ func (r *GoRect) Paint(p *qml.Painter) {
 type GoType struct {
 	private bool // Besides being private, also adds a gap in the reflect field index.
 
-	StringValue  string
-	BoolValue    bool
-	IntValue     int
-	Int64Value   int64
-	Int32Value   int32
-	Uint32Value  uint32
-	Float64Value float64
-	Float32Value float32
-	AnyValue     interface{}
-	ObjectValue  qml.Object
-	ColorValue   color.RGBA
-	IntsValue    []int
-	ObjectsValue []qml.Object
-	MapValue     map[string]interface{}
+	StringValue     string
+	StringAddrValue *string
+	BoolValue       bool
+	IntValue        int
+	Int64Value      int64
+	Int32Value      int32
+	Uint32Value     uint32
+	Float64Value    float64
+	Float32Value    float32
+	AnyValue        interface{}
+	ObjectValue     qml.Object
+	ColorValue      color.RGBA
+	IntsValue       []int
+	ObjectsValue    []qml.Object
+	MapValue        map[string]interface{}
 
 	SetterStringValue  string
 	SetterObjectsValue []qml.Object
@@ -715,16 +716,20 @@ var tests = []struct {
 			GoType {
 				stringValue: "<old>"
 				onStringValueChanged: console.log("String is", stringValue)
+				onStringAddrValueChanged: console.log("String at addr is", stringAddrValue)
 			}
 		`,
 		QMLLog: "!String is",
 		Done: func(c *TestData) {
 			c.Assert(c.createdValue, HasLen, 1)
 			value := c.createdValue[0]
+			s := "<new at addr>"
 			value.StringValue = "<new>"
+			value.StringAddrValue = &s
 			qml.Changed(value, &value.StringValue)
+			qml.Changed(value, &value.StringAddrValue)
 		},
-		DoneLog: "String is <new>",
+		DoneLog: "String is <new>.*String at addr is <new at addr>",
 	},
 	{
 		Summary: "qml.Changed must not trigger on the wrong field",
@@ -1216,6 +1221,7 @@ func (s *S) TestTable(c *C) {
 
 		if !reflect.DeepEqual(t.QMLValue, GoType{}) {
 			c.Check(value.StringValue, Equals, t.QMLValue.StringValue)
+			c.Check(value.StringAddrValue, Equals, t.QMLValue.StringAddrValue)
 			c.Check(value.BoolValue, Equals, t.QMLValue.BoolValue)
 			c.Check(value.IntValue, Equals, t.QMLValue.IntValue)
 			c.Check(value.Int64Value, Equals, t.QMLValue.Int64Value)
@@ -1245,6 +1251,7 @@ func (s *S) TestTable(c *C) {
 
 			if !reflect.DeepEqual(t.DoneValue, GoType{}) {
 				c.Check(value.StringValue, Equals, t.DoneValue.StringValue)
+				c.Check(value.StringAddrValue, Equals, t.DoneValue.StringAddrValue)
 				c.Check(value.BoolValue, Equals, t.DoneValue.BoolValue)
 				c.Check(value.IntValue, Equals, t.DoneValue.IntValue)
 				c.Check(value.Int64Value, Equals, t.DoneValue.Int64Value)
