@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"gopkg.in/v0/qml"
-	"gopkg.in/v0/qml/gl"
+	"gopkg.in/qml.v0"
+	"gopkg.in/qml.v0/gl"
 	"os"
 )
 

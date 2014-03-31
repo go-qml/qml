@@ -17,9 +17,9 @@ import (
 
 	. "launchpad.net/gocheck"
 
-	"gopkg.in/v0/qml"
-	"gopkg.in/v0/qml/cpptest"
-	"gopkg.in/v0/qml/gl"
+	"gopkg.in/qml.v0"
+	"gopkg.in/qml.v0/cpptest"
+	"gopkg.in/qml.v0/gl"
 )
 
 func Test(t *testing.T) { TestingT(t) }

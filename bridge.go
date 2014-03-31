@@ -20,7 +20,7 @@ import "C"
 
 import (
 	"fmt"
-	"gopkg.in/v0/qml/tref"
+	"gopkg.in/qml.v0/tref"
 	"reflect"
 	"runtime"
 	"sync"

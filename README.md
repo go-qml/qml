@@ -34,7 +34,7 @@ Documentation
 -------------
 
 The introductory documentation as well as the detailed API documentation is
-available at [gopkg.in/v0/qml](http://godoc.org/gopkg.in/v0/qml).
+available at [gopkg.in/qml.v0](http://godoc.org/gopkg.in/qml.v0).
 
 
 Installation
@@ -50,7 +50,7 @@ See below for more details about getting these requirements installed in differe
 
 After the requirements are satisfied, _go get_ should work as usual:
 
-    go get gopkg.in/v0/qml
+    go get gopkg.in/qml.v0
 
 
 Requirements on Ubuntu
@@ -73,7 +73,7 @@ and Go 1.2 may be installed using [godeb](http://blog.labix.org/2013/06/15/in-fl
     $ godeb list | head -1
     1.2rc1
     $ godeb install 1.2rc1
-    $ go get gopkg.in/v0/qml
+    $ go get gopkg.in/qml.v0
 
 
 Requirements on Mac OS X
@@ -91,7 +91,7 @@ Something along these lines should be effective:
     $ QT5VERSION=`pkg-config --modversion Qt5Core`
     $ # For "private/qmetaobject_p.h" inclusion
     $ export CGO_CPPFLAGS=-I`brew --prefix qt5`/include/QtCore/$QT5VERSION/QtCore
-    $ CXX=g++-4.8 go get gopkg.in/v0/qml
+    $ CXX=g++-4.8 go get gopkg.in/qml.v0
 
 For Mac OS X Mavericks you may need to use `brew install qt5 --HEAD` and check that QT5VERSION
 is something reasonable like `5.2.0`, `ls /usr/local/Cellar/qt5/HEAD/include/QtCore/ | grep '^5'`
@@ -114,7 +114,7 @@ Then, assuming Qt was installed under `C:\Qt5.1.1\`, set up the following enviro
 
 After reopening the shell for the environment changes to take effect, this should work:
 
-    go get gopkg.in/v0/qml
+    go get gopkg.in/qml.v0
 
 
 Requirements everywhere else

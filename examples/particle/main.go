@@ -1,7 +1,7 @@
 package main
 
 import (
-	"gopkg.in/v0/qml"
+	"gopkg.in/qml.v0"
 	"math/rand"
 	"time"
 )
