@@ -288,6 +288,34 @@ func (s *S) TestReadVoidAddrProperty(c *C) {
 	c.Assert(addr, Equals, uintptr(42))
 }
 
+func (s *S) TestRegisterConverterPlainObject(c *C) {
+	qml.RegisterConverter("PlainTestType", func(engine *qml.Engine, obj qml.Object) interface{} {
+		c.Check(engine, Equals, s.engine)
+		c.Check(obj.String("plainType"), Matches, "(const )?PlainTestType[&*]?")
+		c.Check(obj.Property("plainAddr"), FitsTypeOf, uintptr(0))
+		c.Check(cpptest.PlainTestTypeN(obj), Equals, 42)
+		return "<converted>"
+	})
+	obj := cpptest.NewTestType(s.engine)
+	defer obj.Destroy()
+
+	var calls int
+	obj.On("plainEmittedCpy", func(s string) {
+		c.Check(s, Equals, "<converted>")
+		calls++
+	})
+	obj.On("plainEmittedRef", func(s string) {
+		c.Check(s, Equals, "<converted>")
+		calls++
+	})
+	obj.On("plainEmittedPtr", func(s string) {
+		c.Check(s, Equals, "<converted>")
+		calls++
+	})
+	obj.Call("emitPlain")
+	c.Assert(calls, Equals, 3)
+}
+
 type TestData struct {
 	*C
 	engine           *qml.Engine
@@ -1127,8 +1155,6 @@ var tests = []struct {
 		},
 		DoneLog: "Signal has run.",
 	},
-
-	// TODO Test RegisterConverter action on plain objects. Will need a C++ test extension for that.
 }
 
 var tablef = flag.String("tablef", "", "if provided, TestTable only runs tests with a summary matching the regexp")

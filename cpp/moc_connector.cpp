@@ -108,7 +108,7 @@ int Connector::standard_qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 }
 struct qt_meta_stringdata_PlainObject_t {
     QByteArrayData data[3];
-    char stringdata[32];
+    char stringdata[33];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -118,10 +118,10 @@ struct qt_meta_stringdata_PlainObject_t {
 static const qt_meta_stringdata_PlainObject_t qt_meta_stringdata_PlainObject = {
     {
 QT_MOC_LITERAL(0, 0, 11),
-QT_MOC_LITERAL(1, 12, 8),
-QT_MOC_LITERAL(2, 21, 9)
+QT_MOC_LITERAL(1, 12, 9),
+QT_MOC_LITERAL(2, 22, 9)
     },
-    "PlainObject\0typeName\0valueAddr\0"
+    "PlainObject\0plainType\0plainAddr\0"
 };
 #undef QT_MOC_LITERAL
 
@@ -182,8 +182,8 @@ int PlainObject::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
      if (_c == QMetaObject::ReadProperty) {
         void *_v = _a[0];
         switch (_id) {
-        case 0: *reinterpret_cast< QString*>(_v) = getTypeName(); break;
-        case 1: *reinterpret_cast< void**>(_v) = getValueAddr(); break;
+        case 0: *reinterpret_cast< QString*>(_v) = getPlainType(); break;
+        case 1: *reinterpret_cast< void**>(_v) = getPlainAddr(); break;
         }
         _id -= 2;
     } else if (_c == QMetaObject::WriteProperty) {

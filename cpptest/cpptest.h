@@ -6,12 +6,15 @@
 #include <stdlib.h>
 
 typedef void TestType_;
+typedef void PlainTestType_;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 TestType_ *newTestType();
+
+int plainTestTypeN(PlainTestType_ *plain);
 
 #ifdef __cplusplus
 }

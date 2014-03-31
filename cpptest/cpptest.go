@@ -11,6 +11,8 @@ package cpptest
 import "C"
 
 import (
+	"unsafe"
+
 	"gopkg.in/v0/qml"
 )
 
@@ -21,4 +23,8 @@ func NewTestType(engine *qml.Engine) qml.Object {
 		obj = qml.CommonOf(addr, engine)
 	})
 	return obj
+}
+
+func PlainTestTypeN(obj qml.Object) int {
+	return int(C.plainTestTypeN(unsafe.Pointer(obj.Property("plainAddr").(uintptr))))
 }

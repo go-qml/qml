@@ -21,7 +21,12 @@ int Connector::qt_metacall(QMetaObject::Call c, int idx, void **a)
         for (int i = 0; i < argsLen; i++) {
             int paramType = method.parameterType(i);
             if (paramType == 0 && a[1 + i] != NULL) {
-                plain = new PlainObject(method.parameterTypes()[i].constData(), a[1 + i], plain);
+                const char *typeName = method.parameterTypes()[i].constData();
+                void *addr = a[1 + i];
+                if (typeName[strlen(typeName)-1] == '*') {
+                    addr = *(void **)addr;
+                }
+                plain = new PlainObject(typeName, addr, plain);
                 QVariant var = QVariant::fromValue((QObject *)plain);
                 packDataValue(&var, &args[i]);
             } else {

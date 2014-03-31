@@ -35,22 +35,22 @@ class PlainObject : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(QString typeName READ getTypeName)
-    Q_PROPERTY(void *valueAddr READ getValueAddr)
+    Q_PROPERTY(QString plainType READ getPlainType)
+    Q_PROPERTY(void *plainAddr READ getPlainAddr)
 
-    QString typeName;
-    void *valueAddr;
+    QString plainType;
+    void *plainAddr;
 
     public:
 
     PlainObject(QObject *parent = 0)
         : QObject(parent) {};
 
-    PlainObject(const char *typeName, void *valueAddr, QObject *parent = 0)
-        : QObject(parent), typeName(typeName), valueAddr(valueAddr) {};
+    PlainObject(const char *plainType, void *plainAddr, QObject *parent = 0)
+        : QObject(parent), plainType(plainType), plainAddr(plainAddr) {};
 
-    QString getTypeName() { return typeName; };
-    void *getValueAddr() { return valueAddr; };
+    QString getPlainType() { return plainType; };
+    void *getPlainAddr() { return plainAddr; };
 };
 
 #endif // CONNECTOR_H

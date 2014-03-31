@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"image/color"
 	"reflect"
+	"strings"
 	"unicode"
 	"unsafe"
 )
@@ -165,7 +166,10 @@ func unpackDataValue(dvalue *C.DataValue, engine *Engine) interface{} {
 			// TODO Embed the type name in DataValue to drop these calls.
 			typeName := obj.TypeName()
 			if typeName == "PlainObject" {
-				typeName = obj.String("typeName")
+				typeName = strings.TrimRight(obj.String("plainType"), "&*")
+				if strings.HasPrefix(typeName, "const ") {
+					typeName = typeName[6:]
+				}
 			}
 			if f, ok := converters[typeName]; ok {
 				return f(engine, obj)
