@@ -513,30 +513,30 @@ error *objectConnect(QObject_ *object, const char *signal, int signalLen, QQmlEn
 
 QQmlContext_ *objectContext(QObject_ *object)
 {
-    return qmlContext(reinterpret_cast<QObject *>(object));
+    return qmlContext(static_cast<QObject *>(object));
 }
 
 int objectIsComponent(QObject_ *object)
 {
-    QObject *qobject = reinterpret_cast<QObject *>(object);
+    QObject *qobject = static_cast<QObject *>(object);
     return dynamic_cast<QQmlComponent *>(qobject) ? 1 : 0;
 }
 
 int objectIsWindow(QObject_ *object)
 {
-    QObject *qobject = reinterpret_cast<QObject *>(object);
+    QObject *qobject = static_cast<QObject *>(object);
     return dynamic_cast<QQuickWindow *>(qobject) ? 1 : 0;
 }
 
 int objectIsView(QObject_ *object)
 {
-    QObject *qobject = reinterpret_cast<QObject *>(object);
+    QObject *qobject = static_cast<QObject *>(object);
     return dynamic_cast<QQuickView *>(qobject) ? 1 : 0;
 }
 
 error *objectGoAddr(QObject_ *object, GoAddr **addr)
 {
-    QObject *qobject = reinterpret_cast<QObject *>(object);
+    QObject *qobject = static_cast<QObject *>(object);
     GoValue *goValue = dynamic_cast<GoValue *>(qobject);
     if (goValue) {
         *addr = goValue->addr;
@@ -576,18 +576,12 @@ void goValueActivate(GoValue_ *value, GoTypeInfo *typeInfo, int addrOffset)
     GoMemberInfo *fieldInfo = typeInfo->fields;
     for (int i = 0; i < typeInfo->fieldsLen; i++) {
         if (fieldInfo->addrOffset == addrOffset) {
-            QObject *qvalue = reinterpret_cast<QObject *>(value);
-            GoValue *goValue = dynamic_cast<GoValue *>(qvalue);
-            if (goValue) {
-                goValue->activate(fieldInfo->metaIndex);
-                return;
+            if (typeInfo->paint) {
+                static_cast<GoPaintedValue *>(value)->activate(fieldInfo->metaIndex);
+            } else {
+                static_cast<GoValue *>(value)->activate(fieldInfo->metaIndex);
             }
-            GoPaintedValue *goPaintedValue = dynamic_cast<GoPaintedValue *>(qvalue);
-            if (goPaintedValue) {
-                goPaintedValue->activate(fieldInfo->metaIndex);
-                return;
-            }
-            panicf("invalid GoValue address");
+            return;
         }
         fieldInfo++;
     }
