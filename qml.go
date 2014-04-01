@@ -113,31 +113,14 @@ func (e *Engine) Load(location string, r io.Reader) (Object, error) {
 		return nil, err
 	}
 	if colon, slash := strings.Index(location, ":"), strings.Index(location, "/"); colon == -1 || slash <= colon {
-		//println("location:", location)
-		//if !filepath.IsAbs(location) {
-		//	dir, err := os.Getwd()
-		//	if err != nil {
-		//		return nil, fmt.Errorf("cannot obtain absolute path: %v", err)
-		//	}
-		//	location = filepath.Join(dir, location)
-		//}
-		//cpath, cpathLen := unsafeStringData(location)
-		//curl := C.urlFromLocalFile(cpath, cpathLen)
-		//if curl == nilCharPtr {
-		//	return nil, fmt.Errorf("cannot parse local path: %q", location)
-		//}
-		//url := C.GoString(curl)
-		//C.free(unsafe.Pointer(curl))
-		//println("location:", url)
-
 		if filepath.IsAbs(location) {
-			location = "file://" + filepath.ToSlash(location)
+			location = "file:///" + filepath.ToSlash(location)
 		} else {
 			dir, err := os.Getwd()
 			if err != nil {
 				return nil, fmt.Errorf("cannot obtain absolute path: %v", err)
 			}
-			location = "file://" + filepath.ToSlash(filepath.Join(dir, location))
+			location = "file:///" + filepath.ToSlash(filepath.Join(dir, location))
 		}
 
 	}

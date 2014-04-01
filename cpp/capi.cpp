@@ -155,18 +155,6 @@ void engineAddImageProvider(QQmlEngine_ *engine, QString_ *providerId, void *ima
     qengine->addImageProvider(*qproviderId, new GoImageProvider(imageFunc));
 }
 
-char *urlFromLocalFile(char *path, int pathLen)
-{
-    QByteArray qpath(path, pathLen);
-    QString qspath = QString::fromUtf8(qpath);
-    QUrl qurl = QUrl::fromLocalFile(qspath);
-    if (!qurl.isValid()) {
-        return 0;
-    }
-    QByteArray ba = qurl.toString().toUtf8();
-    return local_strdup(ba.constData());
-}
-
 void componentSetData(QQmlComponent_ *component, const char *data, int dataLen, const char *url, int urlLen)
 {
     QByteArray qdata(data, dataLen);

@@ -141,8 +141,6 @@ int objectIsView(QObject_ *object);
 error *objectConnect(QObject_ *object, const char *signal, int signalLen, QQmlEngine_ *engine, void *func, int argsLen);
 error *objectGoAddr(QObject_ *object, GoAddr **addr);
 
-char *urlFromLocalFile(char *path, int pathLen);
-
 QQmlComponent_ *newComponent(QQmlEngine_ *engine, QObject_ *parent);
 void componentSetData(QQmlComponent_ *component, const char *data, int dataLen, const char *url, int urlLen);
 char *componentErrorString(QQmlComponent_ *component);

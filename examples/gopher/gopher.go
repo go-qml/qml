@@ -5,6 +5,7 @@ import (
 	"gopkg.in/qml.v0"
 	"gopkg.in/qml.v0/gl"
 	"os"
+	"time"
 )
 
 func main() {
