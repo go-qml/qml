@@ -42,7 +42,7 @@ Installation
 
 To try the alpha release you'll need:
 
-  * Go 1.2 (release candidate), for the C++ support of _go build_
+  * Go 1.2, for the C++ support of _go build_
   * Qt 5.0.X or 5.1.X with the development files
   * The Qt headers qmetaobject_p.h and qmetaobjectbuilder_p.h, for the dynamic meta object support
 
@@ -70,9 +70,7 @@ and Go 1.2 may be installed using [godeb](http://blog.labix.org/2013/06/15/in-fl
     $ tar xzvf godeb-$ARCH.tar.gz
     godeb
     $ sudo mv godeb /usr/local/bin
-    $ godeb list | head -1
-    1.2rc1
-    $ godeb install 1.2rc1
+    $ godeb install 1.2
     $ go get gopkg.in/qml.v0
 
 
