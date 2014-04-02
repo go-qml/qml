@@ -233,7 +233,21 @@ func wrapGoValue(engine *Engine, gvalue interface{}, owner valueOwner) (cvalue u
 		gvalue: gvalue,
 		owner:  owner,
 	}
-	fold.cvalue = C.newGoValue(unsafe.Pointer(fold), typeInfo(gvalue), parent)
+	if gvaluek == reflect.Ptr && gvaluev.Elem().Kind() == reflect.Slice {
+		slice := gvaluev.Elem()
+		sliceLen := slice.Len()
+		dlist := make([]C.DataValue, slice.Len())
+		for i := 0; i < sliceLen; i++ {
+			packDataValue(slice.Index(i).Interface(), &dlist[i], fold.engine, cppOwner)
+		}
+		var tinfo *C.GoTypeInfo
+		if sliceLen > 0 {
+			tinfo = typeInfo(slice.Index(0).Interface())
+		}
+		fold.cvalue = C.newGoListModel(&dlist[0], C.int(sliceLen), tinfo)
+	} else {
+		fold.cvalue = C.newGoValue(unsafe.Pointer(fold), typeInfo(gvalue), parent)
+	}
 	if prev != nil {
 		prev.next = fold
 		fold.prev = prev

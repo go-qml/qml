@@ -30,6 +30,7 @@ typedef void QImage_;
 typedef void GoValue_;
 typedef void GoAddr;
 typedef void GoTypeSpec_;
+typedef void GoListModel_;
 
 typedef char error;
 error *errorf(const char *format, ...);
@@ -168,6 +169,8 @@ void goValueActivate(GoValue_ *value, GoTypeInfo *typeInfo, int addrOffset);
 
 void packDataValue(QVariant_ *var, DataValue *result);
 void unpackDataValue(DataValue *value, QVariant_ *result);
+
+GoListModel_ *newGoListModel(DataValue *list, int len, GoTypeInfo *typeInfo);
 
 QVariantList_ *newVariantList(DataValue *list, int len);
 

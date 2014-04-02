@@ -9,6 +9,7 @@
 
 #include "govalue.h"
 #include "govaluetype.h"
+#include "golistmodel.h"
 #include "connector.h"
 #include "capi.h"
 
@@ -575,6 +576,14 @@ void goValueActivate(GoValue_ *value, GoTypeInfo *typeInfo, int addrOffset)
     }
 
     // TODO Return an error; probably an unexported field.
+}
+
+GoListModel_ *newGoListModel(DataValue *list, int len, GoTypeInfo *typeInfo)
+{
+    QVariantList *vlist = static_cast<QVariantList *>(newVariantList(list, len));
+    GoListModel *model = new GoListModel(*vlist, typeInfo);
+    delete vlist;
+    return model;
 }
 
 void unpackDataValue(DataValue *value, QVariant_ *var)
