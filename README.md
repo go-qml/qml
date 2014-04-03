@@ -121,4 +121,6 @@ Requirements everywhere else
 If your operating system does not offer these dependencies readily,
 you may still have success installing [Go 1.2rc1](https://code.google.com/p/go/downloads/list?can=1&q=go1.2rc1)
 and [Qt 5.0.2](http://download.qt-project.org/archive/qt/5.0/5.0.2/)
-directly from the upstreams.
+directly from the upstreams.  Note that you'll likely have to adapt
+environment variables to reflect the custom installation path for
+these libraries. See the instructions above for examples.
