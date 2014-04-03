@@ -1,6 +1,7 @@
 package qml
 
 // #cgo CPPFLAGS: -I./cpp
+// #cgo CPPFLAGS: -I/usr/include/qt5/QtCore/5.0.1/QtCore
 // #cgo CPPFLAGS: -I/usr/include/qt5/QtCore/5.0.2/QtCore
 // #cgo CPPFLAGS: -I/usr/include/qt5/QtCore/5.1.1/QtCore
 // #cgo CPPFLAGS: -I/usr/include/qt5/QtCore/5.2.0/QtCore
