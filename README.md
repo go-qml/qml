@@ -87,8 +87,6 @@ Something along these lines should be effective:
 
     $ export PKG_CONFIG_PATH=`brew --prefix qt5`/lib/pkgconfig
     $ QT5VERSION=`pkg-config --modversion Qt5Core`
-    $ # For "private/qmetaobject_p.h" inclusion
-    $ export CGO_CPPFLAGS=-I`brew --prefix qt5`/include/QtCore/$QT5VERSION/QtCore
     $ CXX=g++-4.8 go get gopkg.in/qml.v0
 
 For Mac OS X Mavericks you may need to use `brew install qt5 --HEAD` and check that QT5VERSION
@@ -106,7 +104,7 @@ On Windows you'll need the following:
 
 Then, assuming Qt was installed under `C:\Qt5.1.1\`, set up the following environment variables in the respective configuration:
 
-    CPATH += C:\Qt5.1.1\5.1.1\mingw48_32\include;C:\Qt5.1.1\5.1.1\mingw48_32\include\QtCore\5.1.1\QtCore
+    CPATH += C:\Qt5.1.1\5.1.1\mingw48_32\include
     LIBRARY_PATH += C:\Qt5.1.1\5.1.1\mingw48_32\lib
     PATH += C:\Qt5.1.1\5.1.1\mingw48_32\bin
 
