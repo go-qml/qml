@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
+	"strings"
 )
 
 // SetLogger sets the target for messages logged by the qml package,
@@ -95,6 +96,11 @@ func init() {
 
 //export hookLogHandler
 func hookLogHandler(cmsg *C.LogMessage) {
+	// Workarund for QTBUG-35943
+	text := unsafeString(cmsg.text, cmsg.textLen)
+	if strings.HasPrefix(text, `"Qt Warning: Compose file:`) {
+		return
+	}
 	msg := logMessage{c: cmsg}
 	logHandler.QmlOutput(&msg)
 	msg.invalid = true
