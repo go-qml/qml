@@ -349,6 +349,7 @@ type Object interface {
 	Map(property string) *Map
 	List(property string) *List
 	ObjectByName(objectName string) Object
+	ChildByName(objectName string) interface{}
 	Call(method string, params ...interface{}) interface{}
 	Create(ctx *Context) Object
 	CreateWindow(ctx *Context) *Window
@@ -399,7 +400,7 @@ type Map struct {
 
 // Len returns the number of pairs in the map.
 func (m *Map) Len() int {
-	return len(m.data)/2
+	return len(m.data) / 2
 }
 
 // Convert allocates a new map and copies the content of m property to it,
@@ -631,7 +632,6 @@ func (obj *Common) List(property string) *List {
 	return m
 }
 
-
 // Map returns the map value of the named property.
 // Map panics if the property is not a map.
 func (obj *Common) Map(property string) *Map {
@@ -659,6 +659,22 @@ func (obj *Common) ObjectByName(objectName string) Object {
 		panic(fmt.Sprintf("cannot find descendant with objectName == %q", objectName))
 	}
 	return object
+}
+
+// ChildByName returns the current value for a child of the object,
+// the child is sepcified by the objectName property.
+// If the child type is known, type-specific methods such as ObjectByName
+// are more convenient to use.
+// ChildByName panics if the child with specified objectName is not found.
+func (obj *Common) ChildByName(objectName string) interface{} {
+	cname, cnamelen := unsafeStringData(objectName)
+	var dvalue C.DataValue
+	RunMain(func() {
+		qname := C.newString(cname, cnamelen)
+		defer C.delString(qname)
+		C.objectFindChild(obj.addr, qname, &dvalue)
+	})
+	return unpackDataValue(&dvalue, obj.engine)
 }
 
 // Call calls the given object method with the provided parameters.
