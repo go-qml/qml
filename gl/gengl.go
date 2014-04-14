@@ -2,7 +2,6 @@
 
 package gl
 
-// #define GL_GLEXT_PROTOTYPES
 // #include "gl.h"
 // #include "glext.h"
 //
