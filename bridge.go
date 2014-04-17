@@ -14,6 +14,7 @@ import "C"
 import (
 	"fmt"
 	"gopkg.in/qml.v0/tref"
+	"os"
 	"reflect"
 	"runtime"
 	"sync"
@@ -25,9 +26,18 @@ var hookWaiting C.int
 
 // guiLoop runs the main GUI thread event loop in C++ land.
 func guiLoop() {
+	// This is not an option in Init to avoid forcing people to patch
+	// and recompile an application just so it runs on Ubuntu Touch.
+	deskfile := os.Getenv("DESKTOP_FILE_HINT")
+	cdeskfile := (*C.char)(nil)
+	if deskfile != "" {
+		os.Setenv("DESKTOP_FILE_HINT", "")
+		cdeskfile = C.CString("--desktop_file_hint=" + deskfile)
+	}
+
 	runtime.LockOSThread()
 	guiLoopRef = tref.Ref()
-	C.newGuiApplication()
+	C.newGuiApplication(cdeskfile)
 	C.idleTimerInit(&hookWaiting)
 	guiLoopReady.Unlock()
 	C.applicationExec()

@@ -43,11 +43,15 @@ void panicf(const char *format, ...)
     hookPanic(local_strdup(ba.constData()));
 }
 
-void newGuiApplication()
+void newGuiApplication(char *deskfile)
 {
     static char empty[1] = {0};
-    static char *argv[] = {empty};
+    static char *argv[] = {empty, empty, empty};
     static int argc = 1;
+    if (deskfile) {
+        argv[argc] = deskfile;
+        argc++;
+    }
     new QApplication(argc, argv);
 
     // The event should never die.

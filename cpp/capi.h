@@ -105,7 +105,7 @@ typedef struct {
     int line;
 } LogMessage;
 
-void newGuiApplication();
+void newGuiApplication(char *deskfile);
 void applicationExec();
 void applicationFlushAll();
 
