@@ -2,7 +2,7 @@
 
 set -e
 
-if [ $UID != 0 ]; then
+if [ "$USER" != "root" ]; then
 	echo 'This script must be run as root.'
 	exit 1
 fi
