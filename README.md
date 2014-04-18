@@ -74,6 +74,34 @@ and Go 1.2 may be installed using [godeb](http://blog.labix.org/2013/06/15/in-fl
     $ go get gopkg.in/qml.v0
 
 
+Requirements on Ubuntu Touch
+----------------------------
+
+After following the [installation instructions](https://wiki.ubuntu.com/Touch/Install) for Ubuntu Touch,
+run the following commands to get a working build environment inside the device:
+
+    $ adb shell
+    # cd /tmp
+    # wget https://github.com/go-qml/qml/raw/master/cmd/ubuntu-touch/setup.sh
+    # /bin/bash setup.sh
+    # su - phablet
+    $
+
+At the end of setup.sh, the phablet user will have GOPATH=$HOME in the environment,
+the qml package will be built, and the particle example will be built and run. For
+stopping it from the command line, run as the phablet user:
+
+    $ upstart-app-stop gopkg.in.qml.particle-example
+
+for running it again:
+
+    $ upstart-app-launch gopkg.in.qml.particle-example
+
+These commands depend on the following file, installed by setup.sh:
+
+    ~/.local/share/applications/gopkg.in.qml.particle-example.desktop
+
+
 Requirements on Mac OS X
 ------------------------
 
