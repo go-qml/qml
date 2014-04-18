@@ -3,15 +3,15 @@
 set -e
 
 if [ $UID != 0 ]; then
-	echo "This script must be run as root."
+	echo 'This script must be run as root.'
 	exit 1
 fi
 
-echo "Remounting root as read-write ------------------------------------------------"
+echo 'Remounting root as read-write ------------------------------------------------'
 
 mount -o remount,rw /
 
-echo "Installing Go and dependencies -----------------------------------------------"
+echo 'Installing Go and dependencies -----------------------------------------------'
 
 apt-get update
 apt-get install -y \
@@ -19,23 +19,23 @@ apt-get install -y \
 	qtbase5-private-dev qtdeclarative5-private-dev libqt5opengl5-dev
 apt-get clean
 
-echo "Setting up enviornment for phablet user --------------------------------------"
+echo 'Setting up environment for phablet user --------------------------------------'
 
 echo 'export GOPATH=$HOME' >> ~phablet/.bash_profile
 
-echo "Fetching the qml package -----------------------------------------------------"
+echo 'Fetching the qml package -----------------------------------------------------'
 
-su -l phablet -c "go get gopkg.in/qml.v0"
+su -l phablet -c 'go get gopkg.in/qml.v0'
 
-echo "Installing the .desktop file for the particle example ------------------------"
+echo 'Installing the .desktop file for the particle example ------------------------'
 
-APP_ID=gopkg.in.qml.particle-example
+APP_ID='gopkg.in.qml.particle-example'
 cp ~phablet/src/gopkg.in/qml.v*/cmd/ubuntu-touch/particle.desktop ~phablet/.local/share/applications/$APP_ID.desktop
 
-echo "Building and launching particle example ----------------------------------------------------"
+echo 'Building and launching particle example --------------------------------------'
 
-su -l phablet -c "go build gopkg.in/qml.v0/examples/particle"
+su -l phablet -c 'cd $HOME/src/gopkg.in/qml.v0/examples/particle; go build'
 
-echo "Launching particle example ---------------------------------------------------"
+echo 'Launching particle example ---------------------------------------------------'
 
 su -l phablet -c "upstart-app-launch $APP_ID"
