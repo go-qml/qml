@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"gopkg.in/qml.v1"
-	"gopkg.in/qml.v1/work-in-progress/gl"
+	"gopkg.in/qml.v1/gl/gengl/foo/1.5"
 )
 
 func main() {
@@ -20,13 +20,15 @@ type GoRect struct {
 }
 
 func (r *GoRect) Paint(p *qml.Painter) {
-	width := gl.Float(r.Int("width"))
-	height := gl.Float(r.Int("height"))
+	gl := GL.API(p)
 
-	gl.Enable(gl.BLEND)
-	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+	width := GL.Float(r.Int("width"))
+	height := GL.Float(r.Int("height"))
+
+	gl.Enable(GL.BLEND)
+	gl.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA)
 	gl.Color4f(1.0, 1.0, 1.0, 0.8)
-	gl.Begin(gl.QUADS)
+	gl.Begin(GL.QUADS)
 	gl.Vertex2f(0, 0)
 	gl.Vertex2f(width, 0)
 	gl.Vertex2f(width, height)
@@ -35,7 +37,7 @@ func (r *GoRect) Paint(p *qml.Painter) {
 
 	gl.LineWidth(2.5)
 	gl.Color4f(0.0, 0.0, 0.0, 1.0)
-	gl.Begin(gl.LINES)
+	gl.Begin(GL.LINES)
 	gl.Vertex2f(0, 0)
 	gl.Vertex2f(width, height)
 	gl.Vertex2f(width, 0)

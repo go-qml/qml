@@ -9,6 +9,7 @@ import "C"
 import (
 	"errors"
 	"fmt"
+	"gopkg.in/qml.v1/gl"
 	"image"
 	"image/color"
 	"io"
@@ -171,13 +172,19 @@ func (e *Engine) Context() *Context {
 
 // Painter is provided to Paint methods on Go types that have displayable content.
 type Painter struct {
-	enigne *Engine
+	engine *Engine
 	obj    Object
+	glctxt gl.Context
 }
 
 // Object returns the underlying object being painted.
 func (p *Painter) Object() Object {
 	return p.obj
+}
+
+// GLContext returns the OpenGL context for this painter.
+func (p *Painter) GLContext() *gl.Context {
+	return &p.glctxt
 }
 
 // AddImageProvider registers f to be called when an image is requested by QML code
@@ -383,7 +390,7 @@ type Map struct {
 
 // Len returns the number of pairs in the map.
 func (m *Map) Len() int {
-	return len(m.data)/2
+	return len(m.data) / 2
 }
 
 // Convert allocates a new map and copies the content of m property to it,
@@ -614,7 +621,6 @@ func (obj *Common) List(property string) *List {
 	}
 	return m
 }
-
 
 // Map returns the map value of the named property.
 // Map panics if the property is not a map.

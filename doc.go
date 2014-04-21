@@ -156,7 +156,7 @@
 // a Paint method such as:
 //
 //    func (p *Person) Paint(painter *qml.Painter) {
-//        // ... OpenGL calls with the gopkg.in/qml.v1/work-in-progress/gl package ...
+//        // ... OpenGL calls with the gopkg.in/qml.v1/gl/<VERSION> package ...
 //    }
 //
 // A simple example is available at:

@@ -160,7 +160,6 @@ void GoPaintedValue::activate(int propIndex)
 
 void GoPaintedValue::paint(QPainter *painter)
 {
-    //qWarning() << "paint: x=" << x() << "; y=" << y() << "; width=" << width() << "; height=" << height();
     painter->beginNativePainting();
     hookGoValuePaint(qmlEngine(this), addr, typeInfo->paint->reflectIndex);
     painter->endNativePainting();

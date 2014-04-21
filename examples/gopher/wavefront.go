@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"gopkg.in/qml.v1/work-in-progress/gl"
+	"gopkg.in/qml.v1/gl"
 	"os"
 	"path/filepath"
 	"strconv"

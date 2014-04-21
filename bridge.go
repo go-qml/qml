@@ -553,7 +553,7 @@ func hookGoValuePaint(enginep, foldp unsafe.Pointer, reflectIndex C.intptr_t) {
 	fold := ensureEngine(enginep, foldp)
 	v := reflect.ValueOf(fold.gvalue)
 
-	painter := &Painter{fold.engine, &Common{fold.cvalue, fold.engine}}
+	painter := &Painter{engine: fold.engine, obj: &Common{fold.cvalue, fold.engine}}
 
 	method := v.Method(int(reflectIndex))
 	method.Call([]reflect.Value{reflect.ValueOf(painter)})

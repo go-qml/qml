@@ -50,7 +50,7 @@ void newGuiApplication()
     static int argc = 1;
     new QApplication(argc, argv);
 
-    // The event should never die.
+    // The event loop should never die.
     qApp->setQuitOnLastWindowClosed(false);
 }
 

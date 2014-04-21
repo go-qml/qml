@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"gopkg.in/qml.v1"
-	"gopkg.in/qml.v1/work-in-progress/gl"
+	"gopkg.in/qml.v1/gl"
 	"os"
 )
 
