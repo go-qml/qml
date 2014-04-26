@@ -125,6 +125,7 @@ void engineAddImageProvider(QQmlEngine_ *engine, QString_ *providerId, void *ima
 void contextGetProperty(QQmlContext_ *context, QString_ *name, DataValue *value);
 void contextSetProperty(QQmlContext_ *context, QString_ *name, DataValue *value);
 void contextSetObject(QQmlContext_ *context, QObject_ *value);
+QQmlContext_ *contextSpawn(QQmlContext_ *context);
 
 void delObject(QObject_ *object);
 void delObjectLater(QObject_ *object);

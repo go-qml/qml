@@ -327,6 +327,12 @@ void contextGetProperty(QQmlContext_ *context, QString_ *name, DataValue *result
     packDataValue(&var, result);
 }
 
+QQmlContext_ *contextSpawn(QQmlContext_ *context)
+{
+    QQmlContext *qcontext = reinterpret_cast<QQmlContext *>(context);
+    return new QQmlContext(qcontext);
+}
+
 void delObject(QObject_ *object)
 {
     delete reinterpret_cast<QObject *>(object);

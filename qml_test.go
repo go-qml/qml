@@ -282,6 +282,27 @@ func (s *S) TestComponentCreateWindow(c *C) {
 	window.Hide()
 }
 
+func (s *S) TestContextSpawn(c *C) {
+	context1 := s.engine.Context()
+	context2 := context1.Spawn()
+
+	context1.SetVar("mystr", "context1")
+	context2.SetVar("mystr", "context2")
+
+	data := `
+		import QtQuick 2.0
+		Item { property var s: mystr }
+	`
+	component, err := s.engine.LoadString("file.qml", data)
+	c.Assert(err, IsNil)
+
+	obj1 := component.Create(context1)
+	obj2 := component.Create(context2)
+
+	c.Assert(obj1.String("s"), Equals, "context1")
+	c.Assert(obj2.String("s"), Equals, "context2")
+}
+
 func (s *S) TestReadVoidAddrProperty(c *C) {
 	obj := cpptest.NewTestType(s.engine)
 	addr := obj.Property("voidAddr").(uintptr)

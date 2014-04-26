@@ -327,7 +327,15 @@ func (ctx *Context) Var(name string) interface{} {
 	return unpackDataValue(&dvalue, ctx.engine)
 }
 
-// TODO Context.Spawn() => Context
+// Spawn creates a new context that has ctx as a parent.
+func (ctx *Context) Spawn() *Context {
+	var result Context
+	result.engine = ctx.engine
+	RunMain(func() {
+		result.addr = C.contextSpawn(ctx.addr)
+	})
+	return &result
+}
 
 // Object is the common interface implemented by all QML types.
 //
