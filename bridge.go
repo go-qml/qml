@@ -523,12 +523,12 @@ func convertParam(methodName string, index int, param reflect.Value, argt reflec
 
 //export hookGoValuePaint
 func hookGoValuePaint(enginep, foldp unsafe.Pointer, reflectIndex C.intptr_t) {
-	fold := ensureEngine(enginep, foldp)
-	v := reflect.ValueOf(fold.gvalue)
-
 	// The main GUI thread is mutex-locked while paint methods are called,
 	// so no two paintings should be happening at the same time.
 	atomic.StoreUintptr(&guiPaintRef, tref.Ref())
+
+	fold := ensureEngine(enginep, foldp)
+	v := reflect.ValueOf(fold.gvalue)
 
 	painter := &Painter{fold.engine, &Common{fold.cvalue, fold.engine}}
 
