@@ -105,11 +105,12 @@ typedef struct {
     int line;
 } LogMessage;
 
-void newGuiApplication(char *deskfile);
+void newGuiApplication();
 void applicationExec();
+void applicationExit();
 void applicationFlushAll();
 
-void idleTimerInit(int *hookWaiting);
+void idleTimerInit(int32_t *guiIdleRun);
 void idleTimerStart();
 
 void *currentThread();

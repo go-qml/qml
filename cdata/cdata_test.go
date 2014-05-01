@@ -1,4 +1,4 @@
-package tref
+package cdata
 
 import (
 	"runtime"

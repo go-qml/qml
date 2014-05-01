@@ -18,32 +18,8 @@ import (
 	"reflect"
 	"strings"
 	"sync"
-	"sync/atomic"
 	"unsafe"
 )
-
-// InitOptions holds options to initialize the qml package.
-type InitOptions struct {
-	// Reserved for coming options.
-}
-
-var initialized int32
-
-// Init initializes the qml package with the provided parameters.
-// If the options parameter is nil, default options suitable for a
-// normal graphic application will be used.
-//
-// Init must be called only once, and before any other functionality
-// from the qml package is used.
-func Init(options *InitOptions) {
-	if !atomic.CompareAndSwapInt32(&initialized, 0, 1) {
-		panic("qml.Init called more than once")
-	}
-
-	guiLoopReady.Lock()
-	go guiLoop()
-	guiLoopReady.Lock()
-}
 
 // Engine provides an environment for instantiating QML components.
 type Engine struct {

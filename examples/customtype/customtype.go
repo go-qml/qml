@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	if err := run(); err != nil {
+	if err := qml.Run(nil, run); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
@@ -27,8 +27,6 @@ type GoSingleton struct {
 }
 
 func run() error {
-	qml.Init(nil)
-
 	qml.RegisterTypes("GoExtensions", 1, 0, []qml.TypeSpec{{
 		Init: func(v *GoType, obj qml.Object) {},
 	}, {
@@ -44,6 +42,7 @@ func run() error {
 	}
 
 	value := component.Create(nil)
+	println(value.TypeName())
 	fmt.Println("Text is:", value.Interface().(*GoType).Text)
 
 	return nil

@@ -22,6 +22,8 @@ import (
 	"gopkg.in/qml.v0/gl"
 )
 
+func init() { qml.SetupTesting() }
+
 func Test(t *testing.T) { TestingT(t) }
 
 type S struct {
@@ -30,10 +32,6 @@ type S struct {
 }
 
 var _ = Suite(&S{})
-
-func (s *S) SetUpSuite(c *C) {
-	qml.Init(nil)
-}
 
 func (s *S) SetUpTest(c *C) {
 	qml.SetLogger(c)

@@ -16,9 +16,9 @@ class IdleTimer : public QObject
         return &singleton;
     }
 
-    void init(int *hookWaiting)
+    void init(int32_t *guiIdleRun)
     {
-        this->hookWaiting = hookWaiting;
+        this->guiIdleRun = guiIdleRun;
     }
 
     Q_INVOKABLE void start()
@@ -31,7 +31,7 @@ class IdleTimer : public QObject
     void timerEvent(QTimerEvent *event)
     {
         __sync_synchronize();
-        if (*hookWaiting > 0) {
+        if (*guiIdleRun > 0) {
             hookIdleTimer();
         } else {
             timer.stop();
@@ -40,14 +40,14 @@ class IdleTimer : public QObject
 
     private:
 
-    int *hookWaiting;
+    int32_t *guiIdleRun;
 
     QBasicTimer timer;    
 };
 
-void idleTimerInit(int *hookWaiting)
+void idleTimerInit(int32_t *guiIdleRun)
 {
-    IdleTimer::singleton()->init(hookWaiting);
+    IdleTimer::singleton()->init(guiIdleRun);
 }
 
 void idleTimerStart()

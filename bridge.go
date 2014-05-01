@@ -13,59 +13,74 @@ import "C"
 
 import (
 	"fmt"
-	"gopkg.in/qml.v0/tref"
-	"os"
+	"gopkg.in/qml.v0/cdata"
 	"reflect"
 	"runtime"
-	"sync"
 	"sync/atomic"
 	"unsafe"
 )
-
-var hookWaiting C.int
-
-// guiLoop runs the main GUI thread event loop in C++ land.
-func guiLoop() {
-	// This is not an option in Init to avoid forcing people to patch
-	// and recompile an application just so it runs on Ubuntu Touch.
-	deskfile := os.Getenv("DESKTOP_FILE_HINT")
-	cdeskfile := (*C.char)(nil)
-	if deskfile != "" {
-		os.Setenv("DESKTOP_FILE_HINT", "")
-		cdeskfile = C.CString("--desktop_file_hint=" + deskfile)
-	}
-
-	runtime.LockOSThread()
-	guiLoopRef = tref.Ref()
-	C.newGuiApplication(cdeskfile)
-	C.idleTimerInit(&hookWaiting)
-	guiLoopReady.Unlock()
-	C.applicationExec()
-}
 
 var (
 	guiFunc      = make(chan func())
 	guiDone      = make(chan struct{})
 	guiLock      = 0
-	guiLoopReady sync.Mutex
-	guiLoopRef   uintptr
+	guiMainRef   uintptr
 	guiPaintRef  uintptr
+	guiIdleRun   int32
+
+	initialized int32
 )
+
+// InitOptions holds options to initialize the qml package.
+type InitOptions struct {
+	// Reserved for coming options.
+}
+
+func init() {
+	runtime.LockOSThread()
+	guiMainRef = cdata.Ref()
+}
+
+// Run runs the main QML event loop with the provided options
+// and then runs f. The event loop is terminated when f returns. 
+//
+// If options is nil, default options suitable for usual graphic
+// applications are used.
+//
+// Most functions from the qml package block until Run is called.
+func Run(options *InitOptions, f func() error) error {
+	if cdata.Ref() != guiMainRef {
+		panic("Run must be called on the initial goroutine so apps are portable to Mac OS")
+	}
+	if !atomic.CompareAndSwapInt32(&initialized, 0, 1) {
+		panic("qml.Run called more than once")
+	}
+	C.newGuiApplication()
+	C.idleTimerInit((*C.int32_t)(&guiIdleRun))
+	done := make(chan error, 1)
+	go func() {
+		RunMain(func() {}) // Block until the event loop is running.
+		done <- f()
+		C.applicationExit()
+	}()
+	C.applicationExec()
+	return <-done
+}
 
 // RunMain runs f in the main QML thread and waits for f to return.
 //
 // This is meant for extensions that integrate directly with the
 // underlying QML logic.
 func RunMain(f func()) {
-	ref := tref.Ref()
-	if ref == guiLoopRef || ref == atomic.LoadUintptr(&guiPaintRef) {
+	ref := cdata.Ref()
+	if ref == guiMainRef || ref == atomic.LoadUintptr(&guiPaintRef) {
 		// Already within the GUI or render threads. Attempting to wait would deadlock.
 		f()
 		return
 	}
 
 	// Tell Qt we're waiting for the idle hook to be called.
-	if atomic.AddInt32((*int32)(unsafe.Pointer(&hookWaiting)), 1) == 1 {
+	if atomic.AddInt32(&guiIdleRun, 1) == 1 {
 		C.idleTimerStart()
 	}
 
@@ -160,7 +175,7 @@ func Changed(value, fieldAddr interface{}) {
 
 // hookIdleTimer is run once per iteration of the Qt event loop,
 // within the main GUI thread, but only if at least one goroutine
-// has atomically incremented hookWaiting.
+// has atomically incremented guiIdleRun.
 //
 //export hookIdleTimer
 func hookIdleTimer() {
@@ -177,7 +192,7 @@ func hookIdleTimer() {
 		}
 		f()
 		guiDone <- struct{}{}
-		atomic.AddInt32((*int32)(unsafe.Pointer(&hookWaiting)), -1)
+		atomic.AddInt32(&guiIdleRun, -1)
 	}
 }
 
@@ -216,7 +231,7 @@ func wrapGoValue(engine *Engine, gvalue interface{}, owner valueOwner) (cvalue u
 		panic("cannot hand pointer of pointer to QML logic; use a simple pointer instead")
 	}
 
-	painting := tref.Ref() == atomic.LoadUintptr(&guiPaintRef)
+	painting := cdata.Ref() == atomic.LoadUintptr(&guiPaintRef)
 
 	prev, ok := engine.values[gvalue]
 	if ok && (prev.owner == owner || owner != cppOwner || painting) {
@@ -525,7 +540,7 @@ func convertParam(methodName string, index int, param reflect.Value, argt reflec
 func hookGoValuePaint(enginep, foldp unsafe.Pointer, reflectIndex C.intptr_t) {
 	// The main GUI thread is mutex-locked while paint methods are called,
 	// so no two paintings should be happening at the same time.
-	atomic.StoreUintptr(&guiPaintRef, tref.Ref())
+	atomic.StoreUintptr(&guiPaintRef, cdata.Ref())
 
 	fold := ensureEngine(enginep, foldp)
 	v := reflect.ValueOf(fold.gvalue)
