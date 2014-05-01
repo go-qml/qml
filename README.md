@@ -114,7 +114,7 @@ Something along these lines should be effective:
     $ brew install gcc48 qt5
 
     $ export PKG_CONFIG_PATH=`brew --prefix qt5`/lib/pkgconfig
-    $ QT5VERSION=`pkg-config --modversion Qt5Core`
+    $ export QT5VERSION=`pkg-config --modversion Qt5Core`
     $ CXX=g++-4.8 go get gopkg.in/qml.v0
 
 For Mac OS X Mavericks you may need to use `brew install qt5 --HEAD` and check that QT5VERSION
