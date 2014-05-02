@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"gopkg.in/qml.v0"
+	"gopkg.in/qml.v1"
 	"image/color"
 	"math/rand"
 	"os"

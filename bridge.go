@@ -13,7 +13,7 @@ import "C"
 
 import (
 	"fmt"
-	"gopkg.in/qml.v0/cdata"
+	"gopkg.in/qml.v1/cdata"
 	"reflect"
 	"runtime"
 	"sync/atomic"

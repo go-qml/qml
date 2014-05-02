@@ -13,7 +13,7 @@ import "C"
 import (
 	"unsafe"
 
-	"gopkg.in/qml.v0"
+	"gopkg.in/qml.v1"
 )
 
 func NewTestType(engine *qml.Engine) qml.Object {
