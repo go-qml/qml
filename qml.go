@@ -100,6 +100,17 @@ func (e *Engine) Destroy() {
 	}
 }
 
+// ClearComponentCache clears the engine's internal component cache.
+// It returns the engine to a state where it does not contain any loaded component data.
+// This may be useful in order to reload a smaller subset of the previous component set,
+// or to load a new version of a previously loaded component.
+
+func (e *Engine) ClearComponentCache() {
+	gui(func() {
+		C.clearComponentCache(e.addr)
+	})
+}
+
 // Load loads a new component with the provided location and with the
 // content read from r. The location informs the resource name for
 // logged messages, and its path is used to locate any other resources

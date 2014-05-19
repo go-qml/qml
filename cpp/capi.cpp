@@ -88,6 +88,11 @@ QQmlContext_ *engineRootContext(QQmlEngine_ *engine)
     return reinterpret_cast<QQmlEngine *>(engine)->rootContext();
 }
 
+void clearComponentCache(QQmlEngine_ *engine) {
+     QQmlEngine *e = reinterpret_cast<QQmlEngine *>(engine);
+     e->clearComponentCache();
+}
+
 void engineSetContextForObject(QQmlEngine_ *engine, QObject_ *object)
 {
     QQmlEngine *qengine = reinterpret_cast<QQmlEngine *>(engine);
