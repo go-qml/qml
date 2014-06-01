@@ -21,12 +21,12 @@ import (
 )
 
 var (
-	guiFunc      = make(chan func())
-	guiDone      = make(chan struct{})
-	guiLock      = 0
-	guiMainRef   uintptr
-	guiPaintRef  uintptr
-	guiIdleRun   int32
+	guiFunc     = make(chan func())
+	guiDone     = make(chan struct{})
+	guiLock     = 0
+	guiMainRef  uintptr
+	guiPaintRef uintptr
+	guiIdleRun  int32
 
 	initialized int32
 )
@@ -42,13 +42,14 @@ func init() {
 }
 
 // Run runs the main QML event loop with the provided options
-// and then runs f. The event loop is terminated when f returns. 
+// and then runs f. The event loop is terminated when f returns.
 //
 // If options is nil, default options suitable for usual graphic
 // applications are used.
 //
 // Most functions from the qml package block until Run is called.
 func Run(options *InitOptions, f func() error) error {
+	runtime.LockOSThread()
 	if cdata.Ref() != guiMainRef {
 		panic("Run must be called on the initial goroutine so apps are portable to Mac OS")
 	}
