@@ -62,7 +62,7 @@ typedef enum {
     DTMethod  = 202
 } DataType;
 
-typedef struct {
+typedef struct _DataValue {
     DataType dataType;
     char data[8];
     int len;
@@ -96,7 +96,7 @@ typedef struct {
     QMetaObject_ *metaObject;
 } GoTypeInfo;
 
-typedef struct {
+typedef struct _LogMessage {
     int severity;
     const char *text;
     int textLen;
