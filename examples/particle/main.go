@@ -1,8 +1,9 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"math/rand"
+	"os"
 	"time"
 
 	"gopkg.in/qml.v1"
@@ -10,7 +11,8 @@ import (
 
 func main() {
 	if err := qml.Run(nil, run); err != nil {
-		log.Fatal(err)
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
 	}
 }
 
