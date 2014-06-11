@@ -917,6 +917,13 @@ var tests = []struct {
 			c.Check(qml.Stats().ValuesAlive, Equals, stats.ValuesAlive+1)
 			c.root.Call("log")
 			c.root.Call("hold", nil)
+			// gc might take a little while to actually collect the garbage
+			for i := 0; i < 10; i++ {
+				if qml.Stats().ValuesAlive == stats.ValuesAlive {
+					break
+				}
+				time.Sleep(time.Millisecond * 10)
+			}
 			c.Check(qml.Stats().ValuesAlive, Equals, stats.ValuesAlive)
 		},
 		DoneLog: "String is <content>",
