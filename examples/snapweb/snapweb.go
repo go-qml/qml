@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"gopkg.in/qml.v1"
 	"image/png"
 	"os"
+
+	"gopkg.in/qml.v1"
 )
 
 const webview = `
@@ -22,14 +23,13 @@ func main() {
 		fmt.Fprintf(os.Stderr, "usage: %s <url> <png path>\n", os.Args[0])
 		os.Exit(1)
 	}
-	if err := run(); err != nil {
+	if err := qml.Run(nil, run); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
 }
 
 func run() error {
-	qml.Init(nil)
 	engine := qml.NewEngine()
 	component, err := engine.LoadString("webview.qml", webview)
 	if err != nil {

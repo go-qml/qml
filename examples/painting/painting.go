@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"gopkg.in/qml.v1"
 	"gopkg.in/qml.v1/gl"
-	"os"
 )
 
 func main() {
-	if err := run(); err != nil {
+	if err := qml.Run(nil, run); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
@@ -43,8 +44,6 @@ func (r *GoRect) Paint(p *qml.Painter) {
 }
 
 func run() error {
-	qml.Init(nil)
-
 	qml.RegisterTypes("GoExtensions", 1, 0, []qml.TypeSpec{{
 		Init: func(r *GoRect, obj qml.Object) { r.Object = obj },
 	}})
