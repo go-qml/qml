@@ -43,11 +43,13 @@ func init() {
 
 // Run runs the main QML event loop with the provided options
 // and then runs f. The event loop is terminated when f returns. 
-//
 // If options is nil, default options suitable for usual graphic
 // applications are used.
 //
 // Most functions from the qml package block until Run is called.
+//
+// The Run function must necessarily be called from the same goroutine as
+// the main function or the application may fail when running on Mac OS.
 func Run(options *InitOptions, f func() error) error {
 	if cdata.Ref() != guiMainRef {
 		panic("Run must be called on the initial goroutine so apps are portable to Mac OS")
@@ -69,7 +71,7 @@ func Run(options *InitOptions, f func() error) error {
 
 // RunMain runs f in the main QML thread and waits for f to return.
 //
-// This is meant for extensions that integrate directly with the
+// This is meant to be used by extensions that integrate directly with the
 // underlying QML logic.
 func RunMain(f func()) {
 	ref := cdata.Ref()

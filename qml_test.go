@@ -19,7 +19,7 @@ import (
 
 	"gopkg.in/qml.v1"
 	"gopkg.in/qml.v1/cpptest"
-	"gopkg.in/qml.v1/gl"
+	"gopkg.in/qml.v1/work-in-progress/gl"
 )
 
 func init() { qml.SetupTesting() }
