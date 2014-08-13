@@ -14,7 +14,7 @@ import (
 const pageSize = 4096
 
 func qmain() {
-	Run(nil, func() error { tmain(); return nil })
+	Run(func() error { tmain(); return nil })
 }
 
 func tmain() { tstub() }

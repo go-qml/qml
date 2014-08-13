@@ -31,26 +31,19 @@ var (
 	initialized int32
 )
 
-// InitOptions holds options to initialize the qml package.
-type InitOptions struct {
-	// Reserved for coming options.
-}
-
 func init() {
 	runtime.LockOSThread()
 	guiMainRef = cdata.Ref()
 }
 
-// Run runs the main QML event loop with the provided options
-// and then runs f. The event loop is terminated when f returns. 
-// If options is nil, default options suitable for usual graphic
-// applications are used.
+// Run runs the main QML event loop, runs f, and then terminates the
+// event loop once f returns.
 //
 // Most functions from the qml package block until Run is called.
 //
 // The Run function must necessarily be called from the same goroutine as
 // the main function or the application may fail when running on Mac OS.
-func Run(options *InitOptions, f func() error) error {
+func Run(f func() error) error {
 	if cdata.Ref() != guiMainRef {
 		panic("Run must be called on the initial goroutine so apps are portable to Mac OS")
 	}

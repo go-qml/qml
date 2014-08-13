@@ -25,7 +25,7 @@
 // A simple Go application that integrates with QML may perform the following steps
 // for offering a graphical interface:
 //
-//   * Initialize the qml package (see Init)
+//   * Call qml.Run from function main providing a function with the logic below
 //   * Create an engine for loading and running QML content (see NewEngine)
 //   * Make Go values and types available to QML (see Context.SetVar and RegisterType)
 //   * Load QML content (see Engine.LoadString and Engine.LoadFile)

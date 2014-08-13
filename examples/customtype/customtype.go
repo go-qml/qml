@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
-	"gopkg.in/qml.v1"
 	"os"
+
+	"gopkg.in/qml.v1"
 )
 
 func main() {
-	if err := qml.Run(nil, run); err != nil {
+	if err := qml.Run(run); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
@@ -42,8 +43,6 @@ func run() error {
 	}
 
 	value := component.Create(nil)
-	println(value.TypeName())
 	fmt.Println("Text is:", value.Interface().(*GoType).Text)
-
 	return nil
 }

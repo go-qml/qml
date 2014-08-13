@@ -1,17 +1,26 @@
 package main
 
 import (
-	"gopkg.in/qml.v1"
+	"fmt"
 	"math/rand"
+	"os"
 	"time"
+
+	"gopkg.in/qml.v1"
 )
 
 func main() {
-	qml.Init(nil)
+	if err := qml.Run(run); err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
+}
+
+func run() error {
 	engine := qml.NewEngine()
 	component, err := engine.LoadFile("particle.qml")
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	ctrl := Control{Message: "Hello from Go!"}
@@ -27,6 +36,8 @@ func main() {
 
 	window.Show()
 	window.Wait()
+
+	return nil
 }
 
 type Control struct {

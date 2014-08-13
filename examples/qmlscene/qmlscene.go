@@ -11,14 +11,13 @@ func main() {
 		fmt.Fprintf(os.Stderr, "usage: %s <qml file>\n", os.Args[0])
 		os.Exit(1)
 	}
-	if err := run(); err != nil {
+	if err := qml.Run(run); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
 }
 
 func run() error {
-	qml.Init(nil)
 	engine := qml.NewEngine()
 
 	engine.On("quit", func() { os.Exit(0) })

@@ -13,7 +13,7 @@ func main() {
 	if len(os.Args) == 2 {
 		filename = os.Args[1]
 	}
-	if err := qml.Run(nil, run); err != nil {
+	if err := qml.Run(run); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
