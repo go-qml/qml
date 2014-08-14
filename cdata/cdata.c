@@ -1,7 +1,7 @@
 #include "runtime.h"
 
 void ·Ref(uintptr ref) {
-	ref = (uintptr)m;
+	ref = (uintptr)g->m;
 	FLUSH(&ref);
 }
 
