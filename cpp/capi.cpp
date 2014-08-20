@@ -139,12 +139,15 @@ class GoImageProvider : public QQuickImageProvider {
             width = requestedSize.width();
             height = requestedSize.height();
         }
-        QImage *image = reinterpret_cast<QImage *>(hookRequestImage(imageFunc, (char*)ba.constData(), ba.size(), width, height));
-        *size = image->size();
+        QImage *ptr = reinterpret_cast<QImage *>(hookRequestImage(imageFunc, (char*)ba.constData(), ba.size(), width, height));
+        QImage image = *ptr;
+        delete ptr;
+
+        *size = image.size();
         if (requestedSize.isValid() && requestedSize != *size) {
-            *image = image->scaled(requestedSize, Qt::KeepAspectRatio);
+            image = image.scaled(requestedSize, Qt::KeepAspectRatio);
         }
-        return *image;
+        return image;
     };
 
     private:
