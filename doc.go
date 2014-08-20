@@ -35,7 +35,7 @@
 // Some of these topics are covered below, and may also be observed in practice
 // in the following examples:
 //
-//   https://github.com/go-qml/qml/tree/master/examples
+//   https://github.com/go-qml/qml/tree/v1/examples
 //
 //
 // Handling QML objects in Go
@@ -161,6 +161,6 @@
 //
 // A simple example is available at:
 //
-//   https://github.com/go-qml/qml/tree/master/examples/painting
+//   https://github.com/go-qml/qml/tree/v1/examples/painting
 //
 package qml
