@@ -105,21 +105,25 @@ These commands depend on the following file, installed by setup.sh:
 Requirements on Mac OS X
 ------------------------
 
-On Mac OS X you'll need gcc (not a symlinked clang, as it complains about `-std=c++11`), and
-must specify the `CXX`, `PKG_CONFIG_PATH`, and `CGO_CPPFLAGS` environment variables.
+On Mac OS X you'll need QT5. It's easiest to install with Homebrew, a
+third-party package management system for OS X.
 
-Something along these lines should be effective:
+Installation instructions for Homebrew are here:
 
-    $ brew tap homebrew/versions
-    $ brew install gcc48 qt5
+    http://brew.sh/
 
-    $ export PKG_CONFIG_PATH=`brew --prefix qt5`/lib/pkgconfig
-    $ QT5VERSION=`pkg-config --modversion Qt5Core`
-    $ CXX=g++-4.8 go get gopkg.in/qml.v0
+Then, install the qt5 and pkg-config packages:
 
-For Mac OS X Mavericks you may need to use `brew install qt5 --HEAD` and check that QT5VERSION
-is something reasonable like `5.2.0`, `ls /usr/local/Cellar/qt5/HEAD/include/QtCore/ | grep '^5'`
-should also work.
+    $ brew install qt5 pkg-config
+
+Then, force brew to "link" qt5 (this makes it available under /usr/local):
+
+    $ brew link --force qt5
+
+And finally, fetch and install go-qml:
+
+    $ go get gopkg.in/qml.v0
+
 
 Requirements on Windows
 -----------------------
