@@ -13,11 +13,13 @@ import "C"
 
 import (
 	"fmt"
-	"gopkg.in/qml.v1/cdata"
+	"os"
 	"reflect"
 	"runtime"
 	"sync/atomic"
 	"unsafe"
+
+	"gopkg.in/qml.v1/cdata"
 )
 
 var (
@@ -531,8 +533,19 @@ func convertParam(methodName string, index int, param reflect.Value, argt reflec
 	return out, nil
 }
 
+func printPaintPanic() {
+	var buf [8192]byte
+	if v := recover(); v != nil {
+		runtime.Stack(buf[:], false)
+		fmt.Fprintf(os.Stderr, "panic while painting: %s\n\n%s", v, buf[:])
+	}
+}
+
 //export hookGoValuePaint
 func hookGoValuePaint(enginep, foldp unsafe.Pointer, reflectIndex C.intptr_t) {
+	// Besides a convenience this is a workaround for http://golang.org/issue/8588
+	defer printPaintPanic()
+
 	// The main GUI thread is mutex-locked while paint methods are called,
 	// so no two paintings should be happening at the same time.
 	atomic.StoreUintptr(&guiPaintRef, cdata.Ref())
