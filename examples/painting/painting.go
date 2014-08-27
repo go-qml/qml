@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"gopkg.in/qml.v1"
-	"gopkg.in/qml.v1/gl/gengl/foo/1.5"
+	"gopkg.in/qml.v1/gl/2.0"
 )
 
 func main() {
