@@ -13,7 +13,6 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
-
 )
 
 type Header struct {
@@ -578,15 +577,33 @@ func prepareHeader(header *Header) error {
 				p.Type = p.Type[8:]
 			}
 			p.GoType = goTypeName(p.Type)
-
+			if p.GoType == "uint32" {
+				switch p.GoName {
+				case "program":
+					p.GoType = "glbase.Program"
+				case "shader":
+					p.GoType = "glbase.Shader"
+				case "buffer":
+					p.GoType = "glbase.Buffer"
+				case "texture":
+					p.GoType = "glbase.Texture"
+				}
+				// TODO Check plurals.
+			}
+			if p.GoType == "int32" && p.GoName == "location" && strings.Contains(f.Name, "Uniform") {
+				p.GoType = "glbase.Uniform"
+			}
 			f.Param[pi] = p
+		}
+		if result := funcTweaks[f.GoName].result; result != "" {
+			f.GoType = result
 		}
 		header.Func[fi] = f
 	}
 
 	for fi, f := range header.Func {
 		prefix := funcNameDocPrefix(f.Name)
-		if true || funcNameDocCount[prefix] > 1 {
+		if funcNameDocCount[prefix] > 1 {
 			f.DocName = prefix
 		} else {
 			f.DocName = f.Name
@@ -599,16 +616,16 @@ func prepareHeader(header *Header) error {
 		header.Type[ti] = t
 	}
 
-	for di, d := range header.Const {
-		if !strings.HasPrefix(d.Name, "GL") || len(d.Name) < 3 {
-			panic("unexpected C define name: " + d.Name)
+	for ci, c := range header.Const {
+		if !strings.HasPrefix(c.Name, "GL") || len(c.Name) < 3 {
+			panic("unexpected C define name: " + c.Name)
 		}
-		if d.Name[3] >= '0' && d.Name[3] <= '9' {
-			d.GoName = "N" + d.Name[3:]
+		if c.Name[3] >= '0' && c.Name[3] <= '9' {
+			c.GoName = "N" + c.Name[3:]
 		} else {
-			d.GoName = d.Name[3:]
+			c.GoName = c.Name[3:]
 		}
-		header.Const[di] = d
+		header.Const[ci] = c
 	}
 
 	return nil
@@ -644,14 +661,28 @@ func constNewLine(lineBlock int) bool {
 }
 
 type funcTweak struct {
-	params   string
-	preamble string
+	params paramTweaks
+	result string
+	before string
+	after  string
 }
 
+type paramTweak struct {
+	rename string
+	retype string
+	remove bool
+}
+
+type paramTweaks map[string]paramTweak
+
 var funcTweaks = map[string]funcTweak{
-	"glShaderSource": {
-		params: "shader uint32, source ...string",
-		preamble: `
+	"ShaderSource": {
+		params: paramTweaks{
+			"glstring": {rename: "source", retype: "...string"},
+			"length":   {remove: true},
+			"count":    {remove: true},
+		},
+		before: `
 			count := len(source)
 			length := make([]int32, count)
 			glstring := make([]unsafe.Pointer, count)
@@ -665,19 +696,35 @@ var funcTweaks = map[string]funcTweak{
 			}
 		`,
 	},
+	"CreateShader": {
+		result: "glbase.Shader",
+	},
+	"CreateProgram": {
+		result: "glbase.Program",
+	},
 }
 
 func funcParams(f Func) string {
-	if tweak, ok := funcTweaks[f.Name]; ok && tweak.params != "" {
-		return tweak.params
-	}
+	tweaks := funcTweaks[f.GoName]
 	var buf bytes.Buffer
 	for i, param := range f.Param {
+		tweak := tweaks.params[param.GoName]
+		if tweak.remove {
+			continue
+		}
 		if i > 0 {
 			buf.WriteString(", ")
 		}
-		buf.WriteString(param.GoName)
+		if tweak.rename != "" {
+			buf.WriteString(tweak.rename)
+		} else {
+			buf.WriteString(param.GoName)
+		}
 		buf.WriteByte(' ')
+		if tweak.retype != "" {
+			buf.WriteString(tweak.retype)
+			continue
+		}
 		if param.Type == "GLvoid" && param.Addr > 0 {
 			buf.WriteString("interface{}")
 			continue
@@ -695,8 +742,12 @@ func funcParams(f Func) string {
 	return buf.String()
 }
 
-func funcCallPreamble(f Func) string {
-	return funcTweaks[f.Name].preamble
+func funcBefore(f Func) string {
+	return funcTweaks[f.GoName].before
+}
+
+func funcAfter(f Func) string {
+	return funcTweaks[f.GoName].after
 }
 
 func funcCallParams(f Func) string {
@@ -765,7 +816,7 @@ func funcCCallParams(f Func) string {
 	return buf.String()
 }
 
-func paramMaxLen(f Func, param Param) string {
+func paramLen(f Func, param Param) string {
 	if param.Addr == 0 || len(f.Name) < 3 || f.Name[len(f.Name)-1] != 'v' {
 		return ""
 	}
@@ -782,7 +833,7 @@ func paramMaxLen(f Func, param Param) string {
 // funcSupported returns whether the given function has wrapping
 // properly implemented already.
 func funcSupported(f Func) bool {
-	if _, ok := funcTweaks[f.Name]; ok {
+	if _, ok := funcTweaks[f.GoName]; ok {
 		return true
 	}
 	if f.Addr > 0 {
@@ -800,17 +851,18 @@ func funcSupported(f Func) bool {
 }
 
 var funcs = template.FuncMap{
-	"constNewLine":     constNewLine,
-	"funcParams":       funcParams,
-	"funcCallParams":   funcCallParams,
-	"funcCallPreamble": funcCallPreamble,
-	"funcCParams":      funcCParams,
-	"funcCCallParams":  funcCCallParams,
-	"funcSupported":    funcSupported,
-	"paramMaxLen":      paramMaxLen,
-	"repeat":           strings.Repeat,
-	"tolower":          strings.ToLower,
-	"goTypeName":       goTypeName,
+	"constNewLine":    constNewLine,
+	"funcParams":      funcParams,
+	"funcCallParams":  funcCallParams,
+	"funcBefore":      funcBefore,
+	"funcAfter":       funcAfter,
+	"funcCParams":     funcCParams,
+	"funcCCallParams": funcCCallParams,
+	"funcSupported":   funcSupported,
+	"paramLen":        paramLen,
+	"repeat":          strings.Repeat,
+	"tolower":         strings.ToLower,
+	"goTypeName":      goTypeName,
 }
 
 type packageFile struct {
@@ -874,14 +926,12 @@ const ({{range $const := $.Const}}{{if $const.LineBlock | constNewLine}}
 {{ range $func := $.Func }}{{if $func | funcSupported}}
 // See http://www.opengl.org/sdk/docs/man/html/{{$func.DocName}}.xhtml
 func (gl *GL) {{$func.GoName}}({{funcParams $func}}) {{if $func.GoType}}{{repeat "*" $func.Addr}}{{$func.GoType}} {{end}}{ {{/*
-*/}}	{{funcCallPreamble $func}} {{/*
+*/}}	{{funcBefore $func}} {{/*
 */}}	{{range $param := $func.Param}} {{/*
-*/}}		{{with $max := paramMaxLen $func $param}} {{/*
-*/}}			{{if $max}} {{/*
-*/}}				if len({{$param.GoName}}) > {{$max}} {
-					panic("parameter {{$param.GoName}} has incorrect length")
-				}
-			{{end}}
+*/}}		{{with $plen := paramLen $func $param}} {{/*
+*/}}			if len({{$param.GoName}}) != {{$plen}} {
+				panic("parameter {{$param.GoName}} has incorrect length")
+			}
 		{{end}} {{/*
 */}}		{{if $param.Type | eq "GLvoid"}} {{/*
 */}}			{{$param.GoName}}_v := reflect.ValueOf({{$param.GoName}})
@@ -890,8 +940,14 @@ func (gl *GL) {{$func.GoName}}({{funcParams $func}}) {{if $func.GoType}}{{repeat
 			}
 		{{end}} {{/*
 */}}	{{end}} {{/*
-*/}}	{{if $func.GoType}}return {{$func.GoType}}({{end}}C.gl{{$.GLVersionLabel}}_{{$func.Name}}(gl.funcs{{if $func.Param}}, {{funcCallParams $func}}{{end}}){{if $func.GoType}}){{end}}
-}
+*/}}	{{if ne $func.Type "void"}}result := {{end}}C.gl{{$.GLVersionLabel}}_{{$func.Name}}(gl.funcs{{if $func.Param}}, {{funcCallParams $func}}{{end}})
+	{{with $after := funcAfter $func}} {{/*
+*/}}		{{$after}} {{/*
+*/}}	{{else}} {{/*
+*/}}		{{if $func.GoType}}return {{$func.GoType}}(result)
+		{{end}} {{/*
+*/}}	{{end}} {{/*
+*/}} }
 {{end}}{{end}}
 `))
 
