@@ -22,8 +22,8 @@ type GoRect struct {
 func (r *GoRect) Paint(p *qml.Painter) {
 	gl := GL.API(p)
 
-	width := GL.Float(r.Int("width"))
-	height := GL.Float(r.Int("height"))
+	width := float32(r.Int("width"))
+	height := float32(r.Int("height"))
 
 	gl.Enable(GL.BLEND)
 	gl.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA)

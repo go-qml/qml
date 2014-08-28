@@ -63,7 +63,7 @@ func (r *Gopher) SetRotation(rotation int) {
 func (r *Gopher) Paint(p *qml.Painter) {
 	gl := GL.API(p)
 
-	width := GL.Float(r.Int("width"))
+	width := float32(r.Int("width"))
 
 	gl.Enable(GL.BLEND)
 	gl.BlendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA)
@@ -77,10 +77,10 @@ func (r *Gopher) Paint(p *qml.Painter) {
 
 	gl.Scalef(width/3, width/3, width/3)
 
-	lka := []GL.Float{0.3, 0.3, 0.3, 1.0}
-	lkd := []GL.Float{1.0, 1.0, 1.0, 0.0}
-	lks := []GL.Float{1.0, 1.0, 1.0, 1.0}
-	lpos := []GL.Float{-2, 6, 3, 1.0}
+	lka := []float32{0.3, 0.3, 0.3, 1.0}
+	lkd := []float32{1.0, 1.0, 1.0, 0.0}
+	lks := []float32{1.0, 1.0, 1.0, 1.0}
+	lpos := []float32{-2, 6, 3, 1.0}
 
 	gl.Enable(GL.LIGHTING)
 	gl.Lightfv(GL.LIGHT0, GL.AMBIENT, lka)
@@ -94,7 +94,7 @@ func (r *Gopher) Paint(p *qml.Painter) {
 
 	gl.Translatef(1.5, 1.5, 0)
 	gl.Rotatef(-90, 0, 0, 1)
-	gl.Rotatef(GL.Float(90+((36000+r.Rotation)%360)), 1, 0, 0)
+	gl.Rotatef(float32(90+((36000+r.Rotation)%360)), 1, 0, 0)
 
 	gl.Disable(GL.COLOR_MATERIAL)
 
@@ -106,7 +106,7 @@ func (r *Gopher) Paint(p *qml.Painter) {
 			gl.Materialf(GL.FRONT, GL.SHININESS, group.Material.Shininess)
 			gl.VertexPointer(3, GL.FLOAT, 0, group.Vertexes)
 			gl.NormalPointer(GL.FLOAT, 0, group.Normals)
-			gl.DrawArrays(GL.TRIANGLES, 0, GL.Sizei(len(group.Vertexes)/3))
+			gl.DrawArrays(GL.TRIANGLES, 0, int32(len(group.Vertexes)/3))
 		}
 	}
 
