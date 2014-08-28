@@ -518,6 +518,34 @@ func parseConsts(filename string) (map[glVersion][]Const, error) {
 }
 
 func goTypeName(ctypeName string) string {
+	// These types carry very little meaning, so it's more
+	// convenient to have their native counterparts instead.
+	switch ctypeName {
+	case "GLbyte", "GLchar":
+		return "byte"
+	case "GLubyte":
+		return "uint8"
+	case "GLshort":
+		return "int16"
+	case "GLushort":
+		return "uint16"
+	case "GLint", "GLsizei":
+		return "int32"
+	case "GLuint":
+		return "uint32"
+	case "GLint64":
+		return "int64"
+	case "GLuint64":
+		return "uint64"
+	case "GLintptr", "GLsizeiptr":
+		return "intptr"
+	case "GLuintptr":
+		return "uintptr"
+	case "GLfloat":
+		return "float32"
+	case "GLdouble":
+		return "float64"
+	}
 	if !strings.HasPrefix(ctypeName, "GL") || len(ctypeName) < 3 {
 		panic("unexpected C type name: " + ctypeName)
 	}
@@ -525,6 +553,10 @@ func goTypeName(ctypeName string) string {
 }
 
 var enumsPath = xmlpath.MustCompile("/registry/enums/enum")
+
+func isExported(s string) bool {
+	return s != "" && s[0] >= 'A' && s[0] <= 'Z'
+}
 
 func prepareHeader(header *Header) error {
 	funcNameDocCount := make(map[string]int)
@@ -548,7 +580,9 @@ func prepareHeader(header *Header) error {
 		if f.Type != "void" {
 			f.GoType = goTypeName(f.Type)
 		}
-		header.GoGLTypes[f.Type] = true
+		if isExported(f.GoType) {
+			header.GoGLTypes[f.Type] = true
+		}
 
 		for pi, p := range f.Param {
 			switch p.Name {
@@ -571,7 +605,9 @@ func prepareHeader(header *Header) error {
 				p.Type = p.Type[8:]
 			}
 			p.GoType = goTypeName(p.Type)
-			header.GoGLTypes[p.Type] = true
+			if isExported(p.GoType) {
+				header.GoGLTypes[p.Type] = true
+			}
 			f.Param[pi] = p
 		}
 		header.Func[fi] = f
@@ -646,7 +682,7 @@ type funcTweak struct {
 
 var funcTweaks = map[string]funcTweak{
 	"glShaderSource": {
-		params:   "shader Uint, source [][]byte",
+		params: "shader Uint, source [][]byte",
 		preamble: `
 			count := len(source)
 			length := make([]Int, count)
@@ -872,7 +908,7 @@ const ({{range $const := $.Const}}{{if $const.LineBlock | constNewLine}}
 {{end}})
 
 {{ range $func := $.Func }}{{if $func | funcSupported}}
-// See http://www.opengl.org/sdk/docs/man3/xhtml/{{$func.DocName}}.xml
+// See http://www.opengl.org/sdk/docs/man/html/{{$func.DocName}}.xhtml
 func (gl *GL) {{$func.GoName}}({{funcParams $func}}) {{if $func.GoType}}{{repeat "*" $func.Addr}}{{$func.GoType}} {{end}}{ {{/*
 */}}	{{funcCallPreamble $func}} {{/*
 */}}	{{range $param := $func.Param}} {{/*
