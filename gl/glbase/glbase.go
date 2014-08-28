@@ -20,4 +20,10 @@ type (
 	Bitfield uint32
 	Enum     uint32
 	Sync     uintptr
+
+	Uniform int32
+	Texture uint32
+	Program uint32
+	Shader  uint32
+	Buffer  uint32
 )

@@ -705,39 +705,53 @@ var funcTweaks = map[string]funcTweak{
 }
 
 func funcParams(f Func) string {
-	tweaks := funcTweaks[f.GoName]
+	type paramItem struct {
+		GoName string
+		GoType string
+	}
+	var tweaks = funcTweaks[f.GoName]
+	var list []paramItem
 	var buf bytes.Buffer
-	for i, param := range f.Param {
+	for _, param := range f.Param {
 		tweak := tweaks.params[param.GoName]
 		if tweak.remove {
 			continue
 		}
+		var item paramItem
+		if tweak.rename != "" {
+			item.GoName = tweak.rename
+		} else {
+			item.GoName = param.GoName
+		}
+		if tweak.retype != "" {
+			item.GoType = tweak.retype
+		} else if param.Type == "GLvoid" && param.Addr > 0 {
+			item.GoType = "interface{}"
+		} else {
+			buf.Truncate(0)
+			for j := 0; j < param.Addr; j++ {
+				buf.WriteString("[]")
+			}
+			if param.Array > 0 {
+				buf.WriteByte('[')
+				buf.WriteString(strconv.Itoa(param.Array))
+				buf.WriteByte(']')
+			}
+			buf.WriteString(param.GoType)
+			item.GoType = buf.String()
+		}
+		list = append(list, item)
+	}
+	buf.Truncate(0)
+	for i, item := range list {
 		if i > 0 {
 			buf.WriteString(", ")
 		}
-		if tweak.rename != "" {
-			buf.WriteString(tweak.rename)
-		} else {
-			buf.WriteString(param.GoName)
+		buf.WriteString(item.GoName)
+		if i == len(list)-1 || item.GoType != list[i+1].GoType {
+			buf.WriteByte(' ')
+			buf.WriteString(item.GoType)
 		}
-		buf.WriteByte(' ')
-		if tweak.retype != "" {
-			buf.WriteString(tweak.retype)
-			continue
-		}
-		if param.Type == "GLvoid" && param.Addr > 0 {
-			buf.WriteString("interface{}")
-			continue
-		}
-		for j := 0; j < param.Addr; j++ {
-			buf.WriteString("[]")
-		}
-		if param.Array > 0 {
-			buf.WriteByte('[')
-			buf.WriteString(strconv.Itoa(param.Array))
-			buf.WriteByte(']')
-		}
-		buf.WriteString(param.GoType)
 	}
 	return buf.String()
 }
