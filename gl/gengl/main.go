@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/xml"
 	"flag"
@@ -10,6 +11,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"text/template"
@@ -660,48 +662,56 @@ func constNewLine(lineBlock int) bool {
 	return true
 }
 
-type funcTweak struct {
-	params paramTweaks
-	result string
-	before string
-	after  string
-}
+var funcTweaks = make(map[string]funcTweak)
 
-type paramTweak struct {
-	rename string
-	retype string
-	remove bool
-}
-
-type paramTweaks map[string]paramTweak
-
-var funcTweaks = map[string]funcTweak{
-	"ShaderSource": {
-		params: paramTweaks{
-			"glstring": {rename: "source", retype: "...string"},
-			"length":   {remove: true},
-			"count":    {remove: true},
-		},
-		before: `
-			count := len(source)
-			length := make([]int32, count)
-			glstring := make([]unsafe.Pointer, count)
-			for i, src := range source {
-				length[i] = int32(len(src))
-				if len(src) > 0 {
-					glstring[i] = *(*unsafe.Pointer)(unsafe.Pointer(&src))
-				} else {
-					glstring[i] = unsafe.Pointer(uintptr(0))
-				}
+func init() {
+	var re = regexp.MustCompile(`\bcopy:([a-zA-Z0-9]+)\b`)
+	for _, tweak := range funcTweakList {
+		funcTweaks[tweak.name] = tweak
+	}
+	for _, tweak := range funcTweakList {
+		if tweak.copy != "" {
+			doc := tweak.doc
+			tweak := funcTweaks[tweak.copy]
+			if doc != "" {
+				tweak.doc = doc
 			}
-		`,
-	},
-	"CreateShader": {
-		result: "glbase.Shader",
-	},
-	"CreateProgram": {
-		result: "glbase.Program",
-	},
+		}
+		tweak.doc = re.ReplaceAllStringFunc(tweak.doc, func(match string) string {
+			return funcTweaks[match[5:]].doc
+		})
+		funcTweaks[tweak.name] = tweak
+	}
+}
+
+func funcDoc(header *Header, f Func) string {
+	var doc = funcTweaks[f.GoName].doc
+	var buf bytes.Buffer
+	if doc != "" {
+		var scanner = bufio.NewScanner(bytes.NewBufferString(doc))
+		var started bool
+		var prefix string
+		for scanner.Scan() {
+			line := scanner.Text()
+			if !started {
+				if line == "" {
+					continue
+				}
+				started = true
+				trimmed := strings.TrimLeft(line, "\t ")
+				prefix = line[:len(line)-len(trimmed)]
+				line = f.GoName + " " + trimmed
+			} else {
+				line = strings.TrimPrefix(line, prefix)
+			}
+			buf.WriteString("// ")
+			buf.WriteString(line)
+			buf.WriteByte('\n')
+		}
+	}
+	var manNum = 2
+	buf.WriteString(fmt.Sprintf("// https://www.opengl.org/sdk/docs/man%d/xhtml/%s.xml", manNum, f.Name))
+	return buf.String()
 }
 
 func funcParams(f Func) string {
@@ -830,7 +840,7 @@ func funcCCallParams(f Func) string {
 	return buf.String()
 }
 
-func paramLen(f Func, param Param) string {
+func funcParamLen(f Func, param Param) string {
 	if param.Addr == 0 || len(f.Name) < 3 || f.Name[len(f.Name)-1] != 'v' {
 		return ""
 	}
@@ -873,7 +883,8 @@ var funcs = template.FuncMap{
 	"funcCParams":     funcCParams,
 	"funcCCallParams": funcCCallParams,
 	"funcSupported":   funcSupported,
-	"paramLen":        paramLen,
+	"funcDoc":         funcDoc,
+	"funcParamLen":    funcParamLen,
 	"repeat":          strings.Repeat,
 	"tolower":         strings.ToLower,
 	"goTypeName":      goTypeName,
@@ -938,11 +949,11 @@ const ({{range $const := $.Const}}{{if $const.LineBlock | constNewLine}}
 {{end}})
 
 {{ range $func := $.Func }}{{if $func | funcSupported}}
-// See http://www.opengl.org/sdk/docs/man/html/{{$func.DocName}}.xhtml
+{{funcDoc $ $func}}
 func (gl *GL) {{$func.GoName}}({{funcParams $func}}) {{if $func.GoType}}{{repeat "*" $func.Addr}}{{$func.GoType}} {{end}}{ {{/*
 */}}	{{funcBefore $func}} {{/*
 */}}	{{range $param := $func.Param}} {{/*
-*/}}		{{with $plen := paramLen $func $param}} {{/*
+*/}}		{{with $plen := funcParamLen $func $param}} {{/*
 */}}			if len({{$param.GoName}}) != {{$plen}} {
 				panic("parameter {{$param.GoName}} has incorrect length")
 			}
