@@ -1,4 +1,4 @@
-package gl
+package glbase
 
 // A Context represents an OpenGL context that may be rendered on by the
 // version-specific APIs under this package.
@@ -14,3 +14,10 @@ type Context struct {
 type Contexter interface {
 	GLContext() *Context
 }
+
+type (
+	Boolean  uint8
+	Bitfield uint32
+	Enum     uint32
+	Sync     uintptr
+)

@@ -14,7 +14,6 @@ import (
 	"strings"
 	"text/template"
 
-	"gopkg.in/xmlpath.v2"
 )
 
 type Header struct {
@@ -27,7 +26,6 @@ type Header struct {
 
 	GLVersionName  string
 	GLVersionLabel string
-	GoGLTypes      map[string]bool
 }
 
 type Const struct {
@@ -258,20 +256,6 @@ func run(qtdir, outdir string) error {
 		}
 	}
 	return nil
-}
-
-func parseRegistry() (*xmlpath.Node, error) {
-	glxml, err := os.Open("gl.xml")
-	if err != nil {
-		return nil, fmt.Errorf("cannot open gl.xml file: %v", err)
-	}
-	defer glxml.Close()
-
-	root, err := xmlpath.Parse(glxml)
-	if err != nil {
-		return nil, fmt.Errorf("cannot parse gl.xml file: %v", err)
-	}
-	return root, nil
 }
 
 type glRegistry struct {
@@ -538,7 +522,7 @@ func goTypeName(ctypeName string) string {
 	case "GLuint64":
 		return "uint64"
 	case "GLintptr", "GLsizeiptr":
-		return "intptr"
+		return "int"
 	case "GLuintptr":
 		return "uintptr"
 	case "GLfloat":
@@ -549,19 +533,11 @@ func goTypeName(ctypeName string) string {
 	if !strings.HasPrefix(ctypeName, "GL") || len(ctypeName) < 3 {
 		panic("unexpected C type name: " + ctypeName)
 	}
-	return string(ctypeName[2]-('a'-'A')) + ctypeName[3:]
-}
-
-var enumsPath = xmlpath.MustCompile("/registry/enums/enum")
-
-func isExported(s string) bool {
-	return s != "" && s[0] >= 'A' && s[0] <= 'Z'
+	return "glbase." + string(ctypeName[2]-('a'-'A')) + ctypeName[3:]
 }
 
 func prepareHeader(header *Header) error {
 	funcNameDocCount := make(map[string]int)
-
-	header.GoGLTypes = make(map[string]bool)
 
 	for fi, f := range header.Func {
 		docPrefix := funcNameDocPrefix(f.Name)
@@ -579,9 +555,6 @@ func prepareHeader(header *Header) error {
 		}
 		if f.Type != "void" {
 			f.GoType = goTypeName(f.Type)
-		}
-		if isExported(f.GoType) {
-			header.GoGLTypes[f.Type] = true
 		}
 
 		for pi, p := range f.Param {
@@ -605,16 +578,11 @@ func prepareHeader(header *Header) error {
 				p.Type = p.Type[8:]
 			}
 			p.GoType = goTypeName(p.Type)
-			if isExported(p.GoType) {
-				header.GoGLTypes[p.Type] = true
-			}
+
 			f.Param[pi] = p
 		}
 		header.Func[fi] = f
 	}
-
-	delete(header.GoGLTypes, "void")
-	delete(header.GoGLTypes, "GLvoid")
 
 	for fi, f := range header.Func {
 		prefix := funcNameDocPrefix(f.Name)
@@ -682,15 +650,15 @@ type funcTweak struct {
 
 var funcTweaks = map[string]funcTweak{
 	"glShaderSource": {
-		params: "shader Uint, source [][]byte",
+		params: "shader uint32, source ...string",
 		preamble: `
 			count := len(source)
-			length := make([]Int, count)
+			length := make([]int32, count)
 			glstring := make([]unsafe.Pointer, count)
-			for i, buf := range source {
-				length[i] = Int(len(buf))
-				if len(buf) > 0 {
-					glstring[i] = unsafe.Pointer(&buf[0])
+			for i, src := range source {
+				length[i] = int32(len(src))
+				if len(src) > 0 {
+					glstring[i] = *(*unsafe.Pointer)(unsafe.Pointer(&src))
 				} else {
 					glstring[i] = unsafe.Pointer(uintptr(0))
 				}
@@ -876,17 +844,13 @@ import (
 	"reflect"
 	"unsafe"
 
-	"gopkg.in/qml.v1/gl"
+	"gopkg.in/qml.v1/gl/glbase"
 )
-
-type (
-{{range $gltype, $foo := $.GoGLTypes}}{{goTypeName $gltype}} C.{{$gltype}}
-{{end}})
 
 // API returns a value that offers methods matching the OpenGL version {{$.GLVersionName}} API.
 //
 // The returned API must not be used after the provided OpenGL context becomes invalid.
-func API(context gl.Contexter) *GL {
+func API(context glbase.Contexter) *GL {
 	gl := &GL{}
 	gl.funcs = C.gl{{$.GLVersionLabel}}_funcs()
 	if gl.funcs == nil {

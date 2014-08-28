@@ -9,7 +9,7 @@ import "C"
 import (
 	"errors"
 	"fmt"
-	"gopkg.in/qml.v1/gl"
+	"gopkg.in/qml.v1/gl/glbase"
 	"image"
 	"image/color"
 	"io"
@@ -174,7 +174,7 @@ func (e *Engine) Context() *Context {
 type Painter struct {
 	engine *Engine
 	obj    Object
-	glctxt gl.Context
+	glctxt glbase.Context
 }
 
 // Object returns the underlying object being painted.
@@ -183,7 +183,7 @@ func (p *Painter) Object() Object {
 }
 
 // GLContext returns the OpenGL context for this painter.
-func (p *Painter) GLContext() *gl.Context {
+func (p *Painter) GLContext() *glbase.Context {
 	return &p.glctxt
 }
 
