@@ -122,7 +122,7 @@ Then, force brew to "link" qt5 (this makes it available under /usr/local):
 
 And finally, fetch and install go-qml:
 
-    $ go get gopkg.in/qml.v0
+    $ go get gopkg.in/qml.v1
 
 
 Requirements on Windows
