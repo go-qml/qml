@@ -20,6 +20,8 @@ type (
 	Bitfield uint32
 	Enum     uint32
 	Sync     uintptr
+	Clampf   float32
+	Clampd   float64
 
 	Uniform int32
 	Texture uint32
