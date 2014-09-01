@@ -38,9 +38,7 @@ type GL struct {
 }
 
 const (
-	FALSE = 0
-	TRUE  = 1
-	NONE  = 0
+	NONE = 0
 
 	BYTE           = 0x1400
 	UNSIGNED_BYTE  = 0x1401
@@ -1229,9 +1227,9 @@ func (gl *GL) DepthRange(nearVal, farVal float64) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsEnabled.xml
-func (gl *GL) IsEnabled(cap glbase.Enum) glbase.Boolean {
+func (gl *GL) IsEnabled(cap glbase.Enum) bool {
 	result := C.gl3_3compat_glIsEnabled(gl.funcs, C.GLenum(cap))
-	return glbase.Boolean(result)
+	return *(*bool)(unsafe.Pointer(&result))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetTexLevelParameteriv.xml
@@ -1285,7 +1283,7 @@ func (gl *GL) GetDoublev(pname glbase.Enum, params []float64) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetBooleanv.xml
-func (gl *GL) GetBooleanv(pname glbase.Enum, params []glbase.Boolean) {
+func (gl *GL) GetBooleanv(pname glbase.Enum, params []bool) {
 	C.gl3_3compat_glGetBooleanv(gl.funcs, C.GLenum(pname), (*C.GLboolean)(unsafe.Pointer(&params[0])))
 }
 
@@ -1359,13 +1357,13 @@ func (gl *GL) Disable(cap glbase.Enum) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDepthMask.xml
-func (gl *GL) DepthMask(flag glbase.Boolean) {
-	C.gl3_3compat_glDepthMask(gl.funcs, C.GLboolean(flag))
+func (gl *GL) DepthMask(flag bool) {
+	C.gl3_3compat_glDepthMask(gl.funcs, *(*C.GLboolean)(unsafe.Pointer(&flag)))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glColorMask.xml
-func (gl *GL) ColorMask(red, green, blue, alpha glbase.Boolean) {
-	C.gl3_3compat_glColorMask(gl.funcs, C.GLboolean(red), C.GLboolean(green), C.GLboolean(blue), C.GLboolean(alpha))
+func (gl *GL) ColorMask(red, green, blue, alpha bool) {
+	C.gl3_3compat_glColorMask(gl.funcs, *(*C.GLboolean)(unsafe.Pointer(&red)), *(*C.GLboolean)(unsafe.Pointer(&green)), *(*C.GLboolean)(unsafe.Pointer(&blue)), *(*C.GLboolean)(unsafe.Pointer(&alpha)))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glStencilMask.xml
@@ -1482,9 +1480,9 @@ func (gl *GL) Indexub(c uint8) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsTexture.xml
-func (gl *GL) IsTexture(texture glbase.Texture) glbase.Boolean {
+func (gl *GL) IsTexture(texture glbase.Texture) bool {
 	result := C.gl3_3compat_glIsTexture(gl.funcs, C.GLuint(texture))
-	return glbase.Boolean(result)
+	return *(*bool)(unsafe.Pointer(&result))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenTextures.xml
@@ -1665,8 +1663,8 @@ func (gl *GL) CompressedTexImage3D(target glbase.Enum, level int32, internalform
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glSampleCoverage.xml
-func (gl *GL) SampleCoverage(value float32, invert glbase.Boolean) {
-	C.gl3_3compat_glSampleCoverage(gl.funcs, C.GLfloat(value), C.GLboolean(invert))
+func (gl *GL) SampleCoverage(value float32, invert bool) {
+	C.gl3_3compat_glSampleCoverage(gl.funcs, C.GLfloat(value), *(*C.GLboolean)(unsafe.Pointer(&invert)))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glActiveTexture.xml
@@ -1710,9 +1708,9 @@ func (gl *GL) GetBufferParameteriv(target, pname glbase.Enum, params []int32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUnmapBuffer.xml
-func (gl *GL) UnmapBuffer(target glbase.Enum) glbase.Boolean {
+func (gl *GL) UnmapBuffer(target glbase.Enum) bool {
 	result := C.gl3_3compat_glUnmapBuffer(gl.funcs, C.GLenum(target))
-	return glbase.Boolean(result)
+	return *(*bool)(unsafe.Pointer(&result))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetBufferSubData.xml
@@ -1743,9 +1741,9 @@ func (gl *GL) BufferData(target glbase.Enum, size int, data interface{}, usage g
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsBuffer.xml
-func (gl *GL) IsBuffer(buffer glbase.Buffer) glbase.Boolean {
+func (gl *GL) IsBuffer(buffer glbase.Buffer) bool {
 	result := C.gl3_3compat_glIsBuffer(gl.funcs, C.GLuint(buffer))
-	return glbase.Boolean(result)
+	return *(*bool)(unsafe.Pointer(&result))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenBuffers.xml
@@ -1789,9 +1787,9 @@ func (gl *GL) BeginQuery(target glbase.Enum, id uint32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsQuery.xml
-func (gl *GL) IsQuery(id uint32) glbase.Boolean {
+func (gl *GL) IsQuery(id uint32) bool {
 	result := C.gl3_3compat_glIsQuery(gl.funcs, C.GLuint(id))
-	return glbase.Boolean(result)
+	return *(*bool)(unsafe.Pointer(&result))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteQueries.xml
@@ -1805,12 +1803,12 @@ func (gl *GL) GenQueries(n int32, ids []uint32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribPointer.xml
-func (gl *GL) VertexAttribPointer(index uint32, size int32, gltype glbase.Enum, normalized glbase.Boolean, stride int32, pointer interface{}) {
+func (gl *GL) VertexAttribPointer(index uint32, size int32, gltype glbase.Enum, normalized bool, stride int32, pointer interface{}) {
 	pointer_v := reflect.ValueOf(pointer)
 	if pointer_v.Kind() != reflect.Slice {
 		panic("parameter pointer must be a slice")
 	}
-	C.gl3_3compat_glVertexAttribPointer(gl.funcs, C.GLuint(index), C.GLint(size), C.GLenum(gltype), C.GLboolean(normalized), C.GLsizei(stride), unsafe.Pointer(pointer_v.Index(0).Addr().Pointer()))
+	C.gl3_3compat_glVertexAttribPointer(gl.funcs, C.GLuint(index), C.GLint(size), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), C.GLsizei(stride), unsafe.Pointer(pointer_v.Index(0).Addr().Pointer()))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glValidateProgram.xml
@@ -1819,27 +1817,27 @@ func (gl *GL) ValidateProgram(program glbase.Program) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix4fv.xml
-func (gl *GL) UniformMatrix4fv(location glbase.Uniform, count int32, transpose glbase.Boolean, value []float32) {
+func (gl *GL) UniformMatrix4fv(location glbase.Uniform, count int32, transpose bool, value []float32) {
 	if len(value) != 4 {
 		panic("parameter value has incorrect length")
 	}
-	C.gl3_3compat_glUniformMatrix4fv(gl.funcs, C.GLint(location), C.GLsizei(count), C.GLboolean(transpose), (*C.GLfloat)(unsafe.Pointer(&value[0])))
+	C.gl3_3compat_glUniformMatrix4fv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLfloat)(unsafe.Pointer(&value[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix3fv.xml
-func (gl *GL) UniformMatrix3fv(location glbase.Uniform, count int32, transpose glbase.Boolean, value []float32) {
+func (gl *GL) UniformMatrix3fv(location glbase.Uniform, count int32, transpose bool, value []float32) {
 	if len(value) != 3 {
 		panic("parameter value has incorrect length")
 	}
-	C.gl3_3compat_glUniformMatrix3fv(gl.funcs, C.GLint(location), C.GLsizei(count), C.GLboolean(transpose), (*C.GLfloat)(unsafe.Pointer(&value[0])))
+	C.gl3_3compat_glUniformMatrix3fv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLfloat)(unsafe.Pointer(&value[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix2fv.xml
-func (gl *GL) UniformMatrix2fv(location glbase.Uniform, count int32, transpose glbase.Boolean, value []float32) {
+func (gl *GL) UniformMatrix2fv(location glbase.Uniform, count int32, transpose bool, value []float32) {
 	if len(value) != 2 {
 		panic("parameter value has incorrect length")
 	}
-	C.gl3_3compat_glUniformMatrix2fv(gl.funcs, C.GLint(location), C.GLsizei(count), C.GLboolean(transpose), (*C.GLfloat)(unsafe.Pointer(&value[0])))
+	C.gl3_3compat_glUniformMatrix2fv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLfloat)(unsafe.Pointer(&value[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniform4iv.xml
@@ -1967,15 +1965,15 @@ func (gl *GL) LinkProgram(program glbase.Program) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsShader.xml
-func (gl *GL) IsShader(shader glbase.Shader) glbase.Boolean {
+func (gl *GL) IsShader(shader glbase.Shader) bool {
 	result := C.gl3_3compat_glIsShader(gl.funcs, C.GLuint(shader))
-	return glbase.Boolean(result)
+	return *(*bool)(unsafe.Pointer(&result))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsProgram.xml
-func (gl *GL) IsProgram(program glbase.Program) glbase.Boolean {
+func (gl *GL) IsProgram(program glbase.Program) bool {
 	result := C.gl3_3compat_glIsProgram(gl.funcs, C.GLuint(program))
-	return glbase.Boolean(result)
+	return *(*bool)(unsafe.Pointer(&result))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetVertexAttribiv.xml
@@ -2133,57 +2131,57 @@ func (gl *GL) BlendEquationSeparate(modeRGB, modeAlpha glbase.Enum) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix4x3fv.xml
-func (gl *GL) UniformMatrix4x3fv(location glbase.Uniform, count int32, transpose glbase.Boolean, value []float32) {
+func (gl *GL) UniformMatrix4x3fv(location glbase.Uniform, count int32, transpose bool, value []float32) {
 	if len(value) != 3 {
 		panic("parameter value has incorrect length")
 	}
-	C.gl3_3compat_glUniformMatrix4x3fv(gl.funcs, C.GLint(location), C.GLsizei(count), C.GLboolean(transpose), (*C.GLfloat)(unsafe.Pointer(&value[0])))
+	C.gl3_3compat_glUniformMatrix4x3fv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLfloat)(unsafe.Pointer(&value[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix3x4fv.xml
-func (gl *GL) UniformMatrix3x4fv(location glbase.Uniform, count int32, transpose glbase.Boolean, value []float32) {
+func (gl *GL) UniformMatrix3x4fv(location glbase.Uniform, count int32, transpose bool, value []float32) {
 	if len(value) != 4 {
 		panic("parameter value has incorrect length")
 	}
-	C.gl3_3compat_glUniformMatrix3x4fv(gl.funcs, C.GLint(location), C.GLsizei(count), C.GLboolean(transpose), (*C.GLfloat)(unsafe.Pointer(&value[0])))
+	C.gl3_3compat_glUniformMatrix3x4fv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLfloat)(unsafe.Pointer(&value[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix4x2fv.xml
-func (gl *GL) UniformMatrix4x2fv(location glbase.Uniform, count int32, transpose glbase.Boolean, value []float32) {
+func (gl *GL) UniformMatrix4x2fv(location glbase.Uniform, count int32, transpose bool, value []float32) {
 	if len(value) != 2 {
 		panic("parameter value has incorrect length")
 	}
-	C.gl3_3compat_glUniformMatrix4x2fv(gl.funcs, C.GLint(location), C.GLsizei(count), C.GLboolean(transpose), (*C.GLfloat)(unsafe.Pointer(&value[0])))
+	C.gl3_3compat_glUniformMatrix4x2fv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLfloat)(unsafe.Pointer(&value[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix2x4fv.xml
-func (gl *GL) UniformMatrix2x4fv(location glbase.Uniform, count int32, transpose glbase.Boolean, value []float32) {
+func (gl *GL) UniformMatrix2x4fv(location glbase.Uniform, count int32, transpose bool, value []float32) {
 	if len(value) != 4 {
 		panic("parameter value has incorrect length")
 	}
-	C.gl3_3compat_glUniformMatrix2x4fv(gl.funcs, C.GLint(location), C.GLsizei(count), C.GLboolean(transpose), (*C.GLfloat)(unsafe.Pointer(&value[0])))
+	C.gl3_3compat_glUniformMatrix2x4fv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLfloat)(unsafe.Pointer(&value[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix3x2fv.xml
-func (gl *GL) UniformMatrix3x2fv(location glbase.Uniform, count int32, transpose glbase.Boolean, value []float32) {
+func (gl *GL) UniformMatrix3x2fv(location glbase.Uniform, count int32, transpose bool, value []float32) {
 	if len(value) != 2 {
 		panic("parameter value has incorrect length")
 	}
-	C.gl3_3compat_glUniformMatrix3x2fv(gl.funcs, C.GLint(location), C.GLsizei(count), C.GLboolean(transpose), (*C.GLfloat)(unsafe.Pointer(&value[0])))
+	C.gl3_3compat_glUniformMatrix3x2fv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLfloat)(unsafe.Pointer(&value[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix2x3fv.xml
-func (gl *GL) UniformMatrix2x3fv(location glbase.Uniform, count int32, transpose glbase.Boolean, value []float32) {
+func (gl *GL) UniformMatrix2x3fv(location glbase.Uniform, count int32, transpose bool, value []float32) {
 	if len(value) != 3 {
 		panic("parameter value has incorrect length")
 	}
-	C.gl3_3compat_glUniformMatrix2x3fv(gl.funcs, C.GLint(location), C.GLsizei(count), C.GLboolean(transpose), (*C.GLfloat)(unsafe.Pointer(&value[0])))
+	C.gl3_3compat_glUniformMatrix2x3fv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLfloat)(unsafe.Pointer(&value[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsVertexArray.xml
-func (gl *GL) IsVertexArray(array uint32) glbase.Boolean {
+func (gl *GL) IsVertexArray(array uint32) bool {
 	result := C.gl3_3compat_glIsVertexArray(gl.funcs, C.GLuint(array))
-	return glbase.Boolean(result)
+	return *(*bool)(unsafe.Pointer(&result))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenVertexArrays.xml
@@ -2273,9 +2271,9 @@ func (gl *GL) BindFramebuffer(target glbase.Enum, framebuffer uint32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsFramebuffer.xml
-func (gl *GL) IsFramebuffer(framebuffer uint32) glbase.Boolean {
+func (gl *GL) IsFramebuffer(framebuffer uint32) bool {
 	result := C.gl3_3compat_glIsFramebuffer(gl.funcs, C.GLuint(framebuffer))
-	return glbase.Boolean(result)
+	return *(*bool)(unsafe.Pointer(&result))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetRenderbufferParameteriv.xml
@@ -2304,9 +2302,9 @@ func (gl *GL) BindRenderbuffer(target glbase.Enum, renderbuffer uint32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsRenderbuffer.xml
-func (gl *GL) IsRenderbuffer(renderbuffer uint32) glbase.Boolean {
+func (gl *GL) IsRenderbuffer(renderbuffer uint32) bool {
 	result := C.gl3_3compat_glIsRenderbuffer(gl.funcs, C.GLuint(renderbuffer))
-	return glbase.Boolean(result)
+	return *(*bool)(unsafe.Pointer(&result))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glClearBufferfi.xml
@@ -2465,9 +2463,9 @@ func (gl *GL) BeginTransformFeedback(primitiveMode glbase.Enum) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsEnabledi.xml
-func (gl *GL) IsEnabledi(target glbase.Enum, index uint32) glbase.Boolean {
+func (gl *GL) IsEnabledi(target glbase.Enum, index uint32) bool {
 	result := C.gl3_3compat_glIsEnabledi(gl.funcs, C.GLenum(target), C.GLuint(index))
-	return glbase.Boolean(result)
+	return *(*bool)(unsafe.Pointer(&result))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDisablei.xml
@@ -2486,13 +2484,13 @@ func (gl *GL) GetIntegeri_v(target glbase.Enum, index uint32, data []int32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetBooleani_v.xml
-func (gl *GL) GetBooleani_v(target glbase.Enum, index uint32, data []glbase.Boolean) {
+func (gl *GL) GetBooleani_v(target glbase.Enum, index uint32, data []bool) {
 	C.gl3_3compat_glGetBooleani_v(gl.funcs, C.GLenum(target), C.GLuint(index), (*C.GLboolean)(unsafe.Pointer(&data[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glColorMaski.xml
-func (gl *GL) ColorMaski(index uint32, r, g, b, a glbase.Boolean) {
-	C.gl3_3compat_glColorMaski(gl.funcs, C.GLuint(index), C.GLboolean(r), C.GLboolean(g), C.GLboolean(b), C.GLboolean(a))
+func (gl *GL) ColorMaski(index uint32, r, g, b, a bool) {
+	C.gl3_3compat_glColorMaski(gl.funcs, C.GLuint(index), *(*C.GLboolean)(unsafe.Pointer(&r)), *(*C.GLboolean)(unsafe.Pointer(&g)), *(*C.GLboolean)(unsafe.Pointer(&b)), *(*C.GLboolean)(unsafe.Pointer(&a)))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCopyBufferSubData.xml
@@ -2566,13 +2564,13 @@ func (gl *GL) GetMultisamplefv(pname glbase.Enum, index uint32, val []float32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glTexImage3DMultisample.xml
-func (gl *GL) TexImage3DMultisample(target glbase.Enum, samples, internalformat, width, height, depth int32, fixedsamplelocations glbase.Boolean) {
-	C.gl3_3compat_glTexImage3DMultisample(gl.funcs, C.GLenum(target), C.GLsizei(samples), C.GLint(internalformat), C.GLsizei(width), C.GLsizei(height), C.GLsizei(depth), C.GLboolean(fixedsamplelocations))
+func (gl *GL) TexImage3DMultisample(target glbase.Enum, samples, internalformat, width, height, depth int32, fixedsamplelocations bool) {
+	C.gl3_3compat_glTexImage3DMultisample(gl.funcs, C.GLenum(target), C.GLsizei(samples), C.GLint(internalformat), C.GLsizei(width), C.GLsizei(height), C.GLsizei(depth), *(*C.GLboolean)(unsafe.Pointer(&fixedsamplelocations)))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glTexImage2DMultisample.xml
-func (gl *GL) TexImage2DMultisample(target glbase.Enum, samples, internalformat, width, height int32, fixedsamplelocations glbase.Boolean) {
-	C.gl3_3compat_glTexImage2DMultisample(gl.funcs, C.GLenum(target), C.GLsizei(samples), C.GLint(internalformat), C.GLsizei(width), C.GLsizei(height), C.GLboolean(fixedsamplelocations))
+func (gl *GL) TexImage2DMultisample(target glbase.Enum, samples, internalformat, width, height int32, fixedsamplelocations bool) {
+	C.gl3_3compat_glTexImage2DMultisample(gl.funcs, C.GLenum(target), C.GLsizei(samples), C.GLint(internalformat), C.GLsizei(width), C.GLsizei(height), *(*C.GLboolean)(unsafe.Pointer(&fixedsamplelocations)))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetSynciv.xml
@@ -2602,9 +2600,9 @@ func (gl *GL) DeleteSync(sync glbase.Sync) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsSync.xml
-func (gl *GL) IsSync(sync glbase.Sync) glbase.Boolean {
+func (gl *GL) IsSync(sync glbase.Sync) bool {
 	result := C.gl3_3compat_glIsSync(gl.funcs, C.GLsync(sync))
-	return glbase.Boolean(result)
+	return *(*bool)(unsafe.Pointer(&result))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glFenceSync.xml
@@ -2661,43 +2659,43 @@ func (gl *GL) GetInteger64i_v(target glbase.Enum, index uint32, data []int64) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribP4uiv.xml
-func (gl *GL) VertexAttribP4uiv(index uint32, gltype glbase.Enum, normalized glbase.Boolean, value []uint32) {
-	C.gl3_3compat_glVertexAttribP4uiv(gl.funcs, C.GLuint(index), C.GLenum(gltype), C.GLboolean(normalized), (*C.GLuint)(unsafe.Pointer(&value[0])))
+func (gl *GL) VertexAttribP4uiv(index uint32, gltype glbase.Enum, normalized bool, value []uint32) {
+	C.gl3_3compat_glVertexAttribP4uiv(gl.funcs, C.GLuint(index), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), (*C.GLuint)(unsafe.Pointer(&value[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribP4ui.xml
-func (gl *GL) VertexAttribP4ui(index uint32, gltype glbase.Enum, normalized glbase.Boolean, value uint32) {
-	C.gl3_3compat_glVertexAttribP4ui(gl.funcs, C.GLuint(index), C.GLenum(gltype), C.GLboolean(normalized), C.GLuint(value))
+func (gl *GL) VertexAttribP4ui(index uint32, gltype glbase.Enum, normalized bool, value uint32) {
+	C.gl3_3compat_glVertexAttribP4ui(gl.funcs, C.GLuint(index), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), C.GLuint(value))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribP3uiv.xml
-func (gl *GL) VertexAttribP3uiv(index uint32, gltype glbase.Enum, normalized glbase.Boolean, value []uint32) {
-	C.gl3_3compat_glVertexAttribP3uiv(gl.funcs, C.GLuint(index), C.GLenum(gltype), C.GLboolean(normalized), (*C.GLuint)(unsafe.Pointer(&value[0])))
+func (gl *GL) VertexAttribP3uiv(index uint32, gltype glbase.Enum, normalized bool, value []uint32) {
+	C.gl3_3compat_glVertexAttribP3uiv(gl.funcs, C.GLuint(index), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), (*C.GLuint)(unsafe.Pointer(&value[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribP3ui.xml
-func (gl *GL) VertexAttribP3ui(index uint32, gltype glbase.Enum, normalized glbase.Boolean, value uint32) {
-	C.gl3_3compat_glVertexAttribP3ui(gl.funcs, C.GLuint(index), C.GLenum(gltype), C.GLboolean(normalized), C.GLuint(value))
+func (gl *GL) VertexAttribP3ui(index uint32, gltype glbase.Enum, normalized bool, value uint32) {
+	C.gl3_3compat_glVertexAttribP3ui(gl.funcs, C.GLuint(index), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), C.GLuint(value))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribP2uiv.xml
-func (gl *GL) VertexAttribP2uiv(index uint32, gltype glbase.Enum, normalized glbase.Boolean, value []uint32) {
-	C.gl3_3compat_glVertexAttribP2uiv(gl.funcs, C.GLuint(index), C.GLenum(gltype), C.GLboolean(normalized), (*C.GLuint)(unsafe.Pointer(&value[0])))
+func (gl *GL) VertexAttribP2uiv(index uint32, gltype glbase.Enum, normalized bool, value []uint32) {
+	C.gl3_3compat_glVertexAttribP2uiv(gl.funcs, C.GLuint(index), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), (*C.GLuint)(unsafe.Pointer(&value[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribP2ui.xml
-func (gl *GL) VertexAttribP2ui(index uint32, gltype glbase.Enum, normalized glbase.Boolean, value uint32) {
-	C.gl3_3compat_glVertexAttribP2ui(gl.funcs, C.GLuint(index), C.GLenum(gltype), C.GLboolean(normalized), C.GLuint(value))
+func (gl *GL) VertexAttribP2ui(index uint32, gltype glbase.Enum, normalized bool, value uint32) {
+	C.gl3_3compat_glVertexAttribP2ui(gl.funcs, C.GLuint(index), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), C.GLuint(value))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribP1uiv.xml
-func (gl *GL) VertexAttribP1uiv(index uint32, gltype glbase.Enum, normalized glbase.Boolean, value []uint32) {
-	C.gl3_3compat_glVertexAttribP1uiv(gl.funcs, C.GLuint(index), C.GLenum(gltype), C.GLboolean(normalized), (*C.GLuint)(unsafe.Pointer(&value[0])))
+func (gl *GL) VertexAttribP1uiv(index uint32, gltype glbase.Enum, normalized bool, value []uint32) {
+	C.gl3_3compat_glVertexAttribP1uiv(gl.funcs, C.GLuint(index), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), (*C.GLuint)(unsafe.Pointer(&value[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribP1ui.xml
-func (gl *GL) VertexAttribP1ui(index uint32, gltype glbase.Enum, normalized glbase.Boolean, value uint32) {
-	C.gl3_3compat_glVertexAttribP1ui(gl.funcs, C.GLuint(index), C.GLenum(gltype), C.GLboolean(normalized), C.GLuint(value))
+func (gl *GL) VertexAttribP1ui(index uint32, gltype glbase.Enum, normalized bool, value uint32) {
+	C.gl3_3compat_glVertexAttribP1ui(gl.funcs, C.GLuint(index), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), C.GLuint(value))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glSecondaryColorP3uiv.xml
@@ -2921,9 +2919,9 @@ func (gl *GL) BindSampler(unit, sampler uint32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsSampler.xml
-func (gl *GL) IsSampler(sampler uint32) glbase.Boolean {
+func (gl *GL) IsSampler(sampler uint32) bool {
 	result := C.gl3_3compat_glIsSampler(gl.funcs, C.GLuint(sampler))
-	return glbase.Boolean(result)
+	return *(*bool)(unsafe.Pointer(&result))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteSamplers.xml
@@ -3080,9 +3078,9 @@ func (gl *GL) Frustum(left, right, bottom, top, zNear, zFar float64) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsList.xml
-func (gl *GL) IsList(list uint32) glbase.Boolean {
+func (gl *GL) IsList(list uint32) bool {
 	result := C.gl3_3compat_glIsList(gl.funcs, C.GLuint(list))
-	return glbase.Boolean(result)
+	return *(*bool)(unsafe.Pointer(&result))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetTexGeniv.xml
@@ -4282,13 +4280,13 @@ func (gl *GL) End() {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glEdgeFlagv.xml
-func (gl *GL) EdgeFlagv(flag []glbase.Boolean) {
+func (gl *GL) EdgeFlagv(flag []bool) {
 	C.gl3_3compat_glEdgeFlagv(gl.funcs, (*C.GLboolean)(unsafe.Pointer(&flag[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glEdgeFlag.xml
-func (gl *GL) EdgeFlag(flag glbase.Boolean) {
-	C.gl3_3compat_glEdgeFlag(gl.funcs, C.GLboolean(flag))
+func (gl *GL) EdgeFlag(flag bool) {
+	C.gl3_3compat_glEdgeFlag(gl.funcs, *(*C.GLboolean)(unsafe.Pointer(&flag)))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glColor4usv.xml
@@ -4541,9 +4539,9 @@ func (gl *GL) PrioritizeTextures(n int32, textures []uint32, priorities []float3
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glAreTexturesResident.xml
-func (gl *GL) AreTexturesResident(n int32, textures []uint32, residences []glbase.Boolean) glbase.Boolean {
+func (gl *GL) AreTexturesResident(n int32, textures []uint32, residences []bool) bool {
 	result := C.gl3_3compat_glAreTexturesResident(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])), (*C.GLboolean)(unsafe.Pointer(&residences[0])))
-	return glbase.Boolean(result)
+	return *(*bool)(unsafe.Pointer(&result))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexPointer.xml
@@ -4635,13 +4633,13 @@ func (gl *GL) ResetHistogram(target glbase.Enum) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glMinmax.xml
-func (gl *GL) Minmax(target, internalformat glbase.Enum, sink glbase.Boolean) {
-	C.gl3_3compat_glMinmax(gl.funcs, C.GLenum(target), C.GLenum(internalformat), C.GLboolean(sink))
+func (gl *GL) Minmax(target, internalformat glbase.Enum, sink bool) {
+	C.gl3_3compat_glMinmax(gl.funcs, C.GLenum(target), C.GLenum(internalformat), *(*C.GLboolean)(unsafe.Pointer(&sink)))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glHistogram.xml
-func (gl *GL) Histogram(target glbase.Enum, width int32, internalformat glbase.Enum, sink glbase.Boolean) {
-	C.gl3_3compat_glHistogram(gl.funcs, C.GLenum(target), C.GLsizei(width), C.GLenum(internalformat), C.GLboolean(sink))
+func (gl *GL) Histogram(target glbase.Enum, width int32, internalformat glbase.Enum, sink bool) {
+	C.gl3_3compat_glHistogram(gl.funcs, C.GLenum(target), C.GLsizei(width), C.GLenum(internalformat), *(*C.GLboolean)(unsafe.Pointer(&sink)))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetMinmaxParameteriv.xml
@@ -4655,12 +4653,12 @@ func (gl *GL) GetMinmaxParameterfv(target, pname glbase.Enum, params []float32) 
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetMinmax.xml
-func (gl *GL) GetMinmax(target glbase.Enum, reset glbase.Boolean, format, gltype glbase.Enum, values interface{}) {
+func (gl *GL) GetMinmax(target glbase.Enum, reset bool, format, gltype glbase.Enum, values interface{}) {
 	values_v := reflect.ValueOf(values)
 	if values_v.Kind() != reflect.Slice {
 		panic("parameter values must be a slice")
 	}
-	C.gl3_3compat_glGetMinmax(gl.funcs, C.GLenum(target), C.GLboolean(reset), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(values_v.Index(0).Addr().Pointer()))
+	C.gl3_3compat_glGetMinmax(gl.funcs, C.GLenum(target), *(*C.GLboolean)(unsafe.Pointer(&reset)), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(values_v.Index(0).Addr().Pointer()))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetHistogramParameteriv.xml
@@ -4674,12 +4672,12 @@ func (gl *GL) GetHistogramParameterfv(target, pname glbase.Enum, params []float3
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetHistogram.xml
-func (gl *GL) GetHistogram(target glbase.Enum, reset glbase.Boolean, format, gltype glbase.Enum, values interface{}) {
+func (gl *GL) GetHistogram(target glbase.Enum, reset bool, format, gltype glbase.Enum, values interface{}) {
 	values_v := reflect.ValueOf(values)
 	if values_v.Kind() != reflect.Slice {
 		panic("parameter values must be a slice")
 	}
-	C.gl3_3compat_glGetHistogram(gl.funcs, C.GLenum(target), C.GLboolean(reset), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(values_v.Index(0).Addr().Pointer()))
+	C.gl3_3compat_glGetHistogram(gl.funcs, C.GLenum(target), *(*C.GLboolean)(unsafe.Pointer(&reset)), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(values_v.Index(0).Addr().Pointer()))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glSeparableFilter2D.xml

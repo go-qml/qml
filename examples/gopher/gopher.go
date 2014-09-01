@@ -70,7 +70,7 @@ func (r *Gopher) Paint(p *qml.Painter) {
 
 	gl.ShadeModel(GL.SMOOTH)
 	gl.Enable(GL.DEPTH_TEST)
-	gl.DepthMask(GL.TRUE)
+	gl.DepthMask(true)
 	gl.Enable(GL.NORMALIZE)
 
 	gl.Clear(GL.DEPTH_BUFFER_BIT)

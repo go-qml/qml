@@ -38,9 +38,7 @@ type GL struct {
 }
 
 const (
-	FALSE = 0
-	TRUE  = 1
-	NONE  = 0
+	NONE = 0
 
 	BYTE           = 0x1400
 	UNSIGNED_BYTE  = 0x1401
@@ -658,9 +656,9 @@ func (gl *GL) DepthRange(nearVal, farVal float64) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsEnabled.xml
-func (gl *GL) IsEnabled(cap glbase.Enum) glbase.Boolean {
+func (gl *GL) IsEnabled(cap glbase.Enum) bool {
 	result := C.gl1_1_glIsEnabled(gl.funcs, C.GLenum(cap))
-	return glbase.Boolean(result)
+	return *(*bool)(unsafe.Pointer(&result))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetTexLevelParameteriv.xml
@@ -714,7 +712,7 @@ func (gl *GL) GetDoublev(pname glbase.Enum, params []float64) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetBooleanv.xml
-func (gl *GL) GetBooleanv(pname glbase.Enum, params []glbase.Boolean) {
+func (gl *GL) GetBooleanv(pname glbase.Enum, params []bool) {
 	C.gl1_1_glGetBooleanv(gl.funcs, C.GLenum(pname), (*C.GLboolean)(unsafe.Pointer(&params[0])))
 }
 
@@ -788,13 +786,13 @@ func (gl *GL) Disable(cap glbase.Enum) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDepthMask.xml
-func (gl *GL) DepthMask(flag glbase.Boolean) {
-	C.gl1_1_glDepthMask(gl.funcs, C.GLboolean(flag))
+func (gl *GL) DepthMask(flag bool) {
+	C.gl1_1_glDepthMask(gl.funcs, *(*C.GLboolean)(unsafe.Pointer(&flag)))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glColorMask.xml
-func (gl *GL) ColorMask(red, green, blue, alpha glbase.Boolean) {
-	C.gl1_1_glColorMask(gl.funcs, C.GLboolean(red), C.GLboolean(green), C.GLboolean(blue), C.GLboolean(alpha))
+func (gl *GL) ColorMask(red, green, blue, alpha bool) {
+	C.gl1_1_glColorMask(gl.funcs, *(*C.GLboolean)(unsafe.Pointer(&red)), *(*C.GLboolean)(unsafe.Pointer(&green)), *(*C.GLboolean)(unsafe.Pointer(&blue)), *(*C.GLboolean)(unsafe.Pointer(&alpha)))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glStencilMask.xml
@@ -911,9 +909,9 @@ func (gl *GL) Indexub(c uint8) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsTexture.xml
-func (gl *GL) IsTexture(texture glbase.Texture) glbase.Boolean {
+func (gl *GL) IsTexture(texture glbase.Texture) bool {
 	result := C.gl1_1_glIsTexture(gl.funcs, C.GLuint(texture))
-	return glbase.Boolean(result)
+	return *(*bool)(unsafe.Pointer(&result))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenTextures.xml
@@ -1116,9 +1114,9 @@ func (gl *GL) Frustum(left, right, bottom, top, zNear, zFar float64) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsList.xml
-func (gl *GL) IsList(list uint32) glbase.Boolean {
+func (gl *GL) IsList(list uint32) bool {
 	result := C.gl1_1_glIsList(gl.funcs, C.GLuint(list))
-	return glbase.Boolean(result)
+	return *(*bool)(unsafe.Pointer(&result))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetTexGeniv.xml
@@ -2318,13 +2316,13 @@ func (gl *GL) End() {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glEdgeFlagv.xml
-func (gl *GL) EdgeFlagv(flag []glbase.Boolean) {
+func (gl *GL) EdgeFlagv(flag []bool) {
 	C.gl1_1_glEdgeFlagv(gl.funcs, (*C.GLboolean)(unsafe.Pointer(&flag[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glEdgeFlag.xml
-func (gl *GL) EdgeFlag(flag glbase.Boolean) {
-	C.gl1_1_glEdgeFlag(gl.funcs, C.GLboolean(flag))
+func (gl *GL) EdgeFlag(flag bool) {
+	C.gl1_1_glEdgeFlag(gl.funcs, *(*C.GLboolean)(unsafe.Pointer(&flag)))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glColor4usv.xml
@@ -2577,9 +2575,9 @@ func (gl *GL) PrioritizeTextures(n int32, textures []uint32, priorities []float3
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glAreTexturesResident.xml
-func (gl *GL) AreTexturesResident(n int32, textures []uint32, residences []glbase.Boolean) glbase.Boolean {
+func (gl *GL) AreTexturesResident(n int32, textures []uint32, residences []bool) bool {
 	result := C.gl1_1_glAreTexturesResident(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])), (*C.GLboolean)(unsafe.Pointer(&residences[0])))
-	return glbase.Boolean(result)
+	return *(*bool)(unsafe.Pointer(&result))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexPointer.xml

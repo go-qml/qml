@@ -38,9 +38,7 @@ type GL struct {
 }
 
 const (
-	FALSE = 0
-	TRUE  = 1
-	NONE  = 0
+	NONE = 0
 
 	BYTE           = 0x1400
 	UNSIGNED_BYTE  = 0x1401
@@ -899,9 +897,9 @@ func (gl *GL) DepthRange(nearVal, farVal float64) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsEnabled.xml
-func (gl *GL) IsEnabled(cap glbase.Enum) glbase.Boolean {
+func (gl *GL) IsEnabled(cap glbase.Enum) bool {
 	result := C.gl1_5_glIsEnabled(gl.funcs, C.GLenum(cap))
-	return glbase.Boolean(result)
+	return *(*bool)(unsafe.Pointer(&result))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetTexLevelParameteriv.xml
@@ -955,7 +953,7 @@ func (gl *GL) GetDoublev(pname glbase.Enum, params []float64) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetBooleanv.xml
-func (gl *GL) GetBooleanv(pname glbase.Enum, params []glbase.Boolean) {
+func (gl *GL) GetBooleanv(pname glbase.Enum, params []bool) {
 	C.gl1_5_glGetBooleanv(gl.funcs, C.GLenum(pname), (*C.GLboolean)(unsafe.Pointer(&params[0])))
 }
 
@@ -1029,13 +1027,13 @@ func (gl *GL) Disable(cap glbase.Enum) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDepthMask.xml
-func (gl *GL) DepthMask(flag glbase.Boolean) {
-	C.gl1_5_glDepthMask(gl.funcs, C.GLboolean(flag))
+func (gl *GL) DepthMask(flag bool) {
+	C.gl1_5_glDepthMask(gl.funcs, *(*C.GLboolean)(unsafe.Pointer(&flag)))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glColorMask.xml
-func (gl *GL) ColorMask(red, green, blue, alpha glbase.Boolean) {
-	C.gl1_5_glColorMask(gl.funcs, C.GLboolean(red), C.GLboolean(green), C.GLboolean(blue), C.GLboolean(alpha))
+func (gl *GL) ColorMask(red, green, blue, alpha bool) {
+	C.gl1_5_glColorMask(gl.funcs, *(*C.GLboolean)(unsafe.Pointer(&red)), *(*C.GLboolean)(unsafe.Pointer(&green)), *(*C.GLboolean)(unsafe.Pointer(&blue)), *(*C.GLboolean)(unsafe.Pointer(&alpha)))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glStencilMask.xml
@@ -1152,9 +1150,9 @@ func (gl *GL) Indexub(c uint8) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsTexture.xml
-func (gl *GL) IsTexture(texture glbase.Texture) glbase.Boolean {
+func (gl *GL) IsTexture(texture glbase.Texture) bool {
 	result := C.gl1_5_glIsTexture(gl.funcs, C.GLuint(texture))
-	return glbase.Boolean(result)
+	return *(*bool)(unsafe.Pointer(&result))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenTextures.xml
@@ -1335,8 +1333,8 @@ func (gl *GL) CompressedTexImage3D(target glbase.Enum, level int32, internalform
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glSampleCoverage.xml
-func (gl *GL) SampleCoverage(value float32, invert glbase.Boolean) {
-	C.gl1_5_glSampleCoverage(gl.funcs, C.GLfloat(value), C.GLboolean(invert))
+func (gl *GL) SampleCoverage(value float32, invert bool) {
+	C.gl1_5_glSampleCoverage(gl.funcs, C.GLfloat(value), *(*C.GLboolean)(unsafe.Pointer(&invert)))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glActiveTexture.xml
@@ -1380,9 +1378,9 @@ func (gl *GL) GetBufferParameteriv(target, pname glbase.Enum, params []int32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUnmapBuffer.xml
-func (gl *GL) UnmapBuffer(target glbase.Enum) glbase.Boolean {
+func (gl *GL) UnmapBuffer(target glbase.Enum) bool {
 	result := C.gl1_5_glUnmapBuffer(gl.funcs, C.GLenum(target))
-	return glbase.Boolean(result)
+	return *(*bool)(unsafe.Pointer(&result))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetBufferSubData.xml
@@ -1413,9 +1411,9 @@ func (gl *GL) BufferData(target glbase.Enum, size int, data interface{}, usage g
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsBuffer.xml
-func (gl *GL) IsBuffer(buffer glbase.Buffer) glbase.Boolean {
+func (gl *GL) IsBuffer(buffer glbase.Buffer) bool {
 	result := C.gl1_5_glIsBuffer(gl.funcs, C.GLuint(buffer))
-	return glbase.Boolean(result)
+	return *(*bool)(unsafe.Pointer(&result))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenBuffers.xml
@@ -1459,9 +1457,9 @@ func (gl *GL) BeginQuery(target glbase.Enum, id uint32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsQuery.xml
-func (gl *GL) IsQuery(id uint32) glbase.Boolean {
+func (gl *GL) IsQuery(id uint32) bool {
 	result := C.gl1_5_glIsQuery(gl.funcs, C.GLuint(id))
-	return glbase.Boolean(result)
+	return *(*bool)(unsafe.Pointer(&result))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteQueries.xml
@@ -1602,9 +1600,9 @@ func (gl *GL) Frustum(left, right, bottom, top, zNear, zFar float64) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsList.xml
-func (gl *GL) IsList(list uint32) glbase.Boolean {
+func (gl *GL) IsList(list uint32) bool {
 	result := C.gl1_5_glIsList(gl.funcs, C.GLuint(list))
-	return glbase.Boolean(result)
+	return *(*bool)(unsafe.Pointer(&result))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetTexGeniv.xml
@@ -2804,13 +2802,13 @@ func (gl *GL) End() {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glEdgeFlagv.xml
-func (gl *GL) EdgeFlagv(flag []glbase.Boolean) {
+func (gl *GL) EdgeFlagv(flag []bool) {
 	C.gl1_5_glEdgeFlagv(gl.funcs, (*C.GLboolean)(unsafe.Pointer(&flag[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glEdgeFlag.xml
-func (gl *GL) EdgeFlag(flag glbase.Boolean) {
-	C.gl1_5_glEdgeFlag(gl.funcs, C.GLboolean(flag))
+func (gl *GL) EdgeFlag(flag bool) {
+	C.gl1_5_glEdgeFlag(gl.funcs, *(*C.GLboolean)(unsafe.Pointer(&flag)))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glColor4usv.xml
@@ -3063,9 +3061,9 @@ func (gl *GL) PrioritizeTextures(n int32, textures []uint32, priorities []float3
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glAreTexturesResident.xml
-func (gl *GL) AreTexturesResident(n int32, textures []uint32, residences []glbase.Boolean) glbase.Boolean {
+func (gl *GL) AreTexturesResident(n int32, textures []uint32, residences []bool) bool {
 	result := C.gl1_5_glAreTexturesResident(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])), (*C.GLboolean)(unsafe.Pointer(&residences[0])))
-	return glbase.Boolean(result)
+	return *(*bool)(unsafe.Pointer(&result))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexPointer.xml
@@ -3157,13 +3155,13 @@ func (gl *GL) ResetHistogram(target glbase.Enum) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glMinmax.xml
-func (gl *GL) Minmax(target, internalformat glbase.Enum, sink glbase.Boolean) {
-	C.gl1_5_glMinmax(gl.funcs, C.GLenum(target), C.GLenum(internalformat), C.GLboolean(sink))
+func (gl *GL) Minmax(target, internalformat glbase.Enum, sink bool) {
+	C.gl1_5_glMinmax(gl.funcs, C.GLenum(target), C.GLenum(internalformat), *(*C.GLboolean)(unsafe.Pointer(&sink)))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glHistogram.xml
-func (gl *GL) Histogram(target glbase.Enum, width int32, internalformat glbase.Enum, sink glbase.Boolean) {
-	C.gl1_5_glHistogram(gl.funcs, C.GLenum(target), C.GLsizei(width), C.GLenum(internalformat), C.GLboolean(sink))
+func (gl *GL) Histogram(target glbase.Enum, width int32, internalformat glbase.Enum, sink bool) {
+	C.gl1_5_glHistogram(gl.funcs, C.GLenum(target), C.GLsizei(width), C.GLenum(internalformat), *(*C.GLboolean)(unsafe.Pointer(&sink)))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetMinmaxParameteriv.xml
@@ -3177,12 +3175,12 @@ func (gl *GL) GetMinmaxParameterfv(target, pname glbase.Enum, params []float32) 
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetMinmax.xml
-func (gl *GL) GetMinmax(target glbase.Enum, reset glbase.Boolean, format, gltype glbase.Enum, values interface{}) {
+func (gl *GL) GetMinmax(target glbase.Enum, reset bool, format, gltype glbase.Enum, values interface{}) {
 	values_v := reflect.ValueOf(values)
 	if values_v.Kind() != reflect.Slice {
 		panic("parameter values must be a slice")
 	}
-	C.gl1_5_glGetMinmax(gl.funcs, C.GLenum(target), C.GLboolean(reset), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(values_v.Index(0).Addr().Pointer()))
+	C.gl1_5_glGetMinmax(gl.funcs, C.GLenum(target), *(*C.GLboolean)(unsafe.Pointer(&reset)), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(values_v.Index(0).Addr().Pointer()))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetHistogramParameteriv.xml
@@ -3196,12 +3194,12 @@ func (gl *GL) GetHistogramParameterfv(target, pname glbase.Enum, params []float3
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetHistogram.xml
-func (gl *GL) GetHistogram(target glbase.Enum, reset glbase.Boolean, format, gltype glbase.Enum, values interface{}) {
+func (gl *GL) GetHistogram(target glbase.Enum, reset bool, format, gltype glbase.Enum, values interface{}) {
 	values_v := reflect.ValueOf(values)
 	if values_v.Kind() != reflect.Slice {
 		panic("parameter values must be a slice")
 	}
-	C.gl1_5_glGetHistogram(gl.funcs, C.GLenum(target), C.GLboolean(reset), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(values_v.Index(0).Addr().Pointer()))
+	C.gl1_5_glGetHistogram(gl.funcs, C.GLenum(target), *(*C.GLboolean)(unsafe.Pointer(&reset)), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(values_v.Index(0).Addr().Pointer()))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glSeparableFilter2D.xml
