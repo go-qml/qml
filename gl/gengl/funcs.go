@@ -17,7 +17,7 @@ type funcTweak struct {
 	result string
 
 	// before is a code snippet to be injected before the C function call.
-	// It may make use of the following template variables and functions:
+	// It may use the following template variables and functions:
 	//
 	//                          . - dot holds the Func being tweaked
 	//         {{copyDoc "Func"}} - replaced by the respective function documentation
@@ -26,10 +26,10 @@ type funcTweak struct {
 	before string
 
 	// after is a code snippet to be injected after the C function call.
-	// It may make use of the same template functions as available for before.
+	// It may use the same template functions as available for before.
 	after  string
 
-	// doc defines the documentation for the function. It may make use of the same
+	// doc defines the documentation for the function. It may use the same
 	// template functions as available for before and after.
 	doc    string
 }
