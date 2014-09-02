@@ -19,8 +19,9 @@ type funcTweak struct {
 	// before is a code snippet to be injected before the C function call.
 	// It may make use of the following template variables and functions:
 	//
-	//     . - dot holds the Func being tweaked
-	//     {{paramGoType . "name"}} - replaced by the respective parameter type
+	//                          . - dot holds the Func being tweaked
+	//         {{copyDoc "Func"}} - replaced by the respective function documentation
+	//  {{paramGoType . "param"}} - replaced by the respective parameter Go type
 	//
 	before string
 

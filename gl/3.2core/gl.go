@@ -93,6 +93,9 @@ const (
 
 	CONTEXT_FLAG_FORWARD_COMPATIBLE_BIT = 0x00000001
 
+	CONTEXT_COMPATIBILITY_PROFILE_BIT = 0x00000002
+	CONTEXT_CORE_PROFILE_BIT          = 0x00000001
+
 	BACK_LEFT   = 0x0402
 	BACK_RIGHT  = 0x0403
 	FRONT_LEFT  = 0x0400
@@ -282,13 +285,17 @@ const (
 
 	POINT_FADE_THRESHOLD_SIZE = 0x8128
 
-	LINES          = 0x0001
-	LINE_LOOP      = 0x0002
-	LINE_STRIP     = 0x0003
-	POINTS         = 0x0000
-	TRIANGLES      = 0x0004
-	TRIANGLE_FAN   = 0x0006
-	TRIANGLE_STRIP = 0x0005
+	LINES                    = 0x0001
+	LINES_ADJACENCY          = 0x000A
+	LINE_LOOP                = 0x0002
+	LINE_STRIP               = 0x0003
+	LINE_STRIP_ADJACENCY     = 0x000B
+	POINTS                   = 0x0000
+	TRIANGLES                = 0x0004
+	TRIANGLES_ADJACENCY      = 0x000C
+	TRIANGLE_FAN             = 0x0006
+	TRIANGLE_STRIP           = 0x0005
+	TRIANGLE_STRIP_ADJACENCY = 0x000D
 
 	DECR = 0x1E03
 	INCR = 0x1E02
@@ -321,7 +328,9 @@ const (
 	CLAMP_TO_EDGE   = 0x812F
 	REPEAT          = 0x2901
 
+	SYNC_FLUSH_COMMANDS_BIT                       = 0x00000001
 	INVALID_INDEX                                 = 0xFFFFFFFF
+	TIMEOUT_IGNORED                               = 0xFFFFFFFFFFFFFFFF
 	CONSTANT_COLOR                                = 0x8001
 	ONE_MINUS_CONSTANT_COLOR                      = 0x8002
 	CONSTANT_ALPHA                                = 0x8003
@@ -465,7 +474,9 @@ const (
 	VERTEX_ATTRIB_ARRAY_TYPE                      = 0x8625
 	CURRENT_VERTEX_ATTRIB                         = 0x8626
 	VERTEX_PROGRAM_POINT_SIZE                     = 0x8642
+	PROGRAM_POINT_SIZE                            = 0x8642
 	VERTEX_ATTRIB_ARRAY_POINTER                   = 0x8645
+	DEPTH_CLAMP                                   = 0x864F
 	TEXTURE_COMPRESSED_IMAGE_SIZE                 = 0x86A0
 	TEXTURE_COMPRESSED                            = 0x86A1
 	NUM_COMPRESSED_TEXTURE_FORMATS                = 0x86A2
@@ -502,6 +513,7 @@ const (
 	TEXTURE_COMPARE_MODE                          = 0x884C
 	TEXTURE_COMPARE_FUNC                          = 0x884D
 	COMPARE_REF_TO_TEXTURE                        = 0x884E
+	TEXTURE_CUBE_MAP_SEAMLESS                     = 0x884F
 	QUERY_COUNTER_BITS                            = 0x8864
 	CURRENT_QUERY                                 = 0x8865
 	QUERY_RESULT                                  = 0x8866
@@ -540,6 +552,9 @@ const (
 	MIN_PROGRAM_TEXEL_OFFSET                      = 0x8904
 	MAX_PROGRAM_TEXEL_OFFSET                      = 0x8905
 	SAMPLES_PASSED                                = 0x8914
+	GEOMETRY_VERTICES_OUT                         = 0x8916
+	GEOMETRY_INPUT_TYPE                           = 0x8917
+	GEOMETRY_OUTPUT_TYPE                          = 0x8918
 	CLAMP_READ_COLOR                              = 0x891C
 	FIXED_ONLY                                    = 0x891D
 	UNIFORM_BUFFER                                = 0x8A11
@@ -635,6 +650,7 @@ const (
 	PROXY_TEXTURE_2D_ARRAY                        = 0x8C1B
 	TEXTURE_BINDING_1D_ARRAY                      = 0x8C1C
 	TEXTURE_BINDING_2D_ARRAY                      = 0x8C1D
+	MAX_GEOMETRY_TEXTURE_IMAGE_UNITS              = 0x8C29
 	TEXTURE_BUFFER                                = 0x8C2A
 	MAX_TEXTURE_BUFFER_SIZE                       = 0x8C2B
 	TEXTURE_BINDING_BUFFER                        = 0x8C2C
@@ -746,6 +762,8 @@ const (
 	RGBA_INTEGER                                  = 0x8D99
 	BGR_INTEGER                                   = 0x8D9A
 	BGRA_INTEGER                                  = 0x8D9B
+	FRAMEBUFFER_ATTACHMENT_LAYERED                = 0x8DA7
+	FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS          = 0x8DA8
 	FLOAT_32_UNSIGNED_INT_24_8_REV                = 0x8DAD
 	FRAMEBUFFER_SRGB                              = 0x8DB9
 	COMPRESSED_RED_RGTC1                          = 0x8DBB
@@ -777,10 +795,22 @@ const (
 	UNSIGNED_INT_SAMPLER_1D_ARRAY                 = 0x8DD6
 	UNSIGNED_INT_SAMPLER_2D_ARRAY                 = 0x8DD7
 	UNSIGNED_INT_SAMPLER_BUFFER                   = 0x8DD8
+	GEOMETRY_SHADER                               = 0x8DD9
+	MAX_GEOMETRY_UNIFORM_COMPONENTS               = 0x8DDF
+	MAX_GEOMETRY_OUTPUT_VERTICES                  = 0x8DE0
+	MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS          = 0x8DE1
 	QUERY_WAIT                                    = 0x8E13
 	QUERY_NO_WAIT                                 = 0x8E14
 	QUERY_BY_REGION_WAIT                          = 0x8E15
 	QUERY_BY_REGION_NO_WAIT                       = 0x8E16
+	QUADS_FOLLOW_PROVOKING_VERTEX_CONVENTION      = 0x8E4C
+	FIRST_VERTEX_CONVENTION                       = 0x8E4D
+	LAST_VERTEX_CONVENTION                        = 0x8E4E
+	PROVOKING_VERTEX                              = 0x8E4F
+	SAMPLE_POSITION                               = 0x8E50
+	SAMPLE_MASK                                   = 0x8E51
+	SAMPLE_MASK_VALUE                             = 0x8E52
+	MAX_SAMPLE_MASK_WORDS                         = 0x8E59
 	COPY_READ_BUFFER                              = 0x8F36
 	COPY_WRITE_BUFFER                             = 0x8F37
 	R8_SNORM                                      = 0x8F94
@@ -794,9 +824,44 @@ const (
 	SIGNED_NORMALIZED                             = 0x8F9C
 	PRIMITIVE_RESTART                             = 0x8F9D
 	PRIMITIVE_RESTART_INDEX                       = 0x8F9E
+	TEXTURE_2D_MULTISAMPLE                        = 0x9100
+	PROXY_TEXTURE_2D_MULTISAMPLE                  = 0x9101
+	TEXTURE_2D_MULTISAMPLE_ARRAY                  = 0x9102
+	PROXY_TEXTURE_2D_MULTISAMPLE_ARRAY            = 0x9103
+	TEXTURE_BINDING_2D_MULTISAMPLE                = 0x9104
+	TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY          = 0x9105
+	TEXTURE_SAMPLES                               = 0x9106
+	TEXTURE_FIXED_SAMPLE_LOCATIONS                = 0x9107
+	SAMPLER_2D_MULTISAMPLE                        = 0x9108
+	INT_SAMPLER_2D_MULTISAMPLE                    = 0x9109
+	UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE           = 0x910A
+	SAMPLER_2D_MULTISAMPLE_ARRAY                  = 0x910B
+	INT_SAMPLER_2D_MULTISAMPLE_ARRAY              = 0x910C
+	UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY     = 0x910D
+	MAX_COLOR_TEXTURE_SAMPLES                     = 0x910E
+	MAX_DEPTH_TEXTURE_SAMPLES                     = 0x910F
+	MAX_INTEGER_SAMPLES                           = 0x9110
+	MAX_SERVER_WAIT_TIMEOUT                       = 0x9111
+	OBJECT_TYPE                                   = 0x9112
+	SYNC_CONDITION                                = 0x9113
+	SYNC_STATUS                                   = 0x9114
+	SYNC_FLAGS                                    = 0x9115
+	SYNC_FENCE                                    = 0x9116
+	SYNC_GPU_COMMANDS_COMPLETE                    = 0x9117
+	UNSIGNALED                                    = 0x9118
+	SIGNALED                                      = 0x9119
+	ALREADY_SIGNALED                              = 0x911A
+	TIMEOUT_EXPIRED                               = 0x911B
+	CONDITION_SATISFIED                           = 0x911C
+	WAIT_FAILED                                   = 0x911D
 	BUFFER_ACCESS_FLAGS                           = 0x911F
 	BUFFER_MAP_LENGTH                             = 0x9120
 	BUFFER_MAP_OFFSET                             = 0x9121
+	MAX_VERTEX_OUTPUT_COMPONENTS                  = 0x9122
+	MAX_GEOMETRY_INPUT_COMPONENTS                 = 0x9123
+	MAX_GEOMETRY_OUTPUT_COMPONENTS                = 0x9124
+	MAX_FRAGMENT_INPUT_COMPONENTS                 = 0x9125
+	CONTEXT_PROFILE_MASK                          = 0x9126
 )
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glViewport.xml
@@ -837,8 +902,8 @@ func (gl *GL) DepthRange(nearVal, farVal float64) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsEnabled.xml
 func (gl *GL) IsEnabled(cap glbase.Enum) bool {
-	result := C.gl3_2core_glIsEnabled(gl.funcs, C.GLenum(cap))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl3_2core_glIsEnabled(gl.funcs, C.GLenum(cap))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetTexLevelParameteriv.xml
@@ -882,8 +947,8 @@ func (gl *GL) GetFloatv(pname glbase.Enum, params []float32) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetError.xml
 func (gl *GL) GetError() glbase.Enum {
-	result := C.gl3_2core_glGetError(gl.funcs)
-	return glbase.Enum(result)
+	glresult := C.gl3_2core_glGetError(gl.funcs)
+	return glbase.Enum(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetDoublev.xml
@@ -1090,8 +1155,8 @@ func (gl *GL) Indexub(c uint8) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsTexture.xml
 func (gl *GL) IsTexture(texture glbase.Texture) bool {
-	result := C.gl3_2core_glIsTexture(gl.funcs, C.GLuint(texture))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl3_2core_glIsTexture(gl.funcs, C.GLuint(texture))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenTextures.xml
@@ -1318,8 +1383,8 @@ func (gl *GL) GetBufferParameteriv(target, pname glbase.Enum, params []int32) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUnmapBuffer.xml
 func (gl *GL) UnmapBuffer(target glbase.Enum) bool {
-	result := C.gl3_2core_glUnmapBuffer(gl.funcs, C.GLenum(target))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl3_2core_glUnmapBuffer(gl.funcs, C.GLenum(target))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetBufferSubData.xml
@@ -1351,8 +1416,8 @@ func (gl *GL) BufferData(target glbase.Enum, size int, data interface{}, usage g
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsBuffer.xml
 func (gl *GL) IsBuffer(buffer glbase.Buffer) bool {
-	result := C.gl3_2core_glIsBuffer(gl.funcs, C.GLuint(buffer))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl3_2core_glIsBuffer(gl.funcs, C.GLuint(buffer))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenBuffers.xml
@@ -1397,8 +1462,8 @@ func (gl *GL) BeginQuery(target glbase.Enum, id uint32) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsQuery.xml
 func (gl *GL) IsQuery(id uint32) bool {
-	result := C.gl3_2core_glIsQuery(gl.funcs, C.GLuint(id))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl3_2core_glIsQuery(gl.funcs, C.GLuint(id))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteQueries.xml
@@ -1493,14 +1558,14 @@ func (gl *GL) LinkProgram(program glbase.Program) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsShader.xml
 func (gl *GL) IsShader(shader glbase.Shader) bool {
-	result := C.gl3_2core_glIsShader(gl.funcs, C.GLuint(shader))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl3_2core_glIsShader(gl.funcs, C.GLuint(shader))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsProgram.xml
 func (gl *GL) IsProgram(program glbase.Program) bool {
-	result := C.gl3_2core_glIsProgram(gl.funcs, C.GLuint(program))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl3_2core_glIsProgram(gl.funcs, C.GLuint(program))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // GetVertexAttribiv returns in params the value of a generic vertex attribute
@@ -1823,9 +1888,9 @@ func (gl *GL) GetUniformfv(program glbase.Program, location glbase.Uniform, para
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetUniformLocation.xml
 func (gl *GL) GetUniformLocation(program glbase.Program, name string) glbase.Uniform {
 	name_cstr := C.CString(name)
-	result := C.gl3_2core_glGetUniformLocation(gl.funcs, C.GLuint(program), (*C.GLchar)(name_cstr))
+	glresult := C.gl3_2core_glGetUniformLocation(gl.funcs, C.GLuint(program), (*C.GLchar)(name_cstr))
 	C.free(unsafe.Pointer(name_cstr))
-	return glbase.Uniform(result)
+	return glbase.Uniform(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetShaderSource.xml
@@ -1887,9 +1952,9 @@ func (gl *GL) GetProgramiv(program glbase.Program, pname glbase.Enum, params []i
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetAttribLocation.xml
 func (gl *GL) GetAttribLocation(program glbase.Program, name string) glbase.Attrib {
 	name_cstr := C.CString(name)
-	result := C.gl3_2core_glGetAttribLocation(gl.funcs, C.GLuint(program), (*C.GLchar)(name_cstr))
+	glresult := C.gl3_2core_glGetAttribLocation(gl.funcs, C.GLuint(program), (*C.GLchar)(name_cstr))
 	C.free(unsafe.Pointer(name_cstr))
-	return glbase.Attrib(result)
+	return glbase.Attrib(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetAttachedShaders.xml
@@ -1934,14 +1999,14 @@ func (gl *GL) DeleteProgram(program glbase.Program) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCreateShader.xml
 func (gl *GL) CreateShader(gltype glbase.Enum) glbase.Shader {
-	result := C.gl3_2core_glCreateShader(gl.funcs, C.GLenum(gltype))
-	return glbase.Shader(result)
+	glresult := C.gl3_2core_glCreateShader(gl.funcs, C.GLenum(gltype))
+	return glbase.Shader(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCreateProgram.xml
 func (gl *GL) CreateProgram() glbase.Program {
-	result := C.gl3_2core_glCreateProgram(gl.funcs)
-	return glbase.Program(result)
+	glresult := C.gl3_2core_glCreateProgram(gl.funcs)
+	return glbase.Program(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCompileShader.xml
@@ -2061,8 +2126,8 @@ func (gl *GL) BlendEquationSeparate(modeRGB, modeAlpha glbase.Enum) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsVertexArray.xml
 func (gl *GL) IsVertexArray(array uint32) bool {
-	result := C.gl3_2core_glIsVertexArray(gl.funcs, C.GLuint(array))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl3_2core_glIsVertexArray(gl.funcs, C.GLuint(array))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenVertexArrays.xml
@@ -2132,8 +2197,8 @@ func (gl *GL) FramebufferTexture1D(target, attachment, textarget glbase.Enum, te
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCheckFramebufferStatus.xml
 func (gl *GL) CheckFramebufferStatus(target glbase.Enum) glbase.Enum {
-	result := C.gl3_2core_glCheckFramebufferStatus(gl.funcs, C.GLenum(target))
-	return glbase.Enum(result)
+	glresult := C.gl3_2core_glCheckFramebufferStatus(gl.funcs, C.GLenum(target))
+	return glbase.Enum(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenFramebuffers.xml
@@ -2153,8 +2218,8 @@ func (gl *GL) BindFramebuffer(target glbase.Enum, framebuffer uint32) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsFramebuffer.xml
 func (gl *GL) IsFramebuffer(framebuffer uint32) bool {
-	result := C.gl3_2core_glIsFramebuffer(gl.funcs, C.GLuint(framebuffer))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl3_2core_glIsFramebuffer(gl.funcs, C.GLuint(framebuffer))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetRenderbufferParameteriv.xml
@@ -2184,8 +2249,8 @@ func (gl *GL) BindRenderbuffer(target glbase.Enum, renderbuffer uint32) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsRenderbuffer.xml
 func (gl *GL) IsRenderbuffer(renderbuffer uint32) bool {
-	result := C.gl3_2core_glIsRenderbuffer(gl.funcs, C.GLuint(renderbuffer))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl3_2core_glIsRenderbuffer(gl.funcs, C.GLuint(renderbuffer))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glClearBufferfi.xml
@@ -2250,8 +2315,8 @@ func (gl *GL) Uniform1ui(location glbase.Uniform, v0 uint32) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetFragDataLocation.xml
 func (gl *GL) GetFragDataLocation(program glbase.Program, name []byte) int32 {
-	result := C.gl3_2core_glGetFragDataLocation(gl.funcs, C.GLuint(program), (*C.GLchar)(unsafe.Pointer(&name[0])))
-	return int32(result)
+	glresult := C.gl3_2core_glGetFragDataLocation(gl.funcs, C.GLuint(program), (*C.GLchar)(unsafe.Pointer(&name[0])))
+	return int32(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glBindFragDataLocation.xml
@@ -2325,8 +2390,8 @@ func (gl *GL) BeginTransformFeedback(primitiveMode glbase.Enum) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsEnabledi.xml
 func (gl *GL) IsEnabledi(target glbase.Enum, index uint32) bool {
-	result := C.gl3_2core_glIsEnabledi(gl.funcs, C.GLenum(target), C.GLuint(index))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl3_2core_glIsEnabledi(gl.funcs, C.GLenum(target), C.GLuint(index))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDisablei.xml
@@ -2376,8 +2441,8 @@ func (gl *GL) GetActiveUniformBlockiv(program glbase.Program, uniformBlockIndex 
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetUniformBlockIndex.xml
 func (gl *GL) GetUniformBlockIndex(program glbase.Program, uniformBlockName []byte) uint32 {
-	result := C.gl3_2core_glGetUniformBlockIndex(gl.funcs, C.GLuint(program), (*C.GLchar)(unsafe.Pointer(&uniformBlockName[0])))
-	return uint32(result)
+	glresult := C.gl3_2core_glGetUniformBlockIndex(gl.funcs, C.GLuint(program), (*C.GLchar)(unsafe.Pointer(&uniformBlockName[0])))
+	return uint32(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetActiveUniformName.xml
@@ -2451,8 +2516,8 @@ func (gl *GL) WaitSync(sync glbase.Sync, flags glbase.Bitfield, timeout uint64) 
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glClientWaitSync.xml
 func (gl *GL) ClientWaitSync(sync glbase.Sync, flags glbase.Bitfield, timeout uint64) glbase.Enum {
-	result := C.gl3_2core_glClientWaitSync(gl.funcs, C.GLsync(sync), C.GLbitfield(flags), C.GLuint64(timeout))
-	return glbase.Enum(result)
+	glresult := C.gl3_2core_glClientWaitSync(gl.funcs, C.GLsync(sync), C.GLbitfield(flags), C.GLuint64(timeout))
+	return glbase.Enum(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteSync.xml
@@ -2462,14 +2527,14 @@ func (gl *GL) DeleteSync(sync glbase.Sync) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsSync.xml
 func (gl *GL) IsSync(sync glbase.Sync) bool {
-	result := C.gl3_2core_glIsSync(gl.funcs, C.GLsync(sync))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl3_2core_glIsSync(gl.funcs, C.GLsync(sync))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glFenceSync.xml
 func (gl *GL) FenceSync(condition glbase.Enum, flags glbase.Bitfield) glbase.Sync {
-	result := C.gl3_2core_glFenceSync(gl.funcs, C.GLenum(condition), C.GLbitfield(flags))
-	return glbase.Sync(result)
+	glresult := C.gl3_2core_glFenceSync(gl.funcs, C.GLenum(condition), C.GLbitfield(flags))
+	return glbase.Sync(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glProvokingVertex.xml

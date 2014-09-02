@@ -850,8 +850,8 @@ func (gl *GL) DepthRange(nearVal, farVal float64) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsEnabled.xml
 func (gl *GL) IsEnabled(cap glbase.Enum) bool {
-	result := C.gl1_4_glIsEnabled(gl.funcs, C.GLenum(cap))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl1_4_glIsEnabled(gl.funcs, C.GLenum(cap))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetTexLevelParameteriv.xml
@@ -895,8 +895,8 @@ func (gl *GL) GetFloatv(pname glbase.Enum, params []float32) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetError.xml
 func (gl *GL) GetError() glbase.Enum {
-	result := C.gl1_4_glGetError(gl.funcs)
-	return glbase.Enum(result)
+	glresult := C.gl1_4_glGetError(gl.funcs)
+	return glbase.Enum(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetDoublev.xml
@@ -1103,8 +1103,8 @@ func (gl *GL) Indexub(c uint8) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsTexture.xml
 func (gl *GL) IsTexture(texture glbase.Texture) bool {
-	result := C.gl1_4_glIsTexture(gl.funcs, C.GLuint(texture))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl1_4_glIsTexture(gl.funcs, C.GLuint(texture))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenTextures.xml
@@ -1500,8 +1500,8 @@ func (gl *GL) Frustum(left, right, bottom, top, zNear, zFar float64) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsList.xml
 func (gl *GL) IsList(list uint32) bool {
-	result := C.gl1_4_glIsList(gl.funcs, C.GLuint(list))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl1_4_glIsList(gl.funcs, C.GLuint(list))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetTexGeniv.xml
@@ -1876,8 +1876,8 @@ func (gl *GL) InitNames() {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glRenderMode.xml
 func (gl *GL) RenderMode(mode glbase.Enum) int32 {
-	result := C.gl1_4_glRenderMode(gl.funcs, C.GLenum(mode))
-	return int32(result)
+	glresult := C.gl1_4_glRenderMode(gl.funcs, C.GLenum(mode))
+	return int32(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glSelectBuffer.xml
@@ -2911,8 +2911,8 @@ func (gl *GL) ListBase(base uint32) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenLists.xml
 func (gl *GL) GenLists(range_ int32) uint32 {
-	result := C.gl1_4_glGenLists(gl.funcs, C.GLsizei(range_))
-	return uint32(result)
+	glresult := C.gl1_4_glGenLists(gl.funcs, C.GLsizei(range_))
+	return uint32(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteLists.xml
@@ -2961,8 +2961,8 @@ func (gl *GL) PrioritizeTextures(n int32, textures []uint32, priorities []float3
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glAreTexturesResident.xml
 func (gl *GL) AreTexturesResident(n int32, textures []uint32, residences []bool) bool {
-	result := C.gl1_4_glAreTexturesResident(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])), (*C.GLboolean)(unsafe.Pointer(&residences[0])))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl1_4_glAreTexturesResident(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])), (*C.GLboolean)(unsafe.Pointer(&residences[0])))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexPointer.xml

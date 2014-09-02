@@ -515,8 +515,8 @@ func (gl *GL) BufferSubData(target glbase.Enum, offset, size int, data interface
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCheckFramebufferStatus.xml
 func (gl *GL) CheckFramebufferStatus(target glbase.Enum) glbase.Enum {
-	result := C.gles2_glCheckFramebufferStatus(gl.funcs, C.GLenum(target))
-	return glbase.Enum(result)
+	glresult := C.gles2_glCheckFramebufferStatus(gl.funcs, C.GLenum(target))
+	return glbase.Enum(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glClearDepthf.xml
@@ -549,14 +549,14 @@ func (gl *GL) CompressedTexSubImage2D(target glbase.Enum, level, xoffset, yoffse
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCreateProgram.xml
 func (gl *GL) CreateProgram() glbase.Program {
-	result := C.gles2_glCreateProgram(gl.funcs)
-	return glbase.Program(result)
+	glresult := C.gles2_glCreateProgram(gl.funcs)
+	return glbase.Program(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCreateShader.xml
 func (gl *GL) CreateShader(gltype glbase.Enum) glbase.Shader {
-	result := C.gles2_glCreateShader(gl.funcs, C.GLenum(gltype))
-	return glbase.Shader(result)
+	glresult := C.gles2_glCreateShader(gl.funcs, C.GLenum(gltype))
+	return glbase.Shader(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteBuffers.xml
@@ -683,9 +683,9 @@ func (gl *GL) GetAttachedShaders(program glbase.Program, maxcount int32, count [
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetAttribLocation.xml
 func (gl *GL) GetAttribLocation(program glbase.Program, name string) glbase.Attrib {
 	name_cstr := C.CString(name)
-	result := C.gles2_glGetAttribLocation(gl.funcs, C.GLuint(program), (*C.GLchar)(name_cstr))
+	glresult := C.gles2_glGetAttribLocation(gl.funcs, C.GLuint(program), (*C.GLchar)(name_cstr))
 	C.free(unsafe.Pointer(name_cstr))
-	return glbase.Attrib(result)
+	return glbase.Attrib(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetBufferParameteriv.xml
@@ -858,9 +858,9 @@ func (gl *GL) GetUniformiv(program glbase.Program, location glbase.Uniform, para
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetUniformLocation.xml
 func (gl *GL) GetUniformLocation(program glbase.Program, name string) glbase.Uniform {
 	name_cstr := C.CString(name)
-	result := C.gles2_glGetUniformLocation(gl.funcs, C.GLuint(program), (*C.GLchar)(name_cstr))
+	glresult := C.gles2_glGetUniformLocation(gl.funcs, C.GLuint(program), (*C.GLchar)(name_cstr))
 	C.free(unsafe.Pointer(name_cstr))
-	return glbase.Uniform(result)
+	return glbase.Uniform(glresult)
 }
 
 // GetVertexAttribfv returns in params the value of a generic vertex attribute
@@ -995,32 +995,32 @@ func (gl *GL) GetVertexAttribiv(index glbase.Attrib, pname glbase.Enum) (params 
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsBuffer.xml
 func (gl *GL) IsBuffer(buffer glbase.Buffer) bool {
-	result := C.gles2_glIsBuffer(gl.funcs, C.GLuint(buffer))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gles2_glIsBuffer(gl.funcs, C.GLuint(buffer))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsFramebuffer.xml
 func (gl *GL) IsFramebuffer(framebuffer uint32) bool {
-	result := C.gles2_glIsFramebuffer(gl.funcs, C.GLuint(framebuffer))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gles2_glIsFramebuffer(gl.funcs, C.GLuint(framebuffer))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsProgram.xml
 func (gl *GL) IsProgram(program glbase.Program) bool {
-	result := C.gles2_glIsProgram(gl.funcs, C.GLuint(program))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gles2_glIsProgram(gl.funcs, C.GLuint(program))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsRenderbuffer.xml
 func (gl *GL) IsRenderbuffer(renderbuffer uint32) bool {
-	result := C.gles2_glIsRenderbuffer(gl.funcs, C.GLuint(renderbuffer))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gles2_glIsRenderbuffer(gl.funcs, C.GLuint(renderbuffer))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsShader.xml
 func (gl *GL) IsShader(shader glbase.Shader) bool {
-	result := C.gles2_glIsShader(gl.funcs, C.GLuint(shader))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gles2_glIsShader(gl.funcs, C.GLuint(shader))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glLinkProgram.xml
@@ -1302,8 +1302,8 @@ func (gl *GL) GetBooleanv(pname glbase.Enum, params []bool) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetError.xml
 func (gl *GL) GetError() glbase.Enum {
-	result := C.gles2_glGetError(gl.funcs)
-	return glbase.Enum(result)
+	glresult := C.gles2_glGetError(gl.funcs)
+	return glbase.Enum(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetFloatv.xml
@@ -1333,14 +1333,14 @@ func (gl *GL) Hint(target, mode glbase.Enum) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsEnabled.xml
 func (gl *GL) IsEnabled(cap glbase.Enum) bool {
-	result := C.gles2_glIsEnabled(gl.funcs, C.GLenum(cap))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gles2_glIsEnabled(gl.funcs, C.GLenum(cap))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsTexture.xml
 func (gl *GL) IsTexture(texture glbase.Texture) bool {
-	result := C.gles2_glIsTexture(gl.funcs, C.GLuint(texture))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gles2_glIsTexture(gl.funcs, C.GLuint(texture))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glLineWidth.xml

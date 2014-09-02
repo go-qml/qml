@@ -1231,8 +1231,8 @@ func (gl *GL) DepthRange(nearVal, farVal float64) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsEnabled.xml
 func (gl *GL) IsEnabled(cap glbase.Enum) bool {
-	result := C.gl4_3compat_glIsEnabled(gl.funcs, C.GLenum(cap))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl4_3compat_glIsEnabled(gl.funcs, C.GLenum(cap))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetTexLevelParameteriv.xml
@@ -1276,8 +1276,8 @@ func (gl *GL) GetFloatv(pname glbase.Enum, params []float32) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetError.xml
 func (gl *GL) GetError() glbase.Enum {
-	result := C.gl4_3compat_glGetError(gl.funcs)
-	return glbase.Enum(result)
+	glresult := C.gl4_3compat_glGetError(gl.funcs)
+	return glbase.Enum(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetDoublev.xml
@@ -1484,8 +1484,8 @@ func (gl *GL) Indexub(c uint8) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsTexture.xml
 func (gl *GL) IsTexture(texture glbase.Texture) bool {
-	result := C.gl4_3compat_glIsTexture(gl.funcs, C.GLuint(texture))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl4_3compat_glIsTexture(gl.funcs, C.GLuint(texture))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenTextures.xml
@@ -1712,8 +1712,8 @@ func (gl *GL) GetBufferParameteriv(target, pname glbase.Enum, params []int32) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUnmapBuffer.xml
 func (gl *GL) UnmapBuffer(target glbase.Enum) bool {
-	result := C.gl4_3compat_glUnmapBuffer(gl.funcs, C.GLenum(target))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl4_3compat_glUnmapBuffer(gl.funcs, C.GLenum(target))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetBufferSubData.xml
@@ -1745,8 +1745,8 @@ func (gl *GL) BufferData(target glbase.Enum, size int, data interface{}, usage g
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsBuffer.xml
 func (gl *GL) IsBuffer(buffer glbase.Buffer) bool {
-	result := C.gl4_3compat_glIsBuffer(gl.funcs, C.GLuint(buffer))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl4_3compat_glIsBuffer(gl.funcs, C.GLuint(buffer))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenBuffers.xml
@@ -1791,8 +1791,8 @@ func (gl *GL) BeginQuery(target glbase.Enum, id uint32) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsQuery.xml
 func (gl *GL) IsQuery(id uint32) bool {
-	result := C.gl4_3compat_glIsQuery(gl.funcs, C.GLuint(id))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl4_3compat_glIsQuery(gl.funcs, C.GLuint(id))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteQueries.xml
@@ -1887,14 +1887,14 @@ func (gl *GL) LinkProgram(program glbase.Program) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsShader.xml
 func (gl *GL) IsShader(shader glbase.Shader) bool {
-	result := C.gl4_3compat_glIsShader(gl.funcs, C.GLuint(shader))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl4_3compat_glIsShader(gl.funcs, C.GLuint(shader))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsProgram.xml
 func (gl *GL) IsProgram(program glbase.Program) bool {
-	result := C.gl4_3compat_glIsProgram(gl.funcs, C.GLuint(program))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl4_3compat_glIsProgram(gl.funcs, C.GLuint(program))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // GetVertexAttribiv returns in params the value of a generic vertex attribute
@@ -2217,9 +2217,9 @@ func (gl *GL) GetUniformfv(program glbase.Program, location glbase.Uniform, para
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetUniformLocation.xml
 func (gl *GL) GetUniformLocation(program glbase.Program, name string) glbase.Uniform {
 	name_cstr := C.CString(name)
-	result := C.gl4_3compat_glGetUniformLocation(gl.funcs, C.GLuint(program), (*C.GLchar)(name_cstr))
+	glresult := C.gl4_3compat_glGetUniformLocation(gl.funcs, C.GLuint(program), (*C.GLchar)(name_cstr))
 	C.free(unsafe.Pointer(name_cstr))
-	return glbase.Uniform(result)
+	return glbase.Uniform(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetShaderSource.xml
@@ -2281,9 +2281,9 @@ func (gl *GL) GetProgramiv(program glbase.Program, pname glbase.Enum, params []i
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetAttribLocation.xml
 func (gl *GL) GetAttribLocation(program glbase.Program, name string) glbase.Attrib {
 	name_cstr := C.CString(name)
-	result := C.gl4_3compat_glGetAttribLocation(gl.funcs, C.GLuint(program), (*C.GLchar)(name_cstr))
+	glresult := C.gl4_3compat_glGetAttribLocation(gl.funcs, C.GLuint(program), (*C.GLchar)(name_cstr))
 	C.free(unsafe.Pointer(name_cstr))
-	return glbase.Attrib(result)
+	return glbase.Attrib(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetAttachedShaders.xml
@@ -2328,14 +2328,14 @@ func (gl *GL) DeleteProgram(program glbase.Program) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCreateShader.xml
 func (gl *GL) CreateShader(gltype glbase.Enum) glbase.Shader {
-	result := C.gl4_3compat_glCreateShader(gl.funcs, C.GLenum(gltype))
-	return glbase.Shader(result)
+	glresult := C.gl4_3compat_glCreateShader(gl.funcs, C.GLenum(gltype))
+	return glbase.Shader(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCreateProgram.xml
 func (gl *GL) CreateProgram() glbase.Program {
-	result := C.gl4_3compat_glCreateProgram(gl.funcs)
-	return glbase.Program(result)
+	glresult := C.gl4_3compat_glCreateProgram(gl.funcs)
+	return glbase.Program(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCompileShader.xml
@@ -2455,8 +2455,8 @@ func (gl *GL) BlendEquationSeparate(modeRGB, modeAlpha glbase.Enum) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsVertexArray.xml
 func (gl *GL) IsVertexArray(array uint32) bool {
-	result := C.gl4_3compat_glIsVertexArray(gl.funcs, C.GLuint(array))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl4_3compat_glIsVertexArray(gl.funcs, C.GLuint(array))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenVertexArrays.xml
@@ -2526,8 +2526,8 @@ func (gl *GL) FramebufferTexture1D(target, attachment, textarget glbase.Enum, te
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCheckFramebufferStatus.xml
 func (gl *GL) CheckFramebufferStatus(target glbase.Enum) glbase.Enum {
-	result := C.gl4_3compat_glCheckFramebufferStatus(gl.funcs, C.GLenum(target))
-	return glbase.Enum(result)
+	glresult := C.gl4_3compat_glCheckFramebufferStatus(gl.funcs, C.GLenum(target))
+	return glbase.Enum(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenFramebuffers.xml
@@ -2547,8 +2547,8 @@ func (gl *GL) BindFramebuffer(target glbase.Enum, framebuffer uint32) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsFramebuffer.xml
 func (gl *GL) IsFramebuffer(framebuffer uint32) bool {
-	result := C.gl4_3compat_glIsFramebuffer(gl.funcs, C.GLuint(framebuffer))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl4_3compat_glIsFramebuffer(gl.funcs, C.GLuint(framebuffer))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetRenderbufferParameteriv.xml
@@ -2578,8 +2578,8 @@ func (gl *GL) BindRenderbuffer(target glbase.Enum, renderbuffer uint32) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsRenderbuffer.xml
 func (gl *GL) IsRenderbuffer(renderbuffer uint32) bool {
-	result := C.gl4_3compat_glIsRenderbuffer(gl.funcs, C.GLuint(renderbuffer))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl4_3compat_glIsRenderbuffer(gl.funcs, C.GLuint(renderbuffer))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glClearBufferfi.xml
@@ -2644,8 +2644,8 @@ func (gl *GL) Uniform1ui(location glbase.Uniform, v0 uint32) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetFragDataLocation.xml
 func (gl *GL) GetFragDataLocation(program glbase.Program, name []byte) int32 {
-	result := C.gl4_3compat_glGetFragDataLocation(gl.funcs, C.GLuint(program), (*C.GLchar)(unsafe.Pointer(&name[0])))
-	return int32(result)
+	glresult := C.gl4_3compat_glGetFragDataLocation(gl.funcs, C.GLuint(program), (*C.GLchar)(unsafe.Pointer(&name[0])))
+	return int32(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glBindFragDataLocation.xml
@@ -2719,8 +2719,8 @@ func (gl *GL) BeginTransformFeedback(primitiveMode glbase.Enum) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsEnabledi.xml
 func (gl *GL) IsEnabledi(target glbase.Enum, index uint32) bool {
-	result := C.gl4_3compat_glIsEnabledi(gl.funcs, C.GLenum(target), C.GLuint(index))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl4_3compat_glIsEnabledi(gl.funcs, C.GLenum(target), C.GLuint(index))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDisablei.xml
@@ -2770,8 +2770,8 @@ func (gl *GL) GetActiveUniformBlockiv(program glbase.Program, uniformBlockIndex 
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetUniformBlockIndex.xml
 func (gl *GL) GetUniformBlockIndex(program glbase.Program, uniformBlockName []byte) uint32 {
-	result := C.gl4_3compat_glGetUniformBlockIndex(gl.funcs, C.GLuint(program), (*C.GLchar)(unsafe.Pointer(&uniformBlockName[0])))
-	return uint32(result)
+	glresult := C.gl4_3compat_glGetUniformBlockIndex(gl.funcs, C.GLuint(program), (*C.GLchar)(unsafe.Pointer(&uniformBlockName[0])))
+	return uint32(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetActiveUniformName.xml
@@ -2845,8 +2845,8 @@ func (gl *GL) WaitSync(sync glbase.Sync, flags glbase.Bitfield, timeout uint64) 
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glClientWaitSync.xml
 func (gl *GL) ClientWaitSync(sync glbase.Sync, flags glbase.Bitfield, timeout uint64) glbase.Enum {
-	result := C.gl4_3compat_glClientWaitSync(gl.funcs, C.GLsync(sync), C.GLbitfield(flags), C.GLuint64(timeout))
-	return glbase.Enum(result)
+	glresult := C.gl4_3compat_glClientWaitSync(gl.funcs, C.GLsync(sync), C.GLbitfield(flags), C.GLuint64(timeout))
+	return glbase.Enum(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteSync.xml
@@ -2856,14 +2856,14 @@ func (gl *GL) DeleteSync(sync glbase.Sync) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsSync.xml
 func (gl *GL) IsSync(sync glbase.Sync) bool {
-	result := C.gl4_3compat_glIsSync(gl.funcs, C.GLsync(sync))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl4_3compat_glIsSync(gl.funcs, C.GLsync(sync))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glFenceSync.xml
 func (gl *GL) FenceSync(condition glbase.Enum, flags glbase.Bitfield) glbase.Sync {
-	result := C.gl4_3compat_glFenceSync(gl.funcs, C.GLenum(condition), C.GLbitfield(flags))
-	return glbase.Sync(result)
+	glresult := C.gl4_3compat_glFenceSync(gl.funcs, C.GLenum(condition), C.GLbitfield(flags))
+	return glbase.Sync(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glProvokingVertex.xml
@@ -3175,8 +3175,8 @@ func (gl *GL) BindSampler(unit, sampler uint32) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsSampler.xml
 func (gl *GL) IsSampler(sampler uint32) bool {
-	result := C.gl4_3compat_glIsSampler(gl.funcs, C.GLuint(sampler))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl4_3compat_glIsSampler(gl.funcs, C.GLuint(sampler))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteSamplers.xml
@@ -3191,8 +3191,8 @@ func (gl *GL) GenSamplers(count int32, samplers []uint32) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetFragDataIndex.xml
 func (gl *GL) GetFragDataIndex(program glbase.Program, name []byte) int32 {
-	result := C.gl4_3compat_glGetFragDataIndex(gl.funcs, C.GLuint(program), (*C.GLchar)(unsafe.Pointer(&name[0])))
-	return int32(result)
+	glresult := C.gl4_3compat_glGetFragDataIndex(gl.funcs, C.GLuint(program), (*C.GLchar)(unsafe.Pointer(&name[0])))
+	return int32(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glBindFragDataLocationIndexed.xml
@@ -3242,8 +3242,8 @@ func (gl *GL) PauseTransformFeedback() {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsTransformFeedback.xml
 func (gl *GL) IsTransformFeedback(id uint32) bool {
-	result := C.gl4_3compat_glIsTransformFeedback(gl.funcs, C.GLuint(id))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl4_3compat_glIsTransformFeedback(gl.funcs, C.GLuint(id))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenTransformFeedbacks.xml
@@ -3298,14 +3298,14 @@ func (gl *GL) GetActiveSubroutineUniformiv(program glbase.Program, shadertype gl
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetSubroutineIndex.xml
 func (gl *GL) GetSubroutineIndex(program glbase.Program, shadertype glbase.Enum, name []byte) uint32 {
-	result := C.gl4_3compat_glGetSubroutineIndex(gl.funcs, C.GLuint(program), C.GLenum(shadertype), (*C.GLchar)(unsafe.Pointer(&name[0])))
-	return uint32(result)
+	glresult := C.gl4_3compat_glGetSubroutineIndex(gl.funcs, C.GLuint(program), C.GLenum(shadertype), (*C.GLchar)(unsafe.Pointer(&name[0])))
+	return uint32(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetSubroutineUniformLocation.xml
 func (gl *GL) GetSubroutineUniformLocation(program glbase.Program, shadertype glbase.Enum, name []byte) int32 {
-	result := C.gl4_3compat_glGetSubroutineUniformLocation(gl.funcs, C.GLuint(program), C.GLenum(shadertype), (*C.GLchar)(unsafe.Pointer(&name[0])))
-	return int32(result)
+	glresult := C.gl4_3compat_glGetSubroutineUniformLocation(gl.funcs, C.GLuint(program), C.GLenum(shadertype), (*C.GLchar)(unsafe.Pointer(&name[0])))
+	return int32(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetUniformdv.xml
@@ -3837,8 +3837,8 @@ func (gl *GL) GetProgramPipelineiv(pipeline uint32, pname glbase.Enum, params []
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsProgramPipeline.xml
 func (gl *GL) IsProgramPipeline(pipeline uint32) bool {
-	result := C.gl4_3compat_glIsProgramPipeline(gl.funcs, C.GLuint(pipeline))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl4_3compat_glIsProgramPipeline(gl.funcs, C.GLuint(pipeline))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenProgramPipelines.xml
@@ -4008,14 +4008,14 @@ func (gl *GL) ShaderStorageBlockBinding(program glbase.Program, storageBlockInde
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetProgramResourceLocationIndex.xml
 func (gl *GL) GetProgramResourceLocationIndex(program glbase.Program, programInterface glbase.Enum, name []byte) int32 {
-	result := C.gl4_3compat_glGetProgramResourceLocationIndex(gl.funcs, C.GLuint(program), C.GLenum(programInterface), (*C.GLchar)(unsafe.Pointer(&name[0])))
-	return int32(result)
+	glresult := C.gl4_3compat_glGetProgramResourceLocationIndex(gl.funcs, C.GLuint(program), C.GLenum(programInterface), (*C.GLchar)(unsafe.Pointer(&name[0])))
+	return int32(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetProgramResourceLocation.xml
 func (gl *GL) GetProgramResourceLocation(program glbase.Program, programInterface glbase.Enum, name []byte) int32 {
-	result := C.gl4_3compat_glGetProgramResourceLocation(gl.funcs, C.GLuint(program), C.GLenum(programInterface), (*C.GLchar)(unsafe.Pointer(&name[0])))
-	return int32(result)
+	glresult := C.gl4_3compat_glGetProgramResourceLocation(gl.funcs, C.GLuint(program), C.GLenum(programInterface), (*C.GLchar)(unsafe.Pointer(&name[0])))
+	return int32(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetProgramResourceiv.xml
@@ -4030,8 +4030,8 @@ func (gl *GL) GetProgramResourceName(program glbase.Program, programInterface gl
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetProgramResourceIndex.xml
 func (gl *GL) GetProgramResourceIndex(program glbase.Program, programInterface glbase.Enum, name []byte) uint32 {
-	result := C.gl4_3compat_glGetProgramResourceIndex(gl.funcs, C.GLuint(program), C.GLenum(programInterface), (*C.GLchar)(unsafe.Pointer(&name[0])))
-	return uint32(result)
+	glresult := C.gl4_3compat_glGetProgramResourceIndex(gl.funcs, C.GLuint(program), C.GLenum(programInterface), (*C.GLchar)(unsafe.Pointer(&name[0])))
+	return uint32(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetProgramInterfaceiv.xml
@@ -4346,8 +4346,8 @@ func (gl *GL) Frustum(left, right, bottom, top, zNear, zFar float64) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsList.xml
 func (gl *GL) IsList(list uint32) bool {
-	result := C.gl4_3compat_glIsList(gl.funcs, C.GLuint(list))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl4_3compat_glIsList(gl.funcs, C.GLuint(list))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetTexGeniv.xml
@@ -4722,8 +4722,8 @@ func (gl *GL) InitNames() {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glRenderMode.xml
 func (gl *GL) RenderMode(mode glbase.Enum) int32 {
-	result := C.gl4_3compat_glRenderMode(gl.funcs, C.GLenum(mode))
-	return int32(result)
+	glresult := C.gl4_3compat_glRenderMode(gl.funcs, C.GLenum(mode))
+	return int32(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glSelectBuffer.xml
@@ -5757,8 +5757,8 @@ func (gl *GL) ListBase(base uint32) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenLists.xml
 func (gl *GL) GenLists(range_ int32) uint32 {
-	result := C.gl4_3compat_glGenLists(gl.funcs, C.GLsizei(range_))
-	return uint32(result)
+	glresult := C.gl4_3compat_glGenLists(gl.funcs, C.GLsizei(range_))
+	return uint32(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteLists.xml
@@ -5807,8 +5807,8 @@ func (gl *GL) PrioritizeTextures(n int32, textures []uint32, priorities []float3
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glAreTexturesResident.xml
 func (gl *GL) AreTexturesResident(n int32, textures []uint32, residences []bool) bool {
-	result := C.gl4_3compat_glAreTexturesResident(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])), (*C.GLboolean)(unsafe.Pointer(&residences[0])))
-	return *(*bool)(unsafe.Pointer(&result))
+	glresult := C.gl4_3compat_glAreTexturesResident(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])), (*C.GLboolean)(unsafe.Pointer(&residences[0])))
+	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexPointer.xml

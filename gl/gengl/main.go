@@ -918,20 +918,11 @@ func funcReturnResult(f Func) string {
 	tweaks := funcTweaks[f.GoName]
 	var buf bytes.Buffer
 	if f.GoType != "" {
-		tweak := tweaks.params["result"]
-		name := "result"
-		if tweak.rename != "" {
-			name = tweak.rename
-		}
 		if f.Type == "GLboolean" {
-			buf.WriteString("*(*bool)(unsafe.Pointer(&")
-			buf.WriteString(name)
-			buf.WriteString("))")
+			buf.WriteString("*(*bool)(unsafe.Pointer(&glresult))")
 		} else {
 			buf.WriteString(f.GoType)
-			buf.WriteByte('(')
-			buf.WriteString(name)
-			buf.WriteByte(')')
+			buf.WriteString("(glresult)")
 		}
 	}
 	for _, param := range f.Param {
@@ -1155,7 +1146,7 @@ func (gl *GL) {{$func.GoName}}({{funcParams $func}}) {{funcResult $func}} { {{/*
 		{{end}} {{/*
 */}}	{{end}} {{/*
 */}}	{{funcCallParamsPrep $func}} {{/*
-*/}}	{{if ne $func.Type "void"}}result := {{end}}C.gl{{$.GLVersionLabel}}_{{$func.Name}}(gl.funcs{{if $func.Param}}, {{funcCallParams $func}}{{end}})
+*/}}	{{if ne $func.Type "void"}}glresult := {{end}}C.gl{{$.GLVersionLabel}}_{{$func.Name}}(gl.funcs{{if $func.Param}}, {{funcCallParams $func}}{{end}})
 	{{funcCallParamsPost $func}} {{/*
 */}}	{{with $code := funcAfter $func}} {{/*
 */}}		{{$code}}
