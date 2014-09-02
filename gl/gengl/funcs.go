@@ -1,19 +1,63 @@
 package main
 
 type funcTweak struct {
+	// name specifies the name of the Go function to be tweaked.
 	name   string
-	params paramTweaks
-	result string
-	before string
-	after  string
+
+	// copy copies all the definitions for this function tweak from the named
+	// function. Templates are parsed under the new context.
 	copy   string
+
+	// params specifies a map of zero or more tweaks for specific parameters.
+	params paramTweaks
+
+	// result defines the function result as presented at the end of the func line.
+	// Simple type changes are handled automatically. More involved multi-value
+	// results will require an appropriate after snippet to handle the return.
+	result string
+
+	// before is a code snippet to be injected before the C function call.
+	// It may make use of the following template variables and functions:
+	//
+	//     . - dot holds the Func being tweaked
+	//     {{paramGoType . "name"}} - replaced by the respective parameter type
+	//
+	before string
+
+	// after is a code snippet to be injected after the C function call.
+	// It may make use of the same template functions as available for before.
+	after  string
+
+	// doc defines the documentation for the function. It may make use of the same
+	// template functions as available for before and after.
 	doc    string
 }
 
 type paramTweak struct {
-	rename string
-	retype string
-	remove bool
+	// rename changes the parameter name in the Go function while keeping the C
+	// function call unchanged. The before snippet must define a proper variable
+	// to be used under the original name.
+	rename  string
+
+	// replace changes the parameter name in the C function call to a variable
+	// named "<original name>_c", while keeping the Go parameter name unchanged.
+	// The before and after snippets must manipulate the two values as needed.
+	replace bool
+
+	// retype changes the Go parameter type.
+	retype  string
+
+	// output flags the parameter as an output parameter, which causes it to be
+	// omitted from the input parameter list and added to the result list.
+	output  bool
+
+	// single flags the parameter as carrying a single value rather than a slice,
+	// when the parameter is originally defined as a pointer.
+	single  bool
+
+	// remove drops the parameter from the Go function. The before snippet must
+	// define a variable with the proper name for the C function call to use.
+	remove  bool
 }
 
 type paramTweaks map[string]paramTweak
@@ -88,13 +132,92 @@ var funcTweakList = []funcTweak{{
 		values to set it to, then call Clear with the accumulation buffer
 		enabled.
 
-		GL.INVALID_ENUM is generated if op is not an accepted value.  
+		Error GL.INVALID_ENUM is generated if op is not an accepted value.  
 		GL.INVALID_OPERATION is generated if there is no accumulation buffer.
 		GL.INVALID_OPERATION is generated if Accum is executed between the
 		execution of Begin and the corresponding execution of End.
 
 		See also Clear, ClearAccum, CopyPixels, DrawBuffer, Get, ReadBuffer,
 		ReadPixels, Scissor, StencilOp
+	`,
+}, {
+	name: "BindAttribLocation",
+	params: paramTweaks{
+		"name": {retype: "string"},
+	},
+	doc: `
+		associates a user-defined attribute variable in the program
+		object specified by program with a generic vertex attribute index. The name
+		parameter specifies the name of the vertex shader attribute variable to
+		which index is to be bound. When program is made part of the current state,
+		values provided via the generic vertex attribute index will modify the
+		value of the user-defined attribute variable specified by name.
+
+		If name refers to a matrix attribute variable, index refers to the first
+		column of the matrix. Other matrix columns are then automatically bound to
+		locations index+1 for a matrix of type mat2; index+1 and index+2 for a
+		matrix of type mat3; and index+1, index+2, and index+3 for a matrix of
+		type mat4.
+
+		This command makes it possible for vertex shaders to use descriptive names
+		for attribute variables rather than generic variables that are numbered
+		from 0 to GL.MAX_VERTEX_ATTRIBS-1. The values sent to each generic
+		attribute index are part of current state, just like standard vertex
+		attributes such as color, normal, and vertex position. If a different
+		program object is made current by calling UseProgram, the generic vertex
+		attributes are tracked in such a way that the same values will be observed
+		by attributes in the new program object that are also bound to index.
+
+		Attribute variable name-to-generic attribute index bindings for a program
+		object can be explicitly assigned at any time by calling
+		BindAttribLocation. Attribute bindings do not go into effect until
+		LinkProgram is called. After a program object has been linked
+		successfully, the index values for generic attributes remain fixed (and
+		their values can be queried) until the next link command occurs.
+
+		Applications are not allowed to bind any of the standard OpenGL vertex
+		attributes using this command, as they are bound automatically when
+		needed. Any attribute binding that occurs after the program object has
+		been linked will not take effect until the next time the program object is
+		linked.
+
+		If name was bound previously, that information is lost. Thus you cannot
+		bind one user-defined attribute variable to multiple indices, but you can
+		bind multiple user-defined attribute variables to the same index.
+
+		Applications are allowed to bind more than one user-defined attribute
+		variable to the same generic vertex attribute index. This is called
+		aliasing, and it is allowed only if just one of the aliased attributes is
+		active in the executable program, or if no path through the shader
+		consumes more than one attribute of a set of attributes aliased to the
+		same location. The compiler and linker are allowed to assume that no
+		aliasing is done and are free to employ optimizations that work only in
+		the absence of aliasing. OpenGL implementations are not required to do
+		error checking to detect aliasing. Because there is no way to bind
+		standard attributes, it is not possible to alias generic attributes with
+		conventional ones (except for generic attribute 0).
+
+		BindAttribLocation can be called before any vertex shader objects are
+		bound to the specified program object. It is also permissible to bind a
+		generic attribute index to an attribute variable name that is never used
+		in a vertex shader.
+
+		Active attributes that are not explicitly bound will be bound by the
+		linker when LinkProgram is called. The locations assigned can be queried
+		by calling GetAttribLocation.
+
+		Error GL.INVALID_VALUE is generated if index is greater than or equal to
+		GL.MAX_VERTEX_ATTRIBS.
+		GL.INVALID_OPERATION is generated if name starts with the reserved prefix "gl_".
+		GL.INVALID_VALUE is generated if program is not a value generated by OpenGL.
+		GL.INVALID_OPERATION is generated if program is not a program object.
+		GL.INVALID_OPERATION is generated if BindAttribLocation is executed
+		between the execution of Begin and the corresponding execution of End.
+
+		BindAttribLocation is available only if the GL version is 2.0 or greater.
+
+		See also GetActiveAttrib, GetAttribLocation, EnableVertexAttribArray,
+		DisableVertexAttribArray, VertexAttrib, VertexAttribPointer.
 	`,
 }, {
 	name: "DepthRange",
@@ -131,6 +254,211 @@ var funcTweakList = []funcTweak{{
 }, {
 	name:   "CreateShader",
 	result: "glbase.Shader",
+}, {
+	name: "GetAttribLocation",
+	params: paramTweaks{
+		"name": {retype: "string"},
+	},
+	result: "glbase.Attrib",
+	doc: `
+		queries the previously linked program object specified
+		by program for the attribute variable specified by name and returns the
+		index of the generic vertex attribute that is bound to that attribute
+		variable. If name is a matrix attribute variable, the index of the first
+		column of the matrix is returned. If the named attribute variable is not
+		an active attribute in the specified program object or if name starts with
+		the reserved prefix "gl_", a value of -1 is returned.
+
+		The association between an attribute variable name and a generic attribute
+		index can be specified at any time by calling BindAttribLocation.
+		Attribute bindings do not go into effect until LinkProgram is called.
+		After a program object has been linked successfully, the index values for
+		attribute variables remain fixed until the next link command occurs. The
+		attribute values can only be queried after a link if the link was
+		successful. GetAttribLocation returns the binding that actually went
+		into effect the last time glLinkProgram was called for the specified
+		program object. Attribute bindings that have been specified since the last
+		link operation are not returned by GetAttribLocation.
+
+		Error GL_INVALID_OPERATION is generated if program is not a value
+		generated by OpenGL. GL_INVALID_OPERATION is generated if program is not
+		a program object. GL_INVALID_OPERATION is generated if program has not
+		been successfully linked.  GL_INVALID_OPERATION is generated if
+		GetAttribLocation is executed between the execution of glBegin and the
+		corresponding execution of glEnd.
+
+		GetAttribLocation is available only if the GL version is 2.0 or greater.
+
+		See also GetActiveAttrib, BindAttribLocation, LinkProgram, VertexAttrib,
+		VertexAttribPointer.
+	`,
+}, {
+	name: "GetUniformLocation",
+	params: paramTweaks{
+		"name": {retype: "string"},
+	},
+	result: "glbase.Uniform",
+	doc: `
+		returns an integer that represents the location of a
+		specific uniform variable within a program object. name must be an active
+		uniform variable name in program that is not a structure, an array of
+		structures, or a subcomponent of a vector or a matrix. This function
+		returns -1 if name does not correspond to an active uniform variable in
+		program or if name starts with the reserved prefix "gl_".
+
+		Uniform variables that are structures or arrays of structures may be
+		queried by calling GetUniformLocation for each field within the
+		structure. The array element operator "[]" and the structure field
+		operator "." may be used in name in order to select elements within an
+		array or fields within a structure. The result of using these operators is
+		not allowed to be another structure, an array of structures, or a
+		subcomponent of a vector or a matrix. Except if the last part of name
+		indicates a uniform variable array, the location of the first element of
+		an array can be retrieved by using the name of the array, or by using the
+		name appended by "[0]".
+
+		The actual locations assigned to uniform variables are not known until the
+		program object is linked successfully. After linking has occurred, the
+		command GetUniformLocation can be used to obtain the location of a
+		uniform variable. This location value can then be passed to glUniform to
+		set the value of the uniform variable or to GetUniform in order to query
+		the current value of the uniform variable. After a program object has been
+		linked successfully, the index values for uniform variables remain fixed
+		until the next link command occurs. Uniform variable locations and values
+		can only be queried after a link if the link was successful.
+
+		Error GL.INVALID_VALUE is generated if program is not a value generated by
+		OpenGL. GL.INVALID_OPERATION is generated if program is not a program object.
+		GL.INVALID_OPERATION is generated if program has not been successfully
+		linked. GL.INVALID_OPERATION is generated if GetUniformLocation is executed
+		between the execution of glBegin and the corresponding execution of glEnd.
+
+		GetUniformLocation is available only if the GL version is 2.0 or greater.
+
+		See also GetActiveUniform, GetProgram, GetUniform, LinkProgram.
+	`,
+}, {
+	name: "GetUniformfv",
+	params: paramTweaks{
+		"params": {replace: true},
+	},
+	before: `
+		var params_c [4]{{paramGoType . "params"}}
+	`,
+	after: `
+		copy(params, params_c[:])
+	`,
+
+	doc: `
+		returns in params the value of the specified uniform
+		variable. The type of the uniform variable specified by location
+		determines the number of values returned. If the uniform variable is
+		defined in the shader as a boolean, int, or float, a single value will be
+		returned. If it is defined as a vec2, ivec2, or bvec2, two values will be
+		returned. If it is defined as a vec3, ivec3, or bvec3, three values will
+		be returned, and so on. To query values stored in uniform variables
+		declared as arrays, call {{.Name}} for each element of the array. To
+		query values stored in uniform variables declared as structures, call
+		{{.Name}} for each field in the structure. The values for uniform
+		variables declared as a matrix will be returned in column major order.
+
+		The locations assigned to uniform variables are not known until the
+		program object is linked. After linking has occurred, the command
+		GetUniformLocation can be used to obtain the location of a uniform
+		variable. This location value can then be passed to {{.Name}} in order
+		to query the current value of the uniform variable. After a program object
+		has been linked successfully, the index values for uniform variables
+		remain fixed until the next link command occurs. The uniform variable
+		values can only be queried after a link if the link was successful.
+
+		Error GL.INVALID_VALUE is generated if program is not a value generated by
+		OpenGL. GL.INVALID_OPERATION is generated if program is not a program
+		object. GL.INVALID_OPERATION is generated if program has not been
+		successfully linked. GL.INVALID_OPERATION is generated if location does
+		not correspond to a valid uniform variable location for the specified
+		program object. GL.INVALID_OPERATION is generated if {{.Name}} is
+		executed between the execution of Begin and the corresponding execution of
+		End.
+
+		{{.Name}} is available only if the GL version is 2.0 or greater.
+
+		See also GetActiveUniform, GetUniformLocation, GetProgram, CreateProgram,
+		LinkProgram.
+	`,
+}, {
+	name: "GetUniformiv",
+	copy: "GetUniformfv",
+}, {
+	name: "GetVertexAttribdv",
+	params: paramTweaks{
+		"params": {single: true, output: true},
+	},
+	doc: `
+		returns in params the value of a generic vertex attribute
+		parameter. The generic vertex attribute to be queried is specified by
+		index, and the parameter to be queried is specified by pname.
+
+		The accepted parameter names are as follows:
+
+		  GL.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING
+		      params returns a single value, the name of the buffer object
+		      currently bound to the binding point corresponding to generic vertex
+		      attribute array index. If no buffer object is bound, 0 is returned.
+		      The initial value is 0.
+
+		  GL.VERTEX_ATTRIB_ARRAY_ENABLED
+		      params returns a single value that is non-zero (true) if the vertex
+		      attribute array for index is enabled and 0 (false) if it is
+		      disabled. The initial value is 0.
+
+		  GL.VERTEX_ATTRIB_ARRAY_SIZE
+		      params returns a single value, the size of the vertex attribute
+		      array for index. The size is the number of values for each element
+		      of the vertex attribute array, and it will be 1, 2, 3, or 4. The
+		      initial value is 4.
+
+		  GL.VERTEX_ATTRIB_ARRAY_STRIDE
+		      params returns a single value, the array stride for (number of bytes
+		      between successive elements in) the vertex attribute array for
+		      index. A value of 0 indicates that the array elements are stored
+		      sequentially in memory. The initial value is 0.
+
+		  GL.VERTEX_ATTRIB_ARRAY_TYPE
+		      params returns a single value, a symbolic constant indicating the
+		      array type for the vertex attribute array for index. Possible values
+		      are GL.BYTE, GL.UNSIGNED_BYTE, GL.SHORT, GL.UNSIGNED_SHORT, GL.INT,
+		      GL.UNSIGNED_INT, GL.FLOAT, and GL.DOUBLE. The initial value is
+		      GL.FLOAT.
+
+		  GL.VERTEX_ATTRIB_ARRAY_NORMALIZED
+		      params returns a single value that is non-zero (true) if fixed-point
+		      data types for the vertex attribute array indicated by index are
+		      normalized when they are converted to floating point, and 0 (false)
+		      otherwise. The initial value is 0.
+
+		  GL.CURRENT_VERTEX_ATTRIB
+		      params returns four values that represent the current value for the
+		      generic vertex attribute specified by index. Generic vertex
+		      attribute 0 is unique in that it has no current state, so an error
+		      will be generated if index is 0. The initial value for all other
+		      generic vertex attributes is (0,0,0,1).
+
+		All of the parameters except GL.CURRENT_VERTEX_ATTRIB represent
+		client-side state.
+
+		Error GL.INVALID_VALUE is generated if index is greater than or equal to
+		GL.MAX_VERTEX_ATTRIBS. GL.INVALID_ENUM is generated if pname is not an
+		accepted value.  GL.INVALID_OPERATION is generated if index is 0 and pname
+		is GL.CURRENT_VERTEX_ATTRIB.
+
+		GetVertexAttrib is available only if the GL version is 2.0 or greater.
+	`,
+}, {
+	name: "GetVertexAttribfv",
+	copy: "GetVertexAttribdv",
+}, {
+	name: "GetVertexAttribiv",
+	copy: "GetVertexAttribdv",
 }, {
 	name: "MultMatrixd",
 	before: `

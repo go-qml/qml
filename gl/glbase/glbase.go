@@ -16,7 +16,6 @@ type Contexter interface {
 }
 
 type (
-	Boolean  uint8
 	Bitfield uint32
 	Enum     uint32
 	Sync     uintptr
@@ -24,6 +23,7 @@ type (
 	Clampd   float64
 
 	Uniform int32
+	Attrib  int32
 	Texture uint32
 	Program uint32
 	Shader  uint32

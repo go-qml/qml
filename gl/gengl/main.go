@@ -563,6 +563,11 @@ func prepareHeader(header *Header) error {
 			f.GoType = goTypeName(f.Type)
 		}
 
+		tweak := funcTweaks[f.GoName]
+		if tweak.result != "" {
+			f.GoType = tweak.result
+		}
+
 		for pi, p := range f.Param {
 			switch p.Name {
 			case "type", "func", "map", "string":
@@ -594,16 +599,20 @@ func prepareHeader(header *Header) error {
 					p.GoType = "glbase.Buffer"
 				case "texture":
 					p.GoType = "glbase.Texture"
+				case "index":
+					if strings.Contains(f.Name, "Attrib") {
+						p.GoType = "glbase.Attrib"
+					}
 				}
 				// TODO Check plurals.
 			}
 			if p.GoType == "int32" && p.GoName == "location" && strings.Contains(f.Name, "Uniform") {
 				p.GoType = "glbase.Uniform"
 			}
+			if retype := tweak.params[p.GoName].retype; retype != "" {
+				p.GoType = retype
+			}
 			f.Param[pi] = p
-		}
-		if result := funcTweaks[f.GoName].result; result != "" {
-			f.GoType = result
 		}
 		header.Func[fi] = f
 	}
@@ -677,7 +686,9 @@ func init() {
 	for _, tweak := range funcTweakList {
 		if tweak.copy != "" {
 			doc := tweak.doc
-			tweak := funcTweaks[tweak.copy]
+			name := tweak.name
+			tweak = funcTweaks[tweak.copy]
+			tweak.name = name
 			if doc != "" {
 				tweak.doc = doc
 			}
@@ -689,8 +700,9 @@ func init() {
 	}
 }
 
-func funcDoc(header *Header, f Func) string {
+func funcComment(header *Header, f Func) string {
 	var doc = funcTweaks[f.GoName].doc
+	doc = execTemplate(f.GoName + ":doc", doc, f)
 	var buf bytes.Buffer
 	if doc != "" {
 		var scanner = bufio.NewScanner(bytes.NewBufferString(doc))
@@ -719,17 +731,42 @@ func funcDoc(header *Header, f Func) string {
 	return buf.String()
 }
 
-func funcParams(f Func) string {
-	type paramItem struct {
-		GoName string
-		GoType string
-	}
+type paramItem struct {
+	GoName string
+	GoType string
+}
+
+func appendResultList(list []paramItem, f Func) []paramItem {
 	var tweaks = funcTweaks[f.GoName]
-	var list []paramItem
+	var buf bytes.Buffer
+	tweak := tweaks.params["result"]
+	if f.GoType != "" && !tweak.remove {
+		var item paramItem
+		if tweak.rename != "" {
+			item.GoName = tweak.rename
+		} else {
+			item.GoName = "result"
+		}
+		if tweak.retype != "" {
+			item.GoType = tweak.retype
+		} else {
+			for i := 0; i < f.Addr; i++ {
+				buf.WriteString("[]")
+			}
+			buf.WriteString(f.GoType)
+			item.GoType = buf.String()
+		}
+		list = append(list, item)
+	}
+	return list
+}
+
+func appendParamsList(list []paramItem, f Func, output bool) []paramItem {
+	var tweaks = funcTweaks[f.GoName]
 	var buf bytes.Buffer
 	for _, param := range f.Param {
 		tweak := tweaks.params[param.GoName]
-		if tweak.remove {
+		if tweak.remove || tweak.output != output {
 			continue
 		}
 		var item paramItem
@@ -739,9 +776,11 @@ func funcParams(f Func) string {
 			item.GoName = param.GoName
 		}
 		if tweak.retype != "" {
-			item.GoType = tweak.retype
+			item.GoType = param.GoType
 		} else if param.Type == "GLvoid" && param.Addr > 0 {
 			item.GoType = "interface{}"
+		} else if tweak.single {
+			item.GoType = param.GoType
 		} else {
 			buf.Truncate(0)
 			for j := 0; j < param.Addr; j++ {
@@ -757,7 +796,11 @@ func funcParams(f Func) string {
 		}
 		list = append(list, item)
 	}
-	buf.Truncate(0)
+	return list
+}
+
+func formatParamsList(list []paramItem) string {
+	var buf bytes.Buffer
 	for i, item := range list {
 		if i > 0 {
 			buf.WriteString(", ")
@@ -771,24 +814,53 @@ func funcParams(f Func) string {
 	return buf.String()
 }
 
+func funcParams(f Func) string {
+	list := appendParamsList(nil, f, false)
+	return formatParamsList(list)
+}
+
+func funcResult(f Func) string {
+	list := appendResultList(nil, f)
+	list = appendParamsList(list, f, true)
+	if len(list) == 0 {
+		return ""
+	}
+	if len(list) == 1 && list[0].GoName == "result" {
+		return list[0].GoType
+	}
+	return "(" + formatParamsList(list) + ")"
+}
+
 func funcBefore(f Func) string {
-	return funcTweaks[f.GoName].before
+	content := strings.TrimSpace(funcTweaks[f.GoName].before)
+	return execTemplate(f.GoName+":before", content, f)
 }
 
 func funcAfter(f Func) string {
-	return funcTweaks[f.GoName].after
+	content := strings.TrimSpace(funcTweaks[f.GoName].after)
+	return execTemplate(f.GoName+":after", content, f)
 }
 
 func funcCallParams(f Func) string {
+	tweaks := funcTweaks[f.GoName]
 	var buf bytes.Buffer
 	for i, param := range f.Param {
 		if i > 0 {
 			buf.WriteString(", ")
 		}
+		tweak := tweaks.params[param.GoName]
+		name := param.GoName
+		if tweak.replace {
+			name += "_c"
+		}
 		if param.Type == "GLvoid" {
 			buf.WriteString("unsafe.Pointer(")
-			buf.WriteString(param.GoName)
+			buf.WriteString(name)
 			buf.WriteString("_v.Index(0).Addr().Pointer())")
+		} else if param.Addr == 1 && param.Type == "GLchar" && param.GoType == "string" {
+			buf.WriteString("(*C.GLchar)(")
+			buf.WriteString(name)
+			buf.WriteString("_cstr)")
 		} else if param.Addr > 0 {
 			buf.WriteByte('(')
 			for i := 0; i < param.Addr; i++ {
@@ -797,28 +869,82 @@ func funcCallParams(f Func) string {
 			buf.WriteString("C.")
 			buf.WriteString(param.Type)
 			buf.WriteString(")(unsafe.Pointer(&")
-			buf.WriteString(param.GoName)
-			buf.WriteString("[0]))")
+			buf.WriteString(name)
+			if !tweak.single {
+				buf.WriteString("[0]")
+			}
+			buf.WriteString("))")
 		} else if param.Type == "GLboolean" {
 			buf.WriteString("*(*C.GLboolean)(unsafe.Pointer(&")
-			buf.WriteString(param.GoName)
+			buf.WriteString(name)
 			buf.WriteString("))")
 		} else {
 			buf.WriteString("C.")
 			buf.WriteString(param.Type)
 			buf.WriteByte('(')
-			buf.WriteString(param.GoName)
+			buf.WriteString(name)
 			buf.WriteByte(')')
 		}
 	}
 	return buf.String()
 }
 
-func funcCallResult(f Func) string {
-	if f.Type == "GLboolean" {
-		return "*(*bool)(unsafe.Pointer(&result))"
+func funcCallParamsPrep(f Func) string {
+	var buf bytes.Buffer
+	for _, param := range f.Param {
+		if param.Addr == 1 && param.Type == "GLchar" && param.GoType == "string" {
+			buf.WriteString(param.GoName)
+			buf.WriteString("_cstr := C.CString(")
+			buf.WriteString(param.GoName)
+			buf.WriteString(")\n")
+		}
 	}
-	return f.GoType + "(result)"
+	return buf.String()
+}
+
+func funcCallParamsPost(f Func) string {
+	var buf bytes.Buffer
+	for _, param := range f.Param {
+		if param.Addr == 1 && param.Type == "GLchar" && param.GoType == "string" {
+			buf.WriteString("C.free(unsafe.Pointer(")
+			buf.WriteString(param.GoName)
+			buf.WriteString("_cstr))\n")
+		}
+	}
+	return buf.String()
+}
+
+func funcReturnResult(f Func) string {
+	tweaks := funcTweaks[f.GoName]
+	var buf bytes.Buffer
+	if f.GoType != "" {
+		tweak := tweaks.params["result"]
+		name := "result"
+		if tweak.rename != "" {
+			name = tweak.rename
+		}
+		if f.Type == "GLboolean" {
+			buf.WriteString("*(*bool)(unsafe.Pointer(&")
+			buf.WriteString(name)
+			buf.WriteString("))")
+		} else {
+			buf.WriteString(f.GoType)
+			buf.WriteByte('(')
+			buf.WriteString(name)
+			buf.WriteByte(')')
+		}
+	}
+	for _, param := range f.Param {
+		tweak := tweaks.params[param.GoName]
+		if tweak.remove || !tweak.output {
+			continue
+		}
+		if buf.Len() > 0 {
+			buf.WriteString(", ")
+		}
+		buf.WriteString(param.GoName)
+	}
+	return buf.String()
 }
 
 func funcCParams(f Func) string {
@@ -873,6 +999,9 @@ func funcParamLen(f Func, param Param) string {
 // funcSupported returns whether the given function has wrapping
 // properly implemented already.
 func funcSupported(f Func) bool {
+	if strings.HasPrefix(f.GoName, "Uniform") && strings.HasSuffix(f.GoName, "v") {
+		return false
+	}
 	if _, ok := funcTweaks[f.GoName]; ok {
 		return true
 	}
@@ -890,39 +1019,75 @@ func funcSupported(f Func) bool {
 	return true
 }
 
-var funcs = template.FuncMap{
-	"constNewLine":    constNewLine,
-	"funcSupported":   funcSupported,
-	"funcDoc":         funcDoc,
-	"funcParams":      funcParams,
-	"funcBefore":      funcBefore,
-	"funcParamLen":    funcParamLen,
-	"funcCallParams":  funcCallParams,
-	"funcAfter":       funcAfter,
-	"funcCallResult":  funcCallResult,
-	"funcCParams":     funcCParams,
-	"funcCCallParams": funcCCallParams,
-	"repeat":          strings.Repeat,
-	"tolower":         strings.ToLower,
-	"goTypeName":      goTypeName,
+func copyDoc(name string) string {
+	return funcTweaks[name].doc
 }
 
-type packageFile struct {
-	Name     string
-	Template *template.Template
+func paramGoType(f Func, name string) string {
+	for _, param := range f.Param {
+		if param.GoName == name {
+			return param.GoType
+		}
+	}
+	panic(fmt.Sprintf("parameter %q not found in function %s", name, f.GoName))
 }
 
-var packageFiles = []packageFile{
-	{"gl.go", tmplGo},
-	{"funcs.cpp", tmplFuncsCpp},
-	{"funcs.h", tmplFuncsH},
+func execTemplate(name, content string, dot interface{}) string {
+	if !strings.Contains(content, "{{") {
+		return content
+	}
+	var buf bytes.Buffer
+	tmpl := template.Must(template.New(name).Funcs(funcs).Parse(content))
+	if err := tmpl.Execute(&buf, dot); err != nil {
+		panic(err)
+	}
+	return buf.String()
 }
 
 func buildTemplate(name, content string) *template.Template {
 	return template.Must(template.New(name).Funcs(funcs).Parse(content))
 }
 
-var tmplGo = buildTemplate("gl.go", `
+var funcs template.FuncMap
+
+type packageFile struct {
+	Name     string
+	Template *template.Template
+}
+
+var packageFiles []packageFile
+
+func init() {
+	funcs = template.FuncMap{
+		"copyDoc":     copyDoc,
+		"paramGoType": paramGoType,
+
+		"constNewLine": constNewLine,
+		"toLower":      strings.ToLower,
+
+		"funcSupported":      funcSupported,
+		"funcComment":        funcComment,
+		"funcParams":         funcParams,
+		"funcResult":         funcResult,
+		"funcBefore":         funcBefore,
+		"funcParamLen":       funcParamLen,
+		"funcCallParams":     funcCallParams,
+		"funcCallParamsPrep": funcCallParamsPrep,
+		"funcCallParamsPost": funcCallParamsPost,
+		"funcAfter":          funcAfter,
+		"funcReturnResult":   funcReturnResult,
+		"funcCParams":        funcCParams,
+		"funcCCallParams":    funcCCallParams,
+	}
+
+	packageFiles = []packageFile{
+		{"gl.go", buildTemplate("gl.go", tmplGo)},
+		{"funcs.cpp", buildTemplate("funcs.cpp", tmplFuncsCpp)},
+		{"funcs.h", buildTemplate("funcs.h", tmplFuncsH)},
+	}
+}
+
+var tmplGo = `
 // ** file automatically generated by glgen -- do not edit manually **
 
 package GL
@@ -934,6 +1099,8 @@ package GL
 {{end}}// #cgo pkg-config: Qt5Core Qt5OpenGL
 //
 // #include "funcs.h"
+//
+// void free(void*);
 //
 import "C"
 
@@ -970,38 +1137,41 @@ const ({{range $const := $.Const}}{{if $const.LineBlock | constNewLine}}
 {{end}})
 
 {{ range $func := $.Func }}{{if $func | funcSupported}}
-{{funcDoc $ $func}}
-func (gl *GL) {{$func.GoName}}({{funcParams $func}}) {{if $func.GoType}}{{repeat "*" $func.Addr}}{{$func.GoType}} {{end}}{ {{/*
-*/}}	{{funcBefore $func}} {{/*
+{{funcComment $ $func}}
+func (gl *GL) {{$func.GoName}}({{funcParams $func}}) {{funcResult $func}} { {{/*
+*/}}	{{with $code := funcBefore $func}}{{$code}}
+	{{end}} {{/*
 */}}	{{range $param := $func.Param}} {{/*
 */}}		{{with $plen := funcParamLen $func $param}} {{/*
 */}}			if len({{$param.GoName}}) != {{$plen}} {
 				panic("parameter {{$param.GoName}} has incorrect length")
 			}
 		{{end}} {{/*
-*/}}		{{if $param.Type | eq "GLvoid"}} {{/*
+*/}}		{{if eq $param.Type "GLvoid"}} {{/*
 */}}			{{$param.GoName}}_v := reflect.ValueOf({{$param.GoName}})
 			if {{$param.GoName}}_v.Kind() != reflect.Slice {
 				panic("parameter {{$param.GoName}} must be a slice")
 			}
 		{{end}} {{/*
 */}}	{{end}} {{/*
+*/}}	{{funcCallParamsPrep $func}} {{/*
 */}}	{{if ne $func.Type "void"}}result := {{end}}C.gl{{$.GLVersionLabel}}_{{$func.Name}}(gl.funcs{{if $func.Param}}, {{funcCallParams $func}}{{end}})
-	{{with $after := funcAfter $func}} {{/*
-*/}}		{{$after}} {{/*
-*/}}	{{else}} {{/*
-*/}}		{{if $func.GoType}}return {{funcCallResult $func}}
+	{{funcCallParamsPost $func}} {{/*
+*/}}	{{with $code := funcAfter $func}} {{/*
+*/}}		{{$code}}
+	{{else}} {{/*
+*/}}		{{with $code := funcReturnResult $func}}return {{$code}}
 		{{end}} {{/*
 */}}	{{end}} {{/*
 */}} }
 {{end}}{{end}}
-`)
+`
 
-var tmplFuncsCpp = buildTemplate("funcs.cpp", `
+var tmplFuncsCpp = `
 // ** file automatically generated by glgen -- do not edit manually **
 
 #include <QOpenGLContext>
-#include <QtGui/{{$.Class | tolower}}.h>
+#include <QtGui/{{$.Class | toLower}}.h>
 
 #include "funcs.h"
 
@@ -1021,9 +1191,9 @@ void *gl{{$.GLVersionLabel}}_funcs() {
 	{{end}}{{if $func.GoType}}return {{end}}{{if not $func.Missing}}_qglfuncs->{{end}}{{$func.Name}}({{funcCCallParams $func}});
 }
 {{end}}{{end}}
-`)
+`
 
-var tmplFuncsH = buildTemplate("funcs.h", `
+var tmplFuncsH = `
 // ** file automatically generated by glgen -- do not edit manually **
 
 #ifndef __cplusplus
@@ -1066,4 +1236,4 @@ void *gl{{$.GLVersionLabel}}_funcs();
 #ifdef __cplusplus
 } // extern "C"
 #endif
-`)
+`

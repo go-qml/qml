@@ -8,6 +8,8 @@ package GL
 //
 // #include "funcs.h"
 //
+// void free(void*);
+//
 import "C"
 
 import (
@@ -1170,8 +1172,55 @@ func (gl *GL) MultMatrixd(m []float64) {
 	C.gl1_2_glMultMatrixd(gl.funcs, (*C.GLdouble)(unsafe.Pointer(&m[0])))
 }
 
+// MultMatrixf multiplies the current matrix with the provided matrix.
+//
+// The m parameter must hold 16 consecutive elements of a 4x4 column-major matrix.
+//
+// The current matrix is determined by the current matrix mode (see
+// MatrixMode). It is either the projection matrix, modelview matrix, or the
+// texture matrix.
+//
+// For example, if the current matrix is C and the coordinates to be transformed
+// are v = (v[0], v[1], v[2], v[3]), then the current transformation is C × v, or
+//
+//     c[0]  c[4]  c[8]  c[12]     v[0]
+//     c[1]  c[5]  c[9]  c[13]     v[1]
+//     c[2]  c[6]  c[10] c[14]  X  v[2]
+//     c[3]  c[7]  c[11] c[15]     v[3]
+//
+// Calling glMultMatrix with an argument of m = m[0], m[1], ..., m[15]
+// replaces the current transformation with (C X M) x v, or
+//
+//     c[0]  c[4]  c[8]  c[12]   m[0]  m[4]  m[8]  m[12]   v[0]
+//     c[1]  c[5]  c[9]  c[13]   m[1]  m[5]  m[9]  m[13]   v[1]
+//     c[2]  c[6]  c[10] c[14] X m[2]  m[6]  m[10] m[14] X v[2]
+//     c[3]  c[7]  c[11] c[15]   m[3]  m[7]  m[11] m[15]   v[3]
+//
+// Where 'X' denotes matrix multiplication, and v is represented as a 4x1 matrix.
+//
+// While the elements of the matrix may be specified with single or double
+// precision, the GL may store or operate on these values in less-than-single
+// precision.
+//
+// In many computer languages, 4×4 arrays are represented in row-major
+// order. The transformations just described represent these matrices in
+// column-major order. The order of the multiplication is important. For
+// example, if the current transformation is a rotation, and MultMatrix is
+// called with a translation matrix, the translation is done directly on the
+// coordinates to be transformed, while the rotation is done on the results
+// of that translation.
+//
+// GL.INVALID_OPERATION is generated if MultMatrix is executed between the
+// execution of Begin and the corresponding execution of End.
+//
+// See also LoadIdentity, LoadMatrix, LoadTransposeMatrix, MatrixMode,
+// MultTransposeMatrix, PushMatrix.
+//
 // https://www.opengl.org/sdk/docs/man2/xhtml/glMultMatrixf.xml
 func (gl *GL) MultMatrixf(m []float32) {
+	if len(m) != 16 {
+		panic("parameter m must have length 16 for the 4x4 matrix")
+	}
 	C.gl1_2_glMultMatrixf(gl.funcs, (*C.GLfloat)(unsafe.Pointer(&m[0])))
 }
 
@@ -1523,7 +1572,7 @@ func (gl *GL) PopAttrib() {
 // values to set it to, then call Clear with the accumulation buffer
 // enabled.
 //
-// GL.INVALID_ENUM is generated if op is not an accepted value.
+// Error GL.INVALID_ENUM is generated if op is not an accepted value.
 // GL.INVALID_OPERATION is generated if there is no accumulation buffer.
 // GL.INVALID_OPERATION is generated if Accum is executed between the
 // execution of Begin and the corresponding execution of End.

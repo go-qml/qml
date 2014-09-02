@@ -8,6 +8,8 @@ package GL
 //
 // #include "funcs.h"
 //
+// void free(void*);
+//
 import "C"
 
 import (
@@ -652,7 +654,7 @@ func (gl *GL) GenQueries(n int32, ids []uint32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribPointer.xml
-func (gl *GL) VertexAttribPointer(index uint32, size int32, gltype glbase.Enum, normalized bool, stride int32, pointer interface{}) {
+func (gl *GL) VertexAttribPointer(index glbase.Attrib, size int32, gltype glbase.Enum, normalized bool, stride int32, pointer interface{}) {
 	pointer_v := reflect.ValueOf(pointer)
 	if pointer_v.Kind() != reflect.Slice {
 		panic("parameter pointer must be a slice")
@@ -663,88 +665,6 @@ func (gl *GL) VertexAttribPointer(index uint32, size int32, gltype glbase.Enum, 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glValidateProgram.xml
 func (gl *GL) ValidateProgram(program glbase.Program) {
 	C.gl4_2core_glValidateProgram(gl.funcs, C.GLuint(program))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix4fv.xml
-func (gl *GL) UniformMatrix4fv(location glbase.Uniform, count int32, transpose bool, value []float32) {
-	if len(value) != 4 {
-		panic("parameter value has incorrect length")
-	}
-	C.gl4_2core_glUniformMatrix4fv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLfloat)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix3fv.xml
-func (gl *GL) UniformMatrix3fv(location glbase.Uniform, count int32, transpose bool, value []float32) {
-	if len(value) != 3 {
-		panic("parameter value has incorrect length")
-	}
-	C.gl4_2core_glUniformMatrix3fv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLfloat)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix2fv.xml
-func (gl *GL) UniformMatrix2fv(location glbase.Uniform, count int32, transpose bool, value []float32) {
-	if len(value) != 2 {
-		panic("parameter value has incorrect length")
-	}
-	C.gl4_2core_glUniformMatrix2fv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLfloat)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform4iv.xml
-func (gl *GL) Uniform4iv(location glbase.Uniform, count int32, value []int32) {
-	if len(value) != 4 {
-		panic("parameter value has incorrect length")
-	}
-	C.gl4_2core_glUniform4iv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLint)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform3iv.xml
-func (gl *GL) Uniform3iv(location glbase.Uniform, count int32, value []int32) {
-	if len(value) != 3 {
-		panic("parameter value has incorrect length")
-	}
-	C.gl4_2core_glUniform3iv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLint)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform2iv.xml
-func (gl *GL) Uniform2iv(location glbase.Uniform, count int32, value []int32) {
-	if len(value) != 2 {
-		panic("parameter value has incorrect length")
-	}
-	C.gl4_2core_glUniform2iv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLint)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform1iv.xml
-func (gl *GL) Uniform1iv(location glbase.Uniform, count int32, value []int32) {
-	C.gl4_2core_glUniform1iv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLint)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform4fv.xml
-func (gl *GL) Uniform4fv(location glbase.Uniform, count int32, value []float32) {
-	if len(value) != 4 {
-		panic("parameter value has incorrect length")
-	}
-	C.gl4_2core_glUniform4fv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLfloat)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform3fv.xml
-func (gl *GL) Uniform3fv(location glbase.Uniform, count int32, value []float32) {
-	if len(value) != 3 {
-		panic("parameter value has incorrect length")
-	}
-	C.gl4_2core_glUniform3fv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLfloat)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform2fv.xml
-func (gl *GL) Uniform2fv(location glbase.Uniform, count int32, value []float32) {
-	if len(value) != 2 {
-		panic("parameter value has incorrect length")
-	}
-	C.gl4_2core_glUniform2fv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLfloat)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform1fv.xml
-func (gl *GL) Uniform1fv(location glbase.Uniform, count int32, value []float32) {
-	C.gl4_2core_glUniform1fv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLfloat)(unsafe.Pointer(&value[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniform4i.xml
@@ -825,35 +745,329 @@ func (gl *GL) IsProgram(program glbase.Program) bool {
 	return *(*bool)(unsafe.Pointer(&result))
 }
 
+// GetVertexAttribiv returns in params the value of a generic vertex attribute
+// parameter. The generic vertex attribute to be queried is specified by
+// index, and the parameter to be queried is specified by pname.
+//
+// The accepted parameter names are as follows:
+//
+//   GL.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING
+//       params returns a single value, the name of the buffer object
+//       currently bound to the binding point corresponding to generic vertex
+//       attribute array index. If no buffer object is bound, 0 is returned.
+//       The initial value is 0.
+//
+//   GL.VERTEX_ATTRIB_ARRAY_ENABLED
+//       params returns a single value that is non-zero (true) if the vertex
+//       attribute array for index is enabled and 0 (false) if it is
+//       disabled. The initial value is 0.
+//
+//   GL.VERTEX_ATTRIB_ARRAY_SIZE
+//       params returns a single value, the size of the vertex attribute
+//       array for index. The size is the number of values for each element
+//       of the vertex attribute array, and it will be 1, 2, 3, or 4. The
+//       initial value is 4.
+//
+//   GL.VERTEX_ATTRIB_ARRAY_STRIDE
+//       params returns a single value, the array stride for (number of bytes
+//       between successive elements in) the vertex attribute array for
+//       index. A value of 0 indicates that the array elements are stored
+//       sequentially in memory. The initial value is 0.
+//
+//   GL.VERTEX_ATTRIB_ARRAY_TYPE
+//       params returns a single value, a symbolic constant indicating the
+//       array type for the vertex attribute array for index. Possible values
+//       are GL.BYTE, GL.UNSIGNED_BYTE, GL.SHORT, GL.UNSIGNED_SHORT, GL.INT,
+//       GL.UNSIGNED_INT, GL.FLOAT, and GL.DOUBLE. The initial value is
+//       GL.FLOAT.
+//
+//   GL.VERTEX_ATTRIB_ARRAY_NORMALIZED
+//       params returns a single value that is non-zero (true) if fixed-point
+//       data types for the vertex attribute array indicated by index are
+//       normalized when they are converted to floating point, and 0 (false)
+//       otherwise. The initial value is 0.
+//
+//   GL.CURRENT_VERTEX_ATTRIB
+//       params returns four values that represent the current value for the
+//       generic vertex attribute specified by index. Generic vertex
+//       attribute 0 is unique in that it has no current state, so an error
+//       will be generated if index is 0. The initial value for all other
+//       generic vertex attributes is (0,0,0,1).
+//
+// All of the parameters except GL.CURRENT_VERTEX_ATTRIB represent
+// client-side state.
+//
+// Error GL.INVALID_VALUE is generated if index is greater than or equal to
+// GL.MAX_VERTEX_ATTRIBS. GL.INVALID_ENUM is generated if pname is not an
+// accepted value.  GL.INVALID_OPERATION is generated if index is 0 and pname
+// is GL.CURRENT_VERTEX_ATTRIB.
+//
+// GetVertexAttrib is available only if the GL version is 2.0 or greater.
+//
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetVertexAttribiv.xml
-func (gl *GL) GetVertexAttribiv(index uint32, pname glbase.Enum, params []int32) {
-	C.gl4_2core_glGetVertexAttribiv(gl.funcs, C.GLuint(index), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
+func (gl *GL) GetVertexAttribiv(index glbase.Attrib, pname glbase.Enum) (params int32) {
+	C.gl4_2core_glGetVertexAttribiv(gl.funcs, C.GLuint(index), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params)))
+	return params
 }
 
+// GetVertexAttribfv returns in params the value of a generic vertex attribute
+// parameter. The generic vertex attribute to be queried is specified by
+// index, and the parameter to be queried is specified by pname.
+//
+// The accepted parameter names are as follows:
+//
+//   GL.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING
+//       params returns a single value, the name of the buffer object
+//       currently bound to the binding point corresponding to generic vertex
+//       attribute array index. If no buffer object is bound, 0 is returned.
+//       The initial value is 0.
+//
+//   GL.VERTEX_ATTRIB_ARRAY_ENABLED
+//       params returns a single value that is non-zero (true) if the vertex
+//       attribute array for index is enabled and 0 (false) if it is
+//       disabled. The initial value is 0.
+//
+//   GL.VERTEX_ATTRIB_ARRAY_SIZE
+//       params returns a single value, the size of the vertex attribute
+//       array for index. The size is the number of values for each element
+//       of the vertex attribute array, and it will be 1, 2, 3, or 4. The
+//       initial value is 4.
+//
+//   GL.VERTEX_ATTRIB_ARRAY_STRIDE
+//       params returns a single value, the array stride for (number of bytes
+//       between successive elements in) the vertex attribute array for
+//       index. A value of 0 indicates that the array elements are stored
+//       sequentially in memory. The initial value is 0.
+//
+//   GL.VERTEX_ATTRIB_ARRAY_TYPE
+//       params returns a single value, a symbolic constant indicating the
+//       array type for the vertex attribute array for index. Possible values
+//       are GL.BYTE, GL.UNSIGNED_BYTE, GL.SHORT, GL.UNSIGNED_SHORT, GL.INT,
+//       GL.UNSIGNED_INT, GL.FLOAT, and GL.DOUBLE. The initial value is
+//       GL.FLOAT.
+//
+//   GL.VERTEX_ATTRIB_ARRAY_NORMALIZED
+//       params returns a single value that is non-zero (true) if fixed-point
+//       data types for the vertex attribute array indicated by index are
+//       normalized when they are converted to floating point, and 0 (false)
+//       otherwise. The initial value is 0.
+//
+//   GL.CURRENT_VERTEX_ATTRIB
+//       params returns four values that represent the current value for the
+//       generic vertex attribute specified by index. Generic vertex
+//       attribute 0 is unique in that it has no current state, so an error
+//       will be generated if index is 0. The initial value for all other
+//       generic vertex attributes is (0,0,0,1).
+//
+// All of the parameters except GL.CURRENT_VERTEX_ATTRIB represent
+// client-side state.
+//
+// Error GL.INVALID_VALUE is generated if index is greater than or equal to
+// GL.MAX_VERTEX_ATTRIBS. GL.INVALID_ENUM is generated if pname is not an
+// accepted value.  GL.INVALID_OPERATION is generated if index is 0 and pname
+// is GL.CURRENT_VERTEX_ATTRIB.
+//
+// GetVertexAttrib is available only if the GL version is 2.0 or greater.
+//
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetVertexAttribfv.xml
-func (gl *GL) GetVertexAttribfv(index uint32, pname glbase.Enum, params []float32) {
-	C.gl4_2core_glGetVertexAttribfv(gl.funcs, C.GLuint(index), C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params[0])))
+func (gl *GL) GetVertexAttribfv(index glbase.Attrib, pname glbase.Enum) (params float32) {
+	C.gl4_2core_glGetVertexAttribfv(gl.funcs, C.GLuint(index), C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params)))
+	return params
 }
 
+// GetVertexAttribdv returns in params the value of a generic vertex attribute
+// parameter. The generic vertex attribute to be queried is specified by
+// index, and the parameter to be queried is specified by pname.
+//
+// The accepted parameter names are as follows:
+//
+//   GL.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING
+//       params returns a single value, the name of the buffer object
+//       currently bound to the binding point corresponding to generic vertex
+//       attribute array index. If no buffer object is bound, 0 is returned.
+//       The initial value is 0.
+//
+//   GL.VERTEX_ATTRIB_ARRAY_ENABLED
+//       params returns a single value that is non-zero (true) if the vertex
+//       attribute array for index is enabled and 0 (false) if it is
+//       disabled. The initial value is 0.
+//
+//   GL.VERTEX_ATTRIB_ARRAY_SIZE
+//       params returns a single value, the size of the vertex attribute
+//       array for index. The size is the number of values for each element
+//       of the vertex attribute array, and it will be 1, 2, 3, or 4. The
+//       initial value is 4.
+//
+//   GL.VERTEX_ATTRIB_ARRAY_STRIDE
+//       params returns a single value, the array stride for (number of bytes
+//       between successive elements in) the vertex attribute array for
+//       index. A value of 0 indicates that the array elements are stored
+//       sequentially in memory. The initial value is 0.
+//
+//   GL.VERTEX_ATTRIB_ARRAY_TYPE
+//       params returns a single value, a symbolic constant indicating the
+//       array type for the vertex attribute array for index. Possible values
+//       are GL.BYTE, GL.UNSIGNED_BYTE, GL.SHORT, GL.UNSIGNED_SHORT, GL.INT,
+//       GL.UNSIGNED_INT, GL.FLOAT, and GL.DOUBLE. The initial value is
+//       GL.FLOAT.
+//
+//   GL.VERTEX_ATTRIB_ARRAY_NORMALIZED
+//       params returns a single value that is non-zero (true) if fixed-point
+//       data types for the vertex attribute array indicated by index are
+//       normalized when they are converted to floating point, and 0 (false)
+//       otherwise. The initial value is 0.
+//
+//   GL.CURRENT_VERTEX_ATTRIB
+//       params returns four values that represent the current value for the
+//       generic vertex attribute specified by index. Generic vertex
+//       attribute 0 is unique in that it has no current state, so an error
+//       will be generated if index is 0. The initial value for all other
+//       generic vertex attributes is (0,0,0,1).
+//
+// All of the parameters except GL.CURRENT_VERTEX_ATTRIB represent
+// client-side state.
+//
+// Error GL.INVALID_VALUE is generated if index is greater than or equal to
+// GL.MAX_VERTEX_ATTRIBS. GL.INVALID_ENUM is generated if pname is not an
+// accepted value.  GL.INVALID_OPERATION is generated if index is 0 and pname
+// is GL.CURRENT_VERTEX_ATTRIB.
+//
+// GetVertexAttrib is available only if the GL version is 2.0 or greater.
+//
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetVertexAttribdv.xml
-func (gl *GL) GetVertexAttribdv(index uint32, pname glbase.Enum, params []float64) {
-	C.gl4_2core_glGetVertexAttribdv(gl.funcs, C.GLuint(index), C.GLenum(pname), (*C.GLdouble)(unsafe.Pointer(&params[0])))
+func (gl *GL) GetVertexAttribdv(index glbase.Attrib, pname glbase.Enum) (params float64) {
+	C.gl4_2core_glGetVertexAttribdv(gl.funcs, C.GLuint(index), C.GLenum(pname), (*C.GLdouble)(unsafe.Pointer(&params)))
+	return params
 }
 
+// GetUniformiv returns in params the value of the specified uniform
+// variable. The type of the uniform variable specified by location
+// determines the number of values returned. If the uniform variable is
+// defined in the shader as a boolean, int, or float, a single value will be
+// returned. If it is defined as a vec2, ivec2, or bvec2, two values will be
+// returned. If it is defined as a vec3, ivec3, or bvec3, three values will
+// be returned, and so on. To query values stored in uniform variables
+// declared as arrays, call glGetUniformiv for each element of the array. To
+// query values stored in uniform variables declared as structures, call
+// glGetUniformiv for each field in the structure. The values for uniform
+// variables declared as a matrix will be returned in column major order.
+//
+// The locations assigned to uniform variables are not known until the
+// program object is linked. After linking has occurred, the command
+// GetUniformLocation can be used to obtain the location of a uniform
+// variable. This location value can then be passed to glGetUniformiv in order
+// to query the current value of the uniform variable. After a program object
+// has been linked successfully, the index values for uniform variables
+// remain fixed until the next link command occurs. The uniform variable
+// values can only be queried after a link if the link was successful.
+//
+// Error GL.INVALID_VALUE is generated if program is not a value generated by
+// OpenGL. GL.INVALID_OPERATION is generated if program is not a program
+// object. GL.INVALID_OPERATION is generated if program has not been
+// successfully linked. GL.INVALID_OPERATION is generated if location does
+// not correspond to a valid uniform variable location for the specified
+// program object. GL.INVALID_OPERATION is generated if glGetUniformiv is
+// executed between the execution of Begin and the corresponding execution of
+// End.
+//
+// glGetUniformiv is available only if the GL version is 2.0 or greater.
+//
+// See also GetActiveUniform, GetUniformLocation, GetProgram, CreateProgram,
+// LinkProgram.
+//
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetUniformiv.xml
 func (gl *GL) GetUniformiv(program glbase.Program, location glbase.Uniform, params []int32) {
-	C.gl4_2core_glGetUniformiv(gl.funcs, C.GLuint(program), C.GLint(location), (*C.GLint)(unsafe.Pointer(&params[0])))
+	var params_c [4]int32
+	C.gl4_2core_glGetUniformiv(gl.funcs, C.GLuint(program), C.GLint(location), (*C.GLint)(unsafe.Pointer(&params_c[0])))
+	copy(params, params_c[:])
 }
 
+// GetUniformfv returns in params the value of the specified uniform
+// variable. The type of the uniform variable specified by location
+// determines the number of values returned. If the uniform variable is
+// defined in the shader as a boolean, int, or float, a single value will be
+// returned. If it is defined as a vec2, ivec2, or bvec2, two values will be
+// returned. If it is defined as a vec3, ivec3, or bvec3, three values will
+// be returned, and so on. To query values stored in uniform variables
+// declared as arrays, call glGetUniformfv for each element of the array. To
+// query values stored in uniform variables declared as structures, call
+// glGetUniformfv for each field in the structure. The values for uniform
+// variables declared as a matrix will be returned in column major order.
+//
+// The locations assigned to uniform variables are not known until the
+// program object is linked. After linking has occurred, the command
+// GetUniformLocation can be used to obtain the location of a uniform
+// variable. This location value can then be passed to glGetUniformfv in order
+// to query the current value of the uniform variable. After a program object
+// has been linked successfully, the index values for uniform variables
+// remain fixed until the next link command occurs. The uniform variable
+// values can only be queried after a link if the link was successful.
+//
+// Error GL.INVALID_VALUE is generated if program is not a value generated by
+// OpenGL. GL.INVALID_OPERATION is generated if program is not a program
+// object. GL.INVALID_OPERATION is generated if program has not been
+// successfully linked. GL.INVALID_OPERATION is generated if location does
+// not correspond to a valid uniform variable location for the specified
+// program object. GL.INVALID_OPERATION is generated if glGetUniformfv is
+// executed between the execution of Begin and the corresponding execution of
+// End.
+//
+// glGetUniformfv is available only if the GL version is 2.0 or greater.
+//
+// See also GetActiveUniform, GetUniformLocation, GetProgram, CreateProgram,
+// LinkProgram.
+//
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetUniformfv.xml
 func (gl *GL) GetUniformfv(program glbase.Program, location glbase.Uniform, params []float32) {
-	C.gl4_2core_glGetUniformfv(gl.funcs, C.GLuint(program), C.GLint(location), (*C.GLfloat)(unsafe.Pointer(&params[0])))
+	var params_c [4]float32
+	C.gl4_2core_glGetUniformfv(gl.funcs, C.GLuint(program), C.GLint(location), (*C.GLfloat)(unsafe.Pointer(&params_c[0])))
+	copy(params, params_c[:])
 }
 
+// GetUniformLocation returns an integer that represents the location of a
+// specific uniform variable within a program object. name must be an active
+// uniform variable name in program that is not a structure, an array of
+// structures, or a subcomponent of a vector or a matrix. This function
+// returns -1 if name does not correspond to an active uniform variable in
+// program or if name starts with the reserved prefix "gl_".
+//
+// Uniform variables that are structures or arrays of structures may be
+// queried by calling GetUniformLocation for each field within the
+// structure. The array element operator "[]" and the structure field
+// operator "." may be used in name in order to select elements within an
+// array or fields within a structure. The result of using these operators is
+// not allowed to be another structure, an array of structures, or a
+// subcomponent of a vector or a matrix. Except if the last part of name
+// indicates a uniform variable array, the location of the first element of
+// an array can be retrieved by using the name of the array, or by using the
+// name appended by "[0]".
+//
+// The actual locations assigned to uniform variables are not known until the
+// program object is linked successfully. After linking has occurred, the
+// command GetUniformLocation can be used to obtain the location of a
+// uniform variable. This location value can then be passed to glUniform to
+// set the value of the uniform variable or to GetUniform in order to query
+// the current value of the uniform variable. After a program object has been
+// linked successfully, the index values for uniform variables remain fixed
+// until the next link command occurs. Uniform variable locations and values
+// can only be queried after a link if the link was successful.
+//
+// Error GL.INVALID_VALUE is generated if program is not a value generated by
+// OpenGL. GL.INVALID_OPERATION is generated if program is not a program object.
+// GL.INVALID_OPERATION is generated if program has not been successfully
+// linked. GL.INVALID_OPERATION is generated if GetUniformLocation is executed
+// between the execution of glBegin and the corresponding execution of glEnd.
+//
+// GetUniformLocation is available only if the GL version is 2.0 or greater.
+//
+// See also GetActiveUniform, GetProgram, GetUniform, LinkProgram.
+//
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetUniformLocation.xml
-func (gl *GL) GetUniformLocation(program glbase.Program, name []byte) int32 {
-	result := C.gl4_2core_glGetUniformLocation(gl.funcs, C.GLuint(program), (*C.GLchar)(unsafe.Pointer(&name[0])))
-	return int32(result)
+func (gl *GL) GetUniformLocation(program glbase.Program, name string) glbase.Uniform {
+	name_cstr := C.CString(name)
+	result := C.gl4_2core_glGetUniformLocation(gl.funcs, C.GLuint(program), (*C.GLchar)(name_cstr))
+	C.free(unsafe.Pointer(name_cstr))
+	return glbase.Uniform(result)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetShaderSource.xml
@@ -881,10 +1095,43 @@ func (gl *GL) GetProgramiv(program glbase.Program, pname glbase.Enum, params []i
 	C.gl4_2core_glGetProgramiv(gl.funcs, C.GLuint(program), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
+// GetAttribLocation queries the previously linked program object specified
+// by program for the attribute variable specified by name and returns the
+// index of the generic vertex attribute that is bound to that attribute
+// variable. If name is a matrix attribute variable, the index of the first
+// column of the matrix is returned. If the named attribute variable is not
+// an active attribute in the specified program object or if name starts with
+// the reserved prefix "gl_", a value of -1 is returned.
+//
+// The association between an attribute variable name and a generic attribute
+// index can be specified at any time by calling BindAttribLocation.
+// Attribute bindings do not go into effect until LinkProgram is called.
+// After a program object has been linked successfully, the index values for
+// attribute variables remain fixed until the next link command occurs. The
+// attribute values can only be queried after a link if the link was
+// successful. GetAttribLocation returns the binding that actually went
+// into effect the last time glLinkProgram was called for the specified
+// program object. Attribute bindings that have been specified since the last
+// link operation are not returned by GetAttribLocation.
+//
+// Error GL_INVALID_OPERATION is generated if program is not a value
+// generated by OpenGL. GL_INVALID_OPERATION is generated if program is not
+// a program object. GL_INVALID_OPERATION is generated if program has not
+// been successfully linked.  GL_INVALID_OPERATION is generated if
+// GetAttribLocation is executed between the execution of glBegin and the
+// corresponding execution of glEnd.
+//
+// GetAttribLocation is available only if the GL version is 2.0 or greater.
+//
+// See also GetActiveAttrib, BindAttribLocation, LinkProgram, VertexAttrib,
+// VertexAttribPointer.
+//
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetAttribLocation.xml
-func (gl *GL) GetAttribLocation(program glbase.Program, name []byte) int32 {
-	result := C.gl4_2core_glGetAttribLocation(gl.funcs, C.GLuint(program), (*C.GLchar)(unsafe.Pointer(&name[0])))
-	return int32(result)
+func (gl *GL) GetAttribLocation(program glbase.Program, name string) glbase.Attrib {
+	name_cstr := C.CString(name)
+	result := C.gl4_2core_glGetAttribLocation(gl.funcs, C.GLuint(program), (*C.GLchar)(name_cstr))
+	C.free(unsafe.Pointer(name_cstr))
+	return glbase.Attrib(result)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetAttachedShaders.xml
@@ -898,17 +1145,17 @@ func (gl *GL) GetActiveUniform(program glbase.Program, index uint32, bufSize int
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetActiveAttrib.xml
-func (gl *GL) GetActiveAttrib(program glbase.Program, index uint32, bufSize int32, length, size []int32, gltype []glbase.Enum, name []byte) {
+func (gl *GL) GetActiveAttrib(program glbase.Program, index glbase.Attrib, bufSize int32, length, size []int32, gltype []glbase.Enum, name []byte) {
 	C.gl4_2core_glGetActiveAttrib(gl.funcs, C.GLuint(program), C.GLuint(index), C.GLsizei(bufSize), (*C.GLsizei)(unsafe.Pointer(&length[0])), (*C.GLint)(unsafe.Pointer(&size[0])), (*C.GLenum)(unsafe.Pointer(&gltype[0])), (*C.GLchar)(unsafe.Pointer(&name[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glEnableVertexAttribArray.xml
-func (gl *GL) EnableVertexAttribArray(index uint32) {
+func (gl *GL) EnableVertexAttribArray(index glbase.Attrib) {
 	C.gl4_2core_glEnableVertexAttribArray(gl.funcs, C.GLuint(index))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDisableVertexAttribArray.xml
-func (gl *GL) DisableVertexAttribArray(index uint32) {
+func (gl *GL) DisableVertexAttribArray(index glbase.Attrib) {
 	C.gl4_2core_glDisableVertexAttribArray(gl.funcs, C.GLuint(index))
 }
 
@@ -944,9 +1191,84 @@ func (gl *GL) CompileShader(shader glbase.Shader) {
 	C.gl4_2core_glCompileShader(gl.funcs, C.GLuint(shader))
 }
 
+// BindAttribLocation associates a user-defined attribute variable in the program
+// object specified by program with a generic vertex attribute index. The name
+// parameter specifies the name of the vertex shader attribute variable to
+// which index is to be bound. When program is made part of the current state,
+// values provided via the generic vertex attribute index will modify the
+// value of the user-defined attribute variable specified by name.
+//
+// If name refers to a matrix attribute variable, index refers to the first
+// column of the matrix. Other matrix columns are then automatically bound to
+// locations index+1 for a matrix of type mat2; index+1 and index+2 for a
+// matrix of type mat3; and index+1, index+2, and index+3 for a matrix of
+// type mat4.
+//
+// This command makes it possible for vertex shaders to use descriptive names
+// for attribute variables rather than generic variables that are numbered
+// from 0 to GL.MAX_VERTEX_ATTRIBS-1. The values sent to each generic
+// attribute index are part of current state, just like standard vertex
+// attributes such as color, normal, and vertex position. If a different
+// program object is made current by calling UseProgram, the generic vertex
+// attributes are tracked in such a way that the same values will be observed
+// by attributes in the new program object that are also bound to index.
+//
+// Attribute variable name-to-generic attribute index bindings for a program
+// object can be explicitly assigned at any time by calling
+// BindAttribLocation. Attribute bindings do not go into effect until
+// LinkProgram is called. After a program object has been linked
+// successfully, the index values for generic attributes remain fixed (and
+// their values can be queried) until the next link command occurs.
+//
+// Applications are not allowed to bind any of the standard OpenGL vertex
+// attributes using this command, as they are bound automatically when
+// needed. Any attribute binding that occurs after the program object has
+// been linked will not take effect until the next time the program object is
+// linked.
+//
+// If name was bound previously, that information is lost. Thus you cannot
+// bind one user-defined attribute variable to multiple indices, but you can
+// bind multiple user-defined attribute variables to the same index.
+//
+// Applications are allowed to bind more than one user-defined attribute
+// variable to the same generic vertex attribute index. This is called
+// aliasing, and it is allowed only if just one of the aliased attributes is
+// active in the executable program, or if no path through the shader
+// consumes more than one attribute of a set of attributes aliased to the
+// same location. The compiler and linker are allowed to assume that no
+// aliasing is done and are free to employ optimizations that work only in
+// the absence of aliasing. OpenGL implementations are not required to do
+// error checking to detect aliasing. Because there is no way to bind
+// standard attributes, it is not possible to alias generic attributes with
+// conventional ones (except for generic attribute 0).
+//
+// BindAttribLocation can be called before any vertex shader objects are
+// bound to the specified program object. It is also permissible to bind a
+// generic attribute index to an attribute variable name that is never used
+// in a vertex shader.
+//
+// Active attributes that are not explicitly bound will be bound by the
+// linker when LinkProgram is called. The locations assigned can be queried
+// by calling GetAttribLocation.
+//
+// Error GL.INVALID_VALUE is generated if index is greater than or equal to
+// GL.MAX_VERTEX_ATTRIBS.
+// GL.INVALID_OPERATION is generated if name starts with the reserved prefix "gl_".
+// GL.INVALID_VALUE is generated if program is not a value generated by OpenGL.
+// GL.INVALID_OPERATION is generated if program is not a program object.
+// GL.INVALID_OPERATION is generated if BindAttribLocation is executed
+// between the execution of Begin and the corresponding execution of End.
+//
+// BindAttribLocation is available only if the GL version is 2.0 or greater.
+//
+// See also GetActiveAttrib, GetAttribLocation, EnableVertexAttribArray,
+// DisableVertexAttribArray, VertexAttrib, VertexAttribPointer.
+//
 // https://www.opengl.org/sdk/docs/man2/xhtml/glBindAttribLocation.xml
-func (gl *GL) BindAttribLocation(program glbase.Program, index uint32, name []byte) {
-	C.gl4_2core_glBindAttribLocation(gl.funcs, C.GLuint(program), C.GLuint(index), (*C.GLchar)(unsafe.Pointer(&name[0])))
+func (gl *GL) BindAttribLocation(program glbase.Program, index glbase.Attrib, name string) {
+	name_cstr := C.CString(name)
+	C.gl4_2core_glBindAttribLocation(gl.funcs, C.GLuint(program), C.GLuint(index), (*C.GLchar)(name_cstr))
+	C.free(unsafe.Pointer(name_cstr))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glAttachShader.xml
@@ -977,54 +1299,6 @@ func (gl *GL) DrawBuffers(n int32, bufs []glbase.Enum) {
 // https://www.opengl.org/sdk/docs/man2/xhtml/glBlendEquationSeparate.xml
 func (gl *GL) BlendEquationSeparate(modeRGB, modeAlpha glbase.Enum) {
 	C.gl4_2core_glBlendEquationSeparate(gl.funcs, C.GLenum(modeRGB), C.GLenum(modeAlpha))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix4x3fv.xml
-func (gl *GL) UniformMatrix4x3fv(location glbase.Uniform, count int32, transpose bool, value []float32) {
-	if len(value) != 3 {
-		panic("parameter value has incorrect length")
-	}
-	C.gl4_2core_glUniformMatrix4x3fv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLfloat)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix3x4fv.xml
-func (gl *GL) UniformMatrix3x4fv(location glbase.Uniform, count int32, transpose bool, value []float32) {
-	if len(value) != 4 {
-		panic("parameter value has incorrect length")
-	}
-	C.gl4_2core_glUniformMatrix3x4fv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLfloat)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix4x2fv.xml
-func (gl *GL) UniformMatrix4x2fv(location glbase.Uniform, count int32, transpose bool, value []float32) {
-	if len(value) != 2 {
-		panic("parameter value has incorrect length")
-	}
-	C.gl4_2core_glUniformMatrix4x2fv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLfloat)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix2x4fv.xml
-func (gl *GL) UniformMatrix2x4fv(location glbase.Uniform, count int32, transpose bool, value []float32) {
-	if len(value) != 4 {
-		panic("parameter value has incorrect length")
-	}
-	C.gl4_2core_glUniformMatrix2x4fv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLfloat)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix3x2fv.xml
-func (gl *GL) UniformMatrix3x2fv(location glbase.Uniform, count int32, transpose bool, value []float32) {
-	if len(value) != 2 {
-		panic("parameter value has incorrect length")
-	}
-	C.gl4_2core_glUniformMatrix3x2fv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLfloat)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix2x3fv.xml
-func (gl *GL) UniformMatrix2x3fv(location glbase.Uniform, count int32, transpose bool, value []float32) {
-	if len(value) != 3 {
-		panic("parameter value has incorrect length")
-	}
-	C.gl4_2core_glUniformMatrix2x3fv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLfloat)(unsafe.Pointer(&value[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsVertexArray.xml
@@ -1196,26 +1470,6 @@ func (gl *GL) TexParameterIiv(target, pname glbase.Enum, params []int32) {
 	C.gl4_2core_glTexParameterIiv(gl.funcs, C.GLenum(target), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform4uiv.xml
-func (gl *GL) Uniform4uiv(location glbase.Uniform, count int32, value []uint32) {
-	C.gl4_2core_glUniform4uiv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLuint)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform3uiv.xml
-func (gl *GL) Uniform3uiv(location glbase.Uniform, count int32, value []uint32) {
-	C.gl4_2core_glUniform3uiv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLuint)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform2uiv.xml
-func (gl *GL) Uniform2uiv(location glbase.Uniform, count int32, value []uint32) {
-	C.gl4_2core_glUniform2uiv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLuint)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform1uiv.xml
-func (gl *GL) Uniform1uiv(location glbase.Uniform, count int32, value []uint32) {
-	C.gl4_2core_glUniform1uiv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLuint)(unsafe.Pointer(&value[0])))
-}
-
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniform4ui.xml
 func (gl *GL) Uniform4ui(location glbase.Uniform, v0, v1, v2, v3 uint32) {
 	C.gl4_2core_glUniform4ui(gl.funcs, C.GLint(location), C.GLuint(v0), C.GLuint(v1), C.GLuint(v2), C.GLuint(v3))
@@ -1253,17 +1507,17 @@ func (gl *GL) GetUniformuiv(program glbase.Program, location glbase.Uniform, par
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetVertexAttribIuiv.xml
-func (gl *GL) GetVertexAttribIuiv(index uint32, pname glbase.Enum, params []uint32) {
+func (gl *GL) GetVertexAttribIuiv(index glbase.Attrib, pname glbase.Enum, params []uint32) {
 	C.gl4_2core_glGetVertexAttribIuiv(gl.funcs, C.GLuint(index), C.GLenum(pname), (*C.GLuint)(unsafe.Pointer(&params[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetVertexAttribIiv.xml
-func (gl *GL) GetVertexAttribIiv(index uint32, pname glbase.Enum, params []int32) {
+func (gl *GL) GetVertexAttribIiv(index glbase.Attrib, pname glbase.Enum, params []int32) {
 	C.gl4_2core_glGetVertexAttribIiv(gl.funcs, C.GLuint(index), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribIPointer.xml
-func (gl *GL) VertexAttribIPointer(index uint32, size int32, gltype glbase.Enum, stride int32, pointer interface{}) {
+func (gl *GL) VertexAttribIPointer(index glbase.Attrib, size int32, gltype glbase.Enum, stride int32, pointer interface{}) {
 	pointer_v := reflect.ValueOf(pointer)
 	if pointer_v.Kind() != reflect.Slice {
 		panic("parameter pointer must be a slice")
@@ -1508,42 +1762,42 @@ func (gl *GL) GetInteger64i_v(target glbase.Enum, index uint32, data []int64) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribP4uiv.xml
-func (gl *GL) VertexAttribP4uiv(index uint32, gltype glbase.Enum, normalized bool, value []uint32) {
+func (gl *GL) VertexAttribP4uiv(index glbase.Attrib, gltype glbase.Enum, normalized bool, value []uint32) {
 	C.gl4_2core_glVertexAttribP4uiv(gl.funcs, C.GLuint(index), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), (*C.GLuint)(unsafe.Pointer(&value[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribP4ui.xml
-func (gl *GL) VertexAttribP4ui(index uint32, gltype glbase.Enum, normalized bool, value uint32) {
+func (gl *GL) VertexAttribP4ui(index glbase.Attrib, gltype glbase.Enum, normalized bool, value uint32) {
 	C.gl4_2core_glVertexAttribP4ui(gl.funcs, C.GLuint(index), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), C.GLuint(value))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribP3uiv.xml
-func (gl *GL) VertexAttribP3uiv(index uint32, gltype glbase.Enum, normalized bool, value []uint32) {
+func (gl *GL) VertexAttribP3uiv(index glbase.Attrib, gltype glbase.Enum, normalized bool, value []uint32) {
 	C.gl4_2core_glVertexAttribP3uiv(gl.funcs, C.GLuint(index), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), (*C.GLuint)(unsafe.Pointer(&value[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribP3ui.xml
-func (gl *GL) VertexAttribP3ui(index uint32, gltype glbase.Enum, normalized bool, value uint32) {
+func (gl *GL) VertexAttribP3ui(index glbase.Attrib, gltype glbase.Enum, normalized bool, value uint32) {
 	C.gl4_2core_glVertexAttribP3ui(gl.funcs, C.GLuint(index), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), C.GLuint(value))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribP2uiv.xml
-func (gl *GL) VertexAttribP2uiv(index uint32, gltype glbase.Enum, normalized bool, value []uint32) {
+func (gl *GL) VertexAttribP2uiv(index glbase.Attrib, gltype glbase.Enum, normalized bool, value []uint32) {
 	C.gl4_2core_glVertexAttribP2uiv(gl.funcs, C.GLuint(index), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), (*C.GLuint)(unsafe.Pointer(&value[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribP2ui.xml
-func (gl *GL) VertexAttribP2ui(index uint32, gltype glbase.Enum, normalized bool, value uint32) {
+func (gl *GL) VertexAttribP2ui(index glbase.Attrib, gltype glbase.Enum, normalized bool, value uint32) {
 	C.gl4_2core_glVertexAttribP2ui(gl.funcs, C.GLuint(index), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), C.GLuint(value))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribP1uiv.xml
-func (gl *GL) VertexAttribP1uiv(index uint32, gltype glbase.Enum, normalized bool, value []uint32) {
+func (gl *GL) VertexAttribP1uiv(index glbase.Attrib, gltype glbase.Enum, normalized bool, value []uint32) {
 	C.gl4_2core_glVertexAttribP1uiv(gl.funcs, C.GLuint(index), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), (*C.GLuint)(unsafe.Pointer(&value[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribP1ui.xml
-func (gl *GL) VertexAttribP1ui(index uint32, gltype glbase.Enum, normalized bool, value uint32) {
+func (gl *GL) VertexAttribP1ui(index glbase.Attrib, gltype glbase.Enum, normalized bool, value uint32) {
 	C.gl4_2core_glVertexAttribP1ui(gl.funcs, C.GLuint(index), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), C.GLuint(value))
 }
 
@@ -1795,7 +2049,7 @@ func (gl *GL) BindFragDataLocationIndexed(program glbase.Program, colorNumber, i
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribDivisor.xml
-func (gl *GL) VertexAttribDivisor(index, divisor uint32) {
+func (gl *GL) VertexAttribDivisor(index glbase.Attrib, divisor uint32) {
 	C.gl4_2core_glVertexAttribDivisor(gl.funcs, C.GLuint(index), C.GLuint(divisor))
 }
 
@@ -1875,11 +2129,6 @@ func (gl *GL) GetUniformSubroutineuiv(shadertype glbase.Enum, location glbase.Un
 	C.gl4_2core_glGetUniformSubroutineuiv(gl.funcs, C.GLenum(shadertype), C.GLint(location), (*C.GLuint)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformSubroutinesuiv.xml
-func (gl *GL) UniformSubroutinesuiv(shadertype glbase.Enum, count int32, indices []uint32) {
-	C.gl4_2core_glUniformSubroutinesuiv(gl.funcs, C.GLenum(shadertype), C.GLsizei(count), (*C.GLuint)(unsafe.Pointer(&indices[0])))
-}
-
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetActiveSubroutineName.xml
 func (gl *GL) GetActiveSubroutineName(program glbase.Program, shadertype glbase.Enum, index uint32, bufsize int32, length []int32, name []byte) {
 	C.gl4_2core_glGetActiveSubroutineName(gl.funcs, C.GLuint(program), C.GLenum(shadertype), C.GLuint(index), C.GLsizei(bufsize), (*C.GLsizei)(unsafe.Pointer(&length[0])), (*C.GLchar)(unsafe.Pointer(&name[0])))
@@ -1910,107 +2159,6 @@ func (gl *GL) GetSubroutineUniformLocation(program glbase.Program, shadertype gl
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetUniformdv.xml
 func (gl *GL) GetUniformdv(program glbase.Program, location glbase.Uniform, params []float64) {
 	C.gl4_2core_glGetUniformdv(gl.funcs, C.GLuint(program), C.GLint(location), (*C.GLdouble)(unsafe.Pointer(&params[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix4x3dv.xml
-func (gl *GL) UniformMatrix4x3dv(location glbase.Uniform, count int32, transpose bool, value []float64) {
-	if len(value) != 3 {
-		panic("parameter value has incorrect length")
-	}
-	C.gl4_2core_glUniformMatrix4x3dv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLdouble)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix4x2dv.xml
-func (gl *GL) UniformMatrix4x2dv(location glbase.Uniform, count int32, transpose bool, value []float64) {
-	if len(value) != 2 {
-		panic("parameter value has incorrect length")
-	}
-	C.gl4_2core_glUniformMatrix4x2dv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLdouble)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix3x4dv.xml
-func (gl *GL) UniformMatrix3x4dv(location glbase.Uniform, count int32, transpose bool, value []float64) {
-	if len(value) != 4 {
-		panic("parameter value has incorrect length")
-	}
-	C.gl4_2core_glUniformMatrix3x4dv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLdouble)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix3x2dv.xml
-func (gl *GL) UniformMatrix3x2dv(location glbase.Uniform, count int32, transpose bool, value []float64) {
-	if len(value) != 2 {
-		panic("parameter value has incorrect length")
-	}
-	C.gl4_2core_glUniformMatrix3x2dv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLdouble)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix2x4dv.xml
-func (gl *GL) UniformMatrix2x4dv(location glbase.Uniform, count int32, transpose bool, value []float64) {
-	if len(value) != 4 {
-		panic("parameter value has incorrect length")
-	}
-	C.gl4_2core_glUniformMatrix2x4dv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLdouble)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix2x3dv.xml
-func (gl *GL) UniformMatrix2x3dv(location glbase.Uniform, count int32, transpose bool, value []float64) {
-	if len(value) != 3 {
-		panic("parameter value has incorrect length")
-	}
-	C.gl4_2core_glUniformMatrix2x3dv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLdouble)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix4dv.xml
-func (gl *GL) UniformMatrix4dv(location glbase.Uniform, count int32, transpose bool, value []float64) {
-	if len(value) != 4 {
-		panic("parameter value has incorrect length")
-	}
-	C.gl4_2core_glUniformMatrix4dv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLdouble)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix3dv.xml
-func (gl *GL) UniformMatrix3dv(location glbase.Uniform, count int32, transpose bool, value []float64) {
-	if len(value) != 3 {
-		panic("parameter value has incorrect length")
-	}
-	C.gl4_2core_glUniformMatrix3dv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLdouble)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix2dv.xml
-func (gl *GL) UniformMatrix2dv(location glbase.Uniform, count int32, transpose bool, value []float64) {
-	if len(value) != 2 {
-		panic("parameter value has incorrect length")
-	}
-	C.gl4_2core_glUniformMatrix2dv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLdouble)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform4dv.xml
-func (gl *GL) Uniform4dv(location glbase.Uniform, count int32, value []float64) {
-	if len(value) != 4 {
-		panic("parameter value has incorrect length")
-	}
-	C.gl4_2core_glUniform4dv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLdouble)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform3dv.xml
-func (gl *GL) Uniform3dv(location glbase.Uniform, count int32, value []float64) {
-	if len(value) != 3 {
-		panic("parameter value has incorrect length")
-	}
-	C.gl4_2core_glUniform3dv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLdouble)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform2dv.xml
-func (gl *GL) Uniform2dv(location glbase.Uniform, count int32, value []float64) {
-	if len(value) != 2 {
-		panic("parameter value has incorrect length")
-	}
-	C.gl4_2core_glUniform2dv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLdouble)(unsafe.Pointer(&value[0])))
-}
-
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform1dv.xml
-func (gl *GL) Uniform1dv(location glbase.Uniform, count int32, value []float64) {
-	C.gl4_2core_glUniform1dv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLdouble)(unsafe.Pointer(&value[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniform4d.xml
@@ -2127,12 +2275,12 @@ func (gl *GL) ViewportArrayv(first uint32, count int32, v []float32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetVertexAttribLdv.xml
-func (gl *GL) GetVertexAttribLdv(index uint32, pname glbase.Enum, params []float64) {
+func (gl *GL) GetVertexAttribLdv(index glbase.Attrib, pname glbase.Enum, params []float64) {
 	C.gl4_2core_glGetVertexAttribLdv(gl.funcs, C.GLuint(index), C.GLenum(pname), (*C.GLdouble)(unsafe.Pointer(&params[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribLPointer.xml
-func (gl *GL) VertexAttribLPointer(index uint32, size int32, gltype glbase.Enum, stride int32, pointer interface{}) {
+func (gl *GL) VertexAttribLPointer(index glbase.Attrib, size int32, gltype glbase.Enum, stride int32, pointer interface{}) {
 	pointer_v := reflect.ValueOf(pointer)
 	if pointer_v.Kind() != reflect.Slice {
 		panic("parameter pointer must be a slice")
@@ -2141,7 +2289,7 @@ func (gl *GL) VertexAttribLPointer(index uint32, size int32, gltype glbase.Enum,
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribL4dv.xml
-func (gl *GL) VertexAttribL4dv(index uint32, v []float64) {
+func (gl *GL) VertexAttribL4dv(index glbase.Attrib, v []float64) {
 	if len(v) != 4 {
 		panic("parameter v has incorrect length")
 	}
@@ -2149,7 +2297,7 @@ func (gl *GL) VertexAttribL4dv(index uint32, v []float64) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribL3dv.xml
-func (gl *GL) VertexAttribL3dv(index uint32, v []float64) {
+func (gl *GL) VertexAttribL3dv(index glbase.Attrib, v []float64) {
 	if len(v) != 3 {
 		panic("parameter v has incorrect length")
 	}
@@ -2157,7 +2305,7 @@ func (gl *GL) VertexAttribL3dv(index uint32, v []float64) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribL2dv.xml
-func (gl *GL) VertexAttribL2dv(index uint32, v []float64) {
+func (gl *GL) VertexAttribL2dv(index glbase.Attrib, v []float64) {
 	if len(v) != 2 {
 		panic("parameter v has incorrect length")
 	}
@@ -2165,27 +2313,27 @@ func (gl *GL) VertexAttribL2dv(index uint32, v []float64) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribL1dv.xml
-func (gl *GL) VertexAttribL1dv(index uint32, v []float64) {
+func (gl *GL) VertexAttribL1dv(index glbase.Attrib, v []float64) {
 	C.gl4_2core_glVertexAttribL1dv(gl.funcs, C.GLuint(index), (*C.GLdouble)(unsafe.Pointer(&v[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribL4d.xml
-func (gl *GL) VertexAttribL4d(index uint32, x, y, z, w float64) {
+func (gl *GL) VertexAttribL4d(index glbase.Attrib, x, y, z, w float64) {
 	C.gl4_2core_glVertexAttribL4d(gl.funcs, C.GLuint(index), C.GLdouble(x), C.GLdouble(y), C.GLdouble(z), C.GLdouble(w))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribL3d.xml
-func (gl *GL) VertexAttribL3d(index uint32, x, y, z float64) {
+func (gl *GL) VertexAttribL3d(index glbase.Attrib, x, y, z float64) {
 	C.gl4_2core_glVertexAttribL3d(gl.funcs, C.GLuint(index), C.GLdouble(x), C.GLdouble(y), C.GLdouble(z))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribL2d.xml
-func (gl *GL) VertexAttribL2d(index uint32, x, y float64) {
+func (gl *GL) VertexAttribL2d(index glbase.Attrib, x, y float64) {
 	C.gl4_2core_glVertexAttribL2d(gl.funcs, C.GLuint(index), C.GLdouble(x), C.GLdouble(y))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribL1d.xml
-func (gl *GL) VertexAttribL1d(index uint32, x float64) {
+func (gl *GL) VertexAttribL1d(index glbase.Attrib, x float64) {
 	C.gl4_2core_glVertexAttribL1d(gl.funcs, C.GLuint(index), C.GLdouble(x))
 }
 

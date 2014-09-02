@@ -417,22 +417,10 @@ void gles2_glUniform1f(void *_glfuncs, GLint location, GLfloat x)
 	_qglfuncs->glUniform1f(location, x);
 }
 
-void gles2_glUniform1fv(void *_glfuncs, GLint location, GLsizei count, const GLfloat* v)
-{
-	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glUniform1fv(location, count, v);
-}
-
 void gles2_glUniform1i(void *_glfuncs, GLint location, GLint x)
 {
 	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
 	_qglfuncs->glUniform1i(location, x);
-}
-
-void gles2_glUniform1iv(void *_glfuncs, GLint location, GLsizei count, const GLint* v)
-{
-	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glUniform1iv(location, count, v);
 }
 
 void gles2_glUniform2f(void *_glfuncs, GLint location, GLfloat x, GLfloat y)
@@ -441,22 +429,10 @@ void gles2_glUniform2f(void *_glfuncs, GLint location, GLfloat x, GLfloat y)
 	_qglfuncs->glUniform2f(location, x, y);
 }
 
-void gles2_glUniform2fv(void *_glfuncs, GLint location, GLsizei count, const GLfloat* v)
-{
-	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glUniform2fv(location, count, v);
-}
-
 void gles2_glUniform2i(void *_glfuncs, GLint location, GLint x, GLint y)
 {
 	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
 	_qglfuncs->glUniform2i(location, x, y);
-}
-
-void gles2_glUniform2iv(void *_glfuncs, GLint location, GLsizei count, const GLint* v)
-{
-	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glUniform2iv(location, count, v);
 }
 
 void gles2_glUniform3f(void *_glfuncs, GLint location, GLfloat x, GLfloat y, GLfloat z)
@@ -465,22 +441,10 @@ void gles2_glUniform3f(void *_glfuncs, GLint location, GLfloat x, GLfloat y, GLf
 	_qglfuncs->glUniform3f(location, x, y, z);
 }
 
-void gles2_glUniform3fv(void *_glfuncs, GLint location, GLsizei count, const GLfloat* v)
-{
-	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glUniform3fv(location, count, v);
-}
-
 void gles2_glUniform3i(void *_glfuncs, GLint location, GLint x, GLint y, GLint z)
 {
 	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
 	_qglfuncs->glUniform3i(location, x, y, z);
-}
-
-void gles2_glUniform3iv(void *_glfuncs, GLint location, GLsizei count, const GLint* v)
-{
-	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glUniform3iv(location, count, v);
 }
 
 void gles2_glUniform4f(void *_glfuncs, GLint location, GLfloat x, GLfloat y, GLfloat z, GLfloat w)
@@ -489,40 +453,10 @@ void gles2_glUniform4f(void *_glfuncs, GLint location, GLfloat x, GLfloat y, GLf
 	_qglfuncs->glUniform4f(location, x, y, z, w);
 }
 
-void gles2_glUniform4fv(void *_glfuncs, GLint location, GLsizei count, const GLfloat* v)
-{
-	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glUniform4fv(location, count, v);
-}
-
 void gles2_glUniform4i(void *_glfuncs, GLint location, GLint x, GLint y, GLint z, GLint w)
 {
 	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
 	_qglfuncs->glUniform4i(location, x, y, z, w);
-}
-
-void gles2_glUniform4iv(void *_glfuncs, GLint location, GLsizei count, const GLint* v)
-{
-	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glUniform4iv(location, count, v);
-}
-
-void gles2_glUniformMatrix2fv(void *_glfuncs, GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
-{
-	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glUniformMatrix2fv(location, count, transpose, value);
-}
-
-void gles2_glUniformMatrix3fv(void *_glfuncs, GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
-{
-	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glUniformMatrix3fv(location, count, transpose, value);
-}
-
-void gles2_glUniformMatrix4fv(void *_glfuncs, GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
-{
-	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glUniformMatrix4fv(location, count, transpose, value);
 }
 
 void gles2_glUseProgram(void *_glfuncs, GLuint program)
