@@ -220,16 +220,16 @@ void gl1_0_glDrawBuffer(void *_glfuncs, GLenum mode)
 	_qglfuncs->glDrawBuffer(mode);
 }
 
-void gl1_0_glTexImage2D(void *_glfuncs, GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels)
+void gl1_0_glTexImage2D(void *_glfuncs, GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels)
 {
 	QOpenGLFunctions_1_0* _qglfuncs = reinterpret_cast<QOpenGLFunctions_1_0*>(_glfuncs);
-	_qglfuncs->glTexImage2D(target, level, internalformat, width, height, border, format, gltype, pixels);
+	_qglfuncs->glTexImage2D(target, level, internalFormat, width, height, border, format, gltype, pixels);
 }
 
-void gl1_0_glTexImage1D(void *_glfuncs, GLenum target, GLint level, GLint internalformat, GLsizei width, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels)
+void gl1_0_glTexImage1D(void *_glfuncs, GLenum target, GLint level, GLint internalFormat, GLsizei width, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels)
 {
 	QOpenGLFunctions_1_0* _qglfuncs = reinterpret_cast<QOpenGLFunctions_1_0*>(_glfuncs);
-	_qglfuncs->glTexImage1D(target, level, internalformat, width, border, format, gltype, pixels);
+	_qglfuncs->glTexImage1D(target, level, internalFormat, width, border, format, gltype, pixels);
 }
 
 void gl1_0_glTexParameteriv(void *_glfuncs, GLenum target, GLenum pname, const GLint* params)

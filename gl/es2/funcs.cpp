@@ -105,10 +105,10 @@ void gles2_glCompileShader(void *_glfuncs, GLuint shader)
 	_qglfuncs->glCompileShader(shader);
 }
 
-void gles2_glCompressedTexImage2D(void *_glfuncs, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid* data)
+void gles2_glCompressedTexImage2D(void *_glfuncs, GLenum target, GLint level, GLenum internalFormat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid* data)
 {
 	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glCompressedTexImage2D(target, level, internalformat, width, height, border, imageSize, data);
+	_qglfuncs->glCompressedTexImage2D(target, level, internalFormat, width, height, border, imageSize, data);
 }
 
 void gles2_glCompressedTexSubImage2D(void *_glfuncs, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid* data)
@@ -219,16 +219,16 @@ void gles2_glGenRenderbuffers(void *_glfuncs, GLsizei n, GLuint* renderbuffers)
 	_qglfuncs->glGenRenderbuffers(n, renderbuffers);
 }
 
-void gles2_glGetActiveAttrib(void *_glfuncs, GLuint program, GLuint index, GLsizei bufsize, GLsizei* length, GLint* size, GLenum* gltype, GLchar* name)
+void gles2_glGetActiveAttrib(void *_glfuncs, GLuint program, GLuint index, GLsizei bufSize, GLsizei* length, GLint* size, GLenum* gltype, GLchar* name)
 {
 	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glGetActiveAttrib(program, index, bufsize, length, size, gltype, name);
+	_qglfuncs->glGetActiveAttrib(program, index, bufSize, length, size, gltype, name);
 }
 
-void gles2_glGetActiveUniform(void *_glfuncs, GLuint program, GLuint index, GLsizei bufsize, GLsizei* length, GLint* size, GLenum* gltype, GLchar* name)
+void gles2_glGetActiveUniform(void *_glfuncs, GLuint program, GLuint index, GLsizei bufSize, GLsizei* length, GLint* size, GLenum* gltype, GLchar* name)
 {
 	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glGetActiveUniform(program, index, bufsize, length, size, gltype, name);
+	_qglfuncs->glGetActiveUniform(program, index, bufSize, length, size, gltype, name);
 }
 
 void gles2_glGetAttachedShaders(void *_glfuncs, GLuint program, GLsizei maxcount, GLsizei* count, GLuint* shaders)
@@ -261,10 +261,10 @@ void gles2_glGetProgramiv(void *_glfuncs, GLuint program, GLenum pname, GLint* p
 	_qglfuncs->glGetProgramiv(program, pname, params);
 }
 
-void gles2_glGetProgramInfoLog(void *_glfuncs, GLuint program, GLsizei bufsize, GLsizei* length, GLchar* infolog)
+void gles2_glGetProgramInfoLog(void *_glfuncs, GLuint program, GLsizei bufSize, GLsizei* length, GLchar* infoLog)
 {
 	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glGetProgramInfoLog(program, bufsize, length, infolog);
+	_qglfuncs->glGetProgramInfoLog(program, bufSize, length, infoLog);
 }
 
 void gles2_glGetRenderbufferParameteriv(void *_glfuncs, GLenum target, GLenum pname, GLint* params)
@@ -279,22 +279,22 @@ void gles2_glGetShaderiv(void *_glfuncs, GLuint shader, GLenum pname, GLint* par
 	_qglfuncs->glGetShaderiv(shader, pname, params);
 }
 
-void gles2_glGetShaderInfoLog(void *_glfuncs, GLuint shader, GLsizei bufsize, GLsizei* length, GLchar* infolog)
+void gles2_glGetShaderInfoLog(void *_glfuncs, GLuint shader, GLsizei bufSize, GLsizei* length, GLchar* infoLog)
 {
 	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glGetShaderInfoLog(shader, bufsize, length, infolog);
+	_qglfuncs->glGetShaderInfoLog(shader, bufSize, length, infoLog);
 }
 
-void gles2_glGetShaderPrecisionFormat(void *_glfuncs, GLenum shadertype, GLenum precisiontype, GLint* range_, GLint* precision)
+void gles2_glGetShaderPrecisionFormat(void *_glfuncs, GLenum shadertype, GLenum precisionType, GLint* range_, GLint* precision)
 {
 	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glGetShaderPrecisionFormat(shadertype, precisiontype, range_, precision);
+	_qglfuncs->glGetShaderPrecisionFormat(shadertype, precisionType, range_, precision);
 }
 
-void gles2_glGetShaderSource(void *_glfuncs, GLuint shader, GLsizei bufsize, GLsizei* length, GLchar* source)
+void gles2_glGetShaderSource(void *_glfuncs, GLuint shader, GLsizei bufSize, GLsizei* length, GLchar* source)
 {
 	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glGetShaderSource(shader, bufsize, length, source);
+	_qglfuncs->glGetShaderSource(shader, bufSize, length, source);
 }
 
 void gles2_glGetUniformfv(void *_glfuncs, GLuint program, GLint location, GLfloat* params)
@@ -369,10 +369,10 @@ void gles2_glReleaseShaderCompiler(void *_glfuncs)
 	_qglfuncs->glReleaseShaderCompiler();
 }
 
-void gles2_glRenderbufferStorage(void *_glfuncs, GLenum target, GLenum internalformat, GLsizei width, GLsizei height)
+void gles2_glRenderbufferStorage(void *_glfuncs, GLenum target, GLenum internalFormat, GLsizei width, GLsizei height)
 {
 	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glRenderbufferStorage(target, internalformat, width, height);
+	_qglfuncs->glRenderbufferStorage(target, internalFormat, width, height);
 }
 
 void gles2_glSampleCoverage(void *_glfuncs, GLclampf value, GLboolean invert)
@@ -381,10 +381,10 @@ void gles2_glSampleCoverage(void *_glfuncs, GLclampf value, GLboolean invert)
 	_qglfuncs->glSampleCoverage(value, invert);
 }
 
-void gles2_glShaderBinary(void *_glfuncs, GLint n, const GLuint* shaders, GLenum binaryformat, const GLvoid* binary, GLint length)
+void gles2_glShaderBinary(void *_glfuncs, GLint n, const GLuint* shaders, GLenum binaryFormat, const GLvoid* binary, GLint length)
 {
 	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glShaderBinary(n, shaders, binaryformat, binary, length);
+	_qglfuncs->glShaderBinary(n, shaders, binaryFormat, binary, length);
 }
 
 void gles2_glShaderSource(void *_glfuncs, GLuint shader, GLsizei count, const GLchar** glstring, const GLint* length)
@@ -471,58 +471,58 @@ void gles2_glValidateProgram(void *_glfuncs, GLuint program)
 	_qglfuncs->glValidateProgram(program);
 }
 
-void gles2_glVertexAttrib1f(void *_glfuncs, GLuint indx, GLfloat x)
+void gles2_glVertexAttrib1f(void *_glfuncs, GLuint index, GLfloat x)
 {
 	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glVertexAttrib1f(indx, x);
+	_qglfuncs->glVertexAttrib1f(index, x);
 }
 
-void gles2_glVertexAttrib1fv(void *_glfuncs, GLuint indx, const GLfloat* values)
+void gles2_glVertexAttrib1fv(void *_glfuncs, GLuint index, const GLfloat* values)
 {
 	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glVertexAttrib1fv(indx, values);
+	_qglfuncs->glVertexAttrib1fv(index, values);
 }
 
-void gles2_glVertexAttrib2f(void *_glfuncs, GLuint indx, GLfloat x, GLfloat y)
+void gles2_glVertexAttrib2f(void *_glfuncs, GLuint index, GLfloat x, GLfloat y)
 {
 	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glVertexAttrib2f(indx, x, y);
+	_qglfuncs->glVertexAttrib2f(index, x, y);
 }
 
-void gles2_glVertexAttrib2fv(void *_glfuncs, GLuint indx, const GLfloat* values)
+void gles2_glVertexAttrib2fv(void *_glfuncs, GLuint index, const GLfloat* values)
 {
 	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glVertexAttrib2fv(indx, values);
+	_qglfuncs->glVertexAttrib2fv(index, values);
 }
 
-void gles2_glVertexAttrib3f(void *_glfuncs, GLuint indx, GLfloat x, GLfloat y, GLfloat z)
+void gles2_glVertexAttrib3f(void *_glfuncs, GLuint index, GLfloat x, GLfloat y, GLfloat z)
 {
 	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glVertexAttrib3f(indx, x, y, z);
+	_qglfuncs->glVertexAttrib3f(index, x, y, z);
 }
 
-void gles2_glVertexAttrib3fv(void *_glfuncs, GLuint indx, const GLfloat* values)
+void gles2_glVertexAttrib3fv(void *_glfuncs, GLuint index, const GLfloat* values)
 {
 	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glVertexAttrib3fv(indx, values);
+	_qglfuncs->glVertexAttrib3fv(index, values);
 }
 
-void gles2_glVertexAttrib4f(void *_glfuncs, GLuint indx, GLfloat x, GLfloat y, GLfloat z, GLfloat w)
+void gles2_glVertexAttrib4f(void *_glfuncs, GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w)
 {
 	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glVertexAttrib4f(indx, x, y, z, w);
+	_qglfuncs->glVertexAttrib4f(index, x, y, z, w);
 }
 
-void gles2_glVertexAttrib4fv(void *_glfuncs, GLuint indx, const GLfloat* values)
+void gles2_glVertexAttrib4fv(void *_glfuncs, GLuint index, const GLfloat* values)
 {
 	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glVertexAttrib4fv(indx, values);
+	_qglfuncs->glVertexAttrib4fv(index, values);
 }
 
-void gles2_glVertexAttribPointer(void *_glfuncs, GLuint indx, GLint size, GLenum gltype, GLboolean normalized, GLsizei stride, const GLvoid* ptr)
+void gles2_glVertexAttribPointer(void *_glfuncs, GLuint index, GLint size, GLenum gltype, GLboolean normalized, GLsizei stride, const GLvoid* ptr)
 {
 	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glVertexAttribPointer(indx, size, gltype, normalized, stride, ptr);
+	_qglfuncs->glVertexAttribPointer(index, size, gltype, normalized, stride, ptr);
 }
 
 void gles2_glBindTexture(void *_glfuncs, GLenum target, GLuint texture)
@@ -555,9 +555,9 @@ void gles2_glColorMask(void *_glfuncs, GLboolean red, GLboolean green, GLboolean
 	glColorMask(red, green, blue, alpha);
 }
 
-void gles2_glCopyTexImage2D(void *_glfuncs, GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border)
+void gles2_glCopyTexImage2D(void *_glfuncs, GLenum target, GLint level, GLenum internalFormat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border)
 {
-	glCopyTexImage2D(target, level, internalformat, x, y, width, height, border);
+	glCopyTexImage2D(target, level, internalFormat, x, y, width, height, border);
 }
 
 void gles2_glCopyTexSubImage2D(void *_glfuncs, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height)
@@ -710,9 +710,9 @@ void gles2_glStencilOp(void *_glfuncs, GLenum fail, GLenum zfail, GLenum zpass)
 	glStencilOp(fail, zfail, zpass);
 }
 
-void gles2_glTexImage2D(void *_glfuncs, GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels)
+void gles2_glTexImage2D(void *_glfuncs, GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels)
 {
-	glTexImage2D(target, level, internalformat, width, height, border, format, gltype, pixels);
+	glTexImage2D(target, level, internalFormat, width, height, border, format, gltype, pixels);
 }
 
 void gles2_glTexParameterf(void *_glfuncs, GLenum target, GLenum pname, GLfloat param)

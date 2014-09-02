@@ -220,16 +220,16 @@ void gl4_2compat_glDrawBuffer(void *_glfuncs, GLenum mode)
 	_qglfuncs->glDrawBuffer(mode);
 }
 
-void gl4_2compat_glTexImage2D(void *_glfuncs, GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels)
+void gl4_2compat_glTexImage2D(void *_glfuncs, GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glTexImage2D(target, level, internalformat, width, height, border, format, gltype, pixels);
+	_qglfuncs->glTexImage2D(target, level, internalFormat, width, height, border, format, gltype, pixels);
 }
 
-void gl4_2compat_glTexImage1D(void *_glfuncs, GLenum target, GLint level, GLint internalformat, GLsizei width, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels)
+void gl4_2compat_glTexImage1D(void *_glfuncs, GLenum target, GLint level, GLint internalFormat, GLsizei width, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glTexImage1D(target, level, internalformat, width, border, format, gltype, pixels);
+	_qglfuncs->glTexImage1D(target, level, internalFormat, width, border, format, gltype, pixels);
 }
 
 void gl4_2compat_glTexParameteriv(void *_glfuncs, GLenum target, GLenum pname, const GLint* params)
@@ -358,16 +358,16 @@ void gl4_2compat_glCopyTexSubImage1D(void *_glfuncs, GLenum target, GLint level,
 	_qglfuncs->glCopyTexSubImage1D(target, level, xoffset, x, y, width);
 }
 
-void gl4_2compat_glCopyTexImage2D(void *_glfuncs, GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border)
+void gl4_2compat_glCopyTexImage2D(void *_glfuncs, GLenum target, GLint level, GLenum internalFormat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glCopyTexImage2D(target, level, internalformat, x, y, width, height, border);
+	_qglfuncs->glCopyTexImage2D(target, level, internalFormat, x, y, width, height, border);
 }
 
-void gl4_2compat_glCopyTexImage1D(void *_glfuncs, GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLint border)
+void gl4_2compat_glCopyTexImage1D(void *_glfuncs, GLenum target, GLint level, GLenum internalFormat, GLint x, GLint y, GLsizei width, GLint border)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glCopyTexImage1D(target, level, internalformat, x, y, width, border);
+	_qglfuncs->glCopyTexImage1D(target, level, internalFormat, x, y, width, border);
 }
 
 void gl4_2compat_glPolygonOffset(void *_glfuncs, GLfloat factor, GLfloat units)
@@ -400,10 +400,10 @@ void gl4_2compat_glTexSubImage3D(void *_glfuncs, GLenum target, GLint level, GLi
 	_qglfuncs->glTexSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, gltype, pixels);
 }
 
-void gl4_2compat_glTexImage3D(void *_glfuncs, GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels)
+void gl4_2compat_glTexImage3D(void *_glfuncs, GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glTexImage3D(target, level, internalformat, width, height, depth, border, format, gltype, pixels);
+	_qglfuncs->glTexImage3D(target, level, internalFormat, width, height, depth, border, format, gltype, pixels);
 }
 
 void gl4_2compat_glDrawRangeElements(void *_glfuncs, GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum gltype, const GLvoid* indices)
@@ -448,22 +448,22 @@ void gl4_2compat_glCompressedTexSubImage3D(void *_glfuncs, GLenum target, GLint 
 	_qglfuncs->glCompressedTexSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, imageSize, data);
 }
 
-void gl4_2compat_glCompressedTexImage1D(void *_glfuncs, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLint border, GLsizei imageSize, const GLvoid* data)
+void gl4_2compat_glCompressedTexImage1D(void *_glfuncs, GLenum target, GLint level, GLenum internalFormat, GLsizei width, GLint border, GLsizei imageSize, const GLvoid* data)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glCompressedTexImage1D(target, level, internalformat, width, border, imageSize, data);
+	_qglfuncs->glCompressedTexImage1D(target, level, internalFormat, width, border, imageSize, data);
 }
 
-void gl4_2compat_glCompressedTexImage2D(void *_glfuncs, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid* data)
+void gl4_2compat_glCompressedTexImage2D(void *_glfuncs, GLenum target, GLint level, GLenum internalFormat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid* data)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glCompressedTexImage2D(target, level, internalformat, width, height, border, imageSize, data);
+	_qglfuncs->glCompressedTexImage2D(target, level, internalFormat, width, height, border, imageSize, data);
 }
 
-void gl4_2compat_glCompressedTexImage3D(void *_glfuncs, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, const GLvoid* data)
+void gl4_2compat_glCompressedTexImage3D(void *_glfuncs, GLenum target, GLint level, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, const GLvoid* data)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glCompressedTexImage3D(target, level, internalformat, width, height, depth, border, imageSize, data);
+	_qglfuncs->glCompressedTexImage3D(target, level, internalFormat, width, height, depth, border, imageSize, data);
 }
 
 void gl4_2compat_glSampleCoverage(void *_glfuncs, GLfloat value, GLboolean invert)
@@ -922,10 +922,10 @@ void gl4_2compat_glFramebufferTextureLayer(void *_glfuncs, GLenum target, GLenum
 	_qglfuncs->glFramebufferTextureLayer(target, attachment, texture, level, layer);
 }
 
-void gl4_2compat_glRenderbufferStorageMultisample(void *_glfuncs, GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height)
+void gl4_2compat_glRenderbufferStorageMultisample(void *_glfuncs, GLenum target, GLsizei samples, GLenum internalFormat, GLsizei width, GLsizei height)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glRenderbufferStorageMultisample(target, samples, internalformat, width, height);
+	_qglfuncs->glRenderbufferStorageMultisample(target, samples, internalFormat, width, height);
 }
 
 void gl4_2compat_glBlitFramebuffer(void *_glfuncs, GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter)
@@ -1006,10 +1006,10 @@ void gl4_2compat_glGetRenderbufferParameteriv(void *_glfuncs, GLenum target, GLe
 	_qglfuncs->glGetRenderbufferParameteriv(target, pname, params);
 }
 
-void gl4_2compat_glRenderbufferStorage(void *_glfuncs, GLenum target, GLenum internalformat, GLsizei width, GLsizei height)
+void gl4_2compat_glRenderbufferStorage(void *_glfuncs, GLenum target, GLenum internalFormat, GLsizei width, GLsizei height)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glRenderbufferStorage(target, internalformat, width, height);
+	_qglfuncs->glRenderbufferStorage(target, internalFormat, width, height);
 }
 
 void gl4_2compat_glGenRenderbuffers(void *_glfuncs, GLsizei n, GLuint* renderbuffers)
@@ -1276,10 +1276,10 @@ void gl4_2compat_glPrimitiveRestartIndex(void *_glfuncs, GLuint index)
 	_qglfuncs->glPrimitiveRestartIndex(index);
 }
 
-void gl4_2compat_glTexBuffer(void *_glfuncs, GLenum target, GLenum internalformat, GLuint buffer)
+void gl4_2compat_glTexBuffer(void *_glfuncs, GLenum target, GLenum internalFormat, GLuint buffer)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glTexBuffer(target, internalformat, buffer);
+	_qglfuncs->glTexBuffer(target, internalFormat, buffer);
 }
 
 void gl4_2compat_glDrawElementsInstanced(void *_glfuncs, GLenum mode, GLsizei count, GLenum gltype, const GLvoid* indices, GLsizei instancecount)
@@ -1306,16 +1306,16 @@ void gl4_2compat_glGetMultisamplefv(void *_glfuncs, GLenum pname, GLuint index, 
 	_qglfuncs->glGetMultisamplefv(pname, index, val);
 }
 
-void gl4_2compat_glTexImage3DMultisample(void *_glfuncs, GLenum target, GLsizei samples, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLboolean fixedsamplelocations)
+void gl4_2compat_glTexImage3DMultisample(void *_glfuncs, GLenum target, GLsizei samples, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLboolean fixedsamplelocations)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glTexImage3DMultisample(target, samples, internalformat, width, height, depth, fixedsamplelocations);
+	_qglfuncs->glTexImage3DMultisample(target, samples, internalFormat, width, height, depth, fixedsamplelocations);
 }
 
-void gl4_2compat_glTexImage2DMultisample(void *_glfuncs, GLenum target, GLsizei samples, GLint internalformat, GLsizei width, GLsizei height, GLboolean fixedsamplelocations)
+void gl4_2compat_glTexImage2DMultisample(void *_glfuncs, GLenum target, GLsizei samples, GLint internalFormat, GLsizei width, GLsizei height, GLboolean fixedsamplelocations)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glTexImage2DMultisample(target, samples, internalformat, width, height, fixedsamplelocations);
+	_qglfuncs->glTexImage2DMultisample(target, samples, internalFormat, width, height, fixedsamplelocations);
 }
 
 void gl4_2compat_glGetSynciv(void *_glfuncs, GLsync sync, GLenum pname, GLsizei bufSize, GLsizei* length, GLint* values)
@@ -1840,16 +1840,16 @@ void gl4_2compat_glGetUniformSubroutineuiv(void *_glfuncs, GLenum shadertype, GL
 	_qglfuncs->glGetUniformSubroutineuiv(shadertype, location, params);
 }
 
-void gl4_2compat_glGetActiveSubroutineName(void *_glfuncs, GLuint program, GLenum shadertype, GLuint index, GLsizei bufsize, GLsizei* length, GLchar* name)
+void gl4_2compat_glGetActiveSubroutineName(void *_glfuncs, GLuint program, GLenum shadertype, GLuint index, GLsizei bufSize, GLsizei* length, GLchar* name)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glGetActiveSubroutineName(program, shadertype, index, bufsize, length, name);
+	_qglfuncs->glGetActiveSubroutineName(program, shadertype, index, bufSize, length, name);
 }
 
-void gl4_2compat_glGetActiveSubroutineUniformName(void *_glfuncs, GLuint program, GLenum shadertype, GLuint index, GLsizei bufsize, GLsizei* length, GLchar* name)
+void gl4_2compat_glGetActiveSubroutineUniformName(void *_glfuncs, GLuint program, GLenum shadertype, GLuint index, GLsizei bufSize, GLsizei* length, GLchar* name)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glGetActiveSubroutineUniformName(program, shadertype, index, bufsize, length, name);
+	_qglfuncs->glGetActiveSubroutineUniformName(program, shadertype, index, bufSize, length, name);
 }
 
 void gl4_2compat_glGetActiveSubroutineUniformiv(void *_glfuncs, GLuint program, GLenum shadertype, GLuint index, GLenum pname, GLint* values)
@@ -2446,16 +2446,16 @@ void gl4_2compat_glDepthRangef(void *_glfuncs, GLfloat n, GLfloat f)
 	_qglfuncs->glDepthRangef(n, f);
 }
 
-void gl4_2compat_glGetShaderPrecisionFormat(void *_glfuncs, GLenum shadertype, GLenum precisiontype, GLint* range_, GLint* precision)
+void gl4_2compat_glGetShaderPrecisionFormat(void *_glfuncs, GLenum shadertype, GLenum precisionType, GLint* range_, GLint* precision)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glGetShaderPrecisionFormat(shadertype, precisiontype, range_, precision);
+	_qglfuncs->glGetShaderPrecisionFormat(shadertype, precisionType, range_, precision);
 }
 
-void gl4_2compat_glShaderBinary(void *_glfuncs, GLsizei count, const GLuint* shaders, GLenum binaryformat, const GLvoid* binary, GLsizei length)
+void gl4_2compat_glShaderBinary(void *_glfuncs, GLsizei count, const GLuint* shaders, GLenum binaryFormat, const GLvoid* binary, GLsizei length)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glShaderBinary(count, shaders, binaryformat, binary, length);
+	_qglfuncs->glShaderBinary(count, shaders, binaryFormat, binary, length);
 }
 
 void gl4_2compat_glReleaseShaderCompiler(void *_glfuncs)
@@ -2464,22 +2464,22 @@ void gl4_2compat_glReleaseShaderCompiler(void *_glfuncs)
 	_qglfuncs->glReleaseShaderCompiler();
 }
 
-void gl4_2compat_glTexStorage3D(void *_glfuncs, GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth)
+void gl4_2compat_glTexStorage3D(void *_glfuncs, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glTexStorage3D(target, levels, internalformat, width, height, depth);
+	_qglfuncs->glTexStorage3D(target, levels, internalFormat, width, height, depth);
 }
 
-void gl4_2compat_glTexStorage2D(void *_glfuncs, GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height)
+void gl4_2compat_glTexStorage2D(void *_glfuncs, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glTexStorage2D(target, levels, internalformat, width, height);
+	_qglfuncs->glTexStorage2D(target, levels, internalFormat, width, height);
 }
 
-void gl4_2compat_glTexStorage1D(void *_glfuncs, GLenum target, GLsizei levels, GLenum internalformat, GLsizei width)
+void gl4_2compat_glTexStorage1D(void *_glfuncs, GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glTexStorage1D(target, levels, internalformat, width);
+	_qglfuncs->glTexStorage1D(target, levels, internalFormat, width);
 }
 
 void gl4_2compat_glMemoryBarrier(void *_glfuncs, GLbitfield barriers)
@@ -2500,10 +2500,10 @@ void gl4_2compat_glGetActiveAtomicCounterBufferiv(void *_glfuncs, GLuint program
 	_qglfuncs->glGetActiveAtomicCounterBufferiv(program, bufferIndex, pname, params);
 }
 
-void gl4_2compat_glGetInternalformativ(void *_glfuncs, GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLint* params)
+void gl4_2compat_glGetInternalformativ(void *_glfuncs, GLenum target, GLenum internalFormat, GLenum pname, GLsizei bufSize, GLint* params)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glGetInternalformativ(target, internalformat, pname, bufSize, params);
+	_qglfuncs->glGetInternalformativ(target, internalFormat, pname, bufSize, params);
 }
 
 void gl4_2compat_glDrawTransformFeedbackStreamInstanced(void *_glfuncs, GLenum mode, GLuint id, GLuint stream, GLsizei instancecount)
@@ -4180,16 +4180,16 @@ void gl4_2compat_glResetHistogram(void *_glfuncs, GLenum target)
 	_qglfuncs->glResetHistogram(target);
 }
 
-void gl4_2compat_glMinmax(void *_glfuncs, GLenum target, GLenum internalformat, GLboolean sink)
+void gl4_2compat_glMinmax(void *_glfuncs, GLenum target, GLenum internalFormat, GLboolean sink)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glMinmax(target, internalformat, sink);
+	_qglfuncs->glMinmax(target, internalFormat, sink);
 }
 
-void gl4_2compat_glHistogram(void *_glfuncs, GLenum target, GLsizei width, GLenum internalformat, GLboolean sink)
+void gl4_2compat_glHistogram(void *_glfuncs, GLenum target, GLsizei width, GLenum internalFormat, GLboolean sink)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glHistogram(target, width, internalformat, sink);
+	_qglfuncs->glHistogram(target, width, internalFormat, sink);
 }
 
 void gl4_2compat_glGetMinmaxParameteriv(void *_glfuncs, GLenum target, GLenum pname, GLint* params)
@@ -4228,10 +4228,10 @@ void gl4_2compat_glGetHistogram(void *_glfuncs, GLenum target, GLboolean reset, 
 	_qglfuncs->glGetHistogram(target, reset, format, gltype, values);
 }
 
-void gl4_2compat_glSeparableFilter2D(void *_glfuncs, GLenum target, GLenum internalformat, GLsizei width, GLsizei height, GLenum format, GLenum gltype, const GLvoid* row, const GLvoid* column)
+void gl4_2compat_glSeparableFilter2D(void *_glfuncs, GLenum target, GLenum internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum gltype, const GLvoid* row, const GLvoid* column)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glSeparableFilter2D(target, internalformat, width, height, format, gltype, row, column);
+	_qglfuncs->glSeparableFilter2D(target, internalFormat, width, height, format, gltype, row, column);
 }
 
 void gl4_2compat_glGetSeparableFilter(void *_glfuncs, GLenum target, GLenum format, GLenum gltype, GLvoid* row, GLvoid* column, GLvoid* span)
@@ -4258,16 +4258,16 @@ void gl4_2compat_glGetConvolutionFilter(void *_glfuncs, GLenum target, GLenum fo
 	_qglfuncs->glGetConvolutionFilter(target, format, gltype, image);
 }
 
-void gl4_2compat_glCopyConvolutionFilter2D(void *_glfuncs, GLenum target, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height)
+void gl4_2compat_glCopyConvolutionFilter2D(void *_glfuncs, GLenum target, GLenum internalFormat, GLint x, GLint y, GLsizei width, GLsizei height)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glCopyConvolutionFilter2D(target, internalformat, x, y, width, height);
+	_qglfuncs->glCopyConvolutionFilter2D(target, internalFormat, x, y, width, height);
 }
 
-void gl4_2compat_glCopyConvolutionFilter1D(void *_glfuncs, GLenum target, GLenum internalformat, GLint x, GLint y, GLsizei width)
+void gl4_2compat_glCopyConvolutionFilter1D(void *_glfuncs, GLenum target, GLenum internalFormat, GLint x, GLint y, GLsizei width)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glCopyConvolutionFilter1D(target, internalformat, x, y, width);
+	_qglfuncs->glCopyConvolutionFilter1D(target, internalFormat, x, y, width);
 }
 
 void gl4_2compat_glConvolutionParameteriv(void *_glfuncs, GLenum target, GLenum pname, const GLint* params)
@@ -4294,16 +4294,16 @@ void gl4_2compat_glConvolutionParameterf(void *_glfuncs, GLenum target, GLenum p
 	_qglfuncs->glConvolutionParameterf(target, pname, params);
 }
 
-void gl4_2compat_glConvolutionFilter2D(void *_glfuncs, GLenum target, GLenum internalformat, GLsizei width, GLsizei height, GLenum format, GLenum gltype, const GLvoid* image)
+void gl4_2compat_glConvolutionFilter2D(void *_glfuncs, GLenum target, GLenum internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum gltype, const GLvoid* image)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glConvolutionFilter2D(target, internalformat, width, height, format, gltype, image);
+	_qglfuncs->glConvolutionFilter2D(target, internalFormat, width, height, format, gltype, image);
 }
 
-void gl4_2compat_glConvolutionFilter1D(void *_glfuncs, GLenum target, GLenum internalformat, GLsizei width, GLenum format, GLenum gltype, const GLvoid* image)
+void gl4_2compat_glConvolutionFilter1D(void *_glfuncs, GLenum target, GLenum internalFormat, GLsizei width, GLenum format, GLenum gltype, const GLvoid* image)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glConvolutionFilter1D(target, internalformat, width, format, gltype, image);
+	_qglfuncs->glConvolutionFilter1D(target, internalFormat, width, format, gltype, image);
 }
 
 void gl4_2compat_glCopyColorSubTable(void *_glfuncs, GLenum target, GLsizei start, GLint x, GLint y, GLsizei width)
@@ -4336,10 +4336,10 @@ void gl4_2compat_glGetColorTable(void *_glfuncs, GLenum target, GLenum format, G
 	_qglfuncs->glGetColorTable(target, format, gltype, table);
 }
 
-void gl4_2compat_glCopyColorTable(void *_glfuncs, GLenum target, GLenum internalformat, GLint x, GLint y, GLsizei width)
+void gl4_2compat_glCopyColorTable(void *_glfuncs, GLenum target, GLenum internalFormat, GLint x, GLint y, GLsizei width)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glCopyColorTable(target, internalformat, x, y, width);
+	_qglfuncs->glCopyColorTable(target, internalFormat, x, y, width);
 }
 
 void gl4_2compat_glColorTableParameteriv(void *_glfuncs, GLenum target, GLenum pname, const GLint* params)
@@ -4354,10 +4354,10 @@ void gl4_2compat_glColorTableParameterfv(void *_glfuncs, GLenum target, GLenum p
 	_qglfuncs->glColorTableParameterfv(target, pname, params);
 }
 
-void gl4_2compat_glColorTable(void *_glfuncs, GLenum target, GLenum internalformat, GLsizei width, GLenum format, GLenum gltype, const GLvoid* table)
+void gl4_2compat_glColorTable(void *_glfuncs, GLenum target, GLenum internalFormat, GLsizei width, GLenum format, GLenum gltype, const GLvoid* table)
 {
 	QOpenGLFunctions_4_2_Compatibility* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_2_Compatibility*>(_glfuncs);
-	_qglfuncs->glColorTable(target, internalformat, width, format, gltype, table);
+	_qglfuncs->glColorTable(target, internalFormat, width, format, gltype, table);
 }
 
 void gl4_2compat_glMultTransposeMatrixd(void *_glfuncs, const GLdouble* m)

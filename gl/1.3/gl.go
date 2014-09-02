@@ -40,7 +40,9 @@ type GL struct {
 }
 
 const (
-	NONE = 0
+	FALSE = 0
+	TRUE  = 1
+	NONE  = 0
 
 	BYTE           = 0x1400
 	UNSIGNED_BYTE  = 0x1401
@@ -792,8 +794,6 @@ func (gl *GL) Viewport(x, y, width, height int32) {
 // GL.INVALID_OPERATION is generated if DepthRange is executed between the
 // execution of Begin and the corresponding execution of End.
 //
-// See also DepthFunc, PolygonOffset, Viewport.
-//
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDepthRange.xml
 func (gl *GL) DepthRange(nearVal, farVal float64) {
 	C.gl1_3_glDepthRange(gl.funcs, C.GLdouble(nearVal), C.GLdouble(farVal))
@@ -827,11 +827,15 @@ func (gl *GL) GetTexParameterfv(target, pname glbase.Enum, params []float32) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetTexImage.xml
 func (gl *GL) GetTexImage(target glbase.Enum, level int32, format, gltype glbase.Enum, pixels interface{}) {
-	pixels_v := reflect.ValueOf(pixels)
-	if pixels_v.Kind() != reflect.Slice {
+	var pixels_ptr unsafe.Pointer
+	var pixels_v = reflect.ValueOf(pixels)
+	if pixels != nil && pixels_v.Kind() != reflect.Slice {
 		panic("parameter pixels must be a slice")
 	}
-	C.gl1_3_glGetTexImage(gl.funcs, C.GLenum(target), C.GLint(level), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(pixels_v.Index(0).Addr().Pointer()))
+	if pixels != nil {
+		pixels_ptr = unsafe.Pointer(pixels_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glGetTexImage(gl.funcs, C.GLenum(target), C.GLint(level), C.GLenum(format), C.GLenum(gltype), pixels_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetIntegerv.xml
@@ -862,11 +866,15 @@ func (gl *GL) GetBooleanv(pname glbase.Enum, params []bool) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glReadPixels.xml
 func (gl *GL) ReadPixels(x, y, width, height int32, format, gltype glbase.Enum, pixels interface{}) {
-	pixels_v := reflect.ValueOf(pixels)
-	if pixels_v.Kind() != reflect.Slice {
+	var pixels_ptr unsafe.Pointer
+	var pixels_v = reflect.ValueOf(pixels)
+	if pixels != nil && pixels_v.Kind() != reflect.Slice {
 		panic("parameter pixels must be a slice")
 	}
-	C.gl1_3_glReadPixels(gl.funcs, C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(pixels_v.Index(0).Addr().Pointer()))
+	if pixels != nil {
+		pixels_ptr = unsafe.Pointer(pixels_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glReadPixels(gl.funcs, C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height), C.GLenum(format), C.GLenum(gltype), pixels_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glReadBuffer.xml
@@ -970,21 +978,29 @@ func (gl *GL) DrawBuffer(mode glbase.Enum) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glTexImage2D.xml
-func (gl *GL) TexImage2D(target glbase.Enum, level, internalformat, width, height, border int32, format, gltype glbase.Enum, pixels interface{}) {
-	pixels_v := reflect.ValueOf(pixels)
-	if pixels_v.Kind() != reflect.Slice {
+func (gl *GL) TexImage2D(target glbase.Enum, level, internalFormat, width, height, border int32, format, gltype glbase.Enum, pixels interface{}) {
+	var pixels_ptr unsafe.Pointer
+	var pixels_v = reflect.ValueOf(pixels)
+	if pixels != nil && pixels_v.Kind() != reflect.Slice {
 		panic("parameter pixels must be a slice")
 	}
-	C.gl1_3_glTexImage2D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(internalformat), C.GLsizei(width), C.GLsizei(height), C.GLint(border), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(pixels_v.Index(0).Addr().Pointer()))
+	if pixels != nil {
+		pixels_ptr = unsafe.Pointer(pixels_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glTexImage2D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(internalFormat), C.GLsizei(width), C.GLsizei(height), C.GLint(border), C.GLenum(format), C.GLenum(gltype), pixels_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glTexImage1D.xml
-func (gl *GL) TexImage1D(target glbase.Enum, level, internalformat, width, border int32, format, gltype glbase.Enum, pixels interface{}) {
-	pixels_v := reflect.ValueOf(pixels)
-	if pixels_v.Kind() != reflect.Slice {
+func (gl *GL) TexImage1D(target glbase.Enum, level, internalFormat, width, border int32, format, gltype glbase.Enum, pixels interface{}) {
+	var pixels_ptr unsafe.Pointer
+	var pixels_v = reflect.ValueOf(pixels)
+	if pixels != nil && pixels_v.Kind() != reflect.Slice {
 		panic("parameter pixels must be a slice")
 	}
-	C.gl1_3_glTexImage1D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(internalformat), C.GLsizei(width), C.GLint(border), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(pixels_v.Index(0).Addr().Pointer()))
+	if pixels != nil {
+		pixels_ptr = unsafe.Pointer(pixels_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glTexImage1D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(internalFormat), C.GLsizei(width), C.GLint(border), C.GLenum(format), C.GLenum(gltype), pixels_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glTexParameteriv.xml
@@ -1075,20 +1091,28 @@ func (gl *GL) BindTexture(target glbase.Enum, texture glbase.Texture) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glTexSubImage2D.xml
 func (gl *GL) TexSubImage2D(target glbase.Enum, level, xoffset, yoffset, width, height int32, format, gltype glbase.Enum, pixels interface{}) {
-	pixels_v := reflect.ValueOf(pixels)
-	if pixels_v.Kind() != reflect.Slice {
+	var pixels_ptr unsafe.Pointer
+	var pixels_v = reflect.ValueOf(pixels)
+	if pixels != nil && pixels_v.Kind() != reflect.Slice {
 		panic("parameter pixels must be a slice")
 	}
-	C.gl1_3_glTexSubImage2D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLint(yoffset), C.GLsizei(width), C.GLsizei(height), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(pixels_v.Index(0).Addr().Pointer()))
+	if pixels != nil {
+		pixels_ptr = unsafe.Pointer(pixels_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glTexSubImage2D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLint(yoffset), C.GLsizei(width), C.GLsizei(height), C.GLenum(format), C.GLenum(gltype), pixels_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glTexSubImage1D.xml
 func (gl *GL) TexSubImage1D(target glbase.Enum, level, xoffset, width int32, format, gltype glbase.Enum, pixels interface{}) {
-	pixels_v := reflect.ValueOf(pixels)
-	if pixels_v.Kind() != reflect.Slice {
+	var pixels_ptr unsafe.Pointer
+	var pixels_v = reflect.ValueOf(pixels)
+	if pixels != nil && pixels_v.Kind() != reflect.Slice {
 		panic("parameter pixels must be a slice")
 	}
-	C.gl1_3_glTexSubImage1D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLsizei(width), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(pixels_v.Index(0).Addr().Pointer()))
+	if pixels != nil {
+		pixels_ptr = unsafe.Pointer(pixels_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glTexSubImage1D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLsizei(width), C.GLenum(format), C.GLenum(gltype), pixels_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCopyTexSubImage2D.xml
@@ -1102,13 +1126,13 @@ func (gl *GL) CopyTexSubImage1D(target glbase.Enum, level, xoffset, x, y, width 
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCopyTexImage2D.xml
-func (gl *GL) CopyTexImage2D(target glbase.Enum, level int32, internalformat glbase.Enum, x, y, width, height, border int32) {
-	C.gl1_3_glCopyTexImage2D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLenum(internalformat), C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height), C.GLint(border))
+func (gl *GL) CopyTexImage2D(target glbase.Enum, level int32, internalFormat glbase.Enum, x, y, width, height, border int32) {
+	C.gl1_3_glCopyTexImage2D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLenum(internalFormat), C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height), C.GLint(border))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCopyTexImage1D.xml
-func (gl *GL) CopyTexImage1D(target glbase.Enum, level int32, internalformat glbase.Enum, x, y, width, border int32) {
-	C.gl1_3_glCopyTexImage1D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLenum(internalformat), C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLint(border))
+func (gl *GL) CopyTexImage1D(target glbase.Enum, level int32, internalFormat glbase.Enum, x, y, width, border int32) {
+	C.gl1_3_glCopyTexImage1D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLenum(internalFormat), C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLint(border))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glPolygonOffset.xml
@@ -1118,11 +1142,15 @@ func (gl *GL) PolygonOffset(factor, units float32) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDrawElements.xml
 func (gl *GL) DrawElements(mode glbase.Enum, count int32, gltype glbase.Enum, indices interface{}) {
-	indices_v := reflect.ValueOf(indices)
-	if indices_v.Kind() != reflect.Slice {
+	var indices_ptr unsafe.Pointer
+	var indices_v = reflect.ValueOf(indices)
+	if indices != nil && indices_v.Kind() != reflect.Slice {
 		panic("parameter indices must be a slice")
 	}
-	C.gl1_3_glDrawElements(gl.funcs, C.GLenum(mode), C.GLsizei(count), C.GLenum(gltype), unsafe.Pointer(indices_v.Index(0).Addr().Pointer()))
+	if indices != nil {
+		indices_ptr = unsafe.Pointer(indices_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glDrawElements(gl.funcs, C.GLenum(mode), C.GLsizei(count), C.GLenum(gltype), indices_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDrawArrays.xml
@@ -1137,29 +1165,41 @@ func (gl *GL) CopyTexSubImage3D(target glbase.Enum, level, xoffset, yoffset, zof
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glTexSubImage3D.xml
 func (gl *GL) TexSubImage3D(target glbase.Enum, level, xoffset, yoffset, zoffset, width, height, depth int32, format, gltype glbase.Enum, pixels interface{}) {
-	pixels_v := reflect.ValueOf(pixels)
-	if pixels_v.Kind() != reflect.Slice {
+	var pixels_ptr unsafe.Pointer
+	var pixels_v = reflect.ValueOf(pixels)
+	if pixels != nil && pixels_v.Kind() != reflect.Slice {
 		panic("parameter pixels must be a slice")
 	}
-	C.gl1_3_glTexSubImage3D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLint(yoffset), C.GLint(zoffset), C.GLsizei(width), C.GLsizei(height), C.GLsizei(depth), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(pixels_v.Index(0).Addr().Pointer()))
+	if pixels != nil {
+		pixels_ptr = unsafe.Pointer(pixels_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glTexSubImage3D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLint(yoffset), C.GLint(zoffset), C.GLsizei(width), C.GLsizei(height), C.GLsizei(depth), C.GLenum(format), C.GLenum(gltype), pixels_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glTexImage3D.xml
-func (gl *GL) TexImage3D(target glbase.Enum, level, internalformat, width, height, depth, border int32, format, gltype glbase.Enum, pixels interface{}) {
-	pixels_v := reflect.ValueOf(pixels)
-	if pixels_v.Kind() != reflect.Slice {
+func (gl *GL) TexImage3D(target glbase.Enum, level, internalFormat, width, height, depth, border int32, format, gltype glbase.Enum, pixels interface{}) {
+	var pixels_ptr unsafe.Pointer
+	var pixels_v = reflect.ValueOf(pixels)
+	if pixels != nil && pixels_v.Kind() != reflect.Slice {
 		panic("parameter pixels must be a slice")
 	}
-	C.gl1_3_glTexImage3D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(internalformat), C.GLsizei(width), C.GLsizei(height), C.GLsizei(depth), C.GLint(border), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(pixels_v.Index(0).Addr().Pointer()))
+	if pixels != nil {
+		pixels_ptr = unsafe.Pointer(pixels_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glTexImage3D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(internalFormat), C.GLsizei(width), C.GLsizei(height), C.GLsizei(depth), C.GLint(border), C.GLenum(format), C.GLenum(gltype), pixels_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDrawRangeElements.xml
 func (gl *GL) DrawRangeElements(mode glbase.Enum, start, end uint32, count int32, gltype glbase.Enum, indices interface{}) {
-	indices_v := reflect.ValueOf(indices)
-	if indices_v.Kind() != reflect.Slice {
+	var indices_ptr unsafe.Pointer
+	var indices_v = reflect.ValueOf(indices)
+	if indices != nil && indices_v.Kind() != reflect.Slice {
 		panic("parameter indices must be a slice")
 	}
-	C.gl1_3_glDrawRangeElements(gl.funcs, C.GLenum(mode), C.GLuint(start), C.GLuint(end), C.GLsizei(count), C.GLenum(gltype), unsafe.Pointer(indices_v.Index(0).Addr().Pointer()))
+	if indices != nil {
+		indices_ptr = unsafe.Pointer(indices_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glDrawRangeElements(gl.funcs, C.GLenum(mode), C.GLuint(start), C.GLuint(end), C.GLsizei(count), C.GLenum(gltype), indices_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glBlendEquation.xml
@@ -1174,65 +1214,93 @@ func (gl *GL) BlendColor(red, green, blue, alpha float32) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetCompressedTexImage.xml
 func (gl *GL) GetCompressedTexImage(target glbase.Enum, level int32, img interface{}) {
-	img_v := reflect.ValueOf(img)
-	if img_v.Kind() != reflect.Slice {
+	var img_ptr unsafe.Pointer
+	var img_v = reflect.ValueOf(img)
+	if img != nil && img_v.Kind() != reflect.Slice {
 		panic("parameter img must be a slice")
 	}
-	C.gl1_3_glGetCompressedTexImage(gl.funcs, C.GLenum(target), C.GLint(level), unsafe.Pointer(img_v.Index(0).Addr().Pointer()))
+	if img != nil {
+		img_ptr = unsafe.Pointer(img_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glGetCompressedTexImage(gl.funcs, C.GLenum(target), C.GLint(level), img_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCompressedTexSubImage1D.xml
 func (gl *GL) CompressedTexSubImage1D(target glbase.Enum, level, xoffset, width int32, format glbase.Enum, imageSize int32, data interface{}) {
-	data_v := reflect.ValueOf(data)
-	if data_v.Kind() != reflect.Slice {
+	var data_ptr unsafe.Pointer
+	var data_v = reflect.ValueOf(data)
+	if data != nil && data_v.Kind() != reflect.Slice {
 		panic("parameter data must be a slice")
 	}
-	C.gl1_3_glCompressedTexSubImage1D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLsizei(width), C.GLenum(format), C.GLsizei(imageSize), unsafe.Pointer(data_v.Index(0).Addr().Pointer()))
+	if data != nil {
+		data_ptr = unsafe.Pointer(data_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glCompressedTexSubImage1D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLsizei(width), C.GLenum(format), C.GLsizei(imageSize), data_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCompressedTexSubImage2D.xml
 func (gl *GL) CompressedTexSubImage2D(target glbase.Enum, level, xoffset, yoffset, width, height int32, format glbase.Enum, imageSize int32, data interface{}) {
-	data_v := reflect.ValueOf(data)
-	if data_v.Kind() != reflect.Slice {
+	var data_ptr unsafe.Pointer
+	var data_v = reflect.ValueOf(data)
+	if data != nil && data_v.Kind() != reflect.Slice {
 		panic("parameter data must be a slice")
 	}
-	C.gl1_3_glCompressedTexSubImage2D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLint(yoffset), C.GLsizei(width), C.GLsizei(height), C.GLenum(format), C.GLsizei(imageSize), unsafe.Pointer(data_v.Index(0).Addr().Pointer()))
+	if data != nil {
+		data_ptr = unsafe.Pointer(data_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glCompressedTexSubImage2D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLint(yoffset), C.GLsizei(width), C.GLsizei(height), C.GLenum(format), C.GLsizei(imageSize), data_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCompressedTexSubImage3D.xml
 func (gl *GL) CompressedTexSubImage3D(target glbase.Enum, level, xoffset, yoffset, zoffset, width, height, depth int32, format glbase.Enum, imageSize int32, data interface{}) {
-	data_v := reflect.ValueOf(data)
-	if data_v.Kind() != reflect.Slice {
+	var data_ptr unsafe.Pointer
+	var data_v = reflect.ValueOf(data)
+	if data != nil && data_v.Kind() != reflect.Slice {
 		panic("parameter data must be a slice")
 	}
-	C.gl1_3_glCompressedTexSubImage3D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLint(yoffset), C.GLint(zoffset), C.GLsizei(width), C.GLsizei(height), C.GLsizei(depth), C.GLenum(format), C.GLsizei(imageSize), unsafe.Pointer(data_v.Index(0).Addr().Pointer()))
+	if data != nil {
+		data_ptr = unsafe.Pointer(data_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glCompressedTexSubImage3D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLint(yoffset), C.GLint(zoffset), C.GLsizei(width), C.GLsizei(height), C.GLsizei(depth), C.GLenum(format), C.GLsizei(imageSize), data_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCompressedTexImage1D.xml
-func (gl *GL) CompressedTexImage1D(target glbase.Enum, level int32, internalformat glbase.Enum, width, border, imageSize int32, data interface{}) {
-	data_v := reflect.ValueOf(data)
-	if data_v.Kind() != reflect.Slice {
+func (gl *GL) CompressedTexImage1D(target glbase.Enum, level int32, internalFormat glbase.Enum, width, border, imageSize int32, data interface{}) {
+	var data_ptr unsafe.Pointer
+	var data_v = reflect.ValueOf(data)
+	if data != nil && data_v.Kind() != reflect.Slice {
 		panic("parameter data must be a slice")
 	}
-	C.gl1_3_glCompressedTexImage1D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLenum(internalformat), C.GLsizei(width), C.GLint(border), C.GLsizei(imageSize), unsafe.Pointer(data_v.Index(0).Addr().Pointer()))
+	if data != nil {
+		data_ptr = unsafe.Pointer(data_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glCompressedTexImage1D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLenum(internalFormat), C.GLsizei(width), C.GLint(border), C.GLsizei(imageSize), data_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCompressedTexImage2D.xml
-func (gl *GL) CompressedTexImage2D(target glbase.Enum, level int32, internalformat glbase.Enum, width, height, border, imageSize int32, data interface{}) {
-	data_v := reflect.ValueOf(data)
-	if data_v.Kind() != reflect.Slice {
+func (gl *GL) CompressedTexImage2D(target glbase.Enum, level int32, internalFormat glbase.Enum, width, height, border, imageSize int32, data interface{}) {
+	var data_ptr unsafe.Pointer
+	var data_v = reflect.ValueOf(data)
+	if data != nil && data_v.Kind() != reflect.Slice {
 		panic("parameter data must be a slice")
 	}
-	C.gl1_3_glCompressedTexImage2D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLenum(internalformat), C.GLsizei(width), C.GLsizei(height), C.GLint(border), C.GLsizei(imageSize), unsafe.Pointer(data_v.Index(0).Addr().Pointer()))
+	if data != nil {
+		data_ptr = unsafe.Pointer(data_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glCompressedTexImage2D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLenum(internalFormat), C.GLsizei(width), C.GLsizei(height), C.GLint(border), C.GLsizei(imageSize), data_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCompressedTexImage3D.xml
-func (gl *GL) CompressedTexImage3D(target glbase.Enum, level int32, internalformat glbase.Enum, width, height, depth, border, imageSize int32, data interface{}) {
-	data_v := reflect.ValueOf(data)
-	if data_v.Kind() != reflect.Slice {
+func (gl *GL) CompressedTexImage3D(target glbase.Enum, level int32, internalFormat glbase.Enum, width, height, depth, border, imageSize int32, data interface{}) {
+	var data_ptr unsafe.Pointer
+	var data_v = reflect.ValueOf(data)
+	if data != nil && data_v.Kind() != reflect.Slice {
 		panic("parameter data must be a slice")
 	}
-	C.gl1_3_glCompressedTexImage3D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLenum(internalformat), C.GLsizei(width), C.GLsizei(height), C.GLsizei(depth), C.GLint(border), C.GLsizei(imageSize), unsafe.Pointer(data_v.Index(0).Addr().Pointer()))
+	if data != nil {
+		data_ptr = unsafe.Pointer(data_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glCompressedTexImage3D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLenum(internalFormat), C.GLsizei(width), C.GLsizei(height), C.GLsizei(depth), C.GLint(border), C.GLsizei(imageSize), data_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glSampleCoverage.xml
@@ -1306,7 +1374,7 @@ func (gl *GL) Ortho(left, right, bottom, top, zNear, zFar float64) {
 //     c[2]  c[6]  c[10] c[14]  X  v[2]
 //     c[3]  c[7]  c[11] c[15]     v[3]
 //
-// Calling glMultMatrix with an argument of m = m[0], m[1], ..., m[15]
+// Calling MultMatrix with an argument of m = m[0], m[1], ..., m[15]
 // replaces the current transformation with (C X M) x v, or
 //
 //     c[0]  c[4]  c[8]  c[12]   m[0]  m[4]  m[8]  m[12]   v[0]
@@ -1330,9 +1398,6 @@ func (gl *GL) Ortho(left, right, bottom, top, zNear, zFar float64) {
 //
 // GL.INVALID_OPERATION is generated if MultMatrix is executed between the
 // execution of Begin and the corresponding execution of End.
-//
-// See also LoadIdentity, LoadMatrix, LoadTransposeMatrix, MatrixMode,
-// MultTransposeMatrix, PushMatrix.
 //
 // https://www.opengl.org/sdk/docs/man2/xhtml/glMultMatrixd.xml
 func (gl *GL) MultMatrixd(m []float64) {
@@ -1358,7 +1423,7 @@ func (gl *GL) MultMatrixd(m []float64) {
 //     c[2]  c[6]  c[10] c[14]  X  v[2]
 //     c[3]  c[7]  c[11] c[15]     v[3]
 //
-// Calling glMultMatrix with an argument of m = m[0], m[1], ..., m[15]
+// Calling MultMatrix with an argument of m = m[0], m[1], ..., m[15]
 // replaces the current transformation with (C X M) x v, or
 //
 //     c[0]  c[4]  c[8]  c[12]   m[0]  m[4]  m[8]  m[12]   v[0]
@@ -1382,9 +1447,6 @@ func (gl *GL) MultMatrixd(m []float64) {
 //
 // GL.INVALID_OPERATION is generated if MultMatrix is executed between the
 // execution of Begin and the corresponding execution of End.
-//
-// See also LoadIdentity, LoadMatrix, LoadTransposeMatrix, MatrixMode,
-// MultTransposeMatrix, PushMatrix.
 //
 // https://www.opengl.org/sdk/docs/man2/xhtml/glMultMatrixf.xml
 func (gl *GL) MultMatrixf(m []float32) {
@@ -1512,11 +1574,15 @@ func (gl *GL) GetClipPlane(plane glbase.Enum, equation []float64) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDrawPixels.xml
 func (gl *GL) DrawPixels(width, height int32, format, gltype glbase.Enum, pixels interface{}) {
-	pixels_v := reflect.ValueOf(pixels)
-	if pixels_v.Kind() != reflect.Slice {
+	var pixels_ptr unsafe.Pointer
+	var pixels_v = reflect.ValueOf(pixels)
+	if pixels != nil && pixels_v.Kind() != reflect.Slice {
 		panic("parameter pixels must be a slice")
 	}
-	C.gl1_3_glDrawPixels(gl.funcs, C.GLsizei(width), C.GLsizei(height), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(pixels_v.Index(0).Addr().Pointer()))
+	if pixels != nil {
+		pixels_ptr = unsafe.Pointer(pixels_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glDrawPixels(gl.funcs, C.GLsizei(width), C.GLsizei(height), C.GLenum(format), C.GLenum(gltype), pixels_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCopyPixels.xml
@@ -1707,7 +1773,7 @@ func (gl *GL) PopAttrib() {
 //
 //   GL.ACCUM
 //       Obtains R, G, B, and A values from the buffer currently selected for
-//       reading (see glReadBuffer). Each component value is divided by 2 n -
+//       reading (see ReadBuffer). Each component value is divided by 2 n -
 //       1 , where n is the number of bits allocated to each color component
 //       in the currently selected buffer. The result is a floating-point
 //       value in the range 0 1 , which is multiplied by value and added to
@@ -1746,9 +1812,6 @@ func (gl *GL) PopAttrib() {
 // GL.INVALID_OPERATION is generated if there is no accumulation buffer.
 // GL.INVALID_OPERATION is generated if Accum is executed between the
 // execution of Begin and the corresponding execution of End.
-//
-// See also Clear, ClearAccum, CopyPixels, DrawBuffer, Get, ReadBuffer,
-// ReadPixels, Scissor, StencilOp
 //
 // https://www.opengl.org/sdk/docs/man2/xhtml/glAccum.xml
 func (gl *GL) Accum(op glbase.Enum, value float32) {
@@ -2843,11 +2906,15 @@ func (gl *GL) DeleteLists(list uint32, range_ int32) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCallLists.xml
 func (gl *GL) CallLists(n int32, gltype glbase.Enum, lists interface{}) {
-	lists_v := reflect.ValueOf(lists)
-	if lists_v.Kind() != reflect.Slice {
+	var lists_ptr unsafe.Pointer
+	var lists_v = reflect.ValueOf(lists)
+	if lists != nil && lists_v.Kind() != reflect.Slice {
 		panic("parameter lists must be a slice")
 	}
-	C.gl1_3_glCallLists(gl.funcs, C.GLsizei(n), C.GLenum(gltype), unsafe.Pointer(lists_v.Index(0).Addr().Pointer()))
+	if lists != nil {
+		lists_ptr = unsafe.Pointer(lists_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glCallLists(gl.funcs, C.GLsizei(n), C.GLenum(gltype), lists_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCallList.xml
@@ -2888,47 +2955,67 @@ func (gl *GL) AreTexturesResident(n int32, textures []uint32, residences []bool)
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexPointer.xml
 func (gl *GL) VertexPointer(size int32, gltype glbase.Enum, stride int32, pointer interface{}) {
-	pointer_v := reflect.ValueOf(pointer)
-	if pointer_v.Kind() != reflect.Slice {
+	var pointer_ptr unsafe.Pointer
+	var pointer_v = reflect.ValueOf(pointer)
+	if pointer != nil && pointer_v.Kind() != reflect.Slice {
 		panic("parameter pointer must be a slice")
 	}
-	C.gl1_3_glVertexPointer(gl.funcs, C.GLint(size), C.GLenum(gltype), C.GLsizei(stride), unsafe.Pointer(pointer_v.Index(0).Addr().Pointer()))
+	if pointer != nil {
+		pointer_ptr = unsafe.Pointer(pointer_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glVertexPointer(gl.funcs, C.GLint(size), C.GLenum(gltype), C.GLsizei(stride), pointer_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glTexCoordPointer.xml
 func (gl *GL) TexCoordPointer(size int32, gltype glbase.Enum, stride int32, pointer interface{}) {
-	pointer_v := reflect.ValueOf(pointer)
-	if pointer_v.Kind() != reflect.Slice {
+	var pointer_ptr unsafe.Pointer
+	var pointer_v = reflect.ValueOf(pointer)
+	if pointer != nil && pointer_v.Kind() != reflect.Slice {
 		panic("parameter pointer must be a slice")
 	}
-	C.gl1_3_glTexCoordPointer(gl.funcs, C.GLint(size), C.GLenum(gltype), C.GLsizei(stride), unsafe.Pointer(pointer_v.Index(0).Addr().Pointer()))
+	if pointer != nil {
+		pointer_ptr = unsafe.Pointer(pointer_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glTexCoordPointer(gl.funcs, C.GLint(size), C.GLenum(gltype), C.GLsizei(stride), pointer_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glNormalPointer.xml
 func (gl *GL) NormalPointer(gltype glbase.Enum, stride int32, pointer interface{}) {
-	pointer_v := reflect.ValueOf(pointer)
-	if pointer_v.Kind() != reflect.Slice {
+	var pointer_ptr unsafe.Pointer
+	var pointer_v = reflect.ValueOf(pointer)
+	if pointer != nil && pointer_v.Kind() != reflect.Slice {
 		panic("parameter pointer must be a slice")
 	}
-	C.gl1_3_glNormalPointer(gl.funcs, C.GLenum(gltype), C.GLsizei(stride), unsafe.Pointer(pointer_v.Index(0).Addr().Pointer()))
+	if pointer != nil {
+		pointer_ptr = unsafe.Pointer(pointer_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glNormalPointer(gl.funcs, C.GLenum(gltype), C.GLsizei(stride), pointer_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glInterleavedArrays.xml
 func (gl *GL) InterleavedArrays(format glbase.Enum, stride int32, pointer interface{}) {
-	pointer_v := reflect.ValueOf(pointer)
-	if pointer_v.Kind() != reflect.Slice {
+	var pointer_ptr unsafe.Pointer
+	var pointer_v = reflect.ValueOf(pointer)
+	if pointer != nil && pointer_v.Kind() != reflect.Slice {
 		panic("parameter pointer must be a slice")
 	}
-	C.gl1_3_glInterleavedArrays(gl.funcs, C.GLenum(format), C.GLsizei(stride), unsafe.Pointer(pointer_v.Index(0).Addr().Pointer()))
+	if pointer != nil {
+		pointer_ptr = unsafe.Pointer(pointer_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glInterleavedArrays(gl.funcs, C.GLenum(format), C.GLsizei(stride), pointer_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIndexPointer.xml
 func (gl *GL) IndexPointer(gltype glbase.Enum, stride int32, pointer interface{}) {
-	pointer_v := reflect.ValueOf(pointer)
-	if pointer_v.Kind() != reflect.Slice {
+	var pointer_ptr unsafe.Pointer
+	var pointer_v = reflect.ValueOf(pointer)
+	if pointer != nil && pointer_v.Kind() != reflect.Slice {
 		panic("parameter pointer must be a slice")
 	}
-	C.gl1_3_glIndexPointer(gl.funcs, C.GLenum(gltype), C.GLsizei(stride), unsafe.Pointer(pointer_v.Index(0).Addr().Pointer()))
+	if pointer != nil {
+		pointer_ptr = unsafe.Pointer(pointer_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glIndexPointer(gl.funcs, C.GLenum(gltype), C.GLsizei(stride), pointer_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glEnableClientState.xml
@@ -2938,11 +3025,15 @@ func (gl *GL) EnableClientState(array glbase.Enum) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glEdgeFlagPointer.xml
 func (gl *GL) EdgeFlagPointer(stride int32, pointer interface{}) {
-	pointer_v := reflect.ValueOf(pointer)
-	if pointer_v.Kind() != reflect.Slice {
+	var pointer_ptr unsafe.Pointer
+	var pointer_v = reflect.ValueOf(pointer)
+	if pointer != nil && pointer_v.Kind() != reflect.Slice {
 		panic("parameter pointer must be a slice")
 	}
-	C.gl1_3_glEdgeFlagPointer(gl.funcs, C.GLsizei(stride), unsafe.Pointer(pointer_v.Index(0).Addr().Pointer()))
+	if pointer != nil {
+		pointer_ptr = unsafe.Pointer(pointer_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glEdgeFlagPointer(gl.funcs, C.GLsizei(stride), pointer_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDisableClientState.xml
@@ -2952,11 +3043,15 @@ func (gl *GL) DisableClientState(array glbase.Enum) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glColorPointer.xml
 func (gl *GL) ColorPointer(size int32, gltype glbase.Enum, stride int32, pointer interface{}) {
-	pointer_v := reflect.ValueOf(pointer)
-	if pointer_v.Kind() != reflect.Slice {
+	var pointer_ptr unsafe.Pointer
+	var pointer_v = reflect.ValueOf(pointer)
+	if pointer != nil && pointer_v.Kind() != reflect.Slice {
 		panic("parameter pointer must be a slice")
 	}
-	C.gl1_3_glColorPointer(gl.funcs, C.GLint(size), C.GLenum(gltype), C.GLsizei(stride), unsafe.Pointer(pointer_v.Index(0).Addr().Pointer()))
+	if pointer != nil {
+		pointer_ptr = unsafe.Pointer(pointer_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glColorPointer(gl.funcs, C.GLint(size), C.GLenum(gltype), C.GLsizei(stride), pointer_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glArrayElement.xml
@@ -2975,13 +3070,13 @@ func (gl *GL) ResetHistogram(target glbase.Enum) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glMinmax.xml
-func (gl *GL) Minmax(target, internalformat glbase.Enum, sink bool) {
-	C.gl1_3_glMinmax(gl.funcs, C.GLenum(target), C.GLenum(internalformat), *(*C.GLboolean)(unsafe.Pointer(&sink)))
+func (gl *GL) Minmax(target, internalFormat glbase.Enum, sink bool) {
+	C.gl1_3_glMinmax(gl.funcs, C.GLenum(target), C.GLenum(internalFormat), *(*C.GLboolean)(unsafe.Pointer(&sink)))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glHistogram.xml
-func (gl *GL) Histogram(target glbase.Enum, width int32, internalformat glbase.Enum, sink bool) {
-	C.gl1_3_glHistogram(gl.funcs, C.GLenum(target), C.GLsizei(width), C.GLenum(internalformat), *(*C.GLboolean)(unsafe.Pointer(&sink)))
+func (gl *GL) Histogram(target glbase.Enum, width int32, internalFormat glbase.Enum, sink bool) {
+	C.gl1_3_glHistogram(gl.funcs, C.GLenum(target), C.GLsizei(width), C.GLenum(internalFormat), *(*C.GLboolean)(unsafe.Pointer(&sink)))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetMinmaxParameteriv.xml
@@ -2996,11 +3091,15 @@ func (gl *GL) GetMinmaxParameterfv(target, pname glbase.Enum, params []float32) 
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetMinmax.xml
 func (gl *GL) GetMinmax(target glbase.Enum, reset bool, format, gltype glbase.Enum, values interface{}) {
-	values_v := reflect.ValueOf(values)
-	if values_v.Kind() != reflect.Slice {
+	var values_ptr unsafe.Pointer
+	var values_v = reflect.ValueOf(values)
+	if values != nil && values_v.Kind() != reflect.Slice {
 		panic("parameter values must be a slice")
 	}
-	C.gl1_3_glGetMinmax(gl.funcs, C.GLenum(target), *(*C.GLboolean)(unsafe.Pointer(&reset)), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(values_v.Index(0).Addr().Pointer()))
+	if values != nil {
+		values_ptr = unsafe.Pointer(values_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glGetMinmax(gl.funcs, C.GLenum(target), *(*C.GLboolean)(unsafe.Pointer(&reset)), C.GLenum(format), C.GLenum(gltype), values_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetHistogramParameteriv.xml
@@ -3015,41 +3114,65 @@ func (gl *GL) GetHistogramParameterfv(target, pname glbase.Enum, params []float3
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetHistogram.xml
 func (gl *GL) GetHistogram(target glbase.Enum, reset bool, format, gltype glbase.Enum, values interface{}) {
-	values_v := reflect.ValueOf(values)
-	if values_v.Kind() != reflect.Slice {
+	var values_ptr unsafe.Pointer
+	var values_v = reflect.ValueOf(values)
+	if values != nil && values_v.Kind() != reflect.Slice {
 		panic("parameter values must be a slice")
 	}
-	C.gl1_3_glGetHistogram(gl.funcs, C.GLenum(target), *(*C.GLboolean)(unsafe.Pointer(&reset)), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(values_v.Index(0).Addr().Pointer()))
+	if values != nil {
+		values_ptr = unsafe.Pointer(values_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glGetHistogram(gl.funcs, C.GLenum(target), *(*C.GLboolean)(unsafe.Pointer(&reset)), C.GLenum(format), C.GLenum(gltype), values_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glSeparableFilter2D.xml
-func (gl *GL) SeparableFilter2D(target, internalformat glbase.Enum, width, height int32, format, gltype glbase.Enum, row, column interface{}) {
-	row_v := reflect.ValueOf(row)
-	if row_v.Kind() != reflect.Slice {
+func (gl *GL) SeparableFilter2D(target, internalFormat glbase.Enum, width, height int32, format, gltype glbase.Enum, row, column interface{}) {
+	var row_ptr unsafe.Pointer
+	var row_v = reflect.ValueOf(row)
+	if row != nil && row_v.Kind() != reflect.Slice {
 		panic("parameter row must be a slice")
 	}
-	column_v := reflect.ValueOf(column)
-	if column_v.Kind() != reflect.Slice {
+	if row != nil {
+		row_ptr = unsafe.Pointer(row_v.Index(0).Addr().Pointer())
+	}
+	var column_ptr unsafe.Pointer
+	var column_v = reflect.ValueOf(column)
+	if column != nil && column_v.Kind() != reflect.Slice {
 		panic("parameter column must be a slice")
 	}
-	C.gl1_3_glSeparableFilter2D(gl.funcs, C.GLenum(target), C.GLenum(internalformat), C.GLsizei(width), C.GLsizei(height), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(row_v.Index(0).Addr().Pointer()), unsafe.Pointer(column_v.Index(0).Addr().Pointer()))
+	if column != nil {
+		column_ptr = unsafe.Pointer(column_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glSeparableFilter2D(gl.funcs, C.GLenum(target), C.GLenum(internalFormat), C.GLsizei(width), C.GLsizei(height), C.GLenum(format), C.GLenum(gltype), row_ptr, column_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetSeparableFilter.xml
 func (gl *GL) GetSeparableFilter(target, format, gltype glbase.Enum, row, column, span interface{}) {
-	row_v := reflect.ValueOf(row)
-	if row_v.Kind() != reflect.Slice {
+	var row_ptr unsafe.Pointer
+	var row_v = reflect.ValueOf(row)
+	if row != nil && row_v.Kind() != reflect.Slice {
 		panic("parameter row must be a slice")
 	}
-	column_v := reflect.ValueOf(column)
-	if column_v.Kind() != reflect.Slice {
+	if row != nil {
+		row_ptr = unsafe.Pointer(row_v.Index(0).Addr().Pointer())
+	}
+	var column_ptr unsafe.Pointer
+	var column_v = reflect.ValueOf(column)
+	if column != nil && column_v.Kind() != reflect.Slice {
 		panic("parameter column must be a slice")
 	}
-	span_v := reflect.ValueOf(span)
-	if span_v.Kind() != reflect.Slice {
+	if column != nil {
+		column_ptr = unsafe.Pointer(column_v.Index(0).Addr().Pointer())
+	}
+	var span_ptr unsafe.Pointer
+	var span_v = reflect.ValueOf(span)
+	if span != nil && span_v.Kind() != reflect.Slice {
 		panic("parameter span must be a slice")
 	}
-	C.gl1_3_glGetSeparableFilter(gl.funcs, C.GLenum(target), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(row_v.Index(0).Addr().Pointer()), unsafe.Pointer(column_v.Index(0).Addr().Pointer()), unsafe.Pointer(span_v.Index(0).Addr().Pointer()))
+	if span != nil {
+		span_ptr = unsafe.Pointer(span_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glGetSeparableFilter(gl.funcs, C.GLenum(target), C.GLenum(format), C.GLenum(gltype), row_ptr, column_ptr, span_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetConvolutionParameteriv.xml
@@ -3064,21 +3187,25 @@ func (gl *GL) GetConvolutionParameterfv(target, pname glbase.Enum, params []floa
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetConvolutionFilter.xml
 func (gl *GL) GetConvolutionFilter(target, format, gltype glbase.Enum, image interface{}) {
-	image_v := reflect.ValueOf(image)
-	if image_v.Kind() != reflect.Slice {
+	var image_ptr unsafe.Pointer
+	var image_v = reflect.ValueOf(image)
+	if image != nil && image_v.Kind() != reflect.Slice {
 		panic("parameter image must be a slice")
 	}
-	C.gl1_3_glGetConvolutionFilter(gl.funcs, C.GLenum(target), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(image_v.Index(0).Addr().Pointer()))
+	if image != nil {
+		image_ptr = unsafe.Pointer(image_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glGetConvolutionFilter(gl.funcs, C.GLenum(target), C.GLenum(format), C.GLenum(gltype), image_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCopyConvolutionFilter2D.xml
-func (gl *GL) CopyConvolutionFilter2D(target, internalformat glbase.Enum, x, y, width, height int32) {
-	C.gl1_3_glCopyConvolutionFilter2D(gl.funcs, C.GLenum(target), C.GLenum(internalformat), C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height))
+func (gl *GL) CopyConvolutionFilter2D(target, internalFormat glbase.Enum, x, y, width, height int32) {
+	C.gl1_3_glCopyConvolutionFilter2D(gl.funcs, C.GLenum(target), C.GLenum(internalFormat), C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCopyConvolutionFilter1D.xml
-func (gl *GL) CopyConvolutionFilter1D(target, internalformat glbase.Enum, x, y, width int32) {
-	C.gl1_3_glCopyConvolutionFilter1D(gl.funcs, C.GLenum(target), C.GLenum(internalformat), C.GLint(x), C.GLint(y), C.GLsizei(width))
+func (gl *GL) CopyConvolutionFilter1D(target, internalFormat glbase.Enum, x, y, width int32) {
+	C.gl1_3_glCopyConvolutionFilter1D(gl.funcs, C.GLenum(target), C.GLenum(internalFormat), C.GLint(x), C.GLint(y), C.GLsizei(width))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glConvolutionParameteriv.xml
@@ -3102,21 +3229,29 @@ func (gl *GL) ConvolutionParameterf(target, pname glbase.Enum, params float32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glConvolutionFilter2D.xml
-func (gl *GL) ConvolutionFilter2D(target, internalformat glbase.Enum, width, height int32, format, gltype glbase.Enum, image interface{}) {
-	image_v := reflect.ValueOf(image)
-	if image_v.Kind() != reflect.Slice {
+func (gl *GL) ConvolutionFilter2D(target, internalFormat glbase.Enum, width, height int32, format, gltype glbase.Enum, image interface{}) {
+	var image_ptr unsafe.Pointer
+	var image_v = reflect.ValueOf(image)
+	if image != nil && image_v.Kind() != reflect.Slice {
 		panic("parameter image must be a slice")
 	}
-	C.gl1_3_glConvolutionFilter2D(gl.funcs, C.GLenum(target), C.GLenum(internalformat), C.GLsizei(width), C.GLsizei(height), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(image_v.Index(0).Addr().Pointer()))
+	if image != nil {
+		image_ptr = unsafe.Pointer(image_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glConvolutionFilter2D(gl.funcs, C.GLenum(target), C.GLenum(internalFormat), C.GLsizei(width), C.GLsizei(height), C.GLenum(format), C.GLenum(gltype), image_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glConvolutionFilter1D.xml
-func (gl *GL) ConvolutionFilter1D(target, internalformat glbase.Enum, width int32, format, gltype glbase.Enum, image interface{}) {
-	image_v := reflect.ValueOf(image)
-	if image_v.Kind() != reflect.Slice {
+func (gl *GL) ConvolutionFilter1D(target, internalFormat glbase.Enum, width int32, format, gltype glbase.Enum, image interface{}) {
+	var image_ptr unsafe.Pointer
+	var image_v = reflect.ValueOf(image)
+	if image != nil && image_v.Kind() != reflect.Slice {
 		panic("parameter image must be a slice")
 	}
-	C.gl1_3_glConvolutionFilter1D(gl.funcs, C.GLenum(target), C.GLenum(internalformat), C.GLsizei(width), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(image_v.Index(0).Addr().Pointer()))
+	if image != nil {
+		image_ptr = unsafe.Pointer(image_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glConvolutionFilter1D(gl.funcs, C.GLenum(target), C.GLenum(internalFormat), C.GLsizei(width), C.GLenum(format), C.GLenum(gltype), image_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCopyColorSubTable.xml
@@ -3126,11 +3261,15 @@ func (gl *GL) CopyColorSubTable(target glbase.Enum, start, x, y, width int32) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glColorSubTable.xml
 func (gl *GL) ColorSubTable(target glbase.Enum, start, count int32, format, gltype glbase.Enum, data interface{}) {
-	data_v := reflect.ValueOf(data)
-	if data_v.Kind() != reflect.Slice {
+	var data_ptr unsafe.Pointer
+	var data_v = reflect.ValueOf(data)
+	if data != nil && data_v.Kind() != reflect.Slice {
 		panic("parameter data must be a slice")
 	}
-	C.gl1_3_glColorSubTable(gl.funcs, C.GLenum(target), C.GLsizei(start), C.GLsizei(count), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(data_v.Index(0).Addr().Pointer()))
+	if data != nil {
+		data_ptr = unsafe.Pointer(data_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glColorSubTable(gl.funcs, C.GLenum(target), C.GLsizei(start), C.GLsizei(count), C.GLenum(format), C.GLenum(gltype), data_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetColorTableParameteriv.xml
@@ -3145,16 +3284,20 @@ func (gl *GL) GetColorTableParameterfv(target, pname glbase.Enum, params []float
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetColorTable.xml
 func (gl *GL) GetColorTable(target, format, gltype glbase.Enum, table interface{}) {
-	table_v := reflect.ValueOf(table)
-	if table_v.Kind() != reflect.Slice {
+	var table_ptr unsafe.Pointer
+	var table_v = reflect.ValueOf(table)
+	if table != nil && table_v.Kind() != reflect.Slice {
 		panic("parameter table must be a slice")
 	}
-	C.gl1_3_glGetColorTable(gl.funcs, C.GLenum(target), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(table_v.Index(0).Addr().Pointer()))
+	if table != nil {
+		table_ptr = unsafe.Pointer(table_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glGetColorTable(gl.funcs, C.GLenum(target), C.GLenum(format), C.GLenum(gltype), table_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCopyColorTable.xml
-func (gl *GL) CopyColorTable(target, internalformat glbase.Enum, x, y, width int32) {
-	C.gl1_3_glCopyColorTable(gl.funcs, C.GLenum(target), C.GLenum(internalformat), C.GLint(x), C.GLint(y), C.GLsizei(width))
+func (gl *GL) CopyColorTable(target, internalFormat glbase.Enum, x, y, width int32) {
+	C.gl1_3_glCopyColorTable(gl.funcs, C.GLenum(target), C.GLenum(internalFormat), C.GLint(x), C.GLint(y), C.GLsizei(width))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glColorTableParameteriv.xml
@@ -3168,12 +3311,16 @@ func (gl *GL) ColorTableParameterfv(target, pname glbase.Enum, params []float32)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glColorTable.xml
-func (gl *GL) ColorTable(target, internalformat glbase.Enum, width int32, format, gltype glbase.Enum, table interface{}) {
-	table_v := reflect.ValueOf(table)
-	if table_v.Kind() != reflect.Slice {
+func (gl *GL) ColorTable(target, internalFormat glbase.Enum, width int32, format, gltype glbase.Enum, table interface{}) {
+	var table_ptr unsafe.Pointer
+	var table_v = reflect.ValueOf(table)
+	if table != nil && table_v.Kind() != reflect.Slice {
 		panic("parameter table must be a slice")
 	}
-	C.gl1_3_glColorTable(gl.funcs, C.GLenum(target), C.GLenum(internalformat), C.GLsizei(width), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(table_v.Index(0).Addr().Pointer()))
+	if table != nil {
+		table_ptr = unsafe.Pointer(table_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_3_glColorTable(gl.funcs, C.GLenum(target), C.GLenum(internalFormat), C.GLsizei(width), C.GLenum(format), C.GLenum(gltype), table_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glMultTransposeMatrixd.xml

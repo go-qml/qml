@@ -438,9 +438,6 @@ func parseConsts(filename string) (map[glVersion][]Const, error) {
 			for _, require := range feature.Requires {
 				if require.Profile == profile || profile == "" {
 					for _, enum := range require.Enums {
-						if enum.Name == "GL_TRUE" || enum.Name == "GL_FALSE" {
-							continue // Use native true/false.
-						}
 						required[enum.Name] = true
 					}
 				}
@@ -579,6 +576,9 @@ func prepareHeader(header *Header) error {
 					p.GoName = p.Name
 				}
 			}
+			if name, ok := paramNameFixes[p.GoName]; ok {
+				p.GoName = name
+			}
 			// Some consistency. Those are a gl* function after all.
 			switch p.Type {
 			case "void":
@@ -702,7 +702,7 @@ func init() {
 
 func funcComment(header *Header, f Func) string {
 	var doc = funcTweaks[f.GoName].doc
-	doc = execTemplate(f.GoName + ":doc", doc, f)
+	doc = execTemplate(f.GoName+":doc", doc, f)
 	var buf bytes.Buffer
 	if doc != "" {
 		var scanner = bufio.NewScanner(bytes.NewBufferString(doc))
@@ -740,7 +740,7 @@ func appendResultList(list []paramItem, f Func) []paramItem {
 	var tweaks = funcTweaks[f.GoName]
 	var buf bytes.Buffer
 	tweak := tweaks.params["result"]
-	if f.GoType != "" && !tweak.remove {
+	if f.GoType != "" && !tweak.omit {
 		var item paramItem
 		if tweak.rename != "" {
 			item.GoName = tweak.rename
@@ -766,7 +766,7 @@ func appendParamsList(list []paramItem, f Func, output bool) []paramItem {
 	var buf bytes.Buffer
 	for _, param := range f.Param {
 		tweak := tweaks.params[param.GoName]
-		if tweak.remove || tweak.output != output {
+		if tweak.omit || tweak.output != output {
 			continue
 		}
 		var item paramItem
@@ -777,7 +777,7 @@ func appendParamsList(list []paramItem, f Func, output bool) []paramItem {
 		}
 		if tweak.retype != "" {
 			item.GoType = param.GoType
-		} else if param.Type == "GLvoid" && param.Addr > 0 {
+		} else if param.Addr == 1 && param.Type == "GLvoid" {
 			item.GoType = "interface{}"
 		} else if tweak.single {
 			item.GoType = param.GoType
@@ -825,7 +825,7 @@ func funcResult(f Func) string {
 	if len(list) == 0 {
 		return ""
 	}
-	if len(list) == 1 && list[0].GoName == "result" {
+	if len(list) == 1 && (list[0].GoName == "result" || funcTweaks[f.GoName].params[list[0].GoName].unnamed) {
 		return list[0].GoType
 	}
 	return "(" + formatParamsList(list) + ")"
@@ -853,10 +853,9 @@ func funcCallParams(f Func) string {
 		if tweak.replace {
 			name += "_c"
 		}
-		if param.Type == "GLvoid" {
-			buf.WriteString("unsafe.Pointer(")
+		if param.Addr == 1 && param.Type == "GLvoid" {
 			buf.WriteString(name)
-			buf.WriteString("_v.Index(0).Addr().Pointer())")
+			buf.WriteString("_ptr")
 		} else if param.Addr == 1 && param.Type == "GLchar" && param.GoType == "string" {
 			buf.WriteString("(*C.GLchar)(")
 			buf.WriteString(name)
@@ -893,10 +892,18 @@ func funcCallParamsPrep(f Func) string {
 	var buf bytes.Buffer
 	for _, param := range f.Param {
 		if param.Addr == 1 && param.Type == "GLchar" && param.GoType == "string" {
-			buf.WriteString(param.GoName)
-			buf.WriteString("_cstr := C.CString(")
-			buf.WriteString(param.GoName)
-			buf.WriteString(")\n")
+			fmt.Fprintf(&buf, "%s_cstr := C.CString(%s)\n", param.GoName, param.GoName)
+		}
+		if param.Addr == 1 && param.Type == "GLvoid" {
+			fmt.Fprintf(&buf, "var %s_ptr unsafe.Pointer\n", param.GoName)
+			fmt.Fprintf(&buf, "var %s_v = reflect.ValueOf(%s)\n", param.GoName, param.GoName)
+			fmt.Fprintf(&buf, "if %s != nil && %s_v.Kind() != reflect.Slice { panic(\"parameter %s must be a slice\") }\n",
+				param.GoName, param.GoName, param.GoName)
+			fmt.Fprintf(&buf, "if %s != nil { %s_ptr = unsafe.Pointer(%s_v.Index(0).Addr().Pointer()) }\n",
+				param.GoName, param.GoName, param.GoName)
+		}
+		if plen := funcParamLen(f, param); plen != "" {
+			fmt.Fprintf(&buf, "if len(%s) != %s { panic(\"parameter %s has incorrect length\") }\n", param.GoName, plen, param.GoName)
 		}
 	}
 	return buf.String()
@@ -927,7 +934,7 @@ func funcReturnResult(f Func) string {
 	}
 	for _, param := range f.Param {
 		tweak := tweaks.params[param.GoName]
-		if tweak.remove || !tweak.output {
+		if tweak.omit || !tweak.output {
 			continue
 		}
 		if buf.Len() > 0 {
@@ -1023,6 +1030,13 @@ func paramGoType(f Func, name string) string {
 	panic(fmt.Sprintf("parameter %q not found in function %s", name, f.GoName))
 }
 
+func funcSince(f Func, since string) string {
+	if strings.HasSuffix(since, "+") {
+		return f.GoName + " is available in GL version " + since[:len(since)-1] + " or greater."
+	}
+	return f.GoName + " is available in GL version " + since + "."
+}
+
 func execTemplate(name, content string, dot interface{}) string {
 	if !strings.Contains(content, "{{") {
 		return content
@@ -1052,6 +1066,7 @@ func init() {
 	funcs = template.FuncMap{
 		"copyDoc":     copyDoc,
 		"paramGoType": paramGoType,
+		"funcSince":   funcSince,
 
 		"constNewLine": constNewLine,
 		"toLower":      strings.ToLower,
@@ -1129,31 +1144,16 @@ const ({{range $const := $.Const}}{{if $const.LineBlock | constNewLine}}
 
 {{ range $func := $.Func }}{{if $func | funcSupported}}
 {{funcComment $ $func}}
-func (gl *GL) {{$func.GoName}}({{funcParams $func}}) {{funcResult $func}} { {{/*
+func (gl *GL) {{$func.GoName}}({{funcParams $func}}) {{funcResult $func}} {
+	{{funcCallParamsPrep $func}} {{/*
 */}}	{{with $code := funcBefore $func}}{{$code}}
 	{{end}} {{/*
-*/}}	{{range $param := $func.Param}} {{/*
-*/}}		{{with $plen := funcParamLen $func $param}} {{/*
-*/}}			if len({{$param.GoName}}) != {{$plen}} {
-				panic("parameter {{$param.GoName}} has incorrect length")
-			}
-		{{end}} {{/*
-*/}}		{{if eq $param.Type "GLvoid"}} {{/*
-*/}}			{{$param.GoName}}_v := reflect.ValueOf({{$param.GoName}})
-			if {{$param.GoName}}_v.Kind() != reflect.Slice {
-				panic("parameter {{$param.GoName}} must be a slice")
-			}
-		{{end}} {{/*
-*/}}	{{end}} {{/*
-*/}}	{{funcCallParamsPrep $func}} {{/*
 */}}	{{if ne $func.Type "void"}}glresult := {{end}}C.gl{{$.GLVersionLabel}}_{{$func.Name}}(gl.funcs{{if $func.Param}}, {{funcCallParams $func}}{{end}})
-	{{funcCallParamsPost $func}} {{/*
-*/}}	{{with $code := funcAfter $func}} {{/*
-*/}}		{{$code}}
-	{{else}} {{/*
-*/}}		{{with $code := funcReturnResult $func}}return {{$code}}
-		{{end}} {{/*
-*/}}	{{end}} {{/*
+	{{with $code := funcAfter $func}}{{$code}}
+	{{end}} {{/*
+*/}}	{{funcCallParamsPost $func}} {{/*
+*/}}	{{with $code := funcReturnResult $func}}return {{$code}}
+	{{end}} {{/*
 */}} }
 {{end}}{{end}}
 `

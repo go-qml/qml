@@ -220,16 +220,16 @@ void gl3_2core_glDrawBuffer(void *_glfuncs, GLenum mode)
 	_qglfuncs->glDrawBuffer(mode);
 }
 
-void gl3_2core_glTexImage2D(void *_glfuncs, GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels)
+void gl3_2core_glTexImage2D(void *_glfuncs, GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels)
 {
 	QOpenGLFunctions_3_2_Core* _qglfuncs = reinterpret_cast<QOpenGLFunctions_3_2_Core*>(_glfuncs);
-	_qglfuncs->glTexImage2D(target, level, internalformat, width, height, border, format, gltype, pixels);
+	_qglfuncs->glTexImage2D(target, level, internalFormat, width, height, border, format, gltype, pixels);
 }
 
-void gl3_2core_glTexImage1D(void *_glfuncs, GLenum target, GLint level, GLint internalformat, GLsizei width, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels)
+void gl3_2core_glTexImage1D(void *_glfuncs, GLenum target, GLint level, GLint internalFormat, GLsizei width, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels)
 {
 	QOpenGLFunctions_3_2_Core* _qglfuncs = reinterpret_cast<QOpenGLFunctions_3_2_Core*>(_glfuncs);
-	_qglfuncs->glTexImage1D(target, level, internalformat, width, border, format, gltype, pixels);
+	_qglfuncs->glTexImage1D(target, level, internalFormat, width, border, format, gltype, pixels);
 }
 
 void gl3_2core_glTexParameteriv(void *_glfuncs, GLenum target, GLenum pname, const GLint* params)
@@ -358,16 +358,16 @@ void gl3_2core_glCopyTexSubImage1D(void *_glfuncs, GLenum target, GLint level, G
 	_qglfuncs->glCopyTexSubImage1D(target, level, xoffset, x, y, width);
 }
 
-void gl3_2core_glCopyTexImage2D(void *_glfuncs, GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border)
+void gl3_2core_glCopyTexImage2D(void *_glfuncs, GLenum target, GLint level, GLenum internalFormat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border)
 {
 	QOpenGLFunctions_3_2_Core* _qglfuncs = reinterpret_cast<QOpenGLFunctions_3_2_Core*>(_glfuncs);
-	_qglfuncs->glCopyTexImage2D(target, level, internalformat, x, y, width, height, border);
+	_qglfuncs->glCopyTexImage2D(target, level, internalFormat, x, y, width, height, border);
 }
 
-void gl3_2core_glCopyTexImage1D(void *_glfuncs, GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLint border)
+void gl3_2core_glCopyTexImage1D(void *_glfuncs, GLenum target, GLint level, GLenum internalFormat, GLint x, GLint y, GLsizei width, GLint border)
 {
 	QOpenGLFunctions_3_2_Core* _qglfuncs = reinterpret_cast<QOpenGLFunctions_3_2_Core*>(_glfuncs);
-	_qglfuncs->glCopyTexImage1D(target, level, internalformat, x, y, width, border);
+	_qglfuncs->glCopyTexImage1D(target, level, internalFormat, x, y, width, border);
 }
 
 void gl3_2core_glPolygonOffset(void *_glfuncs, GLfloat factor, GLfloat units)
@@ -400,10 +400,10 @@ void gl3_2core_glTexSubImage3D(void *_glfuncs, GLenum target, GLint level, GLint
 	_qglfuncs->glTexSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, gltype, pixels);
 }
 
-void gl3_2core_glTexImage3D(void *_glfuncs, GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels)
+void gl3_2core_glTexImage3D(void *_glfuncs, GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels)
 {
 	QOpenGLFunctions_3_2_Core* _qglfuncs = reinterpret_cast<QOpenGLFunctions_3_2_Core*>(_glfuncs);
-	_qglfuncs->glTexImage3D(target, level, internalformat, width, height, depth, border, format, gltype, pixels);
+	_qglfuncs->glTexImage3D(target, level, internalFormat, width, height, depth, border, format, gltype, pixels);
 }
 
 void gl3_2core_glDrawRangeElements(void *_glfuncs, GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum gltype, const GLvoid* indices)
@@ -448,22 +448,22 @@ void gl3_2core_glCompressedTexSubImage3D(void *_glfuncs, GLenum target, GLint le
 	_qglfuncs->glCompressedTexSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, imageSize, data);
 }
 
-void gl3_2core_glCompressedTexImage1D(void *_glfuncs, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLint border, GLsizei imageSize, const GLvoid* data)
+void gl3_2core_glCompressedTexImage1D(void *_glfuncs, GLenum target, GLint level, GLenum internalFormat, GLsizei width, GLint border, GLsizei imageSize, const GLvoid* data)
 {
 	QOpenGLFunctions_3_2_Core* _qglfuncs = reinterpret_cast<QOpenGLFunctions_3_2_Core*>(_glfuncs);
-	_qglfuncs->glCompressedTexImage1D(target, level, internalformat, width, border, imageSize, data);
+	_qglfuncs->glCompressedTexImage1D(target, level, internalFormat, width, border, imageSize, data);
 }
 
-void gl3_2core_glCompressedTexImage2D(void *_glfuncs, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid* data)
+void gl3_2core_glCompressedTexImage2D(void *_glfuncs, GLenum target, GLint level, GLenum internalFormat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid* data)
 {
 	QOpenGLFunctions_3_2_Core* _qglfuncs = reinterpret_cast<QOpenGLFunctions_3_2_Core*>(_glfuncs);
-	_qglfuncs->glCompressedTexImage2D(target, level, internalformat, width, height, border, imageSize, data);
+	_qglfuncs->glCompressedTexImage2D(target, level, internalFormat, width, height, border, imageSize, data);
 }
 
-void gl3_2core_glCompressedTexImage3D(void *_glfuncs, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, const GLvoid* data)
+void gl3_2core_glCompressedTexImage3D(void *_glfuncs, GLenum target, GLint level, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, const GLvoid* data)
 {
 	QOpenGLFunctions_3_2_Core* _qglfuncs = reinterpret_cast<QOpenGLFunctions_3_2_Core*>(_glfuncs);
-	_qglfuncs->glCompressedTexImage3D(target, level, internalformat, width, height, depth, border, imageSize, data);
+	_qglfuncs->glCompressedTexImage3D(target, level, internalFormat, width, height, depth, border, imageSize, data);
 }
 
 void gl3_2core_glSampleCoverage(void *_glfuncs, GLfloat value, GLboolean invert)
@@ -922,10 +922,10 @@ void gl3_2core_glFramebufferTextureLayer(void *_glfuncs, GLenum target, GLenum a
 	_qglfuncs->glFramebufferTextureLayer(target, attachment, texture, level, layer);
 }
 
-void gl3_2core_glRenderbufferStorageMultisample(void *_glfuncs, GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height)
+void gl3_2core_glRenderbufferStorageMultisample(void *_glfuncs, GLenum target, GLsizei samples, GLenum internalFormat, GLsizei width, GLsizei height)
 {
 	QOpenGLFunctions_3_2_Core* _qglfuncs = reinterpret_cast<QOpenGLFunctions_3_2_Core*>(_glfuncs);
-	_qglfuncs->glRenderbufferStorageMultisample(target, samples, internalformat, width, height);
+	_qglfuncs->glRenderbufferStorageMultisample(target, samples, internalFormat, width, height);
 }
 
 void gl3_2core_glBlitFramebuffer(void *_glfuncs, GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter)
@@ -1006,10 +1006,10 @@ void gl3_2core_glGetRenderbufferParameteriv(void *_glfuncs, GLenum target, GLenu
 	_qglfuncs->glGetRenderbufferParameteriv(target, pname, params);
 }
 
-void gl3_2core_glRenderbufferStorage(void *_glfuncs, GLenum target, GLenum internalformat, GLsizei width, GLsizei height)
+void gl3_2core_glRenderbufferStorage(void *_glfuncs, GLenum target, GLenum internalFormat, GLsizei width, GLsizei height)
 {
 	QOpenGLFunctions_3_2_Core* _qglfuncs = reinterpret_cast<QOpenGLFunctions_3_2_Core*>(_glfuncs);
-	_qglfuncs->glRenderbufferStorage(target, internalformat, width, height);
+	_qglfuncs->glRenderbufferStorage(target, internalFormat, width, height);
 }
 
 void gl3_2core_glGenRenderbuffers(void *_glfuncs, GLsizei n, GLuint* renderbuffers)
@@ -1276,10 +1276,10 @@ void gl3_2core_glPrimitiveRestartIndex(void *_glfuncs, GLuint index)
 	_qglfuncs->glPrimitiveRestartIndex(index);
 }
 
-void gl3_2core_glTexBuffer(void *_glfuncs, GLenum target, GLenum internalformat, GLuint buffer)
+void gl3_2core_glTexBuffer(void *_glfuncs, GLenum target, GLenum internalFormat, GLuint buffer)
 {
 	QOpenGLFunctions_3_2_Core* _qglfuncs = reinterpret_cast<QOpenGLFunctions_3_2_Core*>(_glfuncs);
-	_qglfuncs->glTexBuffer(target, internalformat, buffer);
+	_qglfuncs->glTexBuffer(target, internalFormat, buffer);
 }
 
 void gl3_2core_glDrawElementsInstanced(void *_glfuncs, GLenum mode, GLsizei count, GLenum gltype, const GLvoid* indices, GLsizei instancecount)
@@ -1306,16 +1306,16 @@ void gl3_2core_glGetMultisamplefv(void *_glfuncs, GLenum pname, GLuint index, GL
 	_qglfuncs->glGetMultisamplefv(pname, index, val);
 }
 
-void gl3_2core_glTexImage3DMultisample(void *_glfuncs, GLenum target, GLsizei samples, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLboolean fixedsamplelocations)
+void gl3_2core_glTexImage3DMultisample(void *_glfuncs, GLenum target, GLsizei samples, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLboolean fixedsamplelocations)
 {
 	QOpenGLFunctions_3_2_Core* _qglfuncs = reinterpret_cast<QOpenGLFunctions_3_2_Core*>(_glfuncs);
-	_qglfuncs->glTexImage3DMultisample(target, samples, internalformat, width, height, depth, fixedsamplelocations);
+	_qglfuncs->glTexImage3DMultisample(target, samples, internalFormat, width, height, depth, fixedsamplelocations);
 }
 
-void gl3_2core_glTexImage2DMultisample(void *_glfuncs, GLenum target, GLsizei samples, GLint internalformat, GLsizei width, GLsizei height, GLboolean fixedsamplelocations)
+void gl3_2core_glTexImage2DMultisample(void *_glfuncs, GLenum target, GLsizei samples, GLint internalFormat, GLsizei width, GLsizei height, GLboolean fixedsamplelocations)
 {
 	QOpenGLFunctions_3_2_Core* _qglfuncs = reinterpret_cast<QOpenGLFunctions_3_2_Core*>(_glfuncs);
-	_qglfuncs->glTexImage2DMultisample(target, samples, internalformat, width, height, fixedsamplelocations);
+	_qglfuncs->glTexImage2DMultisample(target, samples, internalFormat, width, height, fixedsamplelocations);
 }
 
 void gl3_2core_glGetSynciv(void *_glfuncs, GLsync sync, GLenum pname, GLsizei bufSize, GLsizei* length, GLint* values)

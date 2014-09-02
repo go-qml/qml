@@ -220,16 +220,16 @@ void gl1_1_glDrawBuffer(void *_glfuncs, GLenum mode)
 	_qglfuncs->glDrawBuffer(mode);
 }
 
-void gl1_1_glTexImage2D(void *_glfuncs, GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels)
+void gl1_1_glTexImage2D(void *_glfuncs, GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels)
 {
 	QOpenGLFunctions_1_1* _qglfuncs = reinterpret_cast<QOpenGLFunctions_1_1*>(_glfuncs);
-	_qglfuncs->glTexImage2D(target, level, internalformat, width, height, border, format, gltype, pixels);
+	_qglfuncs->glTexImage2D(target, level, internalFormat, width, height, border, format, gltype, pixels);
 }
 
-void gl1_1_glTexImage1D(void *_glfuncs, GLenum target, GLint level, GLint internalformat, GLsizei width, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels)
+void gl1_1_glTexImage1D(void *_glfuncs, GLenum target, GLint level, GLint internalFormat, GLsizei width, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels)
 {
 	QOpenGLFunctions_1_1* _qglfuncs = reinterpret_cast<QOpenGLFunctions_1_1*>(_glfuncs);
-	_qglfuncs->glTexImage1D(target, level, internalformat, width, border, format, gltype, pixels);
+	_qglfuncs->glTexImage1D(target, level, internalFormat, width, border, format, gltype, pixels);
 }
 
 void gl1_1_glTexParameteriv(void *_glfuncs, GLenum target, GLenum pname, const GLint* params)
@@ -358,16 +358,16 @@ void gl1_1_glCopyTexSubImage1D(void *_glfuncs, GLenum target, GLint level, GLint
 	_qglfuncs->glCopyTexSubImage1D(target, level, xoffset, x, y, width);
 }
 
-void gl1_1_glCopyTexImage2D(void *_glfuncs, GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border)
+void gl1_1_glCopyTexImage2D(void *_glfuncs, GLenum target, GLint level, GLenum internalFormat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border)
 {
 	QOpenGLFunctions_1_1* _qglfuncs = reinterpret_cast<QOpenGLFunctions_1_1*>(_glfuncs);
-	_qglfuncs->glCopyTexImage2D(target, level, internalformat, x, y, width, height, border);
+	_qglfuncs->glCopyTexImage2D(target, level, internalFormat, x, y, width, height, border);
 }
 
-void gl1_1_glCopyTexImage1D(void *_glfuncs, GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLint border)
+void gl1_1_glCopyTexImage1D(void *_glfuncs, GLenum target, GLint level, GLenum internalFormat, GLint x, GLint y, GLsizei width, GLint border)
 {
 	QOpenGLFunctions_1_1* _qglfuncs = reinterpret_cast<QOpenGLFunctions_1_1*>(_glfuncs);
-	_qglfuncs->glCopyTexImage1D(target, level, internalformat, x, y, width, border);
+	_qglfuncs->glCopyTexImage1D(target, level, internalFormat, x, y, width, border);
 }
 
 void gl1_1_glPolygonOffset(void *_glfuncs, GLfloat factor, GLfloat units)

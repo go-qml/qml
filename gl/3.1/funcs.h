@@ -69,8 +69,8 @@ void gl3_1_glClearStencil(void *_glfuncs, GLint s);
 void gl3_1_glClearColor(void *_glfuncs, GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha);
 void gl3_1_glClear(void *_glfuncs, GLbitfield mask);
 void gl3_1_glDrawBuffer(void *_glfuncs, GLenum mode);
-void gl3_1_glTexImage2D(void *_glfuncs, GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels);
-void gl3_1_glTexImage1D(void *_glfuncs, GLenum target, GLint level, GLint internalformat, GLsizei width, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels);
+void gl3_1_glTexImage2D(void *_glfuncs, GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels);
+void gl3_1_glTexImage1D(void *_glfuncs, GLenum target, GLint level, GLint internalFormat, GLsizei width, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels);
 void gl3_1_glTexParameteriv(void *_glfuncs, GLenum target, GLenum pname, const GLint* params);
 void gl3_1_glTexParameteri(void *_glfuncs, GLenum target, GLenum pname, GLint param);
 void gl3_1_glTexParameterfv(void *_glfuncs, GLenum target, GLenum pname, const GLfloat* params);
@@ -92,14 +92,14 @@ void gl3_1_glTexSubImage2D(void *_glfuncs, GLenum target, GLint level, GLint xof
 void gl3_1_glTexSubImage1D(void *_glfuncs, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum gltype, const GLvoid* pixels);
 void gl3_1_glCopyTexSubImage2D(void *_glfuncs, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height);
 void gl3_1_glCopyTexSubImage1D(void *_glfuncs, GLenum target, GLint level, GLint xoffset, GLint x, GLint y, GLsizei width);
-void gl3_1_glCopyTexImage2D(void *_glfuncs, GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border);
-void gl3_1_glCopyTexImage1D(void *_glfuncs, GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLint border);
+void gl3_1_glCopyTexImage2D(void *_glfuncs, GLenum target, GLint level, GLenum internalFormat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border);
+void gl3_1_glCopyTexImage1D(void *_glfuncs, GLenum target, GLint level, GLenum internalFormat, GLint x, GLint y, GLsizei width, GLint border);
 void gl3_1_glPolygonOffset(void *_glfuncs, GLfloat factor, GLfloat units);
 void gl3_1_glDrawElements(void *_glfuncs, GLenum mode, GLsizei count, GLenum gltype, const GLvoid* indices);
 void gl3_1_glDrawArrays(void *_glfuncs, GLenum mode, GLint first, GLsizei count);
 void gl3_1_glCopyTexSubImage3D(void *_glfuncs, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height);
 void gl3_1_glTexSubImage3D(void *_glfuncs, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum gltype, const GLvoid* pixels);
-void gl3_1_glTexImage3D(void *_glfuncs, GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels);
+void gl3_1_glTexImage3D(void *_glfuncs, GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels);
 void gl3_1_glDrawRangeElements(void *_glfuncs, GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum gltype, const GLvoid* indices);
 void gl3_1_glBlendEquation(void *_glfuncs, GLenum mode);
 void gl3_1_glBlendColor(void *_glfuncs, GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha);
@@ -107,9 +107,9 @@ void gl3_1_glGetCompressedTexImage(void *_glfuncs, GLenum target, GLint level, G
 void gl3_1_glCompressedTexSubImage1D(void *_glfuncs, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLsizei imageSize, const GLvoid* data);
 void gl3_1_glCompressedTexSubImage2D(void *_glfuncs, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid* data);
 void gl3_1_glCompressedTexSubImage3D(void *_glfuncs, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, const GLvoid* data);
-void gl3_1_glCompressedTexImage1D(void *_glfuncs, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLint border, GLsizei imageSize, const GLvoid* data);
-void gl3_1_glCompressedTexImage2D(void *_glfuncs, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid* data);
-void gl3_1_glCompressedTexImage3D(void *_glfuncs, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, const GLvoid* data);
+void gl3_1_glCompressedTexImage1D(void *_glfuncs, GLenum target, GLint level, GLenum internalFormat, GLsizei width, GLint border, GLsizei imageSize, const GLvoid* data);
+void gl3_1_glCompressedTexImage2D(void *_glfuncs, GLenum target, GLint level, GLenum internalFormat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid* data);
+void gl3_1_glCompressedTexImage3D(void *_glfuncs, GLenum target, GLint level, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, const GLvoid* data);
 void gl3_1_glSampleCoverage(void *_glfuncs, GLfloat value, GLboolean invert);
 void gl3_1_glActiveTexture(void *_glfuncs, GLenum texture);
 void gl3_1_glPointParameteriv(void *_glfuncs, GLenum pname, const GLint* params);
@@ -186,7 +186,7 @@ void gl3_1_glDeleteVertexArrays(void *_glfuncs, GLsizei n, const GLuint* arrays)
 void gl3_1_glBindVertexArray(void *_glfuncs, GLuint array);
 void gl3_1_glFlushMappedBufferRange(void *_glfuncs, GLenum target, GLintptr offset, GLsizeiptr length);
 void gl3_1_glFramebufferTextureLayer(void *_glfuncs, GLenum target, GLenum attachment, GLuint texture, GLint level, GLint layer);
-void gl3_1_glRenderbufferStorageMultisample(void *_glfuncs, GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height);
+void gl3_1_glRenderbufferStorageMultisample(void *_glfuncs, GLenum target, GLsizei samples, GLenum internalFormat, GLsizei width, GLsizei height);
 void gl3_1_glBlitFramebuffer(void *_glfuncs, GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter);
 void gl3_1_glGenerateMipmap(void *_glfuncs, GLenum target);
 void gl3_1_glGetFramebufferAttachmentParameteriv(void *_glfuncs, GLenum target, GLenum attachment, GLenum pname, GLint* params);
@@ -200,7 +200,7 @@ void gl3_1_glDeleteFramebuffers(void *_glfuncs, GLsizei n, const GLuint* framebu
 void gl3_1_glBindFramebuffer(void *_glfuncs, GLenum target, GLuint framebuffer);
 GLboolean gl3_1_glIsFramebuffer(void *_glfuncs, GLuint framebuffer);
 void gl3_1_glGetRenderbufferParameteriv(void *_glfuncs, GLenum target, GLenum pname, GLint* params);
-void gl3_1_glRenderbufferStorage(void *_glfuncs, GLenum target, GLenum internalformat, GLsizei width, GLsizei height);
+void gl3_1_glRenderbufferStorage(void *_glfuncs, GLenum target, GLenum internalFormat, GLsizei width, GLsizei height);
 void gl3_1_glGenRenderbuffers(void *_glfuncs, GLsizei n, GLuint* renderbuffers);
 void gl3_1_glDeleteRenderbuffers(void *_glfuncs, GLsizei n, const GLuint* renderbuffers);
 void gl3_1_glBindRenderbuffer(void *_glfuncs, GLenum target, GLuint renderbuffer);
@@ -245,7 +245,7 @@ GLuint gl3_1_glGetUniformBlockIndex(void *_glfuncs, GLuint program, const GLchar
 void gl3_1_glGetActiveUniformName(void *_glfuncs, GLuint program, GLuint uniformIndex, GLsizei bufSize, GLsizei* length, GLchar* uniformName);
 void gl3_1_glGetActiveUniformsiv(void *_glfuncs, GLuint program, GLsizei uniformCount, const GLuint* uniformIndices, GLenum pname, GLint* params);
 void gl3_1_glPrimitiveRestartIndex(void *_glfuncs, GLuint index);
-void gl3_1_glTexBuffer(void *_glfuncs, GLenum target, GLenum internalformat, GLuint buffer);
+void gl3_1_glTexBuffer(void *_glfuncs, GLenum target, GLenum internalFormat, GLuint buffer);
 void gl3_1_glDrawElementsInstanced(void *_glfuncs, GLenum mode, GLsizei count, GLenum gltype, const GLvoid* indices, GLsizei instancecount);
 void gl3_1_glDrawArraysInstanced(void *_glfuncs, GLenum mode, GLint first, GLsizei count, GLsizei instancecount);
 

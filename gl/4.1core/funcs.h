@@ -69,8 +69,8 @@ void gl4_1core_glClearStencil(void *_glfuncs, GLint s);
 void gl4_1core_glClearColor(void *_glfuncs, GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha);
 void gl4_1core_glClear(void *_glfuncs, GLbitfield mask);
 void gl4_1core_glDrawBuffer(void *_glfuncs, GLenum mode);
-void gl4_1core_glTexImage2D(void *_glfuncs, GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels);
-void gl4_1core_glTexImage1D(void *_glfuncs, GLenum target, GLint level, GLint internalformat, GLsizei width, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels);
+void gl4_1core_glTexImage2D(void *_glfuncs, GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels);
+void gl4_1core_glTexImage1D(void *_glfuncs, GLenum target, GLint level, GLint internalFormat, GLsizei width, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels);
 void gl4_1core_glTexParameteriv(void *_glfuncs, GLenum target, GLenum pname, const GLint* params);
 void gl4_1core_glTexParameteri(void *_glfuncs, GLenum target, GLenum pname, GLint param);
 void gl4_1core_glTexParameterfv(void *_glfuncs, GLenum target, GLenum pname, const GLfloat* params);
@@ -92,14 +92,14 @@ void gl4_1core_glTexSubImage2D(void *_glfuncs, GLenum target, GLint level, GLint
 void gl4_1core_glTexSubImage1D(void *_glfuncs, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum gltype, const GLvoid* pixels);
 void gl4_1core_glCopyTexSubImage2D(void *_glfuncs, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height);
 void gl4_1core_glCopyTexSubImage1D(void *_glfuncs, GLenum target, GLint level, GLint xoffset, GLint x, GLint y, GLsizei width);
-void gl4_1core_glCopyTexImage2D(void *_glfuncs, GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border);
-void gl4_1core_glCopyTexImage1D(void *_glfuncs, GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLint border);
+void gl4_1core_glCopyTexImage2D(void *_glfuncs, GLenum target, GLint level, GLenum internalFormat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border);
+void gl4_1core_glCopyTexImage1D(void *_glfuncs, GLenum target, GLint level, GLenum internalFormat, GLint x, GLint y, GLsizei width, GLint border);
 void gl4_1core_glPolygonOffset(void *_glfuncs, GLfloat factor, GLfloat units);
 void gl4_1core_glDrawElements(void *_glfuncs, GLenum mode, GLsizei count, GLenum gltype, const GLvoid* indices);
 void gl4_1core_glDrawArrays(void *_glfuncs, GLenum mode, GLint first, GLsizei count);
 void gl4_1core_glCopyTexSubImage3D(void *_glfuncs, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height);
 void gl4_1core_glTexSubImage3D(void *_glfuncs, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum gltype, const GLvoid* pixels);
-void gl4_1core_glTexImage3D(void *_glfuncs, GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels);
+void gl4_1core_glTexImage3D(void *_glfuncs, GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum gltype, const GLvoid* pixels);
 void gl4_1core_glDrawRangeElements(void *_glfuncs, GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum gltype, const GLvoid* indices);
 void gl4_1core_glBlendEquation(void *_glfuncs, GLenum mode);
 void gl4_1core_glBlendColor(void *_glfuncs, GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha);
@@ -107,9 +107,9 @@ void gl4_1core_glGetCompressedTexImage(void *_glfuncs, GLenum target, GLint leve
 void gl4_1core_glCompressedTexSubImage1D(void *_glfuncs, GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLsizei imageSize, const GLvoid* data);
 void gl4_1core_glCompressedTexSubImage2D(void *_glfuncs, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid* data);
 void gl4_1core_glCompressedTexSubImage3D(void *_glfuncs, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, const GLvoid* data);
-void gl4_1core_glCompressedTexImage1D(void *_glfuncs, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLint border, GLsizei imageSize, const GLvoid* data);
-void gl4_1core_glCompressedTexImage2D(void *_glfuncs, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid* data);
-void gl4_1core_glCompressedTexImage3D(void *_glfuncs, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, const GLvoid* data);
+void gl4_1core_glCompressedTexImage1D(void *_glfuncs, GLenum target, GLint level, GLenum internalFormat, GLsizei width, GLint border, GLsizei imageSize, const GLvoid* data);
+void gl4_1core_glCompressedTexImage2D(void *_glfuncs, GLenum target, GLint level, GLenum internalFormat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid* data);
+void gl4_1core_glCompressedTexImage3D(void *_glfuncs, GLenum target, GLint level, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, const GLvoid* data);
 void gl4_1core_glSampleCoverage(void *_glfuncs, GLfloat value, GLboolean invert);
 void gl4_1core_glActiveTexture(void *_glfuncs, GLenum texture);
 void gl4_1core_glPointParameteriv(void *_glfuncs, GLenum pname, const GLint* params);
@@ -186,7 +186,7 @@ void gl4_1core_glDeleteVertexArrays(void *_glfuncs, GLsizei n, const GLuint* arr
 void gl4_1core_glBindVertexArray(void *_glfuncs, GLuint array);
 void gl4_1core_glFlushMappedBufferRange(void *_glfuncs, GLenum target, GLintptr offset, GLsizeiptr length);
 void gl4_1core_glFramebufferTextureLayer(void *_glfuncs, GLenum target, GLenum attachment, GLuint texture, GLint level, GLint layer);
-void gl4_1core_glRenderbufferStorageMultisample(void *_glfuncs, GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height);
+void gl4_1core_glRenderbufferStorageMultisample(void *_glfuncs, GLenum target, GLsizei samples, GLenum internalFormat, GLsizei width, GLsizei height);
 void gl4_1core_glBlitFramebuffer(void *_glfuncs, GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter);
 void gl4_1core_glGenerateMipmap(void *_glfuncs, GLenum target);
 void gl4_1core_glGetFramebufferAttachmentParameteriv(void *_glfuncs, GLenum target, GLenum attachment, GLenum pname, GLint* params);
@@ -200,7 +200,7 @@ void gl4_1core_glDeleteFramebuffers(void *_glfuncs, GLsizei n, const GLuint* fra
 void gl4_1core_glBindFramebuffer(void *_glfuncs, GLenum target, GLuint framebuffer);
 GLboolean gl4_1core_glIsFramebuffer(void *_glfuncs, GLuint framebuffer);
 void gl4_1core_glGetRenderbufferParameteriv(void *_glfuncs, GLenum target, GLenum pname, GLint* params);
-void gl4_1core_glRenderbufferStorage(void *_glfuncs, GLenum target, GLenum internalformat, GLsizei width, GLsizei height);
+void gl4_1core_glRenderbufferStorage(void *_glfuncs, GLenum target, GLenum internalFormat, GLsizei width, GLsizei height);
 void gl4_1core_glGenRenderbuffers(void *_glfuncs, GLsizei n, GLuint* renderbuffers);
 void gl4_1core_glDeleteRenderbuffers(void *_glfuncs, GLsizei n, const GLuint* renderbuffers);
 void gl4_1core_glBindRenderbuffer(void *_glfuncs, GLenum target, GLuint renderbuffer);
@@ -245,13 +245,13 @@ GLuint gl4_1core_glGetUniformBlockIndex(void *_glfuncs, GLuint program, const GL
 void gl4_1core_glGetActiveUniformName(void *_glfuncs, GLuint program, GLuint uniformIndex, GLsizei bufSize, GLsizei* length, GLchar* uniformName);
 void gl4_1core_glGetActiveUniformsiv(void *_glfuncs, GLuint program, GLsizei uniformCount, const GLuint* uniformIndices, GLenum pname, GLint* params);
 void gl4_1core_glPrimitiveRestartIndex(void *_glfuncs, GLuint index);
-void gl4_1core_glTexBuffer(void *_glfuncs, GLenum target, GLenum internalformat, GLuint buffer);
+void gl4_1core_glTexBuffer(void *_glfuncs, GLenum target, GLenum internalFormat, GLuint buffer);
 void gl4_1core_glDrawElementsInstanced(void *_glfuncs, GLenum mode, GLsizei count, GLenum gltype, const GLvoid* indices, GLsizei instancecount);
 void gl4_1core_glDrawArraysInstanced(void *_glfuncs, GLenum mode, GLint first, GLsizei count, GLsizei instancecount);
 void gl4_1core_glSampleMaski(void *_glfuncs, GLuint index, GLbitfield mask);
 void gl4_1core_glGetMultisamplefv(void *_glfuncs, GLenum pname, GLuint index, GLfloat* val);
-void gl4_1core_glTexImage3DMultisample(void *_glfuncs, GLenum target, GLsizei samples, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLboolean fixedsamplelocations);
-void gl4_1core_glTexImage2DMultisample(void *_glfuncs, GLenum target, GLsizei samples, GLint internalformat, GLsizei width, GLsizei height, GLboolean fixedsamplelocations);
+void gl4_1core_glTexImage3DMultisample(void *_glfuncs, GLenum target, GLsizei samples, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLboolean fixedsamplelocations);
+void gl4_1core_glTexImage2DMultisample(void *_glfuncs, GLenum target, GLsizei samples, GLint internalFormat, GLsizei width, GLsizei height, GLboolean fixedsamplelocations);
 void gl4_1core_glGetSynciv(void *_glfuncs, GLsync sync, GLenum pname, GLsizei bufSize, GLsizei* length, GLint* values);
 void gl4_1core_glGetInteger64v(void *_glfuncs, GLenum pname, GLint64* params);
 void gl4_1core_glWaitSync(void *_glfuncs, GLsync sync, GLbitfield flags, GLuint64 timeout);
@@ -339,8 +339,8 @@ void gl4_1core_glPatchParameterfv(void *_glfuncs, GLenum pname, const GLfloat* v
 void gl4_1core_glPatchParameteri(void *_glfuncs, GLenum pname, GLint value);
 void gl4_1core_glGetProgramStageiv(void *_glfuncs, GLuint program, GLenum shadertype, GLenum pname, GLint* values);
 void gl4_1core_glGetUniformSubroutineuiv(void *_glfuncs, GLenum shadertype, GLint location, GLuint* params);
-void gl4_1core_glGetActiveSubroutineName(void *_glfuncs, GLuint program, GLenum shadertype, GLuint index, GLsizei bufsize, GLsizei* length, GLchar* name);
-void gl4_1core_glGetActiveSubroutineUniformName(void *_glfuncs, GLuint program, GLenum shadertype, GLuint index, GLsizei bufsize, GLsizei* length, GLchar* name);
+void gl4_1core_glGetActiveSubroutineName(void *_glfuncs, GLuint program, GLenum shadertype, GLuint index, GLsizei bufSize, GLsizei* length, GLchar* name);
+void gl4_1core_glGetActiveSubroutineUniformName(void *_glfuncs, GLuint program, GLenum shadertype, GLuint index, GLsizei bufSize, GLsizei* length, GLchar* name);
 void gl4_1core_glGetActiveSubroutineUniformiv(void *_glfuncs, GLuint program, GLenum shadertype, GLuint index, GLenum pname, GLint* values);
 GLuint gl4_1core_glGetSubroutineIndex(void *_glfuncs, GLuint program, GLenum shadertype, const GLchar* name);
 GLint gl4_1core_glGetSubroutineUniformLocation(void *_glfuncs, GLuint program, GLenum shadertype, const GLchar* name);
@@ -440,8 +440,8 @@ void gl4_1core_glProgramBinary(void *_glfuncs, GLuint program, GLenum binaryForm
 void gl4_1core_glGetProgramBinary(void *_glfuncs, GLuint program, GLsizei bufSize, GLsizei* length, GLenum* binaryFormat, GLvoid* binary);
 void gl4_1core_glClearDepthf(void *_glfuncs, GLfloat dd);
 void gl4_1core_glDepthRangef(void *_glfuncs, GLfloat n, GLfloat f);
-void gl4_1core_glGetShaderPrecisionFormat(void *_glfuncs, GLenum shadertype, GLenum precisiontype, GLint* range_, GLint* precision);
-void gl4_1core_glShaderBinary(void *_glfuncs, GLsizei count, const GLuint* shaders, GLenum binaryformat, const GLvoid* binary, GLsizei length);
+void gl4_1core_glGetShaderPrecisionFormat(void *_glfuncs, GLenum shadertype, GLenum precisionType, GLint* range_, GLint* precision);
+void gl4_1core_glShaderBinary(void *_glfuncs, GLsizei count, const GLuint* shaders, GLenum binaryFormat, const GLvoid* binary, GLsizei length);
 void gl4_1core_glReleaseShaderCompiler(void *_glfuncs);
 
 

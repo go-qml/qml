@@ -40,7 +40,9 @@ type GL struct {
 }
 
 const (
-	NONE = 0
+	FALSE = 0
+	TRUE  = 1
+	NONE  = 0
 
 	BYTE           = 0x1400
 	UNSIGNED_BYTE  = 0x1401
@@ -650,8 +652,6 @@ func (gl *GL) Viewport(x, y, width, height int32) {
 // GL.INVALID_OPERATION is generated if DepthRange is executed between the
 // execution of Begin and the corresponding execution of End.
 //
-// See also DepthFunc, PolygonOffset, Viewport.
-//
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDepthRange.xml
 func (gl *GL) DepthRange(nearVal, farVal float64) {
 	C.gl1_0_glDepthRange(gl.funcs, C.GLdouble(nearVal), C.GLdouble(farVal))
@@ -685,11 +685,15 @@ func (gl *GL) GetTexParameterfv(target, pname glbase.Enum, params []float32) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetTexImage.xml
 func (gl *GL) GetTexImage(target glbase.Enum, level int32, format, gltype glbase.Enum, pixels interface{}) {
-	pixels_v := reflect.ValueOf(pixels)
-	if pixels_v.Kind() != reflect.Slice {
+	var pixels_ptr unsafe.Pointer
+	var pixels_v = reflect.ValueOf(pixels)
+	if pixels != nil && pixels_v.Kind() != reflect.Slice {
 		panic("parameter pixels must be a slice")
 	}
-	C.gl1_0_glGetTexImage(gl.funcs, C.GLenum(target), C.GLint(level), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(pixels_v.Index(0).Addr().Pointer()))
+	if pixels != nil {
+		pixels_ptr = unsafe.Pointer(pixels_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_0_glGetTexImage(gl.funcs, C.GLenum(target), C.GLint(level), C.GLenum(format), C.GLenum(gltype), pixels_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetIntegerv.xml
@@ -720,11 +724,15 @@ func (gl *GL) GetBooleanv(pname glbase.Enum, params []bool) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glReadPixels.xml
 func (gl *GL) ReadPixels(x, y, width, height int32, format, gltype glbase.Enum, pixels interface{}) {
-	pixels_v := reflect.ValueOf(pixels)
-	if pixels_v.Kind() != reflect.Slice {
+	var pixels_ptr unsafe.Pointer
+	var pixels_v = reflect.ValueOf(pixels)
+	if pixels != nil && pixels_v.Kind() != reflect.Slice {
 		panic("parameter pixels must be a slice")
 	}
-	C.gl1_0_glReadPixels(gl.funcs, C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(pixels_v.Index(0).Addr().Pointer()))
+	if pixels != nil {
+		pixels_ptr = unsafe.Pointer(pixels_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_0_glReadPixels(gl.funcs, C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height), C.GLenum(format), C.GLenum(gltype), pixels_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glReadBuffer.xml
@@ -828,21 +836,29 @@ func (gl *GL) DrawBuffer(mode glbase.Enum) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glTexImage2D.xml
-func (gl *GL) TexImage2D(target glbase.Enum, level, internalformat, width, height, border int32, format, gltype glbase.Enum, pixels interface{}) {
-	pixels_v := reflect.ValueOf(pixels)
-	if pixels_v.Kind() != reflect.Slice {
+func (gl *GL) TexImage2D(target glbase.Enum, level, internalFormat, width, height, border int32, format, gltype glbase.Enum, pixels interface{}) {
+	var pixels_ptr unsafe.Pointer
+	var pixels_v = reflect.ValueOf(pixels)
+	if pixels != nil && pixels_v.Kind() != reflect.Slice {
 		panic("parameter pixels must be a slice")
 	}
-	C.gl1_0_glTexImage2D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(internalformat), C.GLsizei(width), C.GLsizei(height), C.GLint(border), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(pixels_v.Index(0).Addr().Pointer()))
+	if pixels != nil {
+		pixels_ptr = unsafe.Pointer(pixels_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_0_glTexImage2D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(internalFormat), C.GLsizei(width), C.GLsizei(height), C.GLint(border), C.GLenum(format), C.GLenum(gltype), pixels_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glTexImage1D.xml
-func (gl *GL) TexImage1D(target glbase.Enum, level, internalformat, width, border int32, format, gltype glbase.Enum, pixels interface{}) {
-	pixels_v := reflect.ValueOf(pixels)
-	if pixels_v.Kind() != reflect.Slice {
+func (gl *GL) TexImage1D(target glbase.Enum, level, internalFormat, width, border int32, format, gltype glbase.Enum, pixels interface{}) {
+	var pixels_ptr unsafe.Pointer
+	var pixels_v = reflect.ValueOf(pixels)
+	if pixels != nil && pixels_v.Kind() != reflect.Slice {
 		panic("parameter pixels must be a slice")
 	}
-	C.gl1_0_glTexImage1D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(internalformat), C.GLsizei(width), C.GLint(border), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(pixels_v.Index(0).Addr().Pointer()))
+	if pixels != nil {
+		pixels_ptr = unsafe.Pointer(pixels_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_0_glTexImage1D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(internalFormat), C.GLsizei(width), C.GLint(border), C.GLenum(format), C.GLenum(gltype), pixels_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glTexParameteriv.xml
@@ -961,7 +977,7 @@ func (gl *GL) Ortho(left, right, bottom, top, zNear, zFar float64) {
 //     c[2]  c[6]  c[10] c[14]  X  v[2]
 //     c[3]  c[7]  c[11] c[15]     v[3]
 //
-// Calling glMultMatrix with an argument of m = m[0], m[1], ..., m[15]
+// Calling MultMatrix with an argument of m = m[0], m[1], ..., m[15]
 // replaces the current transformation with (C X M) x v, or
 //
 //     c[0]  c[4]  c[8]  c[12]   m[0]  m[4]  m[8]  m[12]   v[0]
@@ -985,9 +1001,6 @@ func (gl *GL) Ortho(left, right, bottom, top, zNear, zFar float64) {
 //
 // GL.INVALID_OPERATION is generated if MultMatrix is executed between the
 // execution of Begin and the corresponding execution of End.
-//
-// See also LoadIdentity, LoadMatrix, LoadTransposeMatrix, MatrixMode,
-// MultTransposeMatrix, PushMatrix.
 //
 // https://www.opengl.org/sdk/docs/man2/xhtml/glMultMatrixd.xml
 func (gl *GL) MultMatrixd(m []float64) {
@@ -1013,7 +1026,7 @@ func (gl *GL) MultMatrixd(m []float64) {
 //     c[2]  c[6]  c[10] c[14]  X  v[2]
 //     c[3]  c[7]  c[11] c[15]     v[3]
 //
-// Calling glMultMatrix with an argument of m = m[0], m[1], ..., m[15]
+// Calling MultMatrix with an argument of m = m[0], m[1], ..., m[15]
 // replaces the current transformation with (C X M) x v, or
 //
 //     c[0]  c[4]  c[8]  c[12]   m[0]  m[4]  m[8]  m[12]   v[0]
@@ -1037,9 +1050,6 @@ func (gl *GL) MultMatrixd(m []float64) {
 //
 // GL.INVALID_OPERATION is generated if MultMatrix is executed between the
 // execution of Begin and the corresponding execution of End.
-//
-// See also LoadIdentity, LoadMatrix, LoadTransposeMatrix, MatrixMode,
-// MultTransposeMatrix, PushMatrix.
 //
 // https://www.opengl.org/sdk/docs/man2/xhtml/glMultMatrixf.xml
 func (gl *GL) MultMatrixf(m []float32) {
@@ -1167,11 +1177,15 @@ func (gl *GL) GetClipPlane(plane glbase.Enum, equation []float64) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDrawPixels.xml
 func (gl *GL) DrawPixels(width, height int32, format, gltype glbase.Enum, pixels interface{}) {
-	pixels_v := reflect.ValueOf(pixels)
-	if pixels_v.Kind() != reflect.Slice {
+	var pixels_ptr unsafe.Pointer
+	var pixels_v = reflect.ValueOf(pixels)
+	if pixels != nil && pixels_v.Kind() != reflect.Slice {
 		panic("parameter pixels must be a slice")
 	}
-	C.gl1_0_glDrawPixels(gl.funcs, C.GLsizei(width), C.GLsizei(height), C.GLenum(format), C.GLenum(gltype), unsafe.Pointer(pixels_v.Index(0).Addr().Pointer()))
+	if pixels != nil {
+		pixels_ptr = unsafe.Pointer(pixels_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_0_glDrawPixels(gl.funcs, C.GLsizei(width), C.GLsizei(height), C.GLenum(format), C.GLenum(gltype), pixels_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCopyPixels.xml
@@ -1362,7 +1376,7 @@ func (gl *GL) PopAttrib() {
 //
 //   GL.ACCUM
 //       Obtains R, G, B, and A values from the buffer currently selected for
-//       reading (see glReadBuffer). Each component value is divided by 2 n -
+//       reading (see ReadBuffer). Each component value is divided by 2 n -
 //       1 , where n is the number of bits allocated to each color component
 //       in the currently selected buffer. The result is a floating-point
 //       value in the range 0 1 , which is multiplied by value and added to
@@ -1401,9 +1415,6 @@ func (gl *GL) PopAttrib() {
 // GL.INVALID_OPERATION is generated if there is no accumulation buffer.
 // GL.INVALID_OPERATION is generated if Accum is executed between the
 // execution of Begin and the corresponding execution of End.
-//
-// See also Clear, ClearAccum, CopyPixels, DrawBuffer, Get, ReadBuffer,
-// ReadPixels, Scissor, StencilOp
 //
 // https://www.opengl.org/sdk/docs/man2/xhtml/glAccum.xml
 func (gl *GL) Accum(op glbase.Enum, value float32) {
@@ -2498,11 +2509,15 @@ func (gl *GL) DeleteLists(list uint32, range_ int32) {
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCallLists.xml
 func (gl *GL) CallLists(n int32, gltype glbase.Enum, lists interface{}) {
-	lists_v := reflect.ValueOf(lists)
-	if lists_v.Kind() != reflect.Slice {
+	var lists_ptr unsafe.Pointer
+	var lists_v = reflect.ValueOf(lists)
+	if lists != nil && lists_v.Kind() != reflect.Slice {
 		panic("parameter lists must be a slice")
 	}
-	C.gl1_0_glCallLists(gl.funcs, C.GLsizei(n), C.GLenum(gltype), unsafe.Pointer(lists_v.Index(0).Addr().Pointer()))
+	if lists != nil {
+		lists_ptr = unsafe.Pointer(lists_v.Index(0).Addr().Pointer())
+	}
+	C.gl1_0_glCallLists(gl.funcs, C.GLsizei(n), C.GLenum(gltype), lists_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCallList.xml
