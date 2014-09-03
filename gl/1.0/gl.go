@@ -624,7 +624,7 @@ const (
 )
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glViewport.xml
-func (gl *GL) Viewport(x, y, width, height int32) {
+func (gl *GL) Viewport(x, y, width, height int) {
 	C.gl1_0_glViewport(gl.funcs, C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height))
 }
 
@@ -664,12 +664,12 @@ func (gl *GL) IsEnabled(cap glbase.Enum) bool {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetTexLevelParameteriv.xml
-func (gl *GL) GetTexLevelParameteriv(target glbase.Enum, level int32, pname glbase.Enum, params []int32) {
+func (gl *GL) GetTexLevelParameteriv(target glbase.Enum, level int, pname glbase.Enum, params []int32) {
 	C.gl1_0_glGetTexLevelParameteriv(gl.funcs, C.GLenum(target), C.GLint(level), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetTexLevelParameterfv.xml
-func (gl *GL) GetTexLevelParameterfv(target glbase.Enum, level int32, pname glbase.Enum, params []float32) {
+func (gl *GL) GetTexLevelParameterfv(target glbase.Enum, level int, pname glbase.Enum, params []float32) {
 	C.gl1_0_glGetTexLevelParameterfv(gl.funcs, C.GLenum(target), C.GLint(level), C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params[0])))
 }
 
@@ -684,7 +684,7 @@ func (gl *GL) GetTexParameterfv(target, pname glbase.Enum, params []float32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetTexImage.xml
-func (gl *GL) GetTexImage(target glbase.Enum, level int32, format, gltype glbase.Enum, pixels interface{}) {
+func (gl *GL) GetTexImage(target glbase.Enum, level int, format, gltype glbase.Enum, pixels interface{}) {
 	var pixels_ptr unsafe.Pointer
 	var pixels_v = reflect.ValueOf(pixels)
 	if pixels != nil && pixels_v.Kind() != reflect.Slice {
@@ -723,7 +723,7 @@ func (gl *GL) GetBooleanv(pname glbase.Enum, params []bool) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glReadPixels.xml
-func (gl *GL) ReadPixels(x, y, width, height int32, format, gltype glbase.Enum, pixels interface{}) {
+func (gl *GL) ReadPixels(x, y, width, height int, format, gltype glbase.Enum, pixels interface{}) {
 	var pixels_ptr unsafe.Pointer
 	var pixels_v = reflect.ValueOf(pixels)
 	if pixels != nil && pixels_v.Kind() != reflect.Slice {
@@ -836,7 +836,7 @@ func (gl *GL) DrawBuffer(mode glbase.Enum) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glTexImage2D.xml
-func (gl *GL) TexImage2D(target glbase.Enum, level, internalFormat, width, height, border int32, format, gltype glbase.Enum, pixels interface{}) {
+func (gl *GL) TexImage2D(target glbase.Enum, level int, internalFormat int32, width, height, border int, format, gltype glbase.Enum, pixels interface{}) {
 	var pixels_ptr unsafe.Pointer
 	var pixels_v = reflect.ValueOf(pixels)
 	if pixels != nil && pixels_v.Kind() != reflect.Slice {
@@ -849,7 +849,7 @@ func (gl *GL) TexImage2D(target glbase.Enum, level, internalFormat, width, heigh
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glTexImage1D.xml
-func (gl *GL) TexImage1D(target glbase.Enum, level, internalFormat, width, border int32, format, gltype glbase.Enum, pixels interface{}) {
+func (gl *GL) TexImage1D(target glbase.Enum, level int, internalFormat int32, width, border int, format, gltype glbase.Enum, pixels interface{}) {
 	var pixels_ptr unsafe.Pointer
 	var pixels_v = reflect.ValueOf(pixels)
 	if pixels != nil && pixels_v.Kind() != reflect.Slice {
@@ -882,7 +882,7 @@ func (gl *GL) TexParameterf(target, pname glbase.Enum, param float32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glScissor.xml
-func (gl *GL) Scissor(x, y, width, height int32) {
+func (gl *GL) Scissor(x, y, width, height int) {
 	C.gl1_0_glScissor(gl.funcs, C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height))
 }
 
@@ -1176,7 +1176,7 @@ func (gl *GL) GetClipPlane(plane glbase.Enum, equation []float64) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDrawPixels.xml
-func (gl *GL) DrawPixels(width, height int32, format, gltype glbase.Enum, pixels interface{}) {
+func (gl *GL) DrawPixels(width, height int, format, gltype glbase.Enum, pixels interface{}) {
 	var pixels_ptr unsafe.Pointer
 	var pixels_v = reflect.ValueOf(pixels)
 	if pixels != nil && pixels_v.Kind() != reflect.Slice {
@@ -1189,7 +1189,7 @@ func (gl *GL) DrawPixels(width, height int32, format, gltype glbase.Enum, pixels
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCopyPixels.xml
-func (gl *GL) CopyPixels(x, y, width, height int32, gltype glbase.Enum) {
+func (gl *GL) CopyPixels(x, y, width, height int, gltype glbase.Enum) {
 	C.gl1_0_glCopyPixels(gl.funcs, C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height), C.GLenum(gltype))
 }
 
@@ -1325,12 +1325,12 @@ func (gl *GL) Map2d(target glbase.Enum, u1, u2 float64, ustride, uorder int32, v
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glMap1f.xml
-func (gl *GL) Map1f(target glbase.Enum, u1, u2 float32, stride, order int32, points []float32) {
+func (gl *GL) Map1f(target glbase.Enum, u1, u2 float32, stride, order int, points []float32) {
 	C.gl1_0_glMap1f(gl.funcs, C.GLenum(target), C.GLfloat(u1), C.GLfloat(u2), C.GLint(stride), C.GLint(order), (*C.GLfloat)(unsafe.Pointer(&points[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glMap1d.xml
-func (gl *GL) Map1d(target glbase.Enum, u1, u2 float64, stride, order int32, points []float64) {
+func (gl *GL) Map1d(target glbase.Enum, u1, u2 float64, stride, order int, points []float64) {
 	C.gl1_0_glMap1d(gl.funcs, C.GLenum(target), C.GLdouble(u1), C.GLdouble(u2), C.GLint(stride), C.GLint(order), (*C.GLdouble)(unsafe.Pointer(&points[0])))
 }
 
@@ -1468,12 +1468,12 @@ func (gl *GL) RenderMode(mode glbase.Enum) int32 {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glSelectBuffer.xml
-func (gl *GL) SelectBuffer(size int32, buffer []glbase.Buffer) {
+func (gl *GL) SelectBuffer(size int, buffer []glbase.Buffer) {
 	C.gl1_0_glSelectBuffer(gl.funcs, C.GLsizei(size), (*C.GLuint)(unsafe.Pointer(&buffer[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glFeedbackBuffer.xml
-func (gl *GL) FeedbackBuffer(size int32, gltype glbase.Enum, buffer []float32) {
+func (gl *GL) FeedbackBuffer(size int, gltype glbase.Enum, buffer []float32) {
 	C.gl1_0_glFeedbackBuffer(gl.funcs, C.GLsizei(size), C.GLenum(gltype), (*C.GLfloat)(unsafe.Pointer(&buffer[0])))
 }
 
@@ -1654,7 +1654,7 @@ func (gl *GL) Vertex4iv(v []int32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertex4i.xml
-func (gl *GL) Vertex4i(x, y, z, w int32) {
+func (gl *GL) Vertex4i(x, y, z, w int) {
 	C.gl1_0_glVertex4i(gl.funcs, C.GLint(x), C.GLint(y), C.GLint(z), C.GLint(w))
 }
 
@@ -1706,7 +1706,7 @@ func (gl *GL) Vertex3iv(v []int32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertex3i.xml
-func (gl *GL) Vertex3i(x, y, z int32) {
+func (gl *GL) Vertex3i(x, y, z int) {
 	C.gl1_0_glVertex3i(gl.funcs, C.GLint(x), C.GLint(y), C.GLint(z))
 }
 
@@ -1758,7 +1758,7 @@ func (gl *GL) Vertex2iv(v []int32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertex2i.xml
-func (gl *GL) Vertex2i(x, y int32) {
+func (gl *GL) Vertex2i(x, y int) {
 	C.gl1_0_glVertex2i(gl.funcs, C.GLint(x), C.GLint(y))
 }
 
@@ -2046,7 +2046,7 @@ func (gl *GL) RasterPos4iv(v []int32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos4i.xml
-func (gl *GL) RasterPos4i(x, y, z, w int32) {
+func (gl *GL) RasterPos4i(x, y, z, w int) {
 	C.gl1_0_glRasterPos4i(gl.funcs, C.GLint(x), C.GLint(y), C.GLint(z), C.GLint(w))
 }
 
@@ -2098,7 +2098,7 @@ func (gl *GL) RasterPos3iv(v []int32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos3i.xml
-func (gl *GL) RasterPos3i(x, y, z int32) {
+func (gl *GL) RasterPos3i(x, y, z int) {
 	C.gl1_0_glRasterPos3i(gl.funcs, C.GLint(x), C.GLint(y), C.GLint(z))
 }
 
@@ -2150,7 +2150,7 @@ func (gl *GL) RasterPos2iv(v []int32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos2i.xml
-func (gl *GL) RasterPos2i(x, y int32) {
+func (gl *GL) RasterPos2i(x, y int) {
 	C.gl1_0_glRasterPos2i(gl.funcs, C.GLint(x), C.GLint(y))
 }
 
@@ -2482,7 +2482,7 @@ func (gl *GL) Color3b(red, green, blue byte) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glBitmap.xml
-func (gl *GL) Bitmap(width, height int32, xorig, yorig, xmove, ymove float32, bitmap []uint8) {
+func (gl *GL) Bitmap(width, height int, xorig, yorig, xmove, ymove float32, bitmap []uint8) {
 	C.gl1_0_glBitmap(gl.funcs, C.GLsizei(width), C.GLsizei(height), C.GLfloat(xorig), C.GLfloat(yorig), C.GLfloat(xmove), C.GLfloat(ymove), (*C.GLubyte)(unsafe.Pointer(&bitmap[0])))
 }
 
@@ -2508,7 +2508,7 @@ func (gl *GL) DeleteLists(list uint32, range_ int32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCallLists.xml
-func (gl *GL) CallLists(n int32, gltype glbase.Enum, lists interface{}) {
+func (gl *GL) CallLists(n int, gltype glbase.Enum, lists interface{}) {
 	var lists_ptr unsafe.Pointer
 	var lists_v = reflect.ValueOf(lists)
 	if lists != nil && lists_v.Kind() != reflect.Slice {

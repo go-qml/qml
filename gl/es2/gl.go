@@ -735,7 +735,7 @@ func (gl *GL) CompileShader(shader glbase.Shader) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCompressedTexImage2D.xml
-func (gl *GL) CompressedTexImage2D(target glbase.Enum, level int32, internalFormat glbase.Enum, width, height, border, imageSize int32, data interface{}) {
+func (gl *GL) CompressedTexImage2D(target glbase.Enum, level int, internalFormat glbase.Enum, width, height, border, imageSize int, data interface{}) {
 	var data_ptr unsafe.Pointer
 	var data_v = reflect.ValueOf(data)
 	if data != nil && data_v.Kind() != reflect.Slice {
@@ -748,7 +748,7 @@ func (gl *GL) CompressedTexImage2D(target glbase.Enum, level int32, internalForm
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCompressedTexSubImage2D.xml
-func (gl *GL) CompressedTexSubImage2D(target glbase.Enum, level, xoffset, yoffset, width, height int32, format glbase.Enum, imageSize int32, data interface{}) {
+func (gl *GL) CompressedTexSubImage2D(target glbase.Enum, level, xoffset, yoffset, width, height int, format glbase.Enum, imageSize int, data interface{}) {
 	var data_ptr unsafe.Pointer
 	var data_v = reflect.ValueOf(data)
 	if data != nil && data_v.Kind() != reflect.Slice {
@@ -837,12 +837,12 @@ func (gl *GL) CreateShader(gltype glbase.Enum) glbase.Shader {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteBuffers.xml
-func (gl *GL) DeleteBuffers(n int32, buffers []uint32) {
+func (gl *GL) DeleteBuffers(n int, buffers []uint32) {
 	C.gles2_glDeleteBuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&buffers[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteFramebuffers.xml
-func (gl *GL) DeleteFramebuffers(n int32, framebuffers []uint32) {
+func (gl *GL) DeleteFramebuffers(n int, framebuffers []uint32) {
 	C.gles2_glDeleteFramebuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&framebuffers[0])))
 }
 
@@ -852,7 +852,7 @@ func (gl *GL) DeleteProgram(program glbase.Program) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteRenderbuffers.xml
-func (gl *GL) DeleteRenderbuffers(n int32, renderbuffers []uint32) {
+func (gl *GL) DeleteRenderbuffers(n int, renderbuffers []uint32) {
 	C.gles2_glDeleteRenderbuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&renderbuffers[0])))
 }
 
@@ -887,7 +887,7 @@ func (gl *GL) FramebufferRenderbuffer(target, attachment, renderbuffertarget glb
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glFramebufferTexture2D.xml
-func (gl *GL) FramebufferTexture2D(target, attachment, textarget glbase.Enum, texture glbase.Texture, level int32) {
+func (gl *GL) FramebufferTexture2D(target, attachment, textarget glbase.Enum, texture glbase.Texture, level int) {
 	C.gles2_glFramebufferTexture2D(gl.funcs, C.GLenum(target), C.GLenum(attachment), C.GLenum(textarget), C.GLuint(texture), C.GLint(level))
 }
 
@@ -909,7 +909,7 @@ func (gl *GL) FramebufferTexture2D(target, attachment, textarget glbase.Enum, te
 // GenBuffers is available in GL version 1.5 or greater.
 //
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenBuffers.xml
-func (gl *GL) GenBuffers(n int32) []glbase.Buffer {
+func (gl *GL) GenBuffers(n int) []glbase.Buffer {
 	buffers := make([]glbase.Buffer, n)
 	C.gles2_glGenBuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&buffers[0])))
 	return buffers
@@ -921,27 +921,27 @@ func (gl *GL) GenerateMipmap(target glbase.Enum) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenFramebuffers.xml
-func (gl *GL) GenFramebuffers(n int32, framebuffers []uint32) {
+func (gl *GL) GenFramebuffers(n int, framebuffers []uint32) {
 	C.gles2_glGenFramebuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&framebuffers[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenRenderbuffers.xml
-func (gl *GL) GenRenderbuffers(n int32, renderbuffers []uint32) {
+func (gl *GL) GenRenderbuffers(n int, renderbuffers []uint32) {
 	C.gles2_glGenRenderbuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&renderbuffers[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetActiveAttrib.xml
-func (gl *GL) GetActiveAttrib(program glbase.Program, index glbase.Attrib, bufSize int32, length, size []int32, gltype []glbase.Enum, name []byte) {
+func (gl *GL) GetActiveAttrib(program glbase.Program, index glbase.Attrib, bufSize int32, length []int32, size []int, gltype []glbase.Enum, name []byte) {
 	C.gles2_glGetActiveAttrib(gl.funcs, C.GLuint(program), C.GLuint(index), C.GLsizei(bufSize), (*C.GLsizei)(unsafe.Pointer(&length[0])), (*C.GLint)(unsafe.Pointer(&size[0])), (*C.GLenum)(unsafe.Pointer(&gltype[0])), (*C.GLchar)(unsafe.Pointer(&name[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetActiveUniform.xml
-func (gl *GL) GetActiveUniform(program glbase.Program, index uint32, bufSize int32, length, size []int32, gltype []glbase.Enum, name []byte) {
+func (gl *GL) GetActiveUniform(program glbase.Program, index uint32, bufSize int32, length []int32, size []int, gltype []glbase.Enum, name []byte) {
 	C.gles2_glGetActiveUniform(gl.funcs, C.GLuint(program), C.GLuint(index), C.GLsizei(bufSize), (*C.GLsizei)(unsafe.Pointer(&length[0])), (*C.GLint)(unsafe.Pointer(&size[0])), (*C.GLenum)(unsafe.Pointer(&gltype[0])), (*C.GLchar)(unsafe.Pointer(&name[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetAttachedShaders.xml
-func (gl *GL) GetAttachedShaders(program glbase.Program, maxcount int32, count []int32, shaders []uint32) {
+func (gl *GL) GetAttachedShaders(program glbase.Program, maxcount int32, count []int, shaders []uint32) {
 	C.gles2_glGetAttachedShaders(gl.funcs, C.GLuint(program), C.GLsizei(maxcount), (*C.GLsizei)(unsafe.Pointer(&count[0])), (*C.GLuint)(unsafe.Pointer(&shaders[0])))
 }
 
@@ -1485,7 +1485,7 @@ func (gl *GL) ReleaseShaderCompiler() {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glRenderbufferStorage.xml
-func (gl *GL) RenderbufferStorage(target, internalFormat glbase.Enum, width, height int32) {
+func (gl *GL) RenderbufferStorage(target, internalFormat glbase.Enum, width, height int) {
 	C.gles2_glRenderbufferStorage(gl.funcs, C.GLenum(target), C.GLenum(internalFormat), C.GLsizei(width), C.GLsizei(height))
 }
 
@@ -1495,7 +1495,7 @@ func (gl *GL) SampleCoverage(value glbase.Clampf, invert bool) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glShaderBinary.xml
-func (gl *GL) ShaderBinary(n int32, shaders []uint32, binaryFormat glbase.Enum, binary interface{}, length int32) {
+func (gl *GL) ShaderBinary(n int, shaders []uint32, binaryFormat glbase.Enum, binary interface{}, length int32) {
 	var binary_ptr unsafe.Pointer
 	var binary_v = reflect.ValueOf(binary)
 	if binary != nil && binary_v.Kind() != reflect.Slice {
@@ -1555,7 +1555,7 @@ func (gl *GL) Uniform1f(location glbase.Uniform, x float32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniform1i.xml
-func (gl *GL) Uniform1i(location glbase.Uniform, x int32) {
+func (gl *GL) Uniform1i(location glbase.Uniform, x int) {
 	C.gles2_glUniform1i(gl.funcs, C.GLint(location), C.GLint(x))
 }
 
@@ -1565,7 +1565,7 @@ func (gl *GL) Uniform2f(location glbase.Uniform, x, y float32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniform2i.xml
-func (gl *GL) Uniform2i(location glbase.Uniform, x, y int32) {
+func (gl *GL) Uniform2i(location glbase.Uniform, x, y int) {
 	C.gles2_glUniform2i(gl.funcs, C.GLint(location), C.GLint(x), C.GLint(y))
 }
 
@@ -1575,7 +1575,7 @@ func (gl *GL) Uniform3f(location glbase.Uniform, x, y, z float32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniform3i.xml
-func (gl *GL) Uniform3i(location glbase.Uniform, x, y, z int32) {
+func (gl *GL) Uniform3i(location glbase.Uniform, x, y, z int) {
 	C.gles2_glUniform3i(gl.funcs, C.GLint(location), C.GLint(x), C.GLint(y), C.GLint(z))
 }
 
@@ -1585,7 +1585,7 @@ func (gl *GL) Uniform4f(location glbase.Uniform, x, y, z, w float32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniform4i.xml
-func (gl *GL) Uniform4i(location glbase.Uniform, x, y, z, w int32) {
+func (gl *GL) Uniform4i(location glbase.Uniform, x, y, z, w int) {
 	C.gles2_glUniform4i(gl.funcs, C.GLint(location), C.GLint(x), C.GLint(y), C.GLint(z), C.GLint(w))
 }
 
@@ -1779,7 +1779,7 @@ func (gl *GL) VertexAttrib4fv(index glbase.Attrib, values []float32) {
 // 3, or 4. GL.INVALID_VALUE is generated if stride is negative.
 //
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribPointer.xml
-func (gl *GL) VertexAttribPointer(index glbase.Attrib, size int32, gltype glbase.Enum, normalized bool, stride int32, offset int) {
+func (gl *GL) VertexAttribPointer(index glbase.Attrib, size int, gltype glbase.Enum, normalized bool, stride, offset int) {
 	// What an awkward API. Just add a new function next time, please.
 	offset_ptr := unsafe.Pointer(uintptr(offset))
 	C.gles2_glVertexAttribPointer(gl.funcs, C.GLuint(index), C.GLint(size), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), C.GLsizei(stride), offset_ptr)
@@ -1816,12 +1816,12 @@ func (gl *GL) ColorMask(red, green, blue, alpha bool) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCopyTexImage2D.xml
-func (gl *GL) CopyTexImage2D(target glbase.Enum, level int32, internalFormat glbase.Enum, x, y, width, height, border int32) {
+func (gl *GL) CopyTexImage2D(target glbase.Enum, level int, internalFormat glbase.Enum, x, y, width, height, border int) {
 	C.gles2_glCopyTexImage2D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLenum(internalFormat), C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height), C.GLint(border))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCopyTexSubImage2D.xml
-func (gl *GL) CopyTexSubImage2D(target glbase.Enum, level, xoffset, yoffset, x, y, width, height int32) {
+func (gl *GL) CopyTexSubImage2D(target glbase.Enum, level, xoffset, yoffset, x, y, width, height int) {
 	C.gles2_glCopyTexSubImage2D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLint(yoffset), C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height))
 }
 
@@ -1831,7 +1831,7 @@ func (gl *GL) CullFace(mode glbase.Enum) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteTextures.xml
-func (gl *GL) DeleteTextures(n int32, textures []uint32) {
+func (gl *GL) DeleteTextures(n int, textures []uint32) {
 	C.gles2_glDeleteTextures(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])))
 }
 
@@ -1851,12 +1851,12 @@ func (gl *GL) Disable(cap glbase.Enum) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDrawArrays.xml
-func (gl *GL) DrawArrays(mode glbase.Enum, first, count int32) {
+func (gl *GL) DrawArrays(mode glbase.Enum, first, count int) {
 	C.gles2_glDrawArrays(gl.funcs, C.GLenum(mode), C.GLint(first), C.GLsizei(count))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDrawElements.xml
-func (gl *GL) DrawElements(mode glbase.Enum, count int32, gltype glbase.Enum, indices interface{}) {
+func (gl *GL) DrawElements(mode glbase.Enum, count int, gltype glbase.Enum, indices interface{}) {
 	var indices_ptr unsafe.Pointer
 	var indices_v = reflect.ValueOf(indices)
 	if indices != nil && indices_v.Kind() != reflect.Slice {
@@ -1889,7 +1889,7 @@ func (gl *GL) FrontFace(mode glbase.Enum) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenTextures.xml
-func (gl *GL) GenTextures(n int32, textures []uint32) {
+func (gl *GL) GenTextures(n int, textures []uint32) {
 	C.gles2_glGenTextures(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])))
 }
 
@@ -1957,7 +1957,7 @@ func (gl *GL) PolygonOffset(factor, units float32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glReadPixels.xml
-func (gl *GL) ReadPixels(x, y, width, height int32, format, gltype glbase.Enum, pixels interface{}) {
+func (gl *GL) ReadPixels(x, y, width, height int, format, gltype glbase.Enum, pixels interface{}) {
 	var pixels_ptr unsafe.Pointer
 	var pixels_v = reflect.ValueOf(pixels)
 	if pixels != nil && pixels_v.Kind() != reflect.Slice {
@@ -1970,7 +1970,7 @@ func (gl *GL) ReadPixels(x, y, width, height int32, format, gltype glbase.Enum, 
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glScissor.xml
-func (gl *GL) Scissor(x, y, width, height int32) {
+func (gl *GL) Scissor(x, y, width, height int) {
 	C.gles2_glScissor(gl.funcs, C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height))
 }
 
@@ -1990,7 +1990,7 @@ func (gl *GL) StencilOp(fail, zfail, zpass glbase.Enum) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glTexImage2D.xml
-func (gl *GL) TexImage2D(target glbase.Enum, level, internalFormat, width, height, border int32, format, gltype glbase.Enum, pixels interface{}) {
+func (gl *GL) TexImage2D(target glbase.Enum, level int, internalFormat int32, width, height, border int, format, gltype glbase.Enum, pixels interface{}) {
 	var pixels_ptr unsafe.Pointer
 	var pixels_v = reflect.ValueOf(pixels)
 	if pixels != nil && pixels_v.Kind() != reflect.Slice {
@@ -2023,7 +2023,7 @@ func (gl *GL) TexParameteriv(target, pname glbase.Enum, params []int32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glTexSubImage2D.xml
-func (gl *GL) TexSubImage2D(target glbase.Enum, level, xoffset, yoffset, width, height int32, format, gltype glbase.Enum, pixels interface{}) {
+func (gl *GL) TexSubImage2D(target glbase.Enum, level, xoffset, yoffset, width, height int, format, gltype glbase.Enum, pixels interface{}) {
 	var pixels_ptr unsafe.Pointer
 	var pixels_v = reflect.ValueOf(pixels)
 	if pixels != nil && pixels_v.Kind() != reflect.Slice {
@@ -2036,6 +2036,6 @@ func (gl *GL) TexSubImage2D(target glbase.Enum, level, xoffset, yoffset, width, 
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glViewport.xml
-func (gl *GL) Viewport(x, y, width, height int32) {
+func (gl *GL) Viewport(x, y, width, height int) {
 	C.gles2_glViewport(gl.funcs, C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height))
 }

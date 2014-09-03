@@ -106,7 +106,7 @@ func (r *Gopher) Paint(p *qml.Painter) {
 			gl.Materialf(GL.FRONT, GL.SHININESS, group.Material.Shininess)
 			gl.VertexPointer(3, GL.FLOAT, 0, group.Vertexes)
 			gl.NormalPointer(GL.FLOAT, 0, group.Normals)
-			gl.DrawArrays(GL.TRIANGLES, 0, int32(len(group.Vertexes)/3))
+			gl.DrawArrays(GL.TRIANGLES, 0, len(group.Vertexes)/3)
 		}
 	}
 

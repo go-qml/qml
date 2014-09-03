@@ -1195,7 +1195,7 @@ const (
 )
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glViewport.xml
-func (gl *GL) Viewport(x, y, width, height int32) {
+func (gl *GL) Viewport(x, y, width, height int) {
 	C.gl3_3compat_glViewport(gl.funcs, C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height))
 }
 
@@ -1235,12 +1235,12 @@ func (gl *GL) IsEnabled(cap glbase.Enum) bool {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetTexLevelParameteriv.xml
-func (gl *GL) GetTexLevelParameteriv(target glbase.Enum, level int32, pname glbase.Enum, params []int32) {
+func (gl *GL) GetTexLevelParameteriv(target glbase.Enum, level int, pname glbase.Enum, params []int32) {
 	C.gl3_3compat_glGetTexLevelParameteriv(gl.funcs, C.GLenum(target), C.GLint(level), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetTexLevelParameterfv.xml
-func (gl *GL) GetTexLevelParameterfv(target glbase.Enum, level int32, pname glbase.Enum, params []float32) {
+func (gl *GL) GetTexLevelParameterfv(target glbase.Enum, level int, pname glbase.Enum, params []float32) {
 	C.gl3_3compat_glGetTexLevelParameterfv(gl.funcs, C.GLenum(target), C.GLint(level), C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params[0])))
 }
 
@@ -1255,7 +1255,7 @@ func (gl *GL) GetTexParameterfv(target, pname glbase.Enum, params []float32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetTexImage.xml
-func (gl *GL) GetTexImage(target glbase.Enum, level int32, format, gltype glbase.Enum, pixels interface{}) {
+func (gl *GL) GetTexImage(target glbase.Enum, level int, format, gltype glbase.Enum, pixels interface{}) {
 	var pixels_ptr unsafe.Pointer
 	var pixels_v = reflect.ValueOf(pixels)
 	if pixels != nil && pixels_v.Kind() != reflect.Slice {
@@ -1294,7 +1294,7 @@ func (gl *GL) GetBooleanv(pname glbase.Enum, params []bool) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glReadPixels.xml
-func (gl *GL) ReadPixels(x, y, width, height int32, format, gltype glbase.Enum, pixels interface{}) {
+func (gl *GL) ReadPixels(x, y, width, height int, format, gltype glbase.Enum, pixels interface{}) {
 	var pixels_ptr unsafe.Pointer
 	var pixels_v = reflect.ValueOf(pixels)
 	if pixels != nil && pixels_v.Kind() != reflect.Slice {
@@ -1407,7 +1407,7 @@ func (gl *GL) DrawBuffer(mode glbase.Enum) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glTexImage2D.xml
-func (gl *GL) TexImage2D(target glbase.Enum, level, internalFormat, width, height, border int32, format, gltype glbase.Enum, pixels interface{}) {
+func (gl *GL) TexImage2D(target glbase.Enum, level int, internalFormat int32, width, height, border int, format, gltype glbase.Enum, pixels interface{}) {
 	var pixels_ptr unsafe.Pointer
 	var pixels_v = reflect.ValueOf(pixels)
 	if pixels != nil && pixels_v.Kind() != reflect.Slice {
@@ -1420,7 +1420,7 @@ func (gl *GL) TexImage2D(target glbase.Enum, level, internalFormat, width, heigh
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glTexImage1D.xml
-func (gl *GL) TexImage1D(target glbase.Enum, level, internalFormat, width, border int32, format, gltype glbase.Enum, pixels interface{}) {
+func (gl *GL) TexImage1D(target glbase.Enum, level int, internalFormat int32, width, border int, format, gltype glbase.Enum, pixels interface{}) {
 	var pixels_ptr unsafe.Pointer
 	var pixels_v = reflect.ValueOf(pixels)
 	if pixels != nil && pixels_v.Kind() != reflect.Slice {
@@ -1453,7 +1453,7 @@ func (gl *GL) TexParameterf(target, pname glbase.Enum, param float32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glScissor.xml
-func (gl *GL) Scissor(x, y, width, height int32) {
+func (gl *GL) Scissor(x, y, width, height int) {
 	C.gl3_3compat_glScissor(gl.funcs, C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height))
 }
 
@@ -1504,12 +1504,12 @@ func (gl *GL) IsTexture(texture glbase.Texture) bool {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenTextures.xml
-func (gl *GL) GenTextures(n int32, textures []uint32) {
+func (gl *GL) GenTextures(n int, textures []uint32) {
 	C.gl3_3compat_glGenTextures(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteTextures.xml
-func (gl *GL) DeleteTextures(n int32, textures []uint32) {
+func (gl *GL) DeleteTextures(n int, textures []uint32) {
 	C.gl3_3compat_glDeleteTextures(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])))
 }
 
@@ -1519,7 +1519,7 @@ func (gl *GL) BindTexture(target glbase.Enum, texture glbase.Texture) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glTexSubImage2D.xml
-func (gl *GL) TexSubImage2D(target glbase.Enum, level, xoffset, yoffset, width, height int32, format, gltype glbase.Enum, pixels interface{}) {
+func (gl *GL) TexSubImage2D(target glbase.Enum, level, xoffset, yoffset, width, height int, format, gltype glbase.Enum, pixels interface{}) {
 	var pixels_ptr unsafe.Pointer
 	var pixels_v = reflect.ValueOf(pixels)
 	if pixels != nil && pixels_v.Kind() != reflect.Slice {
@@ -1532,7 +1532,7 @@ func (gl *GL) TexSubImage2D(target glbase.Enum, level, xoffset, yoffset, width, 
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glTexSubImage1D.xml
-func (gl *GL) TexSubImage1D(target glbase.Enum, level, xoffset, width int32, format, gltype glbase.Enum, pixels interface{}) {
+func (gl *GL) TexSubImage1D(target glbase.Enum, level, xoffset, width int, format, gltype glbase.Enum, pixels interface{}) {
 	var pixels_ptr unsafe.Pointer
 	var pixels_v = reflect.ValueOf(pixels)
 	if pixels != nil && pixels_v.Kind() != reflect.Slice {
@@ -1545,22 +1545,22 @@ func (gl *GL) TexSubImage1D(target glbase.Enum, level, xoffset, width int32, for
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCopyTexSubImage2D.xml
-func (gl *GL) CopyTexSubImage2D(target glbase.Enum, level, xoffset, yoffset, x, y, width, height int32) {
+func (gl *GL) CopyTexSubImage2D(target glbase.Enum, level, xoffset, yoffset, x, y, width, height int) {
 	C.gl3_3compat_glCopyTexSubImage2D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLint(yoffset), C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCopyTexSubImage1D.xml
-func (gl *GL) CopyTexSubImage1D(target glbase.Enum, level, xoffset, x, y, width int32) {
+func (gl *GL) CopyTexSubImage1D(target glbase.Enum, level, xoffset, x, y, width int) {
 	C.gl3_3compat_glCopyTexSubImage1D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLint(x), C.GLint(y), C.GLsizei(width))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCopyTexImage2D.xml
-func (gl *GL) CopyTexImage2D(target glbase.Enum, level int32, internalFormat glbase.Enum, x, y, width, height, border int32) {
+func (gl *GL) CopyTexImage2D(target glbase.Enum, level int, internalFormat glbase.Enum, x, y, width, height, border int) {
 	C.gl3_3compat_glCopyTexImage2D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLenum(internalFormat), C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height), C.GLint(border))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCopyTexImage1D.xml
-func (gl *GL) CopyTexImage1D(target glbase.Enum, level int32, internalFormat glbase.Enum, x, y, width, border int32) {
+func (gl *GL) CopyTexImage1D(target glbase.Enum, level int, internalFormat glbase.Enum, x, y, width, border int) {
 	C.gl3_3compat_glCopyTexImage1D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLenum(internalFormat), C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLint(border))
 }
 
@@ -1570,7 +1570,7 @@ func (gl *GL) PolygonOffset(factor, units float32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDrawElements.xml
-func (gl *GL) DrawElements(mode glbase.Enum, count int32, gltype glbase.Enum, indices interface{}) {
+func (gl *GL) DrawElements(mode glbase.Enum, count int, gltype glbase.Enum, indices interface{}) {
 	var indices_ptr unsafe.Pointer
 	var indices_v = reflect.ValueOf(indices)
 	if indices != nil && indices_v.Kind() != reflect.Slice {
@@ -1583,17 +1583,17 @@ func (gl *GL) DrawElements(mode glbase.Enum, count int32, gltype glbase.Enum, in
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDrawArrays.xml
-func (gl *GL) DrawArrays(mode glbase.Enum, first, count int32) {
+func (gl *GL) DrawArrays(mode glbase.Enum, first, count int) {
 	C.gl3_3compat_glDrawArrays(gl.funcs, C.GLenum(mode), C.GLint(first), C.GLsizei(count))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCopyTexSubImage3D.xml
-func (gl *GL) CopyTexSubImage3D(target glbase.Enum, level, xoffset, yoffset, zoffset, x, y, width, height int32) {
+func (gl *GL) CopyTexSubImage3D(target glbase.Enum, level, xoffset, yoffset int, zoffset int32, x, y, width, height int) {
 	C.gl3_3compat_glCopyTexSubImage3D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLint(yoffset), C.GLint(zoffset), C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glTexSubImage3D.xml
-func (gl *GL) TexSubImage3D(target glbase.Enum, level, xoffset, yoffset, zoffset, width, height, depth int32, format, gltype glbase.Enum, pixels interface{}) {
+func (gl *GL) TexSubImage3D(target glbase.Enum, level, xoffset, yoffset int, zoffset int32, width, height int, depth int32, format, gltype glbase.Enum, pixels interface{}) {
 	var pixels_ptr unsafe.Pointer
 	var pixels_v = reflect.ValueOf(pixels)
 	if pixels != nil && pixels_v.Kind() != reflect.Slice {
@@ -1606,7 +1606,7 @@ func (gl *GL) TexSubImage3D(target glbase.Enum, level, xoffset, yoffset, zoffset
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glTexImage3D.xml
-func (gl *GL) TexImage3D(target glbase.Enum, level, internalFormat, width, height, depth, border int32, format, gltype glbase.Enum, pixels interface{}) {
+func (gl *GL) TexImage3D(target glbase.Enum, level int, internalFormat int32, width, height int, depth int32, border int, format, gltype glbase.Enum, pixels interface{}) {
 	var pixels_ptr unsafe.Pointer
 	var pixels_v = reflect.ValueOf(pixels)
 	if pixels != nil && pixels_v.Kind() != reflect.Slice {
@@ -1619,7 +1619,7 @@ func (gl *GL) TexImage3D(target glbase.Enum, level, internalFormat, width, heigh
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDrawRangeElements.xml
-func (gl *GL) DrawRangeElements(mode glbase.Enum, start, end uint32, count int32, gltype glbase.Enum, indices interface{}) {
+func (gl *GL) DrawRangeElements(mode glbase.Enum, start, end uint32, count int, gltype glbase.Enum, indices interface{}) {
 	var indices_ptr unsafe.Pointer
 	var indices_v = reflect.ValueOf(indices)
 	if indices != nil && indices_v.Kind() != reflect.Slice {
@@ -1642,7 +1642,7 @@ func (gl *GL) BlendColor(red, green, blue, alpha float32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetCompressedTexImage.xml
-func (gl *GL) GetCompressedTexImage(target glbase.Enum, level int32, img interface{}) {
+func (gl *GL) GetCompressedTexImage(target glbase.Enum, level int, img interface{}) {
 	var img_ptr unsafe.Pointer
 	var img_v = reflect.ValueOf(img)
 	if img != nil && img_v.Kind() != reflect.Slice {
@@ -1655,7 +1655,7 @@ func (gl *GL) GetCompressedTexImage(target glbase.Enum, level int32, img interfa
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCompressedTexSubImage1D.xml
-func (gl *GL) CompressedTexSubImage1D(target glbase.Enum, level, xoffset, width int32, format glbase.Enum, imageSize int32, data interface{}) {
+func (gl *GL) CompressedTexSubImage1D(target glbase.Enum, level, xoffset, width int, format glbase.Enum, imageSize int, data interface{}) {
 	var data_ptr unsafe.Pointer
 	var data_v = reflect.ValueOf(data)
 	if data != nil && data_v.Kind() != reflect.Slice {
@@ -1668,7 +1668,7 @@ func (gl *GL) CompressedTexSubImage1D(target glbase.Enum, level, xoffset, width 
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCompressedTexSubImage2D.xml
-func (gl *GL) CompressedTexSubImage2D(target glbase.Enum, level, xoffset, yoffset, width, height int32, format glbase.Enum, imageSize int32, data interface{}) {
+func (gl *GL) CompressedTexSubImage2D(target glbase.Enum, level, xoffset, yoffset, width, height int, format glbase.Enum, imageSize int, data interface{}) {
 	var data_ptr unsafe.Pointer
 	var data_v = reflect.ValueOf(data)
 	if data != nil && data_v.Kind() != reflect.Slice {
@@ -1681,7 +1681,7 @@ func (gl *GL) CompressedTexSubImage2D(target glbase.Enum, level, xoffset, yoffse
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCompressedTexSubImage3D.xml
-func (gl *GL) CompressedTexSubImage3D(target glbase.Enum, level, xoffset, yoffset, zoffset, width, height, depth int32, format glbase.Enum, imageSize int32, data interface{}) {
+func (gl *GL) CompressedTexSubImage3D(target glbase.Enum, level, xoffset, yoffset int, zoffset int32, width, height int, depth int32, format glbase.Enum, imageSize int, data interface{}) {
 	var data_ptr unsafe.Pointer
 	var data_v = reflect.ValueOf(data)
 	if data != nil && data_v.Kind() != reflect.Slice {
@@ -1694,7 +1694,7 @@ func (gl *GL) CompressedTexSubImage3D(target glbase.Enum, level, xoffset, yoffse
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCompressedTexImage1D.xml
-func (gl *GL) CompressedTexImage1D(target glbase.Enum, level int32, internalFormat glbase.Enum, width, border, imageSize int32, data interface{}) {
+func (gl *GL) CompressedTexImage1D(target glbase.Enum, level int, internalFormat glbase.Enum, width, border, imageSize int, data interface{}) {
 	var data_ptr unsafe.Pointer
 	var data_v = reflect.ValueOf(data)
 	if data != nil && data_v.Kind() != reflect.Slice {
@@ -1707,7 +1707,7 @@ func (gl *GL) CompressedTexImage1D(target glbase.Enum, level int32, internalForm
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCompressedTexImage2D.xml
-func (gl *GL) CompressedTexImage2D(target glbase.Enum, level int32, internalFormat glbase.Enum, width, height, border, imageSize int32, data interface{}) {
+func (gl *GL) CompressedTexImage2D(target glbase.Enum, level int, internalFormat glbase.Enum, width, height, border, imageSize int, data interface{}) {
 	var data_ptr unsafe.Pointer
 	var data_v = reflect.ValueOf(data)
 	if data != nil && data_v.Kind() != reflect.Slice {
@@ -1720,7 +1720,7 @@ func (gl *GL) CompressedTexImage2D(target glbase.Enum, level int32, internalForm
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCompressedTexImage3D.xml
-func (gl *GL) CompressedTexImage3D(target glbase.Enum, level int32, internalFormat glbase.Enum, width, height, depth, border, imageSize int32, data interface{}) {
+func (gl *GL) CompressedTexImage3D(target glbase.Enum, level int, internalFormat glbase.Enum, width, height int, depth int32, border, imageSize int, data interface{}) {
 	var data_ptr unsafe.Pointer
 	var data_v = reflect.ValueOf(data)
 	if data != nil && data_v.Kind() != reflect.Slice {
@@ -1763,7 +1763,7 @@ func (gl *GL) PointParameterf(pname glbase.Enum, param float32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glMultiDrawArrays.xml
-func (gl *GL) MultiDrawArrays(mode glbase.Enum, first, count []int32, drawcount int32) {
+func (gl *GL) MultiDrawArrays(mode glbase.Enum, first, count []int, drawcount int32) {
 	C.gl3_3compat_glMultiDrawArrays(gl.funcs, C.GLenum(mode), (*C.GLint)(unsafe.Pointer(&first[0])), (*C.GLsizei)(unsafe.Pointer(&count[0])), C.GLsizei(drawcount))
 }
 
@@ -1914,14 +1914,14 @@ func (gl *GL) IsBuffer(buffer glbase.Buffer) bool {
 // GenBuffers is available in GL version 1.5 or greater.
 //
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenBuffers.xml
-func (gl *GL) GenBuffers(n int32) []glbase.Buffer {
+func (gl *GL) GenBuffers(n int) []glbase.Buffer {
 	buffers := make([]glbase.Buffer, n)
 	C.gl3_3compat_glGenBuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&buffers[0])))
 	return buffers
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteBuffers.xml
-func (gl *GL) DeleteBuffers(n int32, buffers []uint32) {
+func (gl *GL) DeleteBuffers(n int, buffers []uint32) {
 	C.gl3_3compat_glDeleteBuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&buffers[0])))
 }
 
@@ -2042,12 +2042,12 @@ func (gl *GL) IsQuery(id uint32) bool {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteQueries.xml
-func (gl *GL) DeleteQueries(n int32, ids []uint32) {
+func (gl *GL) DeleteQueries(n int, ids []uint32) {
 	C.gl3_3compat_glDeleteQueries(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&ids[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenQueries.xml
-func (gl *GL) GenQueries(n int32, ids []uint32) {
+func (gl *GL) GenQueries(n int, ids []uint32) {
 	C.gl3_3compat_glGenQueries(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&ids[0])))
 }
 
@@ -2082,7 +2082,7 @@ func (gl *GL) GenQueries(n int32, ids []uint32) {
 // 3, or 4. GL.INVALID_VALUE is generated if stride is negative.
 //
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribPointer.xml
-func (gl *GL) VertexAttribPointer(index glbase.Attrib, size int32, gltype glbase.Enum, normalized bool, stride int32, offset int) {
+func (gl *GL) VertexAttribPointer(index glbase.Attrib, size int, gltype glbase.Enum, normalized bool, stride, offset int) {
 	// What an awkward API. Just add a new function next time, please.
 	offset_ptr := unsafe.Pointer(uintptr(offset))
 	C.gl3_3compat_glVertexAttribPointer(gl.funcs, C.GLuint(index), C.GLint(size), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), C.GLsizei(stride), offset_ptr)
@@ -2828,17 +2828,17 @@ func (gl *GL) GetAttribLocation(program glbase.Program, name string) glbase.Attr
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetAttachedShaders.xml
-func (gl *GL) GetAttachedShaders(program glbase.Program, maxCount int32, count []int32, obj []uint32) {
+func (gl *GL) GetAttachedShaders(program glbase.Program, maxCount int32, count []int, obj []uint32) {
 	C.gl3_3compat_glGetAttachedShaders(gl.funcs, C.GLuint(program), C.GLsizei(maxCount), (*C.GLsizei)(unsafe.Pointer(&count[0])), (*C.GLuint)(unsafe.Pointer(&obj[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetActiveUniform.xml
-func (gl *GL) GetActiveUniform(program glbase.Program, index uint32, bufSize int32, length, size []int32, gltype []glbase.Enum, name []byte) {
+func (gl *GL) GetActiveUniform(program glbase.Program, index uint32, bufSize int32, length []int32, size []int, gltype []glbase.Enum, name []byte) {
 	C.gl3_3compat_glGetActiveUniform(gl.funcs, C.GLuint(program), C.GLuint(index), C.GLsizei(bufSize), (*C.GLsizei)(unsafe.Pointer(&length[0])), (*C.GLint)(unsafe.Pointer(&size[0])), (*C.GLenum)(unsafe.Pointer(&gltype[0])), (*C.GLchar)(unsafe.Pointer(&name[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetActiveAttrib.xml
-func (gl *GL) GetActiveAttrib(program glbase.Program, index glbase.Attrib, bufSize int32, length, size []int32, gltype []glbase.Enum, name []byte) {
+func (gl *GL) GetActiveAttrib(program glbase.Program, index glbase.Attrib, bufSize int32, length []int32, size []int, gltype []glbase.Enum, name []byte) {
 	C.gl3_3compat_glGetActiveAttrib(gl.funcs, C.GLuint(program), C.GLuint(index), C.GLsizei(bufSize), (*C.GLsizei)(unsafe.Pointer(&length[0])), (*C.GLint)(unsafe.Pointer(&size[0])), (*C.GLenum)(unsafe.Pointer(&gltype[0])), (*C.GLchar)(unsafe.Pointer(&name[0])))
 }
 
@@ -3096,7 +3096,7 @@ func (gl *GL) StencilOpSeparate(face, sfail, dpfail, dppass glbase.Enum) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDrawBuffers.xml
-func (gl *GL) DrawBuffers(n int32, bufs []glbase.Enum) {
+func (gl *GL) DrawBuffers(n int, bufs []glbase.Enum) {
 	C.gl3_3compat_glDrawBuffers(gl.funcs, C.GLsizei(n), (*C.GLenum)(unsafe.Pointer(&bufs[0])))
 }
 
@@ -3112,12 +3112,12 @@ func (gl *GL) IsVertexArray(array uint32) bool {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenVertexArrays.xml
-func (gl *GL) GenVertexArrays(n int32, arrays []uint32) {
+func (gl *GL) GenVertexArrays(n int, arrays []uint32) {
 	C.gl3_3compat_glGenVertexArrays(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&arrays[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteVertexArrays.xml
-func (gl *GL) DeleteVertexArrays(n int32, arrays []uint32) {
+func (gl *GL) DeleteVertexArrays(n int, arrays []uint32) {
 	C.gl3_3compat_glDeleteVertexArrays(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&arrays[0])))
 }
 
@@ -3132,12 +3132,12 @@ func (gl *GL) FlushMappedBufferRange(target glbase.Enum, offset, length int) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glFramebufferTextureLayer.xml
-func (gl *GL) FramebufferTextureLayer(target, attachment glbase.Enum, texture glbase.Texture, level, layer int32) {
+func (gl *GL) FramebufferTextureLayer(target, attachment glbase.Enum, texture glbase.Texture, level int, layer int32) {
 	C.gl3_3compat_glFramebufferTextureLayer(gl.funcs, C.GLenum(target), C.GLenum(attachment), C.GLuint(texture), C.GLint(level), C.GLint(layer))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glRenderbufferStorageMultisample.xml
-func (gl *GL) RenderbufferStorageMultisample(target glbase.Enum, samples int32, internalFormat glbase.Enum, width, height int32) {
+func (gl *GL) RenderbufferStorageMultisample(target glbase.Enum, samples int32, internalFormat glbase.Enum, width, height int) {
 	C.gl3_3compat_glRenderbufferStorageMultisample(gl.funcs, C.GLenum(target), C.GLsizei(samples), C.GLenum(internalFormat), C.GLsizei(width), C.GLsizei(height))
 }
 
@@ -3162,17 +3162,17 @@ func (gl *GL) FramebufferRenderbuffer(target, attachment, renderbuffertarget glb
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glFramebufferTexture3D.xml
-func (gl *GL) FramebufferTexture3D(target, attachment, textarget glbase.Enum, texture glbase.Texture, level, zoffset int32) {
+func (gl *GL) FramebufferTexture3D(target, attachment, textarget glbase.Enum, texture glbase.Texture, level int, zoffset int32) {
 	C.gl3_3compat_glFramebufferTexture3D(gl.funcs, C.GLenum(target), C.GLenum(attachment), C.GLenum(textarget), C.GLuint(texture), C.GLint(level), C.GLint(zoffset))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glFramebufferTexture2D.xml
-func (gl *GL) FramebufferTexture2D(target, attachment, textarget glbase.Enum, texture glbase.Texture, level int32) {
+func (gl *GL) FramebufferTexture2D(target, attachment, textarget glbase.Enum, texture glbase.Texture, level int) {
 	C.gl3_3compat_glFramebufferTexture2D(gl.funcs, C.GLenum(target), C.GLenum(attachment), C.GLenum(textarget), C.GLuint(texture), C.GLint(level))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glFramebufferTexture1D.xml
-func (gl *GL) FramebufferTexture1D(target, attachment, textarget glbase.Enum, texture glbase.Texture, level int32) {
+func (gl *GL) FramebufferTexture1D(target, attachment, textarget glbase.Enum, texture glbase.Texture, level int) {
 	C.gl3_3compat_glFramebufferTexture1D(gl.funcs, C.GLenum(target), C.GLenum(attachment), C.GLenum(textarget), C.GLuint(texture), C.GLint(level))
 }
 
@@ -3183,12 +3183,12 @@ func (gl *GL) CheckFramebufferStatus(target glbase.Enum) glbase.Enum {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenFramebuffers.xml
-func (gl *GL) GenFramebuffers(n int32, framebuffers []uint32) {
+func (gl *GL) GenFramebuffers(n int, framebuffers []uint32) {
 	C.gl3_3compat_glGenFramebuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&framebuffers[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteFramebuffers.xml
-func (gl *GL) DeleteFramebuffers(n int32, framebuffers []uint32) {
+func (gl *GL) DeleteFramebuffers(n int, framebuffers []uint32) {
 	C.gl3_3compat_glDeleteFramebuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&framebuffers[0])))
 }
 
@@ -3209,17 +3209,17 @@ func (gl *GL) GetRenderbufferParameteriv(target, pname glbase.Enum, params []int
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glRenderbufferStorage.xml
-func (gl *GL) RenderbufferStorage(target, internalFormat glbase.Enum, width, height int32) {
+func (gl *GL) RenderbufferStorage(target, internalFormat glbase.Enum, width, height int) {
 	C.gl3_3compat_glRenderbufferStorage(gl.funcs, C.GLenum(target), C.GLenum(internalFormat), C.GLsizei(width), C.GLsizei(height))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenRenderbuffers.xml
-func (gl *GL) GenRenderbuffers(n int32, renderbuffers []uint32) {
+func (gl *GL) GenRenderbuffers(n int, renderbuffers []uint32) {
 	C.gl3_3compat_glGenRenderbuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&renderbuffers[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteRenderbuffers.xml
-func (gl *GL) DeleteRenderbuffers(n int32, renderbuffers []uint32) {
+func (gl *GL) DeleteRenderbuffers(n int, renderbuffers []uint32) {
 	C.gl3_3compat_glDeleteRenderbuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&renderbuffers[0])))
 }
 
@@ -3321,7 +3321,7 @@ func (gl *GL) GetVertexAttribIiv(index glbase.Attrib, pname glbase.Enum, params 
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribIPointer.xml
-func (gl *GL) VertexAttribIPointer(index glbase.Attrib, size int32, gltype glbase.Enum, stride int32, pointer interface{}) {
+func (gl *GL) VertexAttribIPointer(index glbase.Attrib, size int, gltype glbase.Enum, stride int, pointer interface{}) {
 	var pointer_ptr unsafe.Pointer
 	var pointer_v = reflect.ValueOf(pointer)
 	if pointer != nil && pointer_v.Kind() != reflect.Slice {
@@ -3349,7 +3349,7 @@ func (gl *GL) ClampColor(target, clamp glbase.Enum) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetTransformFeedbackVarying.xml
-func (gl *GL) GetTransformFeedbackVarying(program glbase.Program, index uint32, bufSize int32, length, size []int32, gltype []glbase.Enum, name []byte) {
+func (gl *GL) GetTransformFeedbackVarying(program glbase.Program, index uint32, bufSize int32, length []int32, size []int, gltype []glbase.Enum, name []byte) {
 	C.gl3_3compat_glGetTransformFeedbackVarying(gl.funcs, C.GLuint(program), C.GLuint(index), C.GLsizei(bufSize), (*C.GLsizei)(unsafe.Pointer(&length[0])), (*C.GLsizei)(unsafe.Pointer(&size[0])), (*C.GLenum)(unsafe.Pointer(&gltype[0])), (*C.GLchar)(unsafe.Pointer(&name[0])))
 }
 
@@ -3451,7 +3451,7 @@ func (gl *GL) TexBuffer(target, internalFormat glbase.Enum, buffer glbase.Buffer
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDrawElementsInstanced.xml
-func (gl *GL) DrawElementsInstanced(mode glbase.Enum, count int32, gltype glbase.Enum, indices interface{}, instancecount int32) {
+func (gl *GL) DrawElementsInstanced(mode glbase.Enum, count int, gltype glbase.Enum, indices interface{}, instancecount int32) {
 	var indices_ptr unsafe.Pointer
 	var indices_v = reflect.ValueOf(indices)
 	if indices != nil && indices_v.Kind() != reflect.Slice {
@@ -3464,7 +3464,7 @@ func (gl *GL) DrawElementsInstanced(mode glbase.Enum, count int32, gltype glbase
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDrawArraysInstanced.xml
-func (gl *GL) DrawArraysInstanced(mode glbase.Enum, first, count, instancecount int32) {
+func (gl *GL) DrawArraysInstanced(mode glbase.Enum, first, count int, instancecount int32) {
 	C.gl3_3compat_glDrawArraysInstanced(gl.funcs, C.GLenum(mode), C.GLint(first), C.GLsizei(count), C.GLsizei(instancecount))
 }
 
@@ -3479,12 +3479,12 @@ func (gl *GL) GetMultisamplefv(pname glbase.Enum, index uint32, val []float32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glTexImage3DMultisample.xml
-func (gl *GL) TexImage3DMultisample(target glbase.Enum, samples, internalFormat, width, height, depth int32, fixedsamplelocations bool) {
+func (gl *GL) TexImage3DMultisample(target glbase.Enum, samples, internalFormat int32, width, height int, depth int32, fixedsamplelocations bool) {
 	C.gl3_3compat_glTexImage3DMultisample(gl.funcs, C.GLenum(target), C.GLsizei(samples), C.GLint(internalFormat), C.GLsizei(width), C.GLsizei(height), C.GLsizei(depth), *(*C.GLboolean)(unsafe.Pointer(&fixedsamplelocations)))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glTexImage2DMultisample.xml
-func (gl *GL) TexImage2DMultisample(target glbase.Enum, samples, internalFormat, width, height int32, fixedsamplelocations bool) {
+func (gl *GL) TexImage2DMultisample(target glbase.Enum, samples, internalFormat int32, width, height int, fixedsamplelocations bool) {
 	C.gl3_3compat_glTexImage2DMultisample(gl.funcs, C.GLenum(target), C.GLsizei(samples), C.GLint(internalFormat), C.GLsizei(width), C.GLsizei(height), *(*C.GLboolean)(unsafe.Pointer(&fixedsamplelocations)))
 }
 
@@ -3532,7 +3532,7 @@ func (gl *GL) ProvokingVertex(mode glbase.Enum) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDrawElementsInstancedBaseVertex.xml
-func (gl *GL) DrawElementsInstancedBaseVertex(mode glbase.Enum, count int32, gltype glbase.Enum, indices interface{}, instancecount, basevertex int32) {
+func (gl *GL) DrawElementsInstancedBaseVertex(mode glbase.Enum, count int, gltype glbase.Enum, indices interface{}, instancecount, basevertex int32) {
 	var indices_ptr unsafe.Pointer
 	var indices_v = reflect.ValueOf(indices)
 	if indices != nil && indices_v.Kind() != reflect.Slice {
@@ -3545,7 +3545,7 @@ func (gl *GL) DrawElementsInstancedBaseVertex(mode glbase.Enum, count int32, glt
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDrawRangeElementsBaseVertex.xml
-func (gl *GL) DrawRangeElementsBaseVertex(mode glbase.Enum, start, end uint32, count int32, gltype glbase.Enum, indices interface{}, basevertex int32) {
+func (gl *GL) DrawRangeElementsBaseVertex(mode glbase.Enum, start, end uint32, count int, gltype glbase.Enum, indices interface{}, basevertex int32) {
 	var indices_ptr unsafe.Pointer
 	var indices_v = reflect.ValueOf(indices)
 	if indices != nil && indices_v.Kind() != reflect.Slice {
@@ -3558,7 +3558,7 @@ func (gl *GL) DrawRangeElementsBaseVertex(mode glbase.Enum, start, end uint32, c
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDrawElementsBaseVertex.xml
-func (gl *GL) DrawElementsBaseVertex(mode glbase.Enum, count int32, gltype glbase.Enum, indices interface{}, basevertex int32) {
+func (gl *GL) DrawElementsBaseVertex(mode glbase.Enum, count int, gltype glbase.Enum, indices interface{}, basevertex int32) {
 	var indices_ptr unsafe.Pointer
 	var indices_v = reflect.ValueOf(indices)
 	if indices != nil && indices_v.Kind() != reflect.Slice {
@@ -3571,7 +3571,7 @@ func (gl *GL) DrawElementsBaseVertex(mode glbase.Enum, count int32, gltype glbas
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glFramebufferTexture.xml
-func (gl *GL) FramebufferTexture(target, attachment glbase.Enum, texture glbase.Texture, level int32) {
+func (gl *GL) FramebufferTexture(target, attachment glbase.Enum, texture glbase.Texture, level int) {
 	C.gl3_3compat_glFramebufferTexture(gl.funcs, C.GLenum(target), C.GLenum(attachment), C.GLuint(texture), C.GLint(level))
 }
 
@@ -3852,12 +3852,12 @@ func (gl *GL) IsSampler(sampler uint32) bool {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteSamplers.xml
-func (gl *GL) DeleteSamplers(count int32, samplers []uint32) {
+func (gl *GL) DeleteSamplers(count int, samplers []uint32) {
 	C.gl3_3compat_glDeleteSamplers(gl.funcs, C.GLsizei(count), (*C.GLuint)(unsafe.Pointer(&samplers[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenSamplers.xml
-func (gl *GL) GenSamplers(count int32, samplers []uint32) {
+func (gl *GL) GenSamplers(count int, samplers []uint32) {
 	C.gl3_3compat_glGenSamplers(gl.funcs, C.GLsizei(count), (*C.GLuint)(unsafe.Pointer(&samplers[0])))
 }
 
@@ -4137,7 +4137,7 @@ func (gl *GL) GetClipPlane(plane glbase.Enum, equation []float64) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDrawPixels.xml
-func (gl *GL) DrawPixels(width, height int32, format, gltype glbase.Enum, pixels interface{}) {
+func (gl *GL) DrawPixels(width, height int, format, gltype glbase.Enum, pixels interface{}) {
 	var pixels_ptr unsafe.Pointer
 	var pixels_v = reflect.ValueOf(pixels)
 	if pixels != nil && pixels_v.Kind() != reflect.Slice {
@@ -4150,7 +4150,7 @@ func (gl *GL) DrawPixels(width, height int32, format, gltype glbase.Enum, pixels
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCopyPixels.xml
-func (gl *GL) CopyPixels(x, y, width, height int32, gltype glbase.Enum) {
+func (gl *GL) CopyPixels(x, y, width, height int, gltype glbase.Enum) {
 	C.gl3_3compat_glCopyPixels(gl.funcs, C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height), C.GLenum(gltype))
 }
 
@@ -4286,12 +4286,12 @@ func (gl *GL) Map2d(target glbase.Enum, u1, u2 float64, ustride, uorder int32, v
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glMap1f.xml
-func (gl *GL) Map1f(target glbase.Enum, u1, u2 float32, stride, order int32, points []float32) {
+func (gl *GL) Map1f(target glbase.Enum, u1, u2 float32, stride, order int, points []float32) {
 	C.gl3_3compat_glMap1f(gl.funcs, C.GLenum(target), C.GLfloat(u1), C.GLfloat(u2), C.GLint(stride), C.GLint(order), (*C.GLfloat)(unsafe.Pointer(&points[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glMap1d.xml
-func (gl *GL) Map1d(target glbase.Enum, u1, u2 float64, stride, order int32, points []float64) {
+func (gl *GL) Map1d(target glbase.Enum, u1, u2 float64, stride, order int, points []float64) {
 	C.gl3_3compat_glMap1d(gl.funcs, C.GLenum(target), C.GLdouble(u1), C.GLdouble(u2), C.GLint(stride), C.GLint(order), (*C.GLdouble)(unsafe.Pointer(&points[0])))
 }
 
@@ -4429,12 +4429,12 @@ func (gl *GL) RenderMode(mode glbase.Enum) int32 {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glSelectBuffer.xml
-func (gl *GL) SelectBuffer(size int32, buffer []glbase.Buffer) {
+func (gl *GL) SelectBuffer(size int, buffer []glbase.Buffer) {
 	C.gl3_3compat_glSelectBuffer(gl.funcs, C.GLsizei(size), (*C.GLuint)(unsafe.Pointer(&buffer[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glFeedbackBuffer.xml
-func (gl *GL) FeedbackBuffer(size int32, gltype glbase.Enum, buffer []float32) {
+func (gl *GL) FeedbackBuffer(size int, gltype glbase.Enum, buffer []float32) {
 	C.gl3_3compat_glFeedbackBuffer(gl.funcs, C.GLsizei(size), C.GLenum(gltype), (*C.GLfloat)(unsafe.Pointer(&buffer[0])))
 }
 
@@ -4615,7 +4615,7 @@ func (gl *GL) Vertex4iv(v []int32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertex4i.xml
-func (gl *GL) Vertex4i(x, y, z, w int32) {
+func (gl *GL) Vertex4i(x, y, z, w int) {
 	C.gl3_3compat_glVertex4i(gl.funcs, C.GLint(x), C.GLint(y), C.GLint(z), C.GLint(w))
 }
 
@@ -4667,7 +4667,7 @@ func (gl *GL) Vertex3iv(v []int32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertex3i.xml
-func (gl *GL) Vertex3i(x, y, z int32) {
+func (gl *GL) Vertex3i(x, y, z int) {
 	C.gl3_3compat_glVertex3i(gl.funcs, C.GLint(x), C.GLint(y), C.GLint(z))
 }
 
@@ -4719,7 +4719,7 @@ func (gl *GL) Vertex2iv(v []int32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertex2i.xml
-func (gl *GL) Vertex2i(x, y int32) {
+func (gl *GL) Vertex2i(x, y int) {
 	C.gl3_3compat_glVertex2i(gl.funcs, C.GLint(x), C.GLint(y))
 }
 
@@ -5007,7 +5007,7 @@ func (gl *GL) RasterPos4iv(v []int32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos4i.xml
-func (gl *GL) RasterPos4i(x, y, z, w int32) {
+func (gl *GL) RasterPos4i(x, y, z, w int) {
 	C.gl3_3compat_glRasterPos4i(gl.funcs, C.GLint(x), C.GLint(y), C.GLint(z), C.GLint(w))
 }
 
@@ -5059,7 +5059,7 @@ func (gl *GL) RasterPos3iv(v []int32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos3i.xml
-func (gl *GL) RasterPos3i(x, y, z int32) {
+func (gl *GL) RasterPos3i(x, y, z int) {
 	C.gl3_3compat_glRasterPos3i(gl.funcs, C.GLint(x), C.GLint(y), C.GLint(z))
 }
 
@@ -5111,7 +5111,7 @@ func (gl *GL) RasterPos2iv(v []int32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glRasterPos2i.xml
-func (gl *GL) RasterPos2i(x, y int32) {
+func (gl *GL) RasterPos2i(x, y int) {
 	C.gl3_3compat_glRasterPos2i(gl.funcs, C.GLint(x), C.GLint(y))
 }
 
@@ -5443,7 +5443,7 @@ func (gl *GL) Color3b(red, green, blue byte) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glBitmap.xml
-func (gl *GL) Bitmap(width, height int32, xorig, yorig, xmove, ymove float32, bitmap []uint8) {
+func (gl *GL) Bitmap(width, height int, xorig, yorig, xmove, ymove float32, bitmap []uint8) {
 	C.gl3_3compat_glBitmap(gl.funcs, C.GLsizei(width), C.GLsizei(height), C.GLfloat(xorig), C.GLfloat(yorig), C.GLfloat(xmove), C.GLfloat(ymove), (*C.GLubyte)(unsafe.Pointer(&bitmap[0])))
 }
 
@@ -5469,7 +5469,7 @@ func (gl *GL) DeleteLists(list uint32, range_ int32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCallLists.xml
-func (gl *GL) CallLists(n int32, gltype glbase.Enum, lists interface{}) {
+func (gl *GL) CallLists(n int, gltype glbase.Enum, lists interface{}) {
 	var lists_ptr unsafe.Pointer
 	var lists_v = reflect.ValueOf(lists)
 	if lists != nil && lists_v.Kind() != reflect.Slice {
@@ -5507,18 +5507,18 @@ func (gl *GL) PopClientAttrib() {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glPrioritizeTextures.xml
-func (gl *GL) PrioritizeTextures(n int32, textures []uint32, priorities []float32) {
+func (gl *GL) PrioritizeTextures(n int, textures []uint32, priorities []float32) {
 	C.gl3_3compat_glPrioritizeTextures(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])), (*C.GLfloat)(unsafe.Pointer(&priorities[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glAreTexturesResident.xml
-func (gl *GL) AreTexturesResident(n int32, textures []uint32, residences []bool) bool {
+func (gl *GL) AreTexturesResident(n int, textures []uint32, residences []bool) bool {
 	glresult := C.gl3_3compat_glAreTexturesResident(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])), (*C.GLboolean)(unsafe.Pointer(&residences[0])))
 	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexPointer.xml
-func (gl *GL) VertexPointer(size int32, gltype glbase.Enum, stride int32, pointer interface{}) {
+func (gl *GL) VertexPointer(size int, gltype glbase.Enum, stride int, pointer interface{}) {
 	var pointer_ptr unsafe.Pointer
 	var pointer_v = reflect.ValueOf(pointer)
 	if pointer != nil && pointer_v.Kind() != reflect.Slice {
@@ -5531,7 +5531,7 @@ func (gl *GL) VertexPointer(size int32, gltype glbase.Enum, stride int32, pointe
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glTexCoordPointer.xml
-func (gl *GL) TexCoordPointer(size int32, gltype glbase.Enum, stride int32, pointer interface{}) {
+func (gl *GL) TexCoordPointer(size int, gltype glbase.Enum, stride int, pointer interface{}) {
 	var pointer_ptr unsafe.Pointer
 	var pointer_v = reflect.ValueOf(pointer)
 	if pointer != nil && pointer_v.Kind() != reflect.Slice {
@@ -5544,7 +5544,7 @@ func (gl *GL) TexCoordPointer(size int32, gltype glbase.Enum, stride int32, poin
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glNormalPointer.xml
-func (gl *GL) NormalPointer(gltype glbase.Enum, stride int32, pointer interface{}) {
+func (gl *GL) NormalPointer(gltype glbase.Enum, stride int, pointer interface{}) {
 	var pointer_ptr unsafe.Pointer
 	var pointer_v = reflect.ValueOf(pointer)
 	if pointer != nil && pointer_v.Kind() != reflect.Slice {
@@ -5557,7 +5557,7 @@ func (gl *GL) NormalPointer(gltype glbase.Enum, stride int32, pointer interface{
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glInterleavedArrays.xml
-func (gl *GL) InterleavedArrays(format glbase.Enum, stride int32, pointer interface{}) {
+func (gl *GL) InterleavedArrays(format glbase.Enum, stride int, pointer interface{}) {
 	var pointer_ptr unsafe.Pointer
 	var pointer_v = reflect.ValueOf(pointer)
 	if pointer != nil && pointer_v.Kind() != reflect.Slice {
@@ -5570,7 +5570,7 @@ func (gl *GL) InterleavedArrays(format glbase.Enum, stride int32, pointer interf
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIndexPointer.xml
-func (gl *GL) IndexPointer(gltype glbase.Enum, stride int32, pointer interface{}) {
+func (gl *GL) IndexPointer(gltype glbase.Enum, stride int, pointer interface{}) {
 	var pointer_ptr unsafe.Pointer
 	var pointer_v = reflect.ValueOf(pointer)
 	if pointer != nil && pointer_v.Kind() != reflect.Slice {
@@ -5588,7 +5588,7 @@ func (gl *GL) EnableClientState(array glbase.Enum) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glEdgeFlagPointer.xml
-func (gl *GL) EdgeFlagPointer(stride int32, pointer interface{}) {
+func (gl *GL) EdgeFlagPointer(stride int, pointer interface{}) {
 	var pointer_ptr unsafe.Pointer
 	var pointer_v = reflect.ValueOf(pointer)
 	if pointer != nil && pointer_v.Kind() != reflect.Slice {
@@ -5606,7 +5606,7 @@ func (gl *GL) DisableClientState(array glbase.Enum) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glColorPointer.xml
-func (gl *GL) ColorPointer(size int32, gltype glbase.Enum, stride int32, pointer interface{}) {
+func (gl *GL) ColorPointer(size int, gltype glbase.Enum, stride int, pointer interface{}) {
 	var pointer_ptr unsafe.Pointer
 	var pointer_v = reflect.ValueOf(pointer)
 	if pointer != nil && pointer_v.Kind() != reflect.Slice {
@@ -5639,7 +5639,7 @@ func (gl *GL) Minmax(target, internalFormat glbase.Enum, sink bool) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glHistogram.xml
-func (gl *GL) Histogram(target glbase.Enum, width int32, internalFormat glbase.Enum, sink bool) {
+func (gl *GL) Histogram(target glbase.Enum, width int, internalFormat glbase.Enum, sink bool) {
 	C.gl3_3compat_glHistogram(gl.funcs, C.GLenum(target), C.GLsizei(width), C.GLenum(internalFormat), *(*C.GLboolean)(unsafe.Pointer(&sink)))
 }
 
@@ -5690,7 +5690,7 @@ func (gl *GL) GetHistogram(target glbase.Enum, reset bool, format, gltype glbase
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glSeparableFilter2D.xml
-func (gl *GL) SeparableFilter2D(target, internalFormat glbase.Enum, width, height int32, format, gltype glbase.Enum, row, column interface{}) {
+func (gl *GL) SeparableFilter2D(target, internalFormat glbase.Enum, width, height int, format, gltype glbase.Enum, row, column interface{}) {
 	var row_ptr unsafe.Pointer
 	var row_v = reflect.ValueOf(row)
 	if row != nil && row_v.Kind() != reflect.Slice {
@@ -5763,12 +5763,12 @@ func (gl *GL) GetConvolutionFilter(target, format, gltype glbase.Enum, image int
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCopyConvolutionFilter2D.xml
-func (gl *GL) CopyConvolutionFilter2D(target, internalFormat glbase.Enum, x, y, width, height int32) {
+func (gl *GL) CopyConvolutionFilter2D(target, internalFormat glbase.Enum, x, y, width, height int) {
 	C.gl3_3compat_glCopyConvolutionFilter2D(gl.funcs, C.GLenum(target), C.GLenum(internalFormat), C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCopyConvolutionFilter1D.xml
-func (gl *GL) CopyConvolutionFilter1D(target, internalFormat glbase.Enum, x, y, width int32) {
+func (gl *GL) CopyConvolutionFilter1D(target, internalFormat glbase.Enum, x, y, width int) {
 	C.gl3_3compat_glCopyConvolutionFilter1D(gl.funcs, C.GLenum(target), C.GLenum(internalFormat), C.GLint(x), C.GLint(y), C.GLsizei(width))
 }
 
@@ -5793,7 +5793,7 @@ func (gl *GL) ConvolutionParameterf(target, pname glbase.Enum, params float32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glConvolutionFilter2D.xml
-func (gl *GL) ConvolutionFilter2D(target, internalFormat glbase.Enum, width, height int32, format, gltype glbase.Enum, image interface{}) {
+func (gl *GL) ConvolutionFilter2D(target, internalFormat glbase.Enum, width, height int, format, gltype glbase.Enum, image interface{}) {
 	var image_ptr unsafe.Pointer
 	var image_v = reflect.ValueOf(image)
 	if image != nil && image_v.Kind() != reflect.Slice {
@@ -5806,7 +5806,7 @@ func (gl *GL) ConvolutionFilter2D(target, internalFormat glbase.Enum, width, hei
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glConvolutionFilter1D.xml
-func (gl *GL) ConvolutionFilter1D(target, internalFormat glbase.Enum, width int32, format, gltype glbase.Enum, image interface{}) {
+func (gl *GL) ConvolutionFilter1D(target, internalFormat glbase.Enum, width int, format, gltype glbase.Enum, image interface{}) {
 	var image_ptr unsafe.Pointer
 	var image_v = reflect.ValueOf(image)
 	if image != nil && image_v.Kind() != reflect.Slice {
@@ -5819,12 +5819,12 @@ func (gl *GL) ConvolutionFilter1D(target, internalFormat glbase.Enum, width int3
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCopyColorSubTable.xml
-func (gl *GL) CopyColorSubTable(target glbase.Enum, start, x, y, width int32) {
+func (gl *GL) CopyColorSubTable(target glbase.Enum, start int32, x, y, width int) {
 	C.gl3_3compat_glCopyColorSubTable(gl.funcs, C.GLenum(target), C.GLsizei(start), C.GLint(x), C.GLint(y), C.GLsizei(width))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glColorSubTable.xml
-func (gl *GL) ColorSubTable(target glbase.Enum, start, count int32, format, gltype glbase.Enum, data interface{}) {
+func (gl *GL) ColorSubTable(target glbase.Enum, start int32, count int, format, gltype glbase.Enum, data interface{}) {
 	var data_ptr unsafe.Pointer
 	var data_v = reflect.ValueOf(data)
 	if data != nil && data_v.Kind() != reflect.Slice {
@@ -5860,7 +5860,7 @@ func (gl *GL) GetColorTable(target, format, gltype glbase.Enum, table interface{
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glCopyColorTable.xml
-func (gl *GL) CopyColorTable(target, internalFormat glbase.Enum, x, y, width int32) {
+func (gl *GL) CopyColorTable(target, internalFormat glbase.Enum, x, y, width int) {
 	C.gl3_3compat_glCopyColorTable(gl.funcs, C.GLenum(target), C.GLenum(internalFormat), C.GLint(x), C.GLint(y), C.GLsizei(width))
 }
 
@@ -5875,7 +5875,7 @@ func (gl *GL) ColorTableParameterfv(target, pname glbase.Enum, params []float32)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glColorTable.xml
-func (gl *GL) ColorTable(target, internalFormat glbase.Enum, width int32, format, gltype glbase.Enum, table interface{}) {
+func (gl *GL) ColorTable(target, internalFormat glbase.Enum, width int, format, gltype glbase.Enum, table interface{}) {
 	var table_ptr unsafe.Pointer
 	var table_v = reflect.ValueOf(table)
 	if table != nil && table_v.Kind() != reflect.Slice {
@@ -6130,7 +6130,7 @@ func (gl *GL) WindowPos3iv(v []int32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glWindowPos3i.xml
-func (gl *GL) WindowPos3i(x, y, z int32) {
+func (gl *GL) WindowPos3i(x, y, z int) {
 	C.gl3_3compat_glWindowPos3i(gl.funcs, C.GLint(x), C.GLint(y), C.GLint(z))
 }
 
@@ -6182,7 +6182,7 @@ func (gl *GL) WindowPos2iv(v []int32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glWindowPos2i.xml
-func (gl *GL) WindowPos2i(x, y int32) {
+func (gl *GL) WindowPos2i(x, y int) {
 	C.gl3_3compat_glWindowPos2i(gl.funcs, C.GLint(x), C.GLint(y))
 }
 
@@ -6213,7 +6213,7 @@ func (gl *GL) WindowPos2d(x, y float64) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glSecondaryColorPointer.xml
-func (gl *GL) SecondaryColorPointer(size int32, gltype glbase.Enum, stride int32, pointer interface{}) {
+func (gl *GL) SecondaryColorPointer(size int, gltype glbase.Enum, stride int, pointer interface{}) {
 	var pointer_ptr unsafe.Pointer
 	var pointer_v = reflect.ValueOf(pointer)
 	if pointer != nil && pointer_v.Kind() != reflect.Slice {
@@ -6318,7 +6318,7 @@ func (gl *GL) SecondaryColor3b(red, green, blue byte) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glFogCoordPointer.xml
-func (gl *GL) FogCoordPointer(gltype glbase.Enum, stride int32, pointer interface{}) {
+func (gl *GL) FogCoordPointer(gltype glbase.Enum, stride int, pointer interface{}) {
 	var pointer_ptr unsafe.Pointer
 	var pointer_v = reflect.ValueOf(pointer)
 	if pointer != nil && pointer_v.Kind() != reflect.Slice {
@@ -6653,21 +6653,21 @@ func (gl *GL) VertexAttribI1ui(index glbase.Attrib, x uint32) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribI4i.xml
-func (gl *GL) VertexAttribI4i(index glbase.Attrib, x, y, z, w int32) {
+func (gl *GL) VertexAttribI4i(index glbase.Attrib, x, y, z, w int) {
 	C.gl3_3compat_glVertexAttribI4i(gl.funcs, C.GLuint(index), C.GLint(x), C.GLint(y), C.GLint(z), C.GLint(w))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribI3i.xml
-func (gl *GL) VertexAttribI3i(index glbase.Attrib, x, y, z int32) {
+func (gl *GL) VertexAttribI3i(index glbase.Attrib, x, y, z int) {
 	C.gl3_3compat_glVertexAttribI3i(gl.funcs, C.GLuint(index), C.GLint(x), C.GLint(y), C.GLint(z))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribI2i.xml
-func (gl *GL) VertexAttribI2i(index glbase.Attrib, x, y int32) {
+func (gl *GL) VertexAttribI2i(index glbase.Attrib, x, y int) {
 	C.gl3_3compat_glVertexAttribI2i(gl.funcs, C.GLuint(index), C.GLint(x), C.GLint(y))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribI1i.xml
-func (gl *GL) VertexAttribI1i(index glbase.Attrib, x int32) {
+func (gl *GL) VertexAttribI1i(index glbase.Attrib, x int) {
 	C.gl3_3compat_glVertexAttribI1i(gl.funcs, C.GLuint(index), C.GLint(x))
 }

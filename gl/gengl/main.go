@@ -590,7 +590,9 @@ func prepareHeader(header *Header) error {
 				p.Type = p.Type[8:]
 			}
 			p.GoType = goTypeName(p.Type)
-			if p.GoType == "uint32" {
+			switch p.GoType {
+			case "uint32":
+				// TODO Check plurals.
 				switch p.GoName {
 				case "program":
 					p.GoType = "glbase.Program"
@@ -605,10 +607,17 @@ func prepareHeader(header *Header) error {
 						p.GoType = "glbase.Attrib"
 					}
 				}
-				// TODO Check plurals.
-			}
-			if p.GoType == "int32" && p.GoName == "location" && strings.Contains(f.Name, "Uniform") {
-				p.GoType = "glbase.Uniform"
+			case "int32":
+				switch p.GoName {
+				case "size", "count", "stride", "offset", "xoffset", "yoffset", "order", "level":
+					p.GoType = "int"
+				case "n", "first", "x", "y", "z", "w", "width", "height", "border", "imageSize":
+					p.GoType = "int"
+				case "location":
+					if strings.Contains(f.Name, "Uniform") {
+						p.GoType = "glbase.Uniform"
+					}
+				}
 			}
 			p.GoNameOrig = p.GoName
 			tweak := tweaks.params[p.GoNameOrig]
