@@ -892,8 +892,6 @@ func (gl *GL) Viewport(x, y, width, height int) {
 //
 // GL.INVALID_OPERATION is generated if DepthRange is executed between the
 // execution of Begin and the corresponding execution of End.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDepthRange.xml
 func (gl *GL) DepthRange(nearVal, farVal float64) {
 	C.gl1_5_glDepthRange(gl.funcs, C.GLdouble(nearVal), C.GLdouble(farVal))
 }
@@ -1543,8 +1541,6 @@ func (gl *GL) BufferSubData(target glbase.Enum, offset, size int, data interface
 // GL.INVALID_OPERATION is generated if the reserved buffer object name 0 is
 // bound to target.  GL.OUT_OF_MEMORY is generated if the GL is unable to
 // create a data store with the specified size.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBufferData.xml
 func (gl *GL) BufferData(target glbase.Enum, size int, data interface{}, usage glbase.Enum) {
 	var data_ptr unsafe.Pointer
 	var data_v = reflect.ValueOf(data)
@@ -1582,8 +1578,6 @@ func (gl *GL) IsBuffer(buffer glbase.Buffer) bool {
 // and the corresponding execution of End.
 //
 // GenBuffers is available in GL version 1.5 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGenBuffers.xml
 func (gl *GL) GenBuffers(n int) []glbase.Buffer {
 	buffers := make([]glbase.Buffer, n)
 	C.gl1_5_glGenBuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&buffers[0])))
@@ -1674,8 +1668,6 @@ func (gl *GL) DeleteBuffers(n int, buffers []uint32) {
 // between the execution of Begin and the corresponding execution of End.
 //
 // BindBuffer is available in GL version 1.5 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBindBuffer.xml
 func (gl *GL) BindBuffer(target glbase.Enum, buffer glbase.Buffer) {
 	C.gl1_5_glBindBuffer(gl.funcs, C.GLenum(target), C.GLuint(buffer))
 }
@@ -1806,8 +1798,6 @@ func (gl *GL) Ortho(left, right, bottom, top, zNear, zFar float64) {
 //
 // GL.INVALID_OPERATION is generated if MultMatrix is executed between the
 // execution of Begin and the corresponding execution of End.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glMultMatrixd.xml
 func (gl *GL) MultMatrixd(m []float64) {
 	if len(m) != 16 {
 		panic("parameter m must have length 16 for the 4x4 matrix")
@@ -1855,8 +1845,6 @@ func (gl *GL) MultMatrixd(m []float64) {
 //
 // GL.INVALID_OPERATION is generated if MultMatrix is executed between the
 // execution of Begin and the corresponding execution of End.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glMultMatrixf.xml
 func (gl *GL) MultMatrixf(m []float32) {
 	if len(m) != 16 {
 		panic("parameter m must have length 16 for the 4x4 matrix")
@@ -2220,8 +2208,6 @@ func (gl *GL) PopAttrib() {
 // GL.INVALID_OPERATION is generated if there is no accumulation buffer.
 // GL.INVALID_OPERATION is generated if Accum is executed between the
 // execution of Begin and the corresponding execution of End.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glAccum.xml
 func (gl *GL) Accum(op glbase.Enum, value float32) {
 	C.gl1_5_glAccum(gl.funcs, C.GLenum(op), C.GLfloat(value))
 }

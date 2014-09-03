@@ -753,7 +753,7 @@ func init() {
 
 func funcComment(header *Header, f Func) string {
 	var doc = funcTweaks[f.GoName].doc
-	doc = execTemplate(f.GoName+":doc", doc, f)
+	doc = strings.TrimRight(execTemplate(f.GoName+":doc", doc, f), "\n\t ")
 	var buf bytes.Buffer
 	if doc != "" {
 		var scanner = bufio.NewScanner(bytes.NewBufferString(doc))
@@ -777,9 +777,14 @@ func funcComment(header *Header, f Func) string {
 			buf.WriteByte('\n')
 		}
 	}
+	if buf.Len() > 0 {
+		return strings.TrimSuffix(buf.String(), "\n")
+	}
 	var manNum = 2
-	buf.WriteString(fmt.Sprintf("// https://www.opengl.org/sdk/docs/man%d/xhtml/%s.xml", manNum, f.Name))
-	return buf.String()
+	if header.GLVersionName[0] >= '2' && header.GLVersionName[0] <= '4' {
+		manNum = int(header.GLVersionName[0] - '0')
+	}
+	return fmt.Sprintf("// https://www.opengl.org/sdk/docs/man%d/xhtml/%s.xml", manNum, f.Name)
 }
 
 type paramItem struct {

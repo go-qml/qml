@@ -41,7 +41,7 @@ type GL struct {
 
 const ()
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glViewport.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glViewport.xml
 func (gl *GL) Viewport(x, y, width, height int) {
 	C.gl4_0core_glViewport(gl.funcs, C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height))
 }
@@ -69,39 +69,37 @@ func (gl *GL) Viewport(x, y, width, height int) {
 //
 // GL.INVALID_OPERATION is generated if DepthRange is executed between the
 // execution of Begin and the corresponding execution of End.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDepthRange.xml
 func (gl *GL) DepthRange(nearVal, farVal float64) {
 	C.gl4_0core_glDepthRange(gl.funcs, C.GLdouble(nearVal), C.GLdouble(farVal))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glIsEnabled.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glIsEnabled.xml
 func (gl *GL) IsEnabled(cap glbase.Enum) bool {
 	glresult := C.gl4_0core_glIsEnabled(gl.funcs, C.GLenum(cap))
 	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetTexLevelParameteriv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetTexLevelParameteriv.xml
 func (gl *GL) GetTexLevelParameteriv(target glbase.Enum, level int, pname glbase.Enum, params []int32) {
 	C.gl4_0core_glGetTexLevelParameteriv(gl.funcs, C.GLenum(target), C.GLint(level), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetTexLevelParameterfv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetTexLevelParameterfv.xml
 func (gl *GL) GetTexLevelParameterfv(target glbase.Enum, level int, pname glbase.Enum, params []float32) {
 	C.gl4_0core_glGetTexLevelParameterfv(gl.funcs, C.GLenum(target), C.GLint(level), C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetTexParameteriv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetTexParameteriv.xml
 func (gl *GL) GetTexParameteriv(target, pname glbase.Enum, params []int32) {
 	C.gl4_0core_glGetTexParameteriv(gl.funcs, C.GLenum(target), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetTexParameterfv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetTexParameterfv.xml
 func (gl *GL) GetTexParameterfv(target, pname glbase.Enum, params []float32) {
 	C.gl4_0core_glGetTexParameterfv(gl.funcs, C.GLenum(target), C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetTexImage.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetTexImage.xml
 func (gl *GL) GetTexImage(target glbase.Enum, level int, format, gltype glbase.Enum, pixels interface{}) {
 	var pixels_ptr unsafe.Pointer
 	var pixels_v = reflect.ValueOf(pixels)
@@ -114,33 +112,33 @@ func (gl *GL) GetTexImage(target glbase.Enum, level int, format, gltype glbase.E
 	C.gl4_0core_glGetTexImage(gl.funcs, C.GLenum(target), C.GLint(level), C.GLenum(format), C.GLenum(gltype), pixels_ptr)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetIntegerv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetIntegerv.xml
 func (gl *GL) GetIntegerv(pname glbase.Enum, params []int32) {
 	C.gl4_0core_glGetIntegerv(gl.funcs, C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetFloatv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetFloatv.xml
 func (gl *GL) GetFloatv(pname glbase.Enum, params []float32) {
 	C.gl4_0core_glGetFloatv(gl.funcs, C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetError.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetError.xml
 func (gl *GL) GetError() glbase.Enum {
 	glresult := C.gl4_0core_glGetError(gl.funcs)
 	return glbase.Enum(glresult)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetDoublev.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetDoublev.xml
 func (gl *GL) GetDoublev(pname glbase.Enum, params []float64) {
 	C.gl4_0core_glGetDoublev(gl.funcs, C.GLenum(pname), (*C.GLdouble)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetBooleanv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetBooleanv.xml
 func (gl *GL) GetBooleanv(pname glbase.Enum, params []bool) {
 	C.gl4_0core_glGetBooleanv(gl.funcs, C.GLenum(pname), (*C.GLboolean)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glReadPixels.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glReadPixels.xml
 func (gl *GL) ReadPixels(x, y, width, height int, format, gltype glbase.Enum, pixels interface{}) {
 	var pixels_ptr unsafe.Pointer
 	var pixels_v = reflect.ValueOf(pixels)
@@ -153,107 +151,107 @@ func (gl *GL) ReadPixels(x, y, width, height int, format, gltype glbase.Enum, pi
 	C.gl4_0core_glReadPixels(gl.funcs, C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height), C.GLenum(format), C.GLenum(gltype), pixels_ptr)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glReadBuffer.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glReadBuffer.xml
 func (gl *GL) ReadBuffer(mode glbase.Enum) {
 	C.gl4_0core_glReadBuffer(gl.funcs, C.GLenum(mode))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glPixelStorei.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glPixelStorei.xml
 func (gl *GL) PixelStorei(pname glbase.Enum, param int32) {
 	C.gl4_0core_glPixelStorei(gl.funcs, C.GLenum(pname), C.GLint(param))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glPixelStoref.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glPixelStoref.xml
 func (gl *GL) PixelStoref(pname glbase.Enum, param float32) {
 	C.gl4_0core_glPixelStoref(gl.funcs, C.GLenum(pname), C.GLfloat(param))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDepthFunc.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDepthFunc.xml
 func (gl *GL) DepthFunc(glfunc glbase.Enum) {
 	C.gl4_0core_glDepthFunc(gl.funcs, C.GLenum(glfunc))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glStencilOp.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glStencilOp.xml
 func (gl *GL) StencilOp(fail, zfail, zpass glbase.Enum) {
 	C.gl4_0core_glStencilOp(gl.funcs, C.GLenum(fail), C.GLenum(zfail), C.GLenum(zpass))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glStencilFunc.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glStencilFunc.xml
 func (gl *GL) StencilFunc(glfunc glbase.Enum, ref int32, mask uint32) {
 	C.gl4_0core_glStencilFunc(gl.funcs, C.GLenum(glfunc), C.GLint(ref), C.GLuint(mask))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glLogicOp.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glLogicOp.xml
 func (gl *GL) LogicOp(opcode glbase.Enum) {
 	C.gl4_0core_glLogicOp(gl.funcs, C.GLenum(opcode))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBlendFunc.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glBlendFunc.xml
 func (gl *GL) BlendFunc(sfactor, dfactor glbase.Enum) {
 	C.gl4_0core_glBlendFunc(gl.funcs, C.GLenum(sfactor), C.GLenum(dfactor))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glFlush.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glFlush.xml
 func (gl *GL) Flush() {
 	C.gl4_0core_glFlush(gl.funcs)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glFinish.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glFinish.xml
 func (gl *GL) Finish() {
 	C.gl4_0core_glFinish(gl.funcs)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glEnable.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glEnable.xml
 func (gl *GL) Enable(cap glbase.Enum) {
 	C.gl4_0core_glEnable(gl.funcs, C.GLenum(cap))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDisable.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDisable.xml
 func (gl *GL) Disable(cap glbase.Enum) {
 	C.gl4_0core_glDisable(gl.funcs, C.GLenum(cap))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDepthMask.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDepthMask.xml
 func (gl *GL) DepthMask(flag bool) {
 	C.gl4_0core_glDepthMask(gl.funcs, *(*C.GLboolean)(unsafe.Pointer(&flag)))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glColorMask.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glColorMask.xml
 func (gl *GL) ColorMask(red, green, blue, alpha bool) {
 	C.gl4_0core_glColorMask(gl.funcs, *(*C.GLboolean)(unsafe.Pointer(&red)), *(*C.GLboolean)(unsafe.Pointer(&green)), *(*C.GLboolean)(unsafe.Pointer(&blue)), *(*C.GLboolean)(unsafe.Pointer(&alpha)))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glStencilMask.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glStencilMask.xml
 func (gl *GL) StencilMask(mask uint32) {
 	C.gl4_0core_glStencilMask(gl.funcs, C.GLuint(mask))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glClearDepth.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glClearDepth.xml
 func (gl *GL) ClearDepth(depth float64) {
 	C.gl4_0core_glClearDepth(gl.funcs, C.GLdouble(depth))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glClearStencil.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glClearStencil.xml
 func (gl *GL) ClearStencil(s int32) {
 	C.gl4_0core_glClearStencil(gl.funcs, C.GLint(s))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glClearColor.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glClearColor.xml
 func (gl *GL) ClearColor(red, green, blue, alpha float32) {
 	C.gl4_0core_glClearColor(gl.funcs, C.GLfloat(red), C.GLfloat(green), C.GLfloat(blue), C.GLfloat(alpha))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glClear.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glClear.xml
 func (gl *GL) Clear(mask glbase.Bitfield) {
 	C.gl4_0core_glClear(gl.funcs, C.GLbitfield(mask))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDrawBuffer.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDrawBuffer.xml
 func (gl *GL) DrawBuffer(mode glbase.Enum) {
 	C.gl4_0core_glDrawBuffer(gl.funcs, C.GLenum(mode))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glTexImage2D.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glTexImage2D.xml
 func (gl *GL) TexImage2D(target glbase.Enum, level int, internalFormat int32, width, height, border int, format, gltype glbase.Enum, pixels interface{}) {
 	var pixels_ptr unsafe.Pointer
 	var pixels_v = reflect.ValueOf(pixels)
@@ -266,7 +264,7 @@ func (gl *GL) TexImage2D(target glbase.Enum, level int, internalFormat int32, wi
 	C.gl4_0core_glTexImage2D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(internalFormat), C.GLsizei(width), C.GLsizei(height), C.GLint(border), C.GLenum(format), C.GLenum(gltype), pixels_ptr)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glTexImage1D.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glTexImage1D.xml
 func (gl *GL) TexImage1D(target glbase.Enum, level int, internalFormat int32, width, border int, format, gltype glbase.Enum, pixels interface{}) {
 	var pixels_ptr unsafe.Pointer
 	var pixels_v = reflect.ValueOf(pixels)
@@ -279,93 +277,93 @@ func (gl *GL) TexImage1D(target glbase.Enum, level int, internalFormat int32, wi
 	C.gl4_0core_glTexImage1D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(internalFormat), C.GLsizei(width), C.GLint(border), C.GLenum(format), C.GLenum(gltype), pixels_ptr)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glTexParameteriv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glTexParameteriv.xml
 func (gl *GL) TexParameteriv(target, pname glbase.Enum, params []int32) {
 	C.gl4_0core_glTexParameteriv(gl.funcs, C.GLenum(target), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glTexParameteri.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glTexParameteri.xml
 func (gl *GL) TexParameteri(target, pname glbase.Enum, param int32) {
 	C.gl4_0core_glTexParameteri(gl.funcs, C.GLenum(target), C.GLenum(pname), C.GLint(param))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glTexParameterfv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glTexParameterfv.xml
 func (gl *GL) TexParameterfv(target, pname glbase.Enum, params []float32) {
 	C.gl4_0core_glTexParameterfv(gl.funcs, C.GLenum(target), C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glTexParameterf.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glTexParameterf.xml
 func (gl *GL) TexParameterf(target, pname glbase.Enum, param float32) {
 	C.gl4_0core_glTexParameterf(gl.funcs, C.GLenum(target), C.GLenum(pname), C.GLfloat(param))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glScissor.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glScissor.xml
 func (gl *GL) Scissor(x, y, width, height int) {
 	C.gl4_0core_glScissor(gl.funcs, C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glPolygonMode.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glPolygonMode.xml
 func (gl *GL) PolygonMode(face, mode glbase.Enum) {
 	C.gl4_0core_glPolygonMode(gl.funcs, C.GLenum(face), C.GLenum(mode))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glPointSize.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glPointSize.xml
 func (gl *GL) PointSize(size float32) {
 	C.gl4_0core_glPointSize(gl.funcs, C.GLfloat(size))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glLineWidth.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glLineWidth.xml
 func (gl *GL) LineWidth(width float32) {
 	C.gl4_0core_glLineWidth(gl.funcs, C.GLfloat(width))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glHint.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glHint.xml
 func (gl *GL) Hint(target, mode glbase.Enum) {
 	C.gl4_0core_glHint(gl.funcs, C.GLenum(target), C.GLenum(mode))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glFrontFace.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glFrontFace.xml
 func (gl *GL) FrontFace(mode glbase.Enum) {
 	C.gl4_0core_glFrontFace(gl.funcs, C.GLenum(mode))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glCullFace.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glCullFace.xml
 func (gl *GL) CullFace(mode glbase.Enum) {
 	C.gl4_0core_glCullFace(gl.funcs, C.GLenum(mode))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glIndexubv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glIndexubv.xml
 func (gl *GL) Indexubv(c []uint8) {
 	C.gl4_0core_glIndexubv(gl.funcs, (*C.GLubyte)(unsafe.Pointer(&c[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glIndexub.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glIndexub.xml
 func (gl *GL) Indexub(c uint8) {
 	C.gl4_0core_glIndexub(gl.funcs, C.GLubyte(c))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glIsTexture.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glIsTexture.xml
 func (gl *GL) IsTexture(texture glbase.Texture) bool {
 	glresult := C.gl4_0core_glIsTexture(gl.funcs, C.GLuint(texture))
 	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGenTextures.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGenTextures.xml
 func (gl *GL) GenTextures(n int, textures []uint32) {
 	C.gl4_0core_glGenTextures(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteTextures.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDeleteTextures.xml
 func (gl *GL) DeleteTextures(n int, textures []uint32) {
 	C.gl4_0core_glDeleteTextures(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBindTexture.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glBindTexture.xml
 func (gl *GL) BindTexture(target glbase.Enum, texture glbase.Texture) {
 	C.gl4_0core_glBindTexture(gl.funcs, C.GLenum(target), C.GLuint(texture))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glTexSubImage2D.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glTexSubImage2D.xml
 func (gl *GL) TexSubImage2D(target glbase.Enum, level, xoffset, yoffset, width, height int, format, gltype glbase.Enum, pixels interface{}) {
 	var pixels_ptr unsafe.Pointer
 	var pixels_v = reflect.ValueOf(pixels)
@@ -378,7 +376,7 @@ func (gl *GL) TexSubImage2D(target glbase.Enum, level, xoffset, yoffset, width, 
 	C.gl4_0core_glTexSubImage2D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLint(yoffset), C.GLsizei(width), C.GLsizei(height), C.GLenum(format), C.GLenum(gltype), pixels_ptr)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glTexSubImage1D.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glTexSubImage1D.xml
 func (gl *GL) TexSubImage1D(target glbase.Enum, level, xoffset, width int, format, gltype glbase.Enum, pixels interface{}) {
 	var pixels_ptr unsafe.Pointer
 	var pixels_v = reflect.ValueOf(pixels)
@@ -391,32 +389,32 @@ func (gl *GL) TexSubImage1D(target glbase.Enum, level, xoffset, width int, forma
 	C.gl4_0core_glTexSubImage1D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLsizei(width), C.GLenum(format), C.GLenum(gltype), pixels_ptr)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glCopyTexSubImage2D.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glCopyTexSubImage2D.xml
 func (gl *GL) CopyTexSubImage2D(target glbase.Enum, level, xoffset, yoffset, x, y, width, height int) {
 	C.gl4_0core_glCopyTexSubImage2D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLint(yoffset), C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glCopyTexSubImage1D.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glCopyTexSubImage1D.xml
 func (gl *GL) CopyTexSubImage1D(target glbase.Enum, level, xoffset, x, y, width int) {
 	C.gl4_0core_glCopyTexSubImage1D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLint(x), C.GLint(y), C.GLsizei(width))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glCopyTexImage2D.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glCopyTexImage2D.xml
 func (gl *GL) CopyTexImage2D(target glbase.Enum, level int, internalFormat glbase.Enum, x, y, width, height, border int) {
 	C.gl4_0core_glCopyTexImage2D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLenum(internalFormat), C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height), C.GLint(border))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glCopyTexImage1D.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glCopyTexImage1D.xml
 func (gl *GL) CopyTexImage1D(target glbase.Enum, level int, internalFormat glbase.Enum, x, y, width, border int) {
 	C.gl4_0core_glCopyTexImage1D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLenum(internalFormat), C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLint(border))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glPolygonOffset.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glPolygonOffset.xml
 func (gl *GL) PolygonOffset(factor, units float32) {
 	C.gl4_0core_glPolygonOffset(gl.funcs, C.GLfloat(factor), C.GLfloat(units))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDrawElements.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDrawElements.xml
 func (gl *GL) DrawElements(mode glbase.Enum, count int, gltype glbase.Enum, indices interface{}) {
 	var indices_ptr unsafe.Pointer
 	var indices_v = reflect.ValueOf(indices)
@@ -429,17 +427,17 @@ func (gl *GL) DrawElements(mode glbase.Enum, count int, gltype glbase.Enum, indi
 	C.gl4_0core_glDrawElements(gl.funcs, C.GLenum(mode), C.GLsizei(count), C.GLenum(gltype), indices_ptr)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDrawArrays.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDrawArrays.xml
 func (gl *GL) DrawArrays(mode glbase.Enum, first, count int) {
 	C.gl4_0core_glDrawArrays(gl.funcs, C.GLenum(mode), C.GLint(first), C.GLsizei(count))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glCopyTexSubImage3D.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glCopyTexSubImage3D.xml
 func (gl *GL) CopyTexSubImage3D(target glbase.Enum, level, xoffset, yoffset int, zoffset int32, x, y, width, height int) {
 	C.gl4_0core_glCopyTexSubImage3D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLint(yoffset), C.GLint(zoffset), C.GLint(x), C.GLint(y), C.GLsizei(width), C.GLsizei(height))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glTexSubImage3D.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glTexSubImage3D.xml
 func (gl *GL) TexSubImage3D(target glbase.Enum, level, xoffset, yoffset int, zoffset int32, width, height int, depth int32, format, gltype glbase.Enum, pixels interface{}) {
 	var pixels_ptr unsafe.Pointer
 	var pixels_v = reflect.ValueOf(pixels)
@@ -452,7 +450,7 @@ func (gl *GL) TexSubImage3D(target glbase.Enum, level, xoffset, yoffset int, zof
 	C.gl4_0core_glTexSubImage3D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLint(yoffset), C.GLint(zoffset), C.GLsizei(width), C.GLsizei(height), C.GLsizei(depth), C.GLenum(format), C.GLenum(gltype), pixels_ptr)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glTexImage3D.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glTexImage3D.xml
 func (gl *GL) TexImage3D(target glbase.Enum, level int, internalFormat int32, width, height int, depth int32, border int, format, gltype glbase.Enum, pixels interface{}) {
 	var pixels_ptr unsafe.Pointer
 	var pixels_v = reflect.ValueOf(pixels)
@@ -465,7 +463,7 @@ func (gl *GL) TexImage3D(target glbase.Enum, level int, internalFormat int32, wi
 	C.gl4_0core_glTexImage3D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(internalFormat), C.GLsizei(width), C.GLsizei(height), C.GLsizei(depth), C.GLint(border), C.GLenum(format), C.GLenum(gltype), pixels_ptr)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDrawRangeElements.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDrawRangeElements.xml
 func (gl *GL) DrawRangeElements(mode glbase.Enum, start, end uint32, count int, gltype glbase.Enum, indices interface{}) {
 	var indices_ptr unsafe.Pointer
 	var indices_v = reflect.ValueOf(indices)
@@ -478,17 +476,17 @@ func (gl *GL) DrawRangeElements(mode glbase.Enum, start, end uint32, count int, 
 	C.gl4_0core_glDrawRangeElements(gl.funcs, C.GLenum(mode), C.GLuint(start), C.GLuint(end), C.GLsizei(count), C.GLenum(gltype), indices_ptr)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBlendEquation.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glBlendEquation.xml
 func (gl *GL) BlendEquation(mode glbase.Enum) {
 	C.gl4_0core_glBlendEquation(gl.funcs, C.GLenum(mode))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBlendColor.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glBlendColor.xml
 func (gl *GL) BlendColor(red, green, blue, alpha float32) {
 	C.gl4_0core_glBlendColor(gl.funcs, C.GLfloat(red), C.GLfloat(green), C.GLfloat(blue), C.GLfloat(alpha))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetCompressedTexImage.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetCompressedTexImage.xml
 func (gl *GL) GetCompressedTexImage(target glbase.Enum, level int, img interface{}) {
 	var img_ptr unsafe.Pointer
 	var img_v = reflect.ValueOf(img)
@@ -501,7 +499,7 @@ func (gl *GL) GetCompressedTexImage(target glbase.Enum, level int, img interface
 	C.gl4_0core_glGetCompressedTexImage(gl.funcs, C.GLenum(target), C.GLint(level), img_ptr)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glCompressedTexSubImage1D.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glCompressedTexSubImage1D.xml
 func (gl *GL) CompressedTexSubImage1D(target glbase.Enum, level, xoffset, width int, format glbase.Enum, imageSize int, data interface{}) {
 	var data_ptr unsafe.Pointer
 	var data_v = reflect.ValueOf(data)
@@ -514,7 +512,7 @@ func (gl *GL) CompressedTexSubImage1D(target glbase.Enum, level, xoffset, width 
 	C.gl4_0core_glCompressedTexSubImage1D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLsizei(width), C.GLenum(format), C.GLsizei(imageSize), data_ptr)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glCompressedTexSubImage2D.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glCompressedTexSubImage2D.xml
 func (gl *GL) CompressedTexSubImage2D(target glbase.Enum, level, xoffset, yoffset, width, height int, format glbase.Enum, imageSize int, data interface{}) {
 	var data_ptr unsafe.Pointer
 	var data_v = reflect.ValueOf(data)
@@ -527,7 +525,7 @@ func (gl *GL) CompressedTexSubImage2D(target glbase.Enum, level, xoffset, yoffse
 	C.gl4_0core_glCompressedTexSubImage2D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLint(yoffset), C.GLsizei(width), C.GLsizei(height), C.GLenum(format), C.GLsizei(imageSize), data_ptr)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glCompressedTexSubImage3D.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glCompressedTexSubImage3D.xml
 func (gl *GL) CompressedTexSubImage3D(target glbase.Enum, level, xoffset, yoffset int, zoffset int32, width, height int, depth int32, format glbase.Enum, imageSize int, data interface{}) {
 	var data_ptr unsafe.Pointer
 	var data_v = reflect.ValueOf(data)
@@ -540,7 +538,7 @@ func (gl *GL) CompressedTexSubImage3D(target glbase.Enum, level, xoffset, yoffse
 	C.gl4_0core_glCompressedTexSubImage3D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLint(xoffset), C.GLint(yoffset), C.GLint(zoffset), C.GLsizei(width), C.GLsizei(height), C.GLsizei(depth), C.GLenum(format), C.GLsizei(imageSize), data_ptr)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glCompressedTexImage1D.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glCompressedTexImage1D.xml
 func (gl *GL) CompressedTexImage1D(target glbase.Enum, level int, internalFormat glbase.Enum, width, border, imageSize int, data interface{}) {
 	var data_ptr unsafe.Pointer
 	var data_v = reflect.ValueOf(data)
@@ -553,7 +551,7 @@ func (gl *GL) CompressedTexImage1D(target glbase.Enum, level int, internalFormat
 	C.gl4_0core_glCompressedTexImage1D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLenum(internalFormat), C.GLsizei(width), C.GLint(border), C.GLsizei(imageSize), data_ptr)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glCompressedTexImage2D.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glCompressedTexImage2D.xml
 func (gl *GL) CompressedTexImage2D(target glbase.Enum, level int, internalFormat glbase.Enum, width, height, border, imageSize int, data interface{}) {
 	var data_ptr unsafe.Pointer
 	var data_v = reflect.ValueOf(data)
@@ -566,7 +564,7 @@ func (gl *GL) CompressedTexImage2D(target glbase.Enum, level int, internalFormat
 	C.gl4_0core_glCompressedTexImage2D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLenum(internalFormat), C.GLsizei(width), C.GLsizei(height), C.GLint(border), C.GLsizei(imageSize), data_ptr)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glCompressedTexImage3D.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glCompressedTexImage3D.xml
 func (gl *GL) CompressedTexImage3D(target glbase.Enum, level int, internalFormat glbase.Enum, width, height int, depth int32, border, imageSize int, data interface{}) {
 	var data_ptr unsafe.Pointer
 	var data_v = reflect.ValueOf(data)
@@ -579,58 +577,58 @@ func (gl *GL) CompressedTexImage3D(target glbase.Enum, level int, internalFormat
 	C.gl4_0core_glCompressedTexImage3D(gl.funcs, C.GLenum(target), C.GLint(level), C.GLenum(internalFormat), C.GLsizei(width), C.GLsizei(height), C.GLsizei(depth), C.GLint(border), C.GLsizei(imageSize), data_ptr)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glSampleCoverage.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glSampleCoverage.xml
 func (gl *GL) SampleCoverage(value float32, invert bool) {
 	C.gl4_0core_glSampleCoverage(gl.funcs, C.GLfloat(value), *(*C.GLboolean)(unsafe.Pointer(&invert)))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glActiveTexture.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glActiveTexture.xml
 func (gl *GL) ActiveTexture(texture glbase.Enum) {
 	C.gl4_0core_glActiveTexture(gl.funcs, C.GLenum(texture))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glPointParameteriv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glPointParameteriv.xml
 func (gl *GL) PointParameteriv(pname glbase.Enum, params []int32) {
 	C.gl4_0core_glPointParameteriv(gl.funcs, C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glPointParameteri.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glPointParameteri.xml
 func (gl *GL) PointParameteri(pname glbase.Enum, param int32) {
 	C.gl4_0core_glPointParameteri(gl.funcs, C.GLenum(pname), C.GLint(param))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glPointParameterfv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glPointParameterfv.xml
 func (gl *GL) PointParameterfv(pname glbase.Enum, params []float32) {
 	C.gl4_0core_glPointParameterfv(gl.funcs, C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glPointParameterf.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glPointParameterf.xml
 func (gl *GL) PointParameterf(pname glbase.Enum, param float32) {
 	C.gl4_0core_glPointParameterf(gl.funcs, C.GLenum(pname), C.GLfloat(param))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glMultiDrawArrays.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glMultiDrawArrays.xml
 func (gl *GL) MultiDrawArrays(mode glbase.Enum, first, count []int, drawcount int32) {
 	C.gl4_0core_glMultiDrawArrays(gl.funcs, C.GLenum(mode), (*C.GLint)(unsafe.Pointer(&first[0])), (*C.GLsizei)(unsafe.Pointer(&count[0])), C.GLsizei(drawcount))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBlendFuncSeparate.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glBlendFuncSeparate.xml
 func (gl *GL) BlendFuncSeparate(sfactorRGB, dfactorRGB, sfactorAlpha, dfactorAlpha glbase.Enum) {
 	C.gl4_0core_glBlendFuncSeparate(gl.funcs, C.GLenum(sfactorRGB), C.GLenum(dfactorRGB), C.GLenum(sfactorAlpha), C.GLenum(dfactorAlpha))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetBufferParameteriv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetBufferParameteriv.xml
 func (gl *GL) GetBufferParameteriv(target, pname glbase.Enum, params []int32) {
 	C.gl4_0core_glGetBufferParameteriv(gl.funcs, C.GLenum(target), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUnmapBuffer.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glUnmapBuffer.xml
 func (gl *GL) UnmapBuffer(target glbase.Enum) bool {
 	glresult := C.gl4_0core_glUnmapBuffer(gl.funcs, C.GLenum(target))
 	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetBufferSubData.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetBufferSubData.xml
 func (gl *GL) GetBufferSubData(target glbase.Enum, offset, size int, data interface{}) {
 	var data_ptr unsafe.Pointer
 	var data_v = reflect.ValueOf(data)
@@ -643,7 +641,7 @@ func (gl *GL) GetBufferSubData(target glbase.Enum, offset, size int, data interf
 	C.gl4_0core_glGetBufferSubData(gl.funcs, C.GLenum(target), C.GLintptr(offset), C.GLsizeiptr(size), data_ptr)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBufferSubData.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glBufferSubData.xml
 func (gl *GL) BufferSubData(target glbase.Enum, offset, size int, data interface{}) {
 	var data_ptr unsafe.Pointer
 	var data_v = reflect.ValueOf(data)
@@ -720,8 +718,6 @@ func (gl *GL) BufferSubData(target glbase.Enum, offset, size int, data interface
 // GL.INVALID_OPERATION is generated if the reserved buffer object name 0 is
 // bound to target.  GL.OUT_OF_MEMORY is generated if the GL is unable to
 // create a data store with the specified size.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBufferData.xml
 func (gl *GL) BufferData(target glbase.Enum, size int, data interface{}, usage glbase.Enum) {
 	var data_ptr unsafe.Pointer
 	var data_v = reflect.ValueOf(data)
@@ -737,7 +733,7 @@ func (gl *GL) BufferData(target glbase.Enum, size int, data interface{}, usage g
 	C.gl4_0core_glBufferData(gl.funcs, C.GLenum(target), C.GLsizeiptr(size), data_ptr, C.GLenum(usage))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glIsBuffer.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glIsBuffer.xml
 func (gl *GL) IsBuffer(buffer glbase.Buffer) bool {
 	glresult := C.gl4_0core_glIsBuffer(gl.funcs, C.GLuint(buffer))
 	return *(*bool)(unsafe.Pointer(&glresult))
@@ -759,15 +755,13 @@ func (gl *GL) IsBuffer(buffer glbase.Buffer) bool {
 // and the corresponding execution of End.
 //
 // GenBuffers is available in GL version 1.5 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGenBuffers.xml
 func (gl *GL) GenBuffers(n int) []glbase.Buffer {
 	buffers := make([]glbase.Buffer, n)
 	C.gl4_0core_glGenBuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&buffers[0])))
 	return buffers
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteBuffers.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDeleteBuffers.xml
 func (gl *GL) DeleteBuffers(n int, buffers []uint32) {
 	C.gl4_0core_glDeleteBuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&buffers[0])))
 }
@@ -851,49 +845,47 @@ func (gl *GL) DeleteBuffers(n int, buffers []uint32) {
 // between the execution of Begin and the corresponding execution of End.
 //
 // BindBuffer is available in GL version 1.5 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBindBuffer.xml
 func (gl *GL) BindBuffer(target glbase.Enum, buffer glbase.Buffer) {
 	C.gl4_0core_glBindBuffer(gl.funcs, C.GLenum(target), C.GLuint(buffer))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetQueryObjectuiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetQueryObjectuiv.xml
 func (gl *GL) GetQueryObjectuiv(id uint32, pname glbase.Enum, params []uint32) {
 	C.gl4_0core_glGetQueryObjectuiv(gl.funcs, C.GLuint(id), C.GLenum(pname), (*C.GLuint)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetQueryObjectiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetQueryObjectiv.xml
 func (gl *GL) GetQueryObjectiv(id uint32, pname glbase.Enum, params []int32) {
 	C.gl4_0core_glGetQueryObjectiv(gl.funcs, C.GLuint(id), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetQueryiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetQueryiv.xml
 func (gl *GL) GetQueryiv(target, pname glbase.Enum, params []int32) {
 	C.gl4_0core_glGetQueryiv(gl.funcs, C.GLenum(target), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glEndQuery.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glEndQuery.xml
 func (gl *GL) EndQuery(target glbase.Enum) {
 	C.gl4_0core_glEndQuery(gl.funcs, C.GLenum(target))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBeginQuery.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glBeginQuery.xml
 func (gl *GL) BeginQuery(target glbase.Enum, id uint32) {
 	C.gl4_0core_glBeginQuery(gl.funcs, C.GLenum(target), C.GLuint(id))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glIsQuery.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glIsQuery.xml
 func (gl *GL) IsQuery(id uint32) bool {
 	glresult := C.gl4_0core_glIsQuery(gl.funcs, C.GLuint(id))
 	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteQueries.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDeleteQueries.xml
 func (gl *GL) DeleteQueries(n int, ids []uint32) {
 	C.gl4_0core_glDeleteQueries(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&ids[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGenQueries.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGenQueries.xml
 func (gl *GL) GenQueries(n int, ids []uint32) {
 	C.gl4_0core_glGenQueries(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&ids[0])))
 }
@@ -927,15 +919,13 @@ func (gl *GL) GenQueries(n int, ids []uint32) {
 // GL.INVALID_VALUE is generated if index is greater than or equal to
 // GL.MAX_VERTEX_ATTRIBS. GL.INVALID_VALUE is generated if size is not 1, 2,
 // 3, or 4. GL.INVALID_VALUE is generated if stride is negative.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribPointer.xml
 func (gl *GL) VertexAttribPointer(index glbase.Attrib, size int, gltype glbase.Enum, normalized bool, stride, offset int) {
 	// What an awkward API. Just add a new function next time, please.
 	offset_ptr := unsafe.Pointer(uintptr(offset))
 	C.gl4_0core_glVertexAttribPointer(gl.funcs, C.GLuint(index), C.GLint(size), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), C.GLsizei(stride), offset_ptr)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glValidateProgram.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glValidateProgram.xml
 func (gl *GL) ValidateProgram(program glbase.Program) {
 	C.gl4_0core_glValidateProgram(gl.funcs, C.GLuint(program))
 }
@@ -943,8 +933,8 @@ func (gl *GL) ValidateProgram(program glbase.Program) {
 // UniformMatrix4fv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// UniformMatrix4fv operates on the program object that was made part
-// of current state by calling UseProgram.
+// UniformMatrix4fv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions UniformMatrix{2|3|4|2x3|3x2|2x4|4x2|3x4|4x3}fv are used to
 // modify a matrix or an array of matrices. The numbers in the function name
@@ -966,8 +956,6 @@ func (gl *GL) ValidateProgram(program glbase.Program) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix4fv.xml
 func (gl *GL) UniformMatrix4fv(location glbase.Uniform, transpose bool, value []float32) {
 	if len(value) == 0 {
 		return
@@ -982,8 +970,8 @@ func (gl *GL) UniformMatrix4fv(location glbase.Uniform, transpose bool, value []
 // UniformMatrix3fv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// UniformMatrix3fv operates on the program object that was made part
-// of current state by calling UseProgram.
+// UniformMatrix3fv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions UniformMatrix{2|3|4|2x3|3x2|2x4|4x2|3x4|4x3}fv are used to
 // modify a matrix or an array of matrices. The numbers in the function name
@@ -1005,8 +993,6 @@ func (gl *GL) UniformMatrix4fv(location glbase.Uniform, transpose bool, value []
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix3fv.xml
 func (gl *GL) UniformMatrix3fv(location glbase.Uniform, transpose bool, value []float32) {
 	if len(value) == 0 {
 		return
@@ -1021,8 +1007,8 @@ func (gl *GL) UniformMatrix3fv(location glbase.Uniform, transpose bool, value []
 // UniformMatrix2fv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// UniformMatrix2fv operates on the program object that was made part
-// of current state by calling UseProgram.
+// UniformMatrix2fv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions UniformMatrix{2|3|4|2x3|3x2|2x4|4x2|3x4|4x3}fv are used to
 // modify a matrix or an array of matrices. The numbers in the function name
@@ -1044,8 +1030,6 @@ func (gl *GL) UniformMatrix3fv(location glbase.Uniform, transpose bool, value []
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix2fv.xml
 func (gl *GL) UniformMatrix2fv(location glbase.Uniform, transpose bool, value []float32) {
 	if len(value) == 0 {
 		return
@@ -1060,8 +1044,8 @@ func (gl *GL) UniformMatrix2fv(location glbase.Uniform, transpose bool, value []
 // Uniform4iv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// Uniform4iv operates on the program object that was made part
-// of current state by calling UseProgram.
+// Uniform4iv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
 // uniform variable or a uniform variable array. These functions receive a
@@ -1089,8 +1073,6 @@ func (gl *GL) UniformMatrix2fv(location glbase.Uniform, transpose bool, value []
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform4iv.xml
 func (gl *GL) Uniform4iv(location glbase.Uniform, value []int32) {
 	if len(value) == 0 {
 		return
@@ -1105,8 +1087,8 @@ func (gl *GL) Uniform4iv(location glbase.Uniform, value []int32) {
 // Uniform3iv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// Uniform3iv operates on the program object that was made part
-// of current state by calling UseProgram.
+// Uniform3iv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
 // uniform variable or a uniform variable array. These functions receive a
@@ -1134,8 +1116,6 @@ func (gl *GL) Uniform4iv(location glbase.Uniform, value []int32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform3iv.xml
 func (gl *GL) Uniform3iv(location glbase.Uniform, value []int32) {
 	if len(value) == 0 {
 		return
@@ -1150,8 +1130,8 @@ func (gl *GL) Uniform3iv(location glbase.Uniform, value []int32) {
 // Uniform2iv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// Uniform2iv operates on the program object that was made part
-// of current state by calling UseProgram.
+// Uniform2iv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
 // uniform variable or a uniform variable array. These functions receive a
@@ -1179,8 +1159,6 @@ func (gl *GL) Uniform3iv(location glbase.Uniform, value []int32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform2iv.xml
 func (gl *GL) Uniform2iv(location glbase.Uniform, value []int32) {
 	if len(value) == 0 {
 		return
@@ -1195,8 +1173,8 @@ func (gl *GL) Uniform2iv(location glbase.Uniform, value []int32) {
 // Uniform1iv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// Uniform1iv operates on the program object that was made part
-// of current state by calling UseProgram.
+// Uniform1iv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
 // uniform variable or a uniform variable array. These functions receive a
@@ -1224,8 +1202,6 @@ func (gl *GL) Uniform2iv(location glbase.Uniform, value []int32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform1iv.xml
 func (gl *GL) Uniform1iv(location glbase.Uniform, value []int32) {
 	if len(value) == 0 {
 		return
@@ -1237,8 +1213,8 @@ func (gl *GL) Uniform1iv(location glbase.Uniform, value []int32) {
 // Uniform4fv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// Uniform4fv operates on the program object that was made part
-// of current state by calling UseProgram.
+// Uniform4fv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
 // uniform variable or a uniform variable array. These functions receive a
@@ -1266,8 +1242,6 @@ func (gl *GL) Uniform1iv(location glbase.Uniform, value []int32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform4fv.xml
 func (gl *GL) Uniform4fv(location glbase.Uniform, value []float32) {
 	if len(value) == 0 {
 		return
@@ -1282,8 +1256,8 @@ func (gl *GL) Uniform4fv(location glbase.Uniform, value []float32) {
 // Uniform3fv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// Uniform3fv operates on the program object that was made part
-// of current state by calling UseProgram.
+// Uniform3fv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
 // uniform variable or a uniform variable array. These functions receive a
@@ -1311,8 +1285,6 @@ func (gl *GL) Uniform4fv(location glbase.Uniform, value []float32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform3fv.xml
 func (gl *GL) Uniform3fv(location glbase.Uniform, value []float32) {
 	if len(value) == 0 {
 		return
@@ -1327,8 +1299,8 @@ func (gl *GL) Uniform3fv(location glbase.Uniform, value []float32) {
 // Uniform2fv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// Uniform2fv operates on the program object that was made part
-// of current state by calling UseProgram.
+// Uniform2fv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
 // uniform variable or a uniform variable array. These functions receive a
@@ -1356,8 +1328,6 @@ func (gl *GL) Uniform3fv(location glbase.Uniform, value []float32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform2fv.xml
 func (gl *GL) Uniform2fv(location glbase.Uniform, value []float32) {
 	if len(value) == 0 {
 		return
@@ -1372,8 +1342,8 @@ func (gl *GL) Uniform2fv(location glbase.Uniform, value []float32) {
 // Uniform1fv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// Uniform1fv operates on the program object that was made part
-// of current state by calling UseProgram.
+// Uniform1fv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
 // uniform variable or a uniform variable array. These functions receive a
@@ -1401,8 +1371,6 @@ func (gl *GL) Uniform2fv(location glbase.Uniform, value []float32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform1fv.xml
 func (gl *GL) Uniform1fv(location glbase.Uniform, value []float32) {
 	if len(value) == 0 {
 		return
@@ -1414,8 +1382,8 @@ func (gl *GL) Uniform1fv(location glbase.Uniform, value []float32) {
 // Uniform4i modifies the value of a single uniform variable.
 // The location of the uniform variable to be modified is specified by
 // location, which should be a value returned by GetUniformLocation.
-// Uniform4i operates on the program object that was made part of current
-// state by calling UseProgram.
+// Uniform4i operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
 // uniform variable specified by location using the values passed as
@@ -1446,8 +1414,6 @@ func (gl *GL) Uniform1fv(location glbase.Uniform, value []float32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform4i.xml
 func (gl *GL) Uniform4i(location glbase.Uniform, v0, v1, v2, v3 int32) {
 	C.gl4_0core_glUniform4i(gl.funcs, C.GLint(location), C.GLint(v0), C.GLint(v1), C.GLint(v2), C.GLint(v3))
 }
@@ -1455,8 +1421,8 @@ func (gl *GL) Uniform4i(location glbase.Uniform, v0, v1, v2, v3 int32) {
 // Uniform3i modifies the value of a single uniform variable.
 // The location of the uniform variable to be modified is specified by
 // location, which should be a value returned by GetUniformLocation.
-// Uniform3i operates on the program object that was made part of current
-// state by calling UseProgram.
+// Uniform3i operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
 // uniform variable specified by location using the values passed as
@@ -1487,8 +1453,6 @@ func (gl *GL) Uniform4i(location glbase.Uniform, v0, v1, v2, v3 int32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform3i.xml
 func (gl *GL) Uniform3i(location glbase.Uniform, v0, v1, v2 int32) {
 	C.gl4_0core_glUniform3i(gl.funcs, C.GLint(location), C.GLint(v0), C.GLint(v1), C.GLint(v2))
 }
@@ -1496,8 +1460,8 @@ func (gl *GL) Uniform3i(location glbase.Uniform, v0, v1, v2 int32) {
 // Uniform2i modifies the value of a single uniform variable.
 // The location of the uniform variable to be modified is specified by
 // location, which should be a value returned by GetUniformLocation.
-// Uniform2i operates on the program object that was made part of current
-// state by calling UseProgram.
+// Uniform2i operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
 // uniform variable specified by location using the values passed as
@@ -1528,8 +1492,6 @@ func (gl *GL) Uniform3i(location glbase.Uniform, v0, v1, v2 int32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform2i.xml
 func (gl *GL) Uniform2i(location glbase.Uniform, v0, v1 int32) {
 	C.gl4_0core_glUniform2i(gl.funcs, C.GLint(location), C.GLint(v0), C.GLint(v1))
 }
@@ -1537,8 +1499,8 @@ func (gl *GL) Uniform2i(location glbase.Uniform, v0, v1 int32) {
 // Uniform1i modifies the value of a single uniform variable.
 // The location of the uniform variable to be modified is specified by
 // location, which should be a value returned by GetUniformLocation.
-// Uniform1i operates on the program object that was made part of current
-// state by calling UseProgram.
+// Uniform1i operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
 // uniform variable specified by location using the values passed as
@@ -1569,8 +1531,6 @@ func (gl *GL) Uniform2i(location glbase.Uniform, v0, v1 int32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform1i.xml
 func (gl *GL) Uniform1i(location glbase.Uniform, v0 int32) {
 	C.gl4_0core_glUniform1i(gl.funcs, C.GLint(location), C.GLint(v0))
 }
@@ -1578,8 +1538,8 @@ func (gl *GL) Uniform1i(location glbase.Uniform, v0 int32) {
 // Uniform4f modifies the value of a single uniform variable.
 // The location of the uniform variable to be modified is specified by
 // location, which should be a value returned by GetUniformLocation.
-// Uniform4f operates on the program object that was made part of current
-// state by calling UseProgram.
+// Uniform4f operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
 // uniform variable specified by location using the values passed as
@@ -1610,8 +1570,6 @@ func (gl *GL) Uniform1i(location glbase.Uniform, v0 int32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform4f.xml
 func (gl *GL) Uniform4f(location glbase.Uniform, v0, v1, v2, v3 float32) {
 	C.gl4_0core_glUniform4f(gl.funcs, C.GLint(location), C.GLfloat(v0), C.GLfloat(v1), C.GLfloat(v2), C.GLfloat(v3))
 }
@@ -1619,8 +1577,8 @@ func (gl *GL) Uniform4f(location glbase.Uniform, v0, v1, v2, v3 float32) {
 // Uniform3f modifies the value of a single uniform variable.
 // The location of the uniform variable to be modified is specified by
 // location, which should be a value returned by GetUniformLocation.
-// Uniform3f operates on the program object that was made part of current
-// state by calling UseProgram.
+// Uniform3f operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
 // uniform variable specified by location using the values passed as
@@ -1651,8 +1609,6 @@ func (gl *GL) Uniform4f(location glbase.Uniform, v0, v1, v2, v3 float32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform3f.xml
 func (gl *GL) Uniform3f(location glbase.Uniform, v0, v1, v2 float32) {
 	C.gl4_0core_glUniform3f(gl.funcs, C.GLint(location), C.GLfloat(v0), C.GLfloat(v1), C.GLfloat(v2))
 }
@@ -1660,8 +1616,8 @@ func (gl *GL) Uniform3f(location glbase.Uniform, v0, v1, v2 float32) {
 // Uniform2f modifies the value of a single uniform variable.
 // The location of the uniform variable to be modified is specified by
 // location, which should be a value returned by GetUniformLocation.
-// Uniform2f operates on the program object that was made part of current
-// state by calling UseProgram.
+// Uniform2f operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
 // uniform variable specified by location using the values passed as
@@ -1692,8 +1648,6 @@ func (gl *GL) Uniform3f(location glbase.Uniform, v0, v1, v2 float32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform2f.xml
 func (gl *GL) Uniform2f(location glbase.Uniform, v0, v1 float32) {
 	C.gl4_0core_glUniform2f(gl.funcs, C.GLint(location), C.GLfloat(v0), C.GLfloat(v1))
 }
@@ -1701,8 +1655,8 @@ func (gl *GL) Uniform2f(location glbase.Uniform, v0, v1 float32) {
 // Uniform1f modifies the value of a single uniform variable.
 // The location of the uniform variable to be modified is specified by
 // location, which should be a value returned by GetUniformLocation.
-// Uniform1f operates on the program object that was made part of current
-// state by calling UseProgram.
+// Uniform1f operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
 // uniform variable specified by location using the values passed as
@@ -1733,8 +1687,6 @@ func (gl *GL) Uniform2f(location glbase.Uniform, v0, v1 float32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform1f.xml
 func (gl *GL) Uniform1f(location glbase.Uniform, v0 float32) {
 	C.gl4_0core_glUniform1f(gl.funcs, C.GLint(location), C.GLfloat(v0))
 }
@@ -1838,8 +1790,6 @@ func (gl *GL) Uniform1f(location glbase.Uniform, v0 float32) {
 // corresponding execution of End.
 //
 // UseProgram is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUseProgram.xml
 func (gl *GL) UseProgram(program glbase.Program) {
 	C.gl4_0core_glUseProgram(gl.funcs, C.GLuint(program))
 }
@@ -1854,8 +1804,6 @@ func (gl *GL) UseProgram(program glbase.Program) {
 // execution of Begin and the corresponding execution of End.
 //
 // ShaderSource is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glShaderSource.xml
 func (gl *GL) ShaderSource(shader glbase.Shader, source ...string) {
 	count := len(source)
 	length := make([]int32, count)
@@ -1967,19 +1915,17 @@ func (gl *GL) ShaderSource(shader glbase.Shader, source ...string) {
 // between the execution of Begin and the corresponding execution of End.
 //
 // LinkProgram is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glLinkProgram.xml
 func (gl *GL) LinkProgram(program glbase.Program) {
 	C.gl4_0core_glLinkProgram(gl.funcs, C.GLuint(program))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glIsShader.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glIsShader.xml
 func (gl *GL) IsShader(shader glbase.Shader) bool {
 	glresult := C.gl4_0core_glIsShader(gl.funcs, C.GLuint(shader))
 	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glIsProgram.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glIsProgram.xml
 func (gl *GL) IsProgram(program glbase.Program) bool {
 	glresult := C.gl4_0core_glIsProgram(gl.funcs, C.GLuint(program))
 	return *(*bool)(unsafe.Pointer(&glresult))
@@ -2043,8 +1989,6 @@ func (gl *GL) IsProgram(program glbase.Program) bool {
 // is GL.CURRENT_VERTEX_ATTRIB.
 //
 // GetVertexAttribiv is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetVertexAttribiv.xml
 func (gl *GL) GetVertexAttribiv(index glbase.Attrib, pname glbase.Enum, params []int32) {
 	var params_c [4]int32
 	C.gl4_0core_glGetVertexAttribiv(gl.funcs, C.GLuint(index), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params_c[0])))
@@ -2109,8 +2053,6 @@ func (gl *GL) GetVertexAttribiv(index glbase.Attrib, pname glbase.Enum, params [
 // is GL.CURRENT_VERTEX_ATTRIB.
 //
 // GetVertexAttribfv is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetVertexAttribfv.xml
 func (gl *GL) GetVertexAttribfv(index glbase.Attrib, pname glbase.Enum, params []float32) {
 	var params_c [4]float32
 	C.gl4_0core_glGetVertexAttribfv(gl.funcs, C.GLuint(index), C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params_c[0])))
@@ -2175,8 +2117,6 @@ func (gl *GL) GetVertexAttribfv(index glbase.Attrib, pname glbase.Enum, params [
 // is GL.CURRENT_VERTEX_ATTRIB.
 //
 // GetVertexAttribdv is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetVertexAttribdv.xml
 func (gl *GL) GetVertexAttribdv(index glbase.Attrib, pname glbase.Enum, params []float64) {
 	var params_c [4]float64
 	C.gl4_0core_glGetVertexAttribdv(gl.funcs, C.GLuint(index), C.GLenum(pname), (*C.GLdouble)(unsafe.Pointer(&params_c[0])))
@@ -2214,8 +2154,6 @@ func (gl *GL) GetVertexAttribdv(index glbase.Attrib, pname glbase.Enum, params [
 // End.
 //
 // GetUniformiv is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetUniformiv.xml
 func (gl *GL) GetUniformiv(program glbase.Program, location glbase.Uniform, params []int32) {
 	var params_c [4]int32
 	C.gl4_0core_glGetUniformiv(gl.funcs, C.GLuint(program), C.GLint(location), (*C.GLint)(unsafe.Pointer(&params_c[0])))
@@ -2253,8 +2191,6 @@ func (gl *GL) GetUniformiv(program glbase.Program, location glbase.Uniform, para
 // End.
 //
 // GetUniformfv is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetUniformfv.xml
 func (gl *GL) GetUniformfv(program glbase.Program, location glbase.Uniform, params []float32) {
 	var params_c [4]float32
 	C.gl4_0core_glGetUniformfv(gl.funcs, C.GLuint(program), C.GLint(location), (*C.GLfloat)(unsafe.Pointer(&params_c[0])))
@@ -2296,8 +2232,6 @@ func (gl *GL) GetUniformfv(program glbase.Program, location glbase.Uniform, para
 // between the execution of Begin and the corresponding execution of End.
 //
 // GetUniformLocation is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetUniformLocation.xml
 func (gl *GL) GetUniformLocation(program glbase.Program, name string) glbase.Uniform {
 	name_cstr := C.CString(name)
 	glresult := C.gl4_0core_glGetUniformLocation(gl.funcs, C.GLuint(program), (*C.GLchar)(name_cstr))
@@ -2305,7 +2239,7 @@ func (gl *GL) GetUniformLocation(program glbase.Program, name string) glbase.Uni
 	return glbase.Uniform(glresult)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetShaderSource.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetShaderSource.xml
 func (gl *GL) GetShaderSource(shader glbase.Shader, bufSize int32, length []int32, source []byte) {
 	C.gl4_0core_glGetShaderSource(gl.funcs, C.GLuint(shader), C.GLsizei(bufSize), (*C.GLsizei)(unsafe.Pointer(&length[0])), (*C.GLchar)(unsafe.Pointer(&source[0])))
 }
@@ -2334,8 +2268,6 @@ func (gl *GL) GetShaderSource(shader glbase.Shader, bufSize int32, length []int3
 // between the execution of Begin and the corresponding execution of End.
 //
 // GetShaderInfoLog is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetShaderInfoLog.xml
 func (gl *GL) GetShaderInfoLog(shader glbase.Shader) []byte {
 	var params [1]int32
 	var length int32
@@ -2381,18 +2313,16 @@ func (gl *GL) GetShaderInfoLog(shader glbase.Shader) []byte {
 // between the execution of Begin and the corresponding execution of End.
 //
 // GetShaderiv is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetShaderiv.xml
 func (gl *GL) GetShaderiv(shader glbase.Shader, pname glbase.Enum, params []int32) {
 	C.gl4_0core_glGetShaderiv(gl.funcs, C.GLuint(shader), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetProgramInfoLog.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetProgramInfoLog.xml
 func (gl *GL) GetProgramInfoLog(program glbase.Program, bufSize int32, length []int32, infoLog []byte) {
 	C.gl4_0core_glGetProgramInfoLog(gl.funcs, C.GLuint(program), C.GLsizei(bufSize), (*C.GLsizei)(unsafe.Pointer(&length[0])), (*C.GLchar)(unsafe.Pointer(&infoLog[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetProgramiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetProgramiv.xml
 func (gl *GL) GetProgramiv(program glbase.Program, pname glbase.Enum, params []int32) {
 	C.gl4_0core_glGetProgramiv(gl.funcs, C.GLuint(program), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
@@ -2424,8 +2354,6 @@ func (gl *GL) GetProgramiv(program glbase.Program, pname glbase.Enum, params []i
 // corresponding execution of End.
 //
 // GetAttribLocation is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetAttribLocation.xml
 func (gl *GL) GetAttribLocation(program glbase.Program, name string) glbase.Attrib {
 	name_cstr := C.CString(name)
 	glresult := C.gl4_0core_glGetAttribLocation(gl.funcs, C.GLuint(program), (*C.GLchar)(name_cstr))
@@ -2433,42 +2361,42 @@ func (gl *GL) GetAttribLocation(program glbase.Program, name string) glbase.Attr
 	return glbase.Attrib(glresult)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetAttachedShaders.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetAttachedShaders.xml
 func (gl *GL) GetAttachedShaders(program glbase.Program, maxCount int32, count []int, obj []uint32) {
 	C.gl4_0core_glGetAttachedShaders(gl.funcs, C.GLuint(program), C.GLsizei(maxCount), (*C.GLsizei)(unsafe.Pointer(&count[0])), (*C.GLuint)(unsafe.Pointer(&obj[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetActiveUniform.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetActiveUniform.xml
 func (gl *GL) GetActiveUniform(program glbase.Program, index uint32, bufSize int32, length []int32, size []int, gltype []glbase.Enum, name []byte) {
 	C.gl4_0core_glGetActiveUniform(gl.funcs, C.GLuint(program), C.GLuint(index), C.GLsizei(bufSize), (*C.GLsizei)(unsafe.Pointer(&length[0])), (*C.GLint)(unsafe.Pointer(&size[0])), (*C.GLenum)(unsafe.Pointer(&gltype[0])), (*C.GLchar)(unsafe.Pointer(&name[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetActiveAttrib.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetActiveAttrib.xml
 func (gl *GL) GetActiveAttrib(program glbase.Program, index glbase.Attrib, bufSize int32, length []int32, size []int, gltype []glbase.Enum, name []byte) {
 	C.gl4_0core_glGetActiveAttrib(gl.funcs, C.GLuint(program), C.GLuint(index), C.GLsizei(bufSize), (*C.GLsizei)(unsafe.Pointer(&length[0])), (*C.GLint)(unsafe.Pointer(&size[0])), (*C.GLenum)(unsafe.Pointer(&gltype[0])), (*C.GLchar)(unsafe.Pointer(&name[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glEnableVertexAttribArray.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glEnableVertexAttribArray.xml
 func (gl *GL) EnableVertexAttribArray(index glbase.Attrib) {
 	C.gl4_0core_glEnableVertexAttribArray(gl.funcs, C.GLuint(index))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDisableVertexAttribArray.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDisableVertexAttribArray.xml
 func (gl *GL) DisableVertexAttribArray(index glbase.Attrib) {
 	C.gl4_0core_glDisableVertexAttribArray(gl.funcs, C.GLuint(index))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDetachShader.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDetachShader.xml
 func (gl *GL) DetachShader(program glbase.Program, shader glbase.Shader) {
 	C.gl4_0core_glDetachShader(gl.funcs, C.GLuint(program), C.GLuint(shader))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteShader.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDeleteShader.xml
 func (gl *GL) DeleteShader(shader glbase.Shader) {
 	C.gl4_0core_glDeleteShader(gl.funcs, C.GLuint(shader))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteProgram.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDeleteProgram.xml
 func (gl *GL) DeleteProgram(program glbase.Program) {
 	C.gl4_0core_glDeleteProgram(gl.funcs, C.GLuint(program))
 }
@@ -2502,8 +2430,6 @@ func (gl *GL) DeleteProgram(program glbase.Program) {
 // execution of Begin and the corresponding execution of End.
 //
 // CreateShader is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glCreateShader.xml
 func (gl *GL) CreateShader(gltype glbase.Enum) glbase.Shader {
 	glresult := C.gl4_0core_glCreateShader(gl.funcs, C.GLenum(gltype))
 	return glbase.Shader(glresult)
@@ -2542,8 +2468,6 @@ func (gl *GL) CreateShader(gltype glbase.Enum) glbase.Shader {
 // between the execution of Begin and the corresponding execution of End.
 //
 // CreateProgram is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glCreateProgram.xml
 func (gl *GL) CreateProgram() glbase.Program {
 	glresult := C.gl4_0core_glCreateProgram(gl.funcs)
 	return glbase.Program(glresult)
@@ -2568,8 +2492,6 @@ func (gl *GL) CreateProgram() glbase.Program {
 // between the execution of Begin and the corresponding execution of End.
 //
 // CompileShader is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glCompileShader.xml
 func (gl *GL) CompileShader(shader glbase.Shader) {
 	C.gl4_0core_glCompileShader(gl.funcs, C.GLuint(shader))
 }
@@ -2643,8 +2565,6 @@ func (gl *GL) CompileShader(shader glbase.Shader) {
 // between the execution of Begin and the corresponding execution of End.
 //
 // BindAttribLocation is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBindAttribLocation.xml
 func (gl *GL) BindAttribLocation(program glbase.Program, index glbase.Attrib, name string) {
 	name_cstr := C.CString(name)
 	C.gl4_0core_glBindAttribLocation(gl.funcs, C.GLuint(program), C.GLuint(index), (*C.GLchar)(name_cstr))
@@ -2680,33 +2600,31 @@ func (gl *GL) BindAttribLocation(program glbase.Program, index glbase.Attrib, na
 // corresponding execution of End.
 //
 // AttachShader is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glAttachShader.xml
 func (gl *GL) AttachShader(program glbase.Program, shader glbase.Shader) {
 	C.gl4_0core_glAttachShader(gl.funcs, C.GLuint(program), C.GLuint(shader))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glStencilMaskSeparate.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glStencilMaskSeparate.xml
 func (gl *GL) StencilMaskSeparate(face glbase.Enum, mask uint32) {
 	C.gl4_0core_glStencilMaskSeparate(gl.funcs, C.GLenum(face), C.GLuint(mask))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glStencilFuncSeparate.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glStencilFuncSeparate.xml
 func (gl *GL) StencilFuncSeparate(face, glfunc glbase.Enum, ref int32, mask uint32) {
 	C.gl4_0core_glStencilFuncSeparate(gl.funcs, C.GLenum(face), C.GLenum(glfunc), C.GLint(ref), C.GLuint(mask))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glStencilOpSeparate.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glStencilOpSeparate.xml
 func (gl *GL) StencilOpSeparate(face, sfail, dpfail, dppass glbase.Enum) {
 	C.gl4_0core_glStencilOpSeparate(gl.funcs, C.GLenum(face), C.GLenum(sfail), C.GLenum(dpfail), C.GLenum(dppass))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDrawBuffers.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDrawBuffers.xml
 func (gl *GL) DrawBuffers(n int, bufs []glbase.Enum) {
 	C.gl4_0core_glDrawBuffers(gl.funcs, C.GLsizei(n), (*C.GLenum)(unsafe.Pointer(&bufs[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBlendEquationSeparate.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glBlendEquationSeparate.xml
 func (gl *GL) BlendEquationSeparate(modeRGB, modeAlpha glbase.Enum) {
 	C.gl4_0core_glBlendEquationSeparate(gl.funcs, C.GLenum(modeRGB), C.GLenum(modeAlpha))
 }
@@ -2714,8 +2632,8 @@ func (gl *GL) BlendEquationSeparate(modeRGB, modeAlpha glbase.Enum) {
 // UniformMatrix4x3fv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// UniformMatrix4x3fv operates on the program object that was made part
-// of current state by calling UseProgram.
+// UniformMatrix4x3fv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions UniformMatrix{2|3|4|2x3|3x2|2x4|4x2|3x4|4x3}fv are used to
 // modify a matrix or an array of matrices. The numbers in the function name
@@ -2737,8 +2655,6 @@ func (gl *GL) BlendEquationSeparate(modeRGB, modeAlpha glbase.Enum) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix4x3fv.xml
 func (gl *GL) UniformMatrix4x3fv(location glbase.Uniform, transpose bool, value []float32) {
 	if len(value) == 0 {
 		return
@@ -2753,8 +2669,8 @@ func (gl *GL) UniformMatrix4x3fv(location glbase.Uniform, transpose bool, value 
 // UniformMatrix3x4fv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// UniformMatrix3x4fv operates on the program object that was made part
-// of current state by calling UseProgram.
+// UniformMatrix3x4fv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions UniformMatrix{2|3|4|2x3|3x2|2x4|4x2|3x4|4x3}fv are used to
 // modify a matrix or an array of matrices. The numbers in the function name
@@ -2776,8 +2692,6 @@ func (gl *GL) UniformMatrix4x3fv(location glbase.Uniform, transpose bool, value 
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix3x4fv.xml
 func (gl *GL) UniformMatrix3x4fv(location glbase.Uniform, transpose bool, value []float32) {
 	if len(value) == 0 {
 		return
@@ -2792,8 +2706,8 @@ func (gl *GL) UniformMatrix3x4fv(location glbase.Uniform, transpose bool, value 
 // UniformMatrix4x2fv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// UniformMatrix4x2fv operates on the program object that was made part
-// of current state by calling UseProgram.
+// UniformMatrix4x2fv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions UniformMatrix{2|3|4|2x3|3x2|2x4|4x2|3x4|4x3}fv are used to
 // modify a matrix or an array of matrices. The numbers in the function name
@@ -2815,8 +2729,6 @@ func (gl *GL) UniformMatrix3x4fv(location glbase.Uniform, transpose bool, value 
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix4x2fv.xml
 func (gl *GL) UniformMatrix4x2fv(location glbase.Uniform, transpose bool, value []float32) {
 	if len(value) == 0 {
 		return
@@ -2831,8 +2743,8 @@ func (gl *GL) UniformMatrix4x2fv(location glbase.Uniform, transpose bool, value 
 // UniformMatrix2x4fv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// UniformMatrix2x4fv operates on the program object that was made part
-// of current state by calling UseProgram.
+// UniformMatrix2x4fv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions UniformMatrix{2|3|4|2x3|3x2|2x4|4x2|3x4|4x3}fv are used to
 // modify a matrix or an array of matrices. The numbers in the function name
@@ -2854,8 +2766,6 @@ func (gl *GL) UniformMatrix4x2fv(location glbase.Uniform, transpose bool, value 
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix2x4fv.xml
 func (gl *GL) UniformMatrix2x4fv(location glbase.Uniform, transpose bool, value []float32) {
 	if len(value) == 0 {
 		return
@@ -2870,8 +2780,8 @@ func (gl *GL) UniformMatrix2x4fv(location glbase.Uniform, transpose bool, value 
 // UniformMatrix3x2fv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// UniformMatrix3x2fv operates on the program object that was made part
-// of current state by calling UseProgram.
+// UniformMatrix3x2fv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions UniformMatrix{2|3|4|2x3|3x2|2x4|4x2|3x4|4x3}fv are used to
 // modify a matrix or an array of matrices. The numbers in the function name
@@ -2893,8 +2803,6 @@ func (gl *GL) UniformMatrix2x4fv(location glbase.Uniform, transpose bool, value 
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix3x2fv.xml
 func (gl *GL) UniformMatrix3x2fv(location glbase.Uniform, transpose bool, value []float32) {
 	if len(value) == 0 {
 		return
@@ -2909,8 +2817,8 @@ func (gl *GL) UniformMatrix3x2fv(location glbase.Uniform, transpose bool, value 
 // UniformMatrix2x3fv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// UniformMatrix2x3fv operates on the program object that was made part
-// of current state by calling UseProgram.
+// UniformMatrix2x3fv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions UniformMatrix{2|3|4|2x3|3x2|2x4|4x2|3x4|4x3}fv are used to
 // modify a matrix or an array of matrices. The numbers in the function name
@@ -2932,8 +2840,6 @@ func (gl *GL) UniformMatrix3x2fv(location glbase.Uniform, transpose bool, value 
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix2x3fv.xml
 func (gl *GL) UniformMatrix2x3fv(location glbase.Uniform, transpose bool, value []float32) {
 	if len(value) == 0 {
 		return
@@ -2945,171 +2851,171 @@ func (gl *GL) UniformMatrix2x3fv(location glbase.Uniform, transpose bool, value 
 	C.gl4_0core_glUniformMatrix2x3fv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLfloat)(unsafe.Pointer(&value[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glIsVertexArray.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glIsVertexArray.xml
 func (gl *GL) IsVertexArray(array uint32) bool {
 	glresult := C.gl4_0core_glIsVertexArray(gl.funcs, C.GLuint(array))
 	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGenVertexArrays.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGenVertexArrays.xml
 func (gl *GL) GenVertexArrays(n int, arrays []uint32) {
 	C.gl4_0core_glGenVertexArrays(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&arrays[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteVertexArrays.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDeleteVertexArrays.xml
 func (gl *GL) DeleteVertexArrays(n int, arrays []uint32) {
 	C.gl4_0core_glDeleteVertexArrays(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&arrays[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBindVertexArray.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glBindVertexArray.xml
 func (gl *GL) BindVertexArray(array uint32) {
 	C.gl4_0core_glBindVertexArray(gl.funcs, C.GLuint(array))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glFlushMappedBufferRange.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glFlushMappedBufferRange.xml
 func (gl *GL) FlushMappedBufferRange(target glbase.Enum, offset, length int) {
 	C.gl4_0core_glFlushMappedBufferRange(gl.funcs, C.GLenum(target), C.GLintptr(offset), C.GLsizeiptr(length))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glFramebufferTextureLayer.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glFramebufferTextureLayer.xml
 func (gl *GL) FramebufferTextureLayer(target, attachment glbase.Enum, texture glbase.Texture, level int, layer int32) {
 	C.gl4_0core_glFramebufferTextureLayer(gl.funcs, C.GLenum(target), C.GLenum(attachment), C.GLuint(texture), C.GLint(level), C.GLint(layer))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glRenderbufferStorageMultisample.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glRenderbufferStorageMultisample.xml
 func (gl *GL) RenderbufferStorageMultisample(target glbase.Enum, samples int32, internalFormat glbase.Enum, width, height int) {
 	C.gl4_0core_glRenderbufferStorageMultisample(gl.funcs, C.GLenum(target), C.GLsizei(samples), C.GLenum(internalFormat), C.GLsizei(width), C.GLsizei(height))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBlitFramebuffer.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glBlitFramebuffer.xml
 func (gl *GL) BlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1 int32, mask glbase.Bitfield, filter glbase.Enum) {
 	C.gl4_0core_glBlitFramebuffer(gl.funcs, C.GLint(srcX0), C.GLint(srcY0), C.GLint(srcX1), C.GLint(srcY1), C.GLint(dstX0), C.GLint(dstY0), C.GLint(dstX1), C.GLint(dstY1), C.GLbitfield(mask), C.GLenum(filter))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGenerateMipmap.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGenerateMipmap.xml
 func (gl *GL) GenerateMipmap(target glbase.Enum) {
 	C.gl4_0core_glGenerateMipmap(gl.funcs, C.GLenum(target))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetFramebufferAttachmentParameteriv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetFramebufferAttachmentParameteriv.xml
 func (gl *GL) GetFramebufferAttachmentParameteriv(target, attachment, pname glbase.Enum, params []int32) {
 	C.gl4_0core_glGetFramebufferAttachmentParameteriv(gl.funcs, C.GLenum(target), C.GLenum(attachment), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glFramebufferRenderbuffer.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glFramebufferRenderbuffer.xml
 func (gl *GL) FramebufferRenderbuffer(target, attachment, renderbuffertarget glbase.Enum, renderbuffer uint32) {
 	C.gl4_0core_glFramebufferRenderbuffer(gl.funcs, C.GLenum(target), C.GLenum(attachment), C.GLenum(renderbuffertarget), C.GLuint(renderbuffer))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glFramebufferTexture3D.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glFramebufferTexture3D.xml
 func (gl *GL) FramebufferTexture3D(target, attachment, textarget glbase.Enum, texture glbase.Texture, level int, zoffset int32) {
 	C.gl4_0core_glFramebufferTexture3D(gl.funcs, C.GLenum(target), C.GLenum(attachment), C.GLenum(textarget), C.GLuint(texture), C.GLint(level), C.GLint(zoffset))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glFramebufferTexture2D.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glFramebufferTexture2D.xml
 func (gl *GL) FramebufferTexture2D(target, attachment, textarget glbase.Enum, texture glbase.Texture, level int) {
 	C.gl4_0core_glFramebufferTexture2D(gl.funcs, C.GLenum(target), C.GLenum(attachment), C.GLenum(textarget), C.GLuint(texture), C.GLint(level))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glFramebufferTexture1D.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glFramebufferTexture1D.xml
 func (gl *GL) FramebufferTexture1D(target, attachment, textarget glbase.Enum, texture glbase.Texture, level int) {
 	C.gl4_0core_glFramebufferTexture1D(gl.funcs, C.GLenum(target), C.GLenum(attachment), C.GLenum(textarget), C.GLuint(texture), C.GLint(level))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glCheckFramebufferStatus.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glCheckFramebufferStatus.xml
 func (gl *GL) CheckFramebufferStatus(target glbase.Enum) glbase.Enum {
 	glresult := C.gl4_0core_glCheckFramebufferStatus(gl.funcs, C.GLenum(target))
 	return glbase.Enum(glresult)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGenFramebuffers.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGenFramebuffers.xml
 func (gl *GL) GenFramebuffers(n int, framebuffers []uint32) {
 	C.gl4_0core_glGenFramebuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&framebuffers[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteFramebuffers.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDeleteFramebuffers.xml
 func (gl *GL) DeleteFramebuffers(n int, framebuffers []uint32) {
 	C.gl4_0core_glDeleteFramebuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&framebuffers[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBindFramebuffer.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glBindFramebuffer.xml
 func (gl *GL) BindFramebuffer(target glbase.Enum, framebuffer uint32) {
 	C.gl4_0core_glBindFramebuffer(gl.funcs, C.GLenum(target), C.GLuint(framebuffer))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glIsFramebuffer.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glIsFramebuffer.xml
 func (gl *GL) IsFramebuffer(framebuffer uint32) bool {
 	glresult := C.gl4_0core_glIsFramebuffer(gl.funcs, C.GLuint(framebuffer))
 	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetRenderbufferParameteriv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetRenderbufferParameteriv.xml
 func (gl *GL) GetRenderbufferParameteriv(target, pname glbase.Enum, params []int32) {
 	C.gl4_0core_glGetRenderbufferParameteriv(gl.funcs, C.GLenum(target), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glRenderbufferStorage.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glRenderbufferStorage.xml
 func (gl *GL) RenderbufferStorage(target, internalFormat glbase.Enum, width, height int) {
 	C.gl4_0core_glRenderbufferStorage(gl.funcs, C.GLenum(target), C.GLenum(internalFormat), C.GLsizei(width), C.GLsizei(height))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGenRenderbuffers.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGenRenderbuffers.xml
 func (gl *GL) GenRenderbuffers(n int, renderbuffers []uint32) {
 	C.gl4_0core_glGenRenderbuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&renderbuffers[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteRenderbuffers.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDeleteRenderbuffers.xml
 func (gl *GL) DeleteRenderbuffers(n int, renderbuffers []uint32) {
 	C.gl4_0core_glDeleteRenderbuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&renderbuffers[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBindRenderbuffer.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glBindRenderbuffer.xml
 func (gl *GL) BindRenderbuffer(target glbase.Enum, renderbuffer uint32) {
 	C.gl4_0core_glBindRenderbuffer(gl.funcs, C.GLenum(target), C.GLuint(renderbuffer))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glIsRenderbuffer.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glIsRenderbuffer.xml
 func (gl *GL) IsRenderbuffer(renderbuffer uint32) bool {
 	glresult := C.gl4_0core_glIsRenderbuffer(gl.funcs, C.GLuint(renderbuffer))
 	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glClearBufferfi.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glClearBufferfi.xml
 func (gl *GL) ClearBufferfi(buffer glbase.Enum, drawbuffer int32, depth float32, stencil int32) {
 	C.gl4_0core_glClearBufferfi(gl.funcs, C.GLenum(buffer), C.GLint(drawbuffer), C.GLfloat(depth), C.GLint(stencil))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glClearBufferfv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glClearBufferfv.xml
 func (gl *GL) ClearBufferfv(buffer glbase.Enum, drawbuffer int32, value []float32) {
 	C.gl4_0core_glClearBufferfv(gl.funcs, C.GLenum(buffer), C.GLint(drawbuffer), (*C.GLfloat)(unsafe.Pointer(&value[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glClearBufferuiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glClearBufferuiv.xml
 func (gl *GL) ClearBufferuiv(buffer glbase.Enum, drawbuffer int32, value []uint32) {
 	C.gl4_0core_glClearBufferuiv(gl.funcs, C.GLenum(buffer), C.GLint(drawbuffer), (*C.GLuint)(unsafe.Pointer(&value[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glClearBufferiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glClearBufferiv.xml
 func (gl *GL) ClearBufferiv(buffer glbase.Enum, drawbuffer int32, value []int32) {
 	C.gl4_0core_glClearBufferiv(gl.funcs, C.GLenum(buffer), C.GLint(drawbuffer), (*C.GLint)(unsafe.Pointer(&value[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetTexParameterIuiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetTexParameterIuiv.xml
 func (gl *GL) GetTexParameterIuiv(target, pname glbase.Enum, params []uint32) {
 	C.gl4_0core_glGetTexParameterIuiv(gl.funcs, C.GLenum(target), C.GLenum(pname), (*C.GLuint)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetTexParameterIiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetTexParameterIiv.xml
 func (gl *GL) GetTexParameterIiv(target, pname glbase.Enum, params []int32) {
 	C.gl4_0core_glGetTexParameterIiv(gl.funcs, C.GLenum(target), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glTexParameterIuiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glTexParameterIuiv.xml
 func (gl *GL) TexParameterIuiv(target, pname glbase.Enum, params []uint32) {
 	C.gl4_0core_glTexParameterIuiv(gl.funcs, C.GLenum(target), C.GLenum(pname), (*C.GLuint)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glTexParameterIiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glTexParameterIiv.xml
 func (gl *GL) TexParameterIiv(target, pname glbase.Enum, params []int32) {
 	C.gl4_0core_glTexParameterIiv(gl.funcs, C.GLenum(target), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
@@ -3117,8 +3023,8 @@ func (gl *GL) TexParameterIiv(target, pname glbase.Enum, params []int32) {
 // Uniform4uiv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// Uniform4uiv operates on the program object that was made part
-// of current state by calling UseProgram.
+// Uniform4uiv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
 // uniform variable or a uniform variable array. These functions receive a
@@ -3146,8 +3052,6 @@ func (gl *GL) TexParameterIiv(target, pname glbase.Enum, params []int32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform4uiv.xml
 func (gl *GL) Uniform4uiv(location glbase.Uniform, value []uint32) {
 	if len(value) == 0 {
 		return
@@ -3162,8 +3066,8 @@ func (gl *GL) Uniform4uiv(location glbase.Uniform, value []uint32) {
 // Uniform3uiv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// Uniform3uiv operates on the program object that was made part
-// of current state by calling UseProgram.
+// Uniform3uiv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
 // uniform variable or a uniform variable array. These functions receive a
@@ -3191,8 +3095,6 @@ func (gl *GL) Uniform4uiv(location glbase.Uniform, value []uint32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform3uiv.xml
 func (gl *GL) Uniform3uiv(location glbase.Uniform, value []uint32) {
 	if len(value) == 0 {
 		return
@@ -3207,8 +3109,8 @@ func (gl *GL) Uniform3uiv(location glbase.Uniform, value []uint32) {
 // Uniform2uiv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// Uniform2uiv operates on the program object that was made part
-// of current state by calling UseProgram.
+// Uniform2uiv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
 // uniform variable or a uniform variable array. These functions receive a
@@ -3236,8 +3138,6 @@ func (gl *GL) Uniform3uiv(location glbase.Uniform, value []uint32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform2uiv.xml
 func (gl *GL) Uniform2uiv(location glbase.Uniform, value []uint32) {
 	if len(value) == 0 {
 		return
@@ -3252,8 +3152,8 @@ func (gl *GL) Uniform2uiv(location glbase.Uniform, value []uint32) {
 // Uniform1uiv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// Uniform1uiv operates on the program object that was made part
-// of current state by calling UseProgram.
+// Uniform1uiv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
 // uniform variable or a uniform variable array. These functions receive a
@@ -3281,8 +3181,6 @@ func (gl *GL) Uniform2uiv(location glbase.Uniform, value []uint32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform1uiv.xml
 func (gl *GL) Uniform1uiv(location glbase.Uniform, value []uint32) {
 	if len(value) == 0 {
 		return
@@ -3294,8 +3192,8 @@ func (gl *GL) Uniform1uiv(location glbase.Uniform, value []uint32) {
 // Uniform4ui modifies the value of a single uniform variable.
 // The location of the uniform variable to be modified is specified by
 // location, which should be a value returned by GetUniformLocation.
-// Uniform4ui operates on the program object that was made part of current
-// state by calling UseProgram.
+// Uniform4ui operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
 // uniform variable specified by location using the values passed as
@@ -3326,8 +3224,6 @@ func (gl *GL) Uniform1uiv(location glbase.Uniform, value []uint32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform4ui.xml
 func (gl *GL) Uniform4ui(location glbase.Uniform, v0, v1, v2, v3 uint32) {
 	C.gl4_0core_glUniform4ui(gl.funcs, C.GLint(location), C.GLuint(v0), C.GLuint(v1), C.GLuint(v2), C.GLuint(v3))
 }
@@ -3335,8 +3231,8 @@ func (gl *GL) Uniform4ui(location glbase.Uniform, v0, v1, v2, v3 uint32) {
 // Uniform3ui modifies the value of a single uniform variable.
 // The location of the uniform variable to be modified is specified by
 // location, which should be a value returned by GetUniformLocation.
-// Uniform3ui operates on the program object that was made part of current
-// state by calling UseProgram.
+// Uniform3ui operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
 // uniform variable specified by location using the values passed as
@@ -3367,8 +3263,6 @@ func (gl *GL) Uniform4ui(location glbase.Uniform, v0, v1, v2, v3 uint32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform3ui.xml
 func (gl *GL) Uniform3ui(location glbase.Uniform, v0, v1, v2 uint32) {
 	C.gl4_0core_glUniform3ui(gl.funcs, C.GLint(location), C.GLuint(v0), C.GLuint(v1), C.GLuint(v2))
 }
@@ -3376,8 +3270,8 @@ func (gl *GL) Uniform3ui(location glbase.Uniform, v0, v1, v2 uint32) {
 // Uniform2ui modifies the value of a single uniform variable.
 // The location of the uniform variable to be modified is specified by
 // location, which should be a value returned by GetUniformLocation.
-// Uniform2ui operates on the program object that was made part of current
-// state by calling UseProgram.
+// Uniform2ui operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
 // uniform variable specified by location using the values passed as
@@ -3408,8 +3302,6 @@ func (gl *GL) Uniform3ui(location glbase.Uniform, v0, v1, v2 uint32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform2ui.xml
 func (gl *GL) Uniform2ui(location glbase.Uniform, v0, v1 uint32) {
 	C.gl4_0core_glUniform2ui(gl.funcs, C.GLint(location), C.GLuint(v0), C.GLuint(v1))
 }
@@ -3417,8 +3309,8 @@ func (gl *GL) Uniform2ui(location glbase.Uniform, v0, v1 uint32) {
 // Uniform1ui modifies the value of a single uniform variable.
 // The location of the uniform variable to be modified is specified by
 // location, which should be a value returned by GetUniformLocation.
-// Uniform1ui operates on the program object that was made part of current
-// state by calling UseProgram.
+// Uniform1ui operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
 // uniform variable specified by location using the values passed as
@@ -3449,39 +3341,37 @@ func (gl *GL) Uniform2ui(location glbase.Uniform, v0, v1 uint32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform1ui.xml
 func (gl *GL) Uniform1ui(location glbase.Uniform, v0 uint32) {
 	C.gl4_0core_glUniform1ui(gl.funcs, C.GLint(location), C.GLuint(v0))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetFragDataLocation.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetFragDataLocation.xml
 func (gl *GL) GetFragDataLocation(program glbase.Program, name []byte) int32 {
 	glresult := C.gl4_0core_glGetFragDataLocation(gl.funcs, C.GLuint(program), (*C.GLchar)(unsafe.Pointer(&name[0])))
 	return int32(glresult)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBindFragDataLocation.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glBindFragDataLocation.xml
 func (gl *GL) BindFragDataLocation(program glbase.Program, color uint32, name []byte) {
 	C.gl4_0core_glBindFragDataLocation(gl.funcs, C.GLuint(program), C.GLuint(color), (*C.GLchar)(unsafe.Pointer(&name[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetUniformuiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetUniformuiv.xml
 func (gl *GL) GetUniformuiv(program glbase.Program, location glbase.Uniform, params []uint32) {
 	C.gl4_0core_glGetUniformuiv(gl.funcs, C.GLuint(program), C.GLint(location), (*C.GLuint)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetVertexAttribIuiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetVertexAttribIuiv.xml
 func (gl *GL) GetVertexAttribIuiv(index glbase.Attrib, pname glbase.Enum, params []uint32) {
 	C.gl4_0core_glGetVertexAttribIuiv(gl.funcs, C.GLuint(index), C.GLenum(pname), (*C.GLuint)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetVertexAttribIiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetVertexAttribIiv.xml
 func (gl *GL) GetVertexAttribIiv(index glbase.Attrib, pname glbase.Enum, params []int32) {
 	C.gl4_0core_glGetVertexAttribIiv(gl.funcs, C.GLuint(index), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribIPointer.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glVertexAttribIPointer.xml
 func (gl *GL) VertexAttribIPointer(index glbase.Attrib, size int, gltype glbase.Enum, stride int, pointer interface{}) {
 	var pointer_ptr unsafe.Pointer
 	var pointer_v = reflect.ValueOf(pointer)
@@ -3494,124 +3384,124 @@ func (gl *GL) VertexAttribIPointer(index glbase.Attrib, size int, gltype glbase.
 	C.gl4_0core_glVertexAttribIPointer(gl.funcs, C.GLuint(index), C.GLint(size), C.GLenum(gltype), C.GLsizei(stride), pointer_ptr)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glEndConditionalRender.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glEndConditionalRender.xml
 func (gl *GL) EndConditionalRender() {
 	C.gl4_0core_glEndConditionalRender(gl.funcs)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBeginConditionalRender.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glBeginConditionalRender.xml
 func (gl *GL) BeginConditionalRender(id uint32, mode glbase.Enum) {
 	C.gl4_0core_glBeginConditionalRender(gl.funcs, C.GLuint(id), C.GLenum(mode))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glClampColor.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glClampColor.xml
 func (gl *GL) ClampColor(target, clamp glbase.Enum) {
 	C.gl4_0core_glClampColor(gl.funcs, C.GLenum(target), C.GLenum(clamp))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetTransformFeedbackVarying.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetTransformFeedbackVarying.xml
 func (gl *GL) GetTransformFeedbackVarying(program glbase.Program, index uint32, bufSize int32, length []int32, size []int, gltype []glbase.Enum, name []byte) {
 	C.gl4_0core_glGetTransformFeedbackVarying(gl.funcs, C.GLuint(program), C.GLuint(index), C.GLsizei(bufSize), (*C.GLsizei)(unsafe.Pointer(&length[0])), (*C.GLsizei)(unsafe.Pointer(&size[0])), (*C.GLenum)(unsafe.Pointer(&gltype[0])), (*C.GLchar)(unsafe.Pointer(&name[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBindBufferBase.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glBindBufferBase.xml
 func (gl *GL) BindBufferBase(target glbase.Enum, index uint32, buffer glbase.Buffer) {
 	C.gl4_0core_glBindBufferBase(gl.funcs, C.GLenum(target), C.GLuint(index), C.GLuint(buffer))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBindBufferRange.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glBindBufferRange.xml
 func (gl *GL) BindBufferRange(target glbase.Enum, index uint32, buffer glbase.Buffer, offset, size int) {
 	C.gl4_0core_glBindBufferRange(gl.funcs, C.GLenum(target), C.GLuint(index), C.GLuint(buffer), C.GLintptr(offset), C.GLsizeiptr(size))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glEndTransformFeedback.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glEndTransformFeedback.xml
 func (gl *GL) EndTransformFeedback() {
 	C.gl4_0core_glEndTransformFeedback(gl.funcs)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBeginTransformFeedback.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glBeginTransformFeedback.xml
 func (gl *GL) BeginTransformFeedback(primitiveMode glbase.Enum) {
 	C.gl4_0core_glBeginTransformFeedback(gl.funcs, C.GLenum(primitiveMode))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glIsEnabledi.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glIsEnabledi.xml
 func (gl *GL) IsEnabledi(target glbase.Enum, index uint32) bool {
 	glresult := C.gl4_0core_glIsEnabledi(gl.funcs, C.GLenum(target), C.GLuint(index))
 	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDisablei.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDisablei.xml
 func (gl *GL) Disablei(target glbase.Enum, index uint32) {
 	C.gl4_0core_glDisablei(gl.funcs, C.GLenum(target), C.GLuint(index))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glEnablei.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glEnablei.xml
 func (gl *GL) Enablei(target glbase.Enum, index uint32) {
 	C.gl4_0core_glEnablei(gl.funcs, C.GLenum(target), C.GLuint(index))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetIntegeri_v.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetIntegeri_v.xml
 func (gl *GL) GetIntegeri_v(target glbase.Enum, index uint32, data []int32) {
 	C.gl4_0core_glGetIntegeri_v(gl.funcs, C.GLenum(target), C.GLuint(index), (*C.GLint)(unsafe.Pointer(&data[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetBooleani_v.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetBooleani_v.xml
 func (gl *GL) GetBooleani_v(target glbase.Enum, index uint32, data []bool) {
 	C.gl4_0core_glGetBooleani_v(gl.funcs, C.GLenum(target), C.GLuint(index), (*C.GLboolean)(unsafe.Pointer(&data[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glColorMaski.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glColorMaski.xml
 func (gl *GL) ColorMaski(index uint32, r, g, b, a bool) {
 	C.gl4_0core_glColorMaski(gl.funcs, C.GLuint(index), *(*C.GLboolean)(unsafe.Pointer(&r)), *(*C.GLboolean)(unsafe.Pointer(&g)), *(*C.GLboolean)(unsafe.Pointer(&b)), *(*C.GLboolean)(unsafe.Pointer(&a)))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glCopyBufferSubData.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glCopyBufferSubData.xml
 func (gl *GL) CopyBufferSubData(readTarget, writeTarget glbase.Enum, readOffset, writeOffset, size int) {
 	C.gl4_0core_glCopyBufferSubData(gl.funcs, C.GLenum(readTarget), C.GLenum(writeTarget), C.GLintptr(readOffset), C.GLintptr(writeOffset), C.GLsizeiptr(size))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformBlockBinding.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glUniformBlockBinding.xml
 func (gl *GL) UniformBlockBinding(program glbase.Program, v0, v1 uint32) {
 	C.gl4_0core_glUniformBlockBinding(gl.funcs, C.GLuint(program), C.GLuint(v0), C.GLuint(v1))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetActiveUniformBlockName.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetActiveUniformBlockName.xml
 func (gl *GL) GetActiveUniformBlockName(program glbase.Program, uniformBlockIndex uint32, bufSize int32, length []int32, uniformBlockName []byte) {
 	C.gl4_0core_glGetActiveUniformBlockName(gl.funcs, C.GLuint(program), C.GLuint(uniformBlockIndex), C.GLsizei(bufSize), (*C.GLsizei)(unsafe.Pointer(&length[0])), (*C.GLchar)(unsafe.Pointer(&uniformBlockName[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetActiveUniformBlockiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetActiveUniformBlockiv.xml
 func (gl *GL) GetActiveUniformBlockiv(program glbase.Program, uniformBlockIndex uint32, pname glbase.Enum, params []int32) {
 	C.gl4_0core_glGetActiveUniformBlockiv(gl.funcs, C.GLuint(program), C.GLuint(uniformBlockIndex), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetUniformBlockIndex.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetUniformBlockIndex.xml
 func (gl *GL) GetUniformBlockIndex(program glbase.Program, uniformBlockName []byte) uint32 {
 	glresult := C.gl4_0core_glGetUniformBlockIndex(gl.funcs, C.GLuint(program), (*C.GLchar)(unsafe.Pointer(&uniformBlockName[0])))
 	return uint32(glresult)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetActiveUniformName.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetActiveUniformName.xml
 func (gl *GL) GetActiveUniformName(program glbase.Program, uniformIndex uint32, bufSize int32, length []int32, uniformName []byte) {
 	C.gl4_0core_glGetActiveUniformName(gl.funcs, C.GLuint(program), C.GLuint(uniformIndex), C.GLsizei(bufSize), (*C.GLsizei)(unsafe.Pointer(&length[0])), (*C.GLchar)(unsafe.Pointer(&uniformName[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetActiveUniformsiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetActiveUniformsiv.xml
 func (gl *GL) GetActiveUniformsiv(program glbase.Program, uniformCount int32, uniformIndices []uint32, pname glbase.Enum, params []int32) {
 	C.gl4_0core_glGetActiveUniformsiv(gl.funcs, C.GLuint(program), C.GLsizei(uniformCount), (*C.GLuint)(unsafe.Pointer(&uniformIndices[0])), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glPrimitiveRestartIndex.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glPrimitiveRestartIndex.xml
 func (gl *GL) PrimitiveRestartIndex(index uint32) {
 	C.gl4_0core_glPrimitiveRestartIndex(gl.funcs, C.GLuint(index))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glTexBuffer.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glTexBuffer.xml
 func (gl *GL) TexBuffer(target, internalFormat glbase.Enum, buffer glbase.Buffer) {
 	C.gl4_0core_glTexBuffer(gl.funcs, C.GLenum(target), C.GLenum(internalFormat), C.GLuint(buffer))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDrawElementsInstanced.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDrawElementsInstanced.xml
 func (gl *GL) DrawElementsInstanced(mode glbase.Enum, count int, gltype glbase.Enum, indices interface{}, instancecount int32) {
 	var indices_ptr unsafe.Pointer
 	var indices_v = reflect.ValueOf(indices)
@@ -3624,75 +3514,75 @@ func (gl *GL) DrawElementsInstanced(mode glbase.Enum, count int, gltype glbase.E
 	C.gl4_0core_glDrawElementsInstanced(gl.funcs, C.GLenum(mode), C.GLsizei(count), C.GLenum(gltype), indices_ptr, C.GLsizei(instancecount))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDrawArraysInstanced.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDrawArraysInstanced.xml
 func (gl *GL) DrawArraysInstanced(mode glbase.Enum, first, count int, instancecount int32) {
 	C.gl4_0core_glDrawArraysInstanced(gl.funcs, C.GLenum(mode), C.GLint(first), C.GLsizei(count), C.GLsizei(instancecount))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glSampleMaski.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glSampleMaski.xml
 func (gl *GL) SampleMaski(index uint32, mask glbase.Bitfield) {
 	C.gl4_0core_glSampleMaski(gl.funcs, C.GLuint(index), C.GLbitfield(mask))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetMultisamplefv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetMultisamplefv.xml
 func (gl *GL) GetMultisamplefv(pname glbase.Enum, index uint32, val []float32) {
 	C.gl4_0core_glGetMultisamplefv(gl.funcs, C.GLenum(pname), C.GLuint(index), (*C.GLfloat)(unsafe.Pointer(&val[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glTexImage3DMultisample.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glTexImage3DMultisample.xml
 func (gl *GL) TexImage3DMultisample(target glbase.Enum, samples, internalFormat int32, width, height int, depth int32, fixedsamplelocations bool) {
 	C.gl4_0core_glTexImage3DMultisample(gl.funcs, C.GLenum(target), C.GLsizei(samples), C.GLint(internalFormat), C.GLsizei(width), C.GLsizei(height), C.GLsizei(depth), *(*C.GLboolean)(unsafe.Pointer(&fixedsamplelocations)))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glTexImage2DMultisample.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glTexImage2DMultisample.xml
 func (gl *GL) TexImage2DMultisample(target glbase.Enum, samples, internalFormat int32, width, height int, fixedsamplelocations bool) {
 	C.gl4_0core_glTexImage2DMultisample(gl.funcs, C.GLenum(target), C.GLsizei(samples), C.GLint(internalFormat), C.GLsizei(width), C.GLsizei(height), *(*C.GLboolean)(unsafe.Pointer(&fixedsamplelocations)))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetSynciv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetSynciv.xml
 func (gl *GL) GetSynciv(sync glbase.Sync, pname glbase.Enum, bufSize int32, length, values []int32) {
 	C.gl4_0core_glGetSynciv(gl.funcs, C.GLsync(sync), C.GLenum(pname), C.GLsizei(bufSize), (*C.GLsizei)(unsafe.Pointer(&length[0])), (*C.GLint)(unsafe.Pointer(&values[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetInteger64v.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetInteger64v.xml
 func (gl *GL) GetInteger64v(pname glbase.Enum, params []int64) {
 	C.gl4_0core_glGetInteger64v(gl.funcs, C.GLenum(pname), (*C.GLint64)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glWaitSync.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glWaitSync.xml
 func (gl *GL) WaitSync(sync glbase.Sync, flags glbase.Bitfield, timeout uint64) {
 	C.gl4_0core_glWaitSync(gl.funcs, C.GLsync(sync), C.GLbitfield(flags), C.GLuint64(timeout))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glClientWaitSync.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glClientWaitSync.xml
 func (gl *GL) ClientWaitSync(sync glbase.Sync, flags glbase.Bitfield, timeout uint64) glbase.Enum {
 	glresult := C.gl4_0core_glClientWaitSync(gl.funcs, C.GLsync(sync), C.GLbitfield(flags), C.GLuint64(timeout))
 	return glbase.Enum(glresult)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteSync.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDeleteSync.xml
 func (gl *GL) DeleteSync(sync glbase.Sync) {
 	C.gl4_0core_glDeleteSync(gl.funcs, C.GLsync(sync))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glIsSync.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glIsSync.xml
 func (gl *GL) IsSync(sync glbase.Sync) bool {
 	glresult := C.gl4_0core_glIsSync(gl.funcs, C.GLsync(sync))
 	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glFenceSync.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glFenceSync.xml
 func (gl *GL) FenceSync(condition glbase.Enum, flags glbase.Bitfield) glbase.Sync {
 	glresult := C.gl4_0core_glFenceSync(gl.funcs, C.GLenum(condition), C.GLbitfield(flags))
 	return glbase.Sync(glresult)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glProvokingVertex.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glProvokingVertex.xml
 func (gl *GL) ProvokingVertex(mode glbase.Enum) {
 	C.gl4_0core_glProvokingVertex(gl.funcs, C.GLenum(mode))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDrawElementsInstancedBaseVertex.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDrawElementsInstancedBaseVertex.xml
 func (gl *GL) DrawElementsInstancedBaseVertex(mode glbase.Enum, count int, gltype glbase.Enum, indices interface{}, instancecount, basevertex int32) {
 	var indices_ptr unsafe.Pointer
 	var indices_v = reflect.ValueOf(indices)
@@ -3705,7 +3595,7 @@ func (gl *GL) DrawElementsInstancedBaseVertex(mode glbase.Enum, count int, gltyp
 	C.gl4_0core_glDrawElementsInstancedBaseVertex(gl.funcs, C.GLenum(mode), C.GLsizei(count), C.GLenum(gltype), indices_ptr, C.GLsizei(instancecount), C.GLint(basevertex))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDrawRangeElementsBaseVertex.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDrawRangeElementsBaseVertex.xml
 func (gl *GL) DrawRangeElementsBaseVertex(mode glbase.Enum, start, end uint32, count int, gltype glbase.Enum, indices interface{}, basevertex int32) {
 	var indices_ptr unsafe.Pointer
 	var indices_v = reflect.ValueOf(indices)
@@ -3718,7 +3608,7 @@ func (gl *GL) DrawRangeElementsBaseVertex(mode glbase.Enum, start, end uint32, c
 	C.gl4_0core_glDrawRangeElementsBaseVertex(gl.funcs, C.GLenum(mode), C.GLuint(start), C.GLuint(end), C.GLsizei(count), C.GLenum(gltype), indices_ptr, C.GLint(basevertex))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDrawElementsBaseVertex.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDrawElementsBaseVertex.xml
 func (gl *GL) DrawElementsBaseVertex(mode glbase.Enum, count int, gltype glbase.Enum, indices interface{}, basevertex int32) {
 	var indices_ptr unsafe.Pointer
 	var indices_v = reflect.ValueOf(indices)
@@ -3731,512 +3621,512 @@ func (gl *GL) DrawElementsBaseVertex(mode glbase.Enum, count int, gltype glbase.
 	C.gl4_0core_glDrawElementsBaseVertex(gl.funcs, C.GLenum(mode), C.GLsizei(count), C.GLenum(gltype), indices_ptr, C.GLint(basevertex))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glFramebufferTexture.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glFramebufferTexture.xml
 func (gl *GL) FramebufferTexture(target, attachment glbase.Enum, texture glbase.Texture, level int) {
 	C.gl4_0core_glFramebufferTexture(gl.funcs, C.GLenum(target), C.GLenum(attachment), C.GLuint(texture), C.GLint(level))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetBufferParameteri64v.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetBufferParameteri64v.xml
 func (gl *GL) GetBufferParameteri64v(target, pname glbase.Enum, params []int64) {
 	C.gl4_0core_glGetBufferParameteri64v(gl.funcs, C.GLenum(target), C.GLenum(pname), (*C.GLint64)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetInteger64i_v.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetInteger64i_v.xml
 func (gl *GL) GetInteger64i_v(target glbase.Enum, index uint32, data []int64) {
 	C.gl4_0core_glGetInteger64i_v(gl.funcs, C.GLenum(target), C.GLuint(index), (*C.GLint64)(unsafe.Pointer(&data[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribP4uiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glVertexAttribP4uiv.xml
 func (gl *GL) VertexAttribP4uiv(index glbase.Attrib, gltype glbase.Enum, normalized bool, value []uint32) {
 	C.gl4_0core_glVertexAttribP4uiv(gl.funcs, C.GLuint(index), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), (*C.GLuint)(unsafe.Pointer(&value[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribP4ui.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glVertexAttribP4ui.xml
 func (gl *GL) VertexAttribP4ui(index glbase.Attrib, gltype glbase.Enum, normalized bool, value uint32) {
 	C.gl4_0core_glVertexAttribP4ui(gl.funcs, C.GLuint(index), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), C.GLuint(value))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribP3uiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glVertexAttribP3uiv.xml
 func (gl *GL) VertexAttribP3uiv(index glbase.Attrib, gltype glbase.Enum, normalized bool, value []uint32) {
 	C.gl4_0core_glVertexAttribP3uiv(gl.funcs, C.GLuint(index), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), (*C.GLuint)(unsafe.Pointer(&value[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribP3ui.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glVertexAttribP3ui.xml
 func (gl *GL) VertexAttribP3ui(index glbase.Attrib, gltype glbase.Enum, normalized bool, value uint32) {
 	C.gl4_0core_glVertexAttribP3ui(gl.funcs, C.GLuint(index), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), C.GLuint(value))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribP2uiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glVertexAttribP2uiv.xml
 func (gl *GL) VertexAttribP2uiv(index glbase.Attrib, gltype glbase.Enum, normalized bool, value []uint32) {
 	C.gl4_0core_glVertexAttribP2uiv(gl.funcs, C.GLuint(index), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), (*C.GLuint)(unsafe.Pointer(&value[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribP2ui.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glVertexAttribP2ui.xml
 func (gl *GL) VertexAttribP2ui(index glbase.Attrib, gltype glbase.Enum, normalized bool, value uint32) {
 	C.gl4_0core_glVertexAttribP2ui(gl.funcs, C.GLuint(index), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), C.GLuint(value))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribP1uiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glVertexAttribP1uiv.xml
 func (gl *GL) VertexAttribP1uiv(index glbase.Attrib, gltype glbase.Enum, normalized bool, value []uint32) {
 	C.gl4_0core_glVertexAttribP1uiv(gl.funcs, C.GLuint(index), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), (*C.GLuint)(unsafe.Pointer(&value[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribP1ui.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glVertexAttribP1ui.xml
 func (gl *GL) VertexAttribP1ui(index glbase.Attrib, gltype glbase.Enum, normalized bool, value uint32) {
 	C.gl4_0core_glVertexAttribP1ui(gl.funcs, C.GLuint(index), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), C.GLuint(value))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glSecondaryColorP3uiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glSecondaryColorP3uiv.xml
 func (gl *GL) SecondaryColorP3uiv(gltype glbase.Enum, color []uint32) {
 	C.gl4_0core_glSecondaryColorP3uiv(gl.funcs, C.GLenum(gltype), (*C.GLuint)(unsafe.Pointer(&color[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glSecondaryColorP3ui.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glSecondaryColorP3ui.xml
 func (gl *GL) SecondaryColorP3ui(gltype glbase.Enum, color uint32) {
 	C.gl4_0core_glSecondaryColorP3ui(gl.funcs, C.GLenum(gltype), C.GLuint(color))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glColorP4uiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glColorP4uiv.xml
 func (gl *GL) ColorP4uiv(gltype glbase.Enum, color []uint32) {
 	C.gl4_0core_glColorP4uiv(gl.funcs, C.GLenum(gltype), (*C.GLuint)(unsafe.Pointer(&color[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glColorP4ui.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glColorP4ui.xml
 func (gl *GL) ColorP4ui(gltype glbase.Enum, color uint32) {
 	C.gl4_0core_glColorP4ui(gl.funcs, C.GLenum(gltype), C.GLuint(color))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glColorP3uiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glColorP3uiv.xml
 func (gl *GL) ColorP3uiv(gltype glbase.Enum, color []uint32) {
 	C.gl4_0core_glColorP3uiv(gl.funcs, C.GLenum(gltype), (*C.GLuint)(unsafe.Pointer(&color[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glColorP3ui.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glColorP3ui.xml
 func (gl *GL) ColorP3ui(gltype glbase.Enum, color uint32) {
 	C.gl4_0core_glColorP3ui(gl.funcs, C.GLenum(gltype), C.GLuint(color))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glNormalP3uiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glNormalP3uiv.xml
 func (gl *GL) NormalP3uiv(gltype glbase.Enum, coords []uint32) {
 	C.gl4_0core_glNormalP3uiv(gl.funcs, C.GLenum(gltype), (*C.GLuint)(unsafe.Pointer(&coords[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glNormalP3ui.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glNormalP3ui.xml
 func (gl *GL) NormalP3ui(gltype glbase.Enum, coords uint32) {
 	C.gl4_0core_glNormalP3ui(gl.funcs, C.GLenum(gltype), C.GLuint(coords))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoordP4uiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glMultiTexCoordP4uiv.xml
 func (gl *GL) MultiTexCoordP4uiv(texture, gltype glbase.Enum, coords []uint32) {
 	C.gl4_0core_glMultiTexCoordP4uiv(gl.funcs, C.GLenum(texture), C.GLenum(gltype), (*C.GLuint)(unsafe.Pointer(&coords[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoordP4ui.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glMultiTexCoordP4ui.xml
 func (gl *GL) MultiTexCoordP4ui(texture, gltype glbase.Enum, coords uint32) {
 	C.gl4_0core_glMultiTexCoordP4ui(gl.funcs, C.GLenum(texture), C.GLenum(gltype), C.GLuint(coords))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoordP3uiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glMultiTexCoordP3uiv.xml
 func (gl *GL) MultiTexCoordP3uiv(texture, gltype glbase.Enum, coords []uint32) {
 	C.gl4_0core_glMultiTexCoordP3uiv(gl.funcs, C.GLenum(texture), C.GLenum(gltype), (*C.GLuint)(unsafe.Pointer(&coords[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoordP3ui.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glMultiTexCoordP3ui.xml
 func (gl *GL) MultiTexCoordP3ui(texture, gltype glbase.Enum, coords uint32) {
 	C.gl4_0core_glMultiTexCoordP3ui(gl.funcs, C.GLenum(texture), C.GLenum(gltype), C.GLuint(coords))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoordP2uiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glMultiTexCoordP2uiv.xml
 func (gl *GL) MultiTexCoordP2uiv(texture, gltype glbase.Enum, coords []uint32) {
 	C.gl4_0core_glMultiTexCoordP2uiv(gl.funcs, C.GLenum(texture), C.GLenum(gltype), (*C.GLuint)(unsafe.Pointer(&coords[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoordP2ui.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glMultiTexCoordP2ui.xml
 func (gl *GL) MultiTexCoordP2ui(texture, gltype glbase.Enum, coords uint32) {
 	C.gl4_0core_glMultiTexCoordP2ui(gl.funcs, C.GLenum(texture), C.GLenum(gltype), C.GLuint(coords))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoordP1uiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glMultiTexCoordP1uiv.xml
 func (gl *GL) MultiTexCoordP1uiv(texture, gltype glbase.Enum, coords []uint32) {
 	C.gl4_0core_glMultiTexCoordP1uiv(gl.funcs, C.GLenum(texture), C.GLenum(gltype), (*C.GLuint)(unsafe.Pointer(&coords[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glMultiTexCoordP1ui.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glMultiTexCoordP1ui.xml
 func (gl *GL) MultiTexCoordP1ui(texture, gltype glbase.Enum, coords uint32) {
 	C.gl4_0core_glMultiTexCoordP1ui(gl.funcs, C.GLenum(texture), C.GLenum(gltype), C.GLuint(coords))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glTexCoordP4uiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glTexCoordP4uiv.xml
 func (gl *GL) TexCoordP4uiv(gltype glbase.Enum, coords []uint32) {
 	C.gl4_0core_glTexCoordP4uiv(gl.funcs, C.GLenum(gltype), (*C.GLuint)(unsafe.Pointer(&coords[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glTexCoordP4ui.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glTexCoordP4ui.xml
 func (gl *GL) TexCoordP4ui(gltype glbase.Enum, coords uint32) {
 	C.gl4_0core_glTexCoordP4ui(gl.funcs, C.GLenum(gltype), C.GLuint(coords))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glTexCoordP3uiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glTexCoordP3uiv.xml
 func (gl *GL) TexCoordP3uiv(gltype glbase.Enum, coords []uint32) {
 	C.gl4_0core_glTexCoordP3uiv(gl.funcs, C.GLenum(gltype), (*C.GLuint)(unsafe.Pointer(&coords[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glTexCoordP3ui.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glTexCoordP3ui.xml
 func (gl *GL) TexCoordP3ui(gltype glbase.Enum, coords uint32) {
 	C.gl4_0core_glTexCoordP3ui(gl.funcs, C.GLenum(gltype), C.GLuint(coords))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glTexCoordP2uiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glTexCoordP2uiv.xml
 func (gl *GL) TexCoordP2uiv(gltype glbase.Enum, coords []uint32) {
 	C.gl4_0core_glTexCoordP2uiv(gl.funcs, C.GLenum(gltype), (*C.GLuint)(unsafe.Pointer(&coords[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glTexCoordP2ui.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glTexCoordP2ui.xml
 func (gl *GL) TexCoordP2ui(gltype glbase.Enum, coords uint32) {
 	C.gl4_0core_glTexCoordP2ui(gl.funcs, C.GLenum(gltype), C.GLuint(coords))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glTexCoordP1uiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glTexCoordP1uiv.xml
 func (gl *GL) TexCoordP1uiv(gltype glbase.Enum, coords []uint32) {
 	C.gl4_0core_glTexCoordP1uiv(gl.funcs, C.GLenum(gltype), (*C.GLuint)(unsafe.Pointer(&coords[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glTexCoordP1ui.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glTexCoordP1ui.xml
 func (gl *GL) TexCoordP1ui(gltype glbase.Enum, coords uint32) {
 	C.gl4_0core_glTexCoordP1ui(gl.funcs, C.GLenum(gltype), C.GLuint(coords))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glVertexP4uiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glVertexP4uiv.xml
 func (gl *GL) VertexP4uiv(gltype glbase.Enum, value []uint32) {
 	C.gl4_0core_glVertexP4uiv(gl.funcs, C.GLenum(gltype), (*C.GLuint)(unsafe.Pointer(&value[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glVertexP4ui.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glVertexP4ui.xml
 func (gl *GL) VertexP4ui(gltype glbase.Enum, value uint32) {
 	C.gl4_0core_glVertexP4ui(gl.funcs, C.GLenum(gltype), C.GLuint(value))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glVertexP3uiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glVertexP3uiv.xml
 func (gl *GL) VertexP3uiv(gltype glbase.Enum, value []uint32) {
 	C.gl4_0core_glVertexP3uiv(gl.funcs, C.GLenum(gltype), (*C.GLuint)(unsafe.Pointer(&value[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glVertexP3ui.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glVertexP3ui.xml
 func (gl *GL) VertexP3ui(gltype glbase.Enum, value uint32) {
 	C.gl4_0core_glVertexP3ui(gl.funcs, C.GLenum(gltype), C.GLuint(value))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glVertexP2uiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glVertexP2uiv.xml
 func (gl *GL) VertexP2uiv(gltype glbase.Enum, value []uint32) {
 	C.gl4_0core_glVertexP2uiv(gl.funcs, C.GLenum(gltype), (*C.GLuint)(unsafe.Pointer(&value[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glVertexP2ui.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glVertexP2ui.xml
 func (gl *GL) VertexP2ui(gltype glbase.Enum, value uint32) {
 	C.gl4_0core_glVertexP2ui(gl.funcs, C.GLenum(gltype), C.GLuint(value))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetQueryObjectui64v.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetQueryObjectui64v.xml
 func (gl *GL) GetQueryObjectui64v(id uint32, pname glbase.Enum, params []uint64) {
 	C.gl4_0core_glGetQueryObjectui64v(gl.funcs, C.GLuint(id), C.GLenum(pname), (*C.GLuint64)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetQueryObjecti64v.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetQueryObjecti64v.xml
 func (gl *GL) GetQueryObjecti64v(id uint32, pname glbase.Enum, params []int64) {
 	C.gl4_0core_glGetQueryObjecti64v(gl.funcs, C.GLuint(id), C.GLenum(pname), (*C.GLint64)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glQueryCounter.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glQueryCounter.xml
 func (gl *GL) QueryCounter(id uint32, target glbase.Enum) {
 	C.gl4_0core_glQueryCounter(gl.funcs, C.GLuint(id), C.GLenum(target))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetSamplerParameterIuiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetSamplerParameterIuiv.xml
 func (gl *GL) GetSamplerParameterIuiv(sampler uint32, pname glbase.Enum, params []uint32) {
 	C.gl4_0core_glGetSamplerParameterIuiv(gl.funcs, C.GLuint(sampler), C.GLenum(pname), (*C.GLuint)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetSamplerParameterfv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetSamplerParameterfv.xml
 func (gl *GL) GetSamplerParameterfv(sampler uint32, pname glbase.Enum, params []float32) {
 	C.gl4_0core_glGetSamplerParameterfv(gl.funcs, C.GLuint(sampler), C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetSamplerParameterIiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetSamplerParameterIiv.xml
 func (gl *GL) GetSamplerParameterIiv(sampler uint32, pname glbase.Enum, params []int32) {
 	C.gl4_0core_glGetSamplerParameterIiv(gl.funcs, C.GLuint(sampler), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetSamplerParameteriv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetSamplerParameteriv.xml
 func (gl *GL) GetSamplerParameteriv(sampler uint32, pname glbase.Enum, params []int32) {
 	C.gl4_0core_glGetSamplerParameteriv(gl.funcs, C.GLuint(sampler), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glSamplerParameterIuiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glSamplerParameterIuiv.xml
 func (gl *GL) SamplerParameterIuiv(sampler uint32, pname glbase.Enum, param []uint32) {
 	C.gl4_0core_glSamplerParameterIuiv(gl.funcs, C.GLuint(sampler), C.GLenum(pname), (*C.GLuint)(unsafe.Pointer(&param[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glSamplerParameterIiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glSamplerParameterIiv.xml
 func (gl *GL) SamplerParameterIiv(sampler uint32, pname glbase.Enum, param []int32) {
 	C.gl4_0core_glSamplerParameterIiv(gl.funcs, C.GLuint(sampler), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&param[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glSamplerParameterfv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glSamplerParameterfv.xml
 func (gl *GL) SamplerParameterfv(sampler uint32, pname glbase.Enum, param []float32) {
 	C.gl4_0core_glSamplerParameterfv(gl.funcs, C.GLuint(sampler), C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&param[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glSamplerParameterf.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glSamplerParameterf.xml
 func (gl *GL) SamplerParameterf(sampler uint32, pname glbase.Enum, param float32) {
 	C.gl4_0core_glSamplerParameterf(gl.funcs, C.GLuint(sampler), C.GLenum(pname), C.GLfloat(param))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glSamplerParameteriv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glSamplerParameteriv.xml
 func (gl *GL) SamplerParameteriv(sampler uint32, pname glbase.Enum, param []int32) {
 	C.gl4_0core_glSamplerParameteriv(gl.funcs, C.GLuint(sampler), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&param[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glSamplerParameteri.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glSamplerParameteri.xml
 func (gl *GL) SamplerParameteri(sampler uint32, pname glbase.Enum, param int32) {
 	C.gl4_0core_glSamplerParameteri(gl.funcs, C.GLuint(sampler), C.GLenum(pname), C.GLint(param))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBindSampler.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glBindSampler.xml
 func (gl *GL) BindSampler(unit, sampler uint32) {
 	C.gl4_0core_glBindSampler(gl.funcs, C.GLuint(unit), C.GLuint(sampler))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glIsSampler.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glIsSampler.xml
 func (gl *GL) IsSampler(sampler uint32) bool {
 	glresult := C.gl4_0core_glIsSampler(gl.funcs, C.GLuint(sampler))
 	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteSamplers.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDeleteSamplers.xml
 func (gl *GL) DeleteSamplers(count int, samplers []uint32) {
 	C.gl4_0core_glDeleteSamplers(gl.funcs, C.GLsizei(count), (*C.GLuint)(unsafe.Pointer(&samplers[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGenSamplers.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGenSamplers.xml
 func (gl *GL) GenSamplers(count int, samplers []uint32) {
 	C.gl4_0core_glGenSamplers(gl.funcs, C.GLsizei(count), (*C.GLuint)(unsafe.Pointer(&samplers[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetFragDataIndex.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetFragDataIndex.xml
 func (gl *GL) GetFragDataIndex(program glbase.Program, name []byte) int32 {
 	glresult := C.gl4_0core_glGetFragDataIndex(gl.funcs, C.GLuint(program), (*C.GLchar)(unsafe.Pointer(&name[0])))
 	return int32(glresult)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBindFragDataLocationIndexed.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glBindFragDataLocationIndexed.xml
 func (gl *GL) BindFragDataLocationIndexed(program glbase.Program, colorNumber, index uint32, name []byte) {
 	C.gl4_0core_glBindFragDataLocationIndexed(gl.funcs, C.GLuint(program), C.GLuint(colorNumber), C.GLuint(index), (*C.GLchar)(unsafe.Pointer(&name[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribDivisor.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glVertexAttribDivisor.xml
 func (gl *GL) VertexAttribDivisor(index glbase.Attrib, divisor uint32) {
 	C.gl4_0core_glVertexAttribDivisor(gl.funcs, C.GLuint(index), C.GLuint(divisor))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetQueryIndexediv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetQueryIndexediv.xml
 func (gl *GL) GetQueryIndexediv(target glbase.Enum, index uint32, pname glbase.Enum, params []int32) {
 	C.gl4_0core_glGetQueryIndexediv(gl.funcs, C.GLenum(target), C.GLuint(index), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glEndQueryIndexed.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glEndQueryIndexed.xml
 func (gl *GL) EndQueryIndexed(target glbase.Enum, index uint32) {
 	C.gl4_0core_glEndQueryIndexed(gl.funcs, C.GLenum(target), C.GLuint(index))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBeginQueryIndexed.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glBeginQueryIndexed.xml
 func (gl *GL) BeginQueryIndexed(target glbase.Enum, index, id uint32) {
 	C.gl4_0core_glBeginQueryIndexed(gl.funcs, C.GLenum(target), C.GLuint(index), C.GLuint(id))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDrawTransformFeedbackStream.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDrawTransformFeedbackStream.xml
 func (gl *GL) DrawTransformFeedbackStream(mode glbase.Enum, id, stream uint32) {
 	C.gl4_0core_glDrawTransformFeedbackStream(gl.funcs, C.GLenum(mode), C.GLuint(id), C.GLuint(stream))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDrawTransformFeedback.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDrawTransformFeedback.xml
 func (gl *GL) DrawTransformFeedback(mode glbase.Enum, id uint32) {
 	C.gl4_0core_glDrawTransformFeedback(gl.funcs, C.GLenum(mode), C.GLuint(id))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glResumeTransformFeedback.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glResumeTransformFeedback.xml
 func (gl *GL) ResumeTransformFeedback() {
 	C.gl4_0core_glResumeTransformFeedback(gl.funcs)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glPauseTransformFeedback.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glPauseTransformFeedback.xml
 func (gl *GL) PauseTransformFeedback() {
 	C.gl4_0core_glPauseTransformFeedback(gl.funcs)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glIsTransformFeedback.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glIsTransformFeedback.xml
 func (gl *GL) IsTransformFeedback(id uint32) bool {
 	glresult := C.gl4_0core_glIsTransformFeedback(gl.funcs, C.GLuint(id))
 	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGenTransformFeedbacks.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGenTransformFeedbacks.xml
 func (gl *GL) GenTransformFeedbacks(n int, ids []uint32) {
 	C.gl4_0core_glGenTransformFeedbacks(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&ids[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteTransformFeedbacks.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDeleteTransformFeedbacks.xml
 func (gl *GL) DeleteTransformFeedbacks(n int, ids []uint32) {
 	C.gl4_0core_glDeleteTransformFeedbacks(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&ids[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBindTransformFeedback.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glBindTransformFeedback.xml
 func (gl *GL) BindTransformFeedback(target glbase.Enum, id uint32) {
 	C.gl4_0core_glBindTransformFeedback(gl.funcs, C.GLenum(target), C.GLuint(id))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glPatchParameterfv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glPatchParameterfv.xml
 func (gl *GL) PatchParameterfv(pname glbase.Enum, values []float32) {
 	C.gl4_0core_glPatchParameterfv(gl.funcs, C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&values[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glPatchParameteri.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glPatchParameteri.xml
 func (gl *GL) PatchParameteri(pname glbase.Enum, value int32) {
 	C.gl4_0core_glPatchParameteri(gl.funcs, C.GLenum(pname), C.GLint(value))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetProgramStageiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetProgramStageiv.xml
 func (gl *GL) GetProgramStageiv(program glbase.Program, shadertype, pname glbase.Enum, values []int32) {
 	C.gl4_0core_glGetProgramStageiv(gl.funcs, C.GLuint(program), C.GLenum(shadertype), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&values[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetUniformSubroutineuiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetUniformSubroutineuiv.xml
 func (gl *GL) GetUniformSubroutineuiv(shadertype glbase.Enum, location glbase.Uniform, params []uint32) {
 	C.gl4_0core_glGetUniformSubroutineuiv(gl.funcs, C.GLenum(shadertype), C.GLint(location), (*C.GLuint)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformSubroutinesuiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glUniformSubroutinesuiv.xml
 func (gl *GL) UniformSubroutinesuiv(shadertype glbase.Enum, count int, value []uint32) {
 	C.gl4_0core_glUniformSubroutinesuiv(gl.funcs, C.GLenum(shadertype), C.GLsizei(count), (*C.GLuint)(unsafe.Pointer(&value[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetActiveSubroutineName.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetActiveSubroutineName.xml
 func (gl *GL) GetActiveSubroutineName(program glbase.Program, shadertype glbase.Enum, index uint32, bufSize int32, length []int32, name []byte) {
 	C.gl4_0core_glGetActiveSubroutineName(gl.funcs, C.GLuint(program), C.GLenum(shadertype), C.GLuint(index), C.GLsizei(bufSize), (*C.GLsizei)(unsafe.Pointer(&length[0])), (*C.GLchar)(unsafe.Pointer(&name[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetActiveSubroutineUniformName.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetActiveSubroutineUniformName.xml
 func (gl *GL) GetActiveSubroutineUniformName(program glbase.Program, shadertype glbase.Enum, index uint32, bufSize int32, length []int32, name []byte) {
 	C.gl4_0core_glGetActiveSubroutineUniformName(gl.funcs, C.GLuint(program), C.GLenum(shadertype), C.GLuint(index), C.GLsizei(bufSize), (*C.GLsizei)(unsafe.Pointer(&length[0])), (*C.GLchar)(unsafe.Pointer(&name[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetActiveSubroutineUniformiv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetActiveSubroutineUniformiv.xml
 func (gl *GL) GetActiveSubroutineUniformiv(program glbase.Program, shadertype glbase.Enum, index uint32, pname glbase.Enum, values []int32) {
 	C.gl4_0core_glGetActiveSubroutineUniformiv(gl.funcs, C.GLuint(program), C.GLenum(shadertype), C.GLuint(index), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&values[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetSubroutineIndex.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetSubroutineIndex.xml
 func (gl *GL) GetSubroutineIndex(program glbase.Program, shadertype glbase.Enum, name []byte) uint32 {
 	glresult := C.gl4_0core_glGetSubroutineIndex(gl.funcs, C.GLuint(program), C.GLenum(shadertype), (*C.GLchar)(unsafe.Pointer(&name[0])))
 	return uint32(glresult)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetSubroutineUniformLocation.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetSubroutineUniformLocation.xml
 func (gl *GL) GetSubroutineUniformLocation(program glbase.Program, shadertype glbase.Enum, name []byte) int32 {
 	glresult := C.gl4_0core_glGetSubroutineUniformLocation(gl.funcs, C.GLuint(program), C.GLenum(shadertype), (*C.GLchar)(unsafe.Pointer(&name[0])))
 	return int32(glresult)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetUniformdv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glGetUniformdv.xml
 func (gl *GL) GetUniformdv(program glbase.Program, location glbase.Uniform, params []float64) {
 	C.gl4_0core_glGetUniformdv(gl.funcs, C.GLuint(program), C.GLint(location), (*C.GLdouble)(unsafe.Pointer(&params[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix4x3dv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glUniformMatrix4x3dv.xml
 func (gl *GL) UniformMatrix4x3dv(location glbase.Uniform, count int, transpose bool, value []float64) {
 	C.gl4_0core_glUniformMatrix4x3dv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLdouble)(unsafe.Pointer(&value[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix4x2dv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glUniformMatrix4x2dv.xml
 func (gl *GL) UniformMatrix4x2dv(location glbase.Uniform, count int, transpose bool, value []float64) {
 	C.gl4_0core_glUniformMatrix4x2dv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLdouble)(unsafe.Pointer(&value[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix3x4dv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glUniformMatrix3x4dv.xml
 func (gl *GL) UniformMatrix3x4dv(location glbase.Uniform, count int, transpose bool, value []float64) {
 	C.gl4_0core_glUniformMatrix3x4dv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLdouble)(unsafe.Pointer(&value[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix3x2dv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glUniformMatrix3x2dv.xml
 func (gl *GL) UniformMatrix3x2dv(location glbase.Uniform, count int, transpose bool, value []float64) {
 	C.gl4_0core_glUniformMatrix3x2dv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLdouble)(unsafe.Pointer(&value[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix2x4dv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glUniformMatrix2x4dv.xml
 func (gl *GL) UniformMatrix2x4dv(location glbase.Uniform, count int, transpose bool, value []float64) {
 	C.gl4_0core_glUniformMatrix2x4dv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLdouble)(unsafe.Pointer(&value[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix2x3dv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glUniformMatrix2x3dv.xml
 func (gl *GL) UniformMatrix2x3dv(location glbase.Uniform, count int, transpose bool, value []float64) {
 	C.gl4_0core_glUniformMatrix2x3dv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLdouble)(unsafe.Pointer(&value[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix4dv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glUniformMatrix4dv.xml
 func (gl *GL) UniformMatrix4dv(location glbase.Uniform, count int, transpose bool, value []float64) {
 	C.gl4_0core_glUniformMatrix4dv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLdouble)(unsafe.Pointer(&value[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix3dv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glUniformMatrix3dv.xml
 func (gl *GL) UniformMatrix3dv(location glbase.Uniform, count int, transpose bool, value []float64) {
 	C.gl4_0core_glUniformMatrix3dv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLdouble)(unsafe.Pointer(&value[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix2dv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glUniformMatrix2dv.xml
 func (gl *GL) UniformMatrix2dv(location glbase.Uniform, count int, transpose bool, value []float64) {
 	C.gl4_0core_glUniformMatrix2dv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLdouble)(unsafe.Pointer(&value[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform4dv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glUniform4dv.xml
 func (gl *GL) Uniform4dv(location glbase.Uniform, count int, value []float64) {
 	C.gl4_0core_glUniform4dv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLdouble)(unsafe.Pointer(&value[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform3dv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glUniform3dv.xml
 func (gl *GL) Uniform3dv(location glbase.Uniform, count int, value []float64) {
 	C.gl4_0core_glUniform3dv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLdouble)(unsafe.Pointer(&value[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform2dv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glUniform2dv.xml
 func (gl *GL) Uniform2dv(location glbase.Uniform, count int, value []float64) {
 	C.gl4_0core_glUniform2dv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLdouble)(unsafe.Pointer(&value[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform1dv.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glUniform1dv.xml
 func (gl *GL) Uniform1dv(location glbase.Uniform, count int, value []float64) {
 	C.gl4_0core_glUniform1dv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLdouble)(unsafe.Pointer(&value[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform4d.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glUniform4d.xml
 func (gl *GL) Uniform4d(location glbase.Uniform, v0, v1, v2, v3 float64) {
 	C.gl4_0core_glUniform4d(gl.funcs, C.GLint(location), C.GLdouble(v0), C.GLdouble(v1), C.GLdouble(v2), C.GLdouble(v3))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform3d.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glUniform3d.xml
 func (gl *GL) Uniform3d(location glbase.Uniform, v0, v1, v2 float64) {
 	C.gl4_0core_glUniform3d(gl.funcs, C.GLint(location), C.GLdouble(v0), C.GLdouble(v1), C.GLdouble(v2))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform2d.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glUniform2d.xml
 func (gl *GL) Uniform2d(location glbase.Uniform, v0, v1 float64) {
 	C.gl4_0core_glUniform2d(gl.funcs, C.GLint(location), C.GLdouble(v0), C.GLdouble(v1))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform1d.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glUniform1d.xml
 func (gl *GL) Uniform1d(location glbase.Uniform, v0 float64) {
 	C.gl4_0core_glUniform1d(gl.funcs, C.GLint(location), C.GLdouble(v0))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDrawElementsIndirect.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDrawElementsIndirect.xml
 func (gl *GL) DrawElementsIndirect(mode, gltype glbase.Enum, indirect interface{}) {
 	var indirect_ptr unsafe.Pointer
 	var indirect_v = reflect.ValueOf(indirect)
@@ -4249,7 +4139,7 @@ func (gl *GL) DrawElementsIndirect(mode, gltype glbase.Enum, indirect interface{
 	C.gl4_0core_glDrawElementsIndirect(gl.funcs, C.GLenum(mode), C.GLenum(gltype), indirect_ptr)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDrawArraysIndirect.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glDrawArraysIndirect.xml
 func (gl *GL) DrawArraysIndirect(mode glbase.Enum, indirect interface{}) {
 	var indirect_ptr unsafe.Pointer
 	var indirect_v = reflect.ValueOf(indirect)
@@ -4262,27 +4152,27 @@ func (gl *GL) DrawArraysIndirect(mode glbase.Enum, indirect interface{}) {
 	C.gl4_0core_glDrawArraysIndirect(gl.funcs, C.GLenum(mode), indirect_ptr)
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBlendFuncSeparatei.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glBlendFuncSeparatei.xml
 func (gl *GL) BlendFuncSeparatei(buf uint32, srcRGB, dstRGB, srcAlpha, dstAlpha glbase.Enum) {
 	C.gl4_0core_glBlendFuncSeparatei(gl.funcs, C.GLuint(buf), C.GLenum(srcRGB), C.GLenum(dstRGB), C.GLenum(srcAlpha), C.GLenum(dstAlpha))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBlendFunci.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glBlendFunci.xml
 func (gl *GL) BlendFunci(buf uint32, src, dst glbase.Enum) {
 	C.gl4_0core_glBlendFunci(gl.funcs, C.GLuint(buf), C.GLenum(src), C.GLenum(dst))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBlendEquationSeparatei.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glBlendEquationSeparatei.xml
 func (gl *GL) BlendEquationSeparatei(buf uint32, modeRGB, modeAlpha glbase.Enum) {
 	C.gl4_0core_glBlendEquationSeparatei(gl.funcs, C.GLuint(buf), C.GLenum(modeRGB), C.GLenum(modeAlpha))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBlendEquationi.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glBlendEquationi.xml
 func (gl *GL) BlendEquationi(buf uint32, mode glbase.Enum) {
 	C.gl4_0core_glBlendEquationi(gl.funcs, C.GLuint(buf), C.GLenum(mode))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glMinSampleShading.xml
+// https://www.opengl.org/sdk/docs/man4/xhtml/glMinSampleShading.xml
 func (gl *GL) MinSampleShading(value float32) {
 	C.gl4_0core_glMinSampleShading(gl.funcs, C.GLfloat(value))
 }

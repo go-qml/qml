@@ -976,8 +976,6 @@ func (gl *GL) Viewport(x, y, width, height int) {
 //
 // GL.INVALID_OPERATION is generated if DepthRange is executed between the
 // execution of Begin and the corresponding execution of End.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDepthRange.xml
 func (gl *GL) DepthRange(nearVal, farVal float64) {
 	C.gl2_0_glDepthRange(gl.funcs, C.GLdouble(nearVal), C.GLdouble(farVal))
 }
@@ -1627,8 +1625,6 @@ func (gl *GL) BufferSubData(target glbase.Enum, offset, size int, data interface
 // GL.INVALID_OPERATION is generated if the reserved buffer object name 0 is
 // bound to target.  GL.OUT_OF_MEMORY is generated if the GL is unable to
 // create a data store with the specified size.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBufferData.xml
 func (gl *GL) BufferData(target glbase.Enum, size int, data interface{}, usage glbase.Enum) {
 	var data_ptr unsafe.Pointer
 	var data_v = reflect.ValueOf(data)
@@ -1666,8 +1662,6 @@ func (gl *GL) IsBuffer(buffer glbase.Buffer) bool {
 // and the corresponding execution of End.
 //
 // GenBuffers is available in GL version 1.5 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGenBuffers.xml
 func (gl *GL) GenBuffers(n int) []glbase.Buffer {
 	buffers := make([]glbase.Buffer, n)
 	C.gl2_0_glGenBuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&buffers[0])))
@@ -1758,8 +1752,6 @@ func (gl *GL) DeleteBuffers(n int, buffers []uint32) {
 // between the execution of Begin and the corresponding execution of End.
 //
 // BindBuffer is available in GL version 1.5 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBindBuffer.xml
 func (gl *GL) BindBuffer(target glbase.Enum, buffer glbase.Buffer) {
 	C.gl2_0_glBindBuffer(gl.funcs, C.GLenum(target), C.GLuint(buffer))
 }
@@ -1834,8 +1826,6 @@ func (gl *GL) GenQueries(n int, ids []uint32) {
 // GL.INVALID_VALUE is generated if index is greater than or equal to
 // GL.MAX_VERTEX_ATTRIBS. GL.INVALID_VALUE is generated if size is not 1, 2,
 // 3, or 4. GL.INVALID_VALUE is generated if stride is negative.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribPointer.xml
 func (gl *GL) VertexAttribPointer(index glbase.Attrib, size int, gltype glbase.Enum, normalized bool, stride, offset int) {
 	// What an awkward API. Just add a new function next time, please.
 	offset_ptr := unsafe.Pointer(uintptr(offset))
@@ -1850,8 +1840,8 @@ func (gl *GL) ValidateProgram(program glbase.Program) {
 // UniformMatrix4fv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// UniformMatrix4fv operates on the program object that was made part
-// of current state by calling UseProgram.
+// UniformMatrix4fv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions UniformMatrix{2|3|4|2x3|3x2|2x4|4x2|3x4|4x3}fv are used to
 // modify a matrix or an array of matrices. The numbers in the function name
@@ -1873,8 +1863,6 @@ func (gl *GL) ValidateProgram(program glbase.Program) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix4fv.xml
 func (gl *GL) UniformMatrix4fv(location glbase.Uniform, transpose bool, value []float32) {
 	if len(value) == 0 {
 		return
@@ -1889,8 +1877,8 @@ func (gl *GL) UniformMatrix4fv(location glbase.Uniform, transpose bool, value []
 // UniformMatrix3fv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// UniformMatrix3fv operates on the program object that was made part
-// of current state by calling UseProgram.
+// UniformMatrix3fv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions UniformMatrix{2|3|4|2x3|3x2|2x4|4x2|3x4|4x3}fv are used to
 // modify a matrix or an array of matrices. The numbers in the function name
@@ -1912,8 +1900,6 @@ func (gl *GL) UniformMatrix4fv(location glbase.Uniform, transpose bool, value []
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix3fv.xml
 func (gl *GL) UniformMatrix3fv(location glbase.Uniform, transpose bool, value []float32) {
 	if len(value) == 0 {
 		return
@@ -1928,8 +1914,8 @@ func (gl *GL) UniformMatrix3fv(location glbase.Uniform, transpose bool, value []
 // UniformMatrix2fv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// UniformMatrix2fv operates on the program object that was made part
-// of current state by calling UseProgram.
+// UniformMatrix2fv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions UniformMatrix{2|3|4|2x3|3x2|2x4|4x2|3x4|4x3}fv are used to
 // modify a matrix or an array of matrices. The numbers in the function name
@@ -1951,8 +1937,6 @@ func (gl *GL) UniformMatrix3fv(location glbase.Uniform, transpose bool, value []
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix2fv.xml
 func (gl *GL) UniformMatrix2fv(location glbase.Uniform, transpose bool, value []float32) {
 	if len(value) == 0 {
 		return
@@ -1967,8 +1951,8 @@ func (gl *GL) UniformMatrix2fv(location glbase.Uniform, transpose bool, value []
 // Uniform4iv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// Uniform4iv operates on the program object that was made part
-// of current state by calling UseProgram.
+// Uniform4iv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
 // uniform variable or a uniform variable array. These functions receive a
@@ -1996,8 +1980,6 @@ func (gl *GL) UniformMatrix2fv(location glbase.Uniform, transpose bool, value []
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform4iv.xml
 func (gl *GL) Uniform4iv(location glbase.Uniform, value []int32) {
 	if len(value) == 0 {
 		return
@@ -2012,8 +1994,8 @@ func (gl *GL) Uniform4iv(location glbase.Uniform, value []int32) {
 // Uniform3iv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// Uniform3iv operates on the program object that was made part
-// of current state by calling UseProgram.
+// Uniform3iv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
 // uniform variable or a uniform variable array. These functions receive a
@@ -2041,8 +2023,6 @@ func (gl *GL) Uniform4iv(location glbase.Uniform, value []int32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform3iv.xml
 func (gl *GL) Uniform3iv(location glbase.Uniform, value []int32) {
 	if len(value) == 0 {
 		return
@@ -2057,8 +2037,8 @@ func (gl *GL) Uniform3iv(location glbase.Uniform, value []int32) {
 // Uniform2iv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// Uniform2iv operates on the program object that was made part
-// of current state by calling UseProgram.
+// Uniform2iv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
 // uniform variable or a uniform variable array. These functions receive a
@@ -2086,8 +2066,6 @@ func (gl *GL) Uniform3iv(location glbase.Uniform, value []int32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform2iv.xml
 func (gl *GL) Uniform2iv(location glbase.Uniform, value []int32) {
 	if len(value) == 0 {
 		return
@@ -2102,8 +2080,8 @@ func (gl *GL) Uniform2iv(location glbase.Uniform, value []int32) {
 // Uniform1iv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// Uniform1iv operates on the program object that was made part
-// of current state by calling UseProgram.
+// Uniform1iv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
 // uniform variable or a uniform variable array. These functions receive a
@@ -2131,8 +2109,6 @@ func (gl *GL) Uniform2iv(location glbase.Uniform, value []int32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform1iv.xml
 func (gl *GL) Uniform1iv(location glbase.Uniform, value []int32) {
 	if len(value) == 0 {
 		return
@@ -2144,8 +2120,8 @@ func (gl *GL) Uniform1iv(location glbase.Uniform, value []int32) {
 // Uniform4fv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// Uniform4fv operates on the program object that was made part
-// of current state by calling UseProgram.
+// Uniform4fv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
 // uniform variable or a uniform variable array. These functions receive a
@@ -2173,8 +2149,6 @@ func (gl *GL) Uniform1iv(location glbase.Uniform, value []int32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform4fv.xml
 func (gl *GL) Uniform4fv(location glbase.Uniform, value []float32) {
 	if len(value) == 0 {
 		return
@@ -2189,8 +2163,8 @@ func (gl *GL) Uniform4fv(location glbase.Uniform, value []float32) {
 // Uniform3fv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// Uniform3fv operates on the program object that was made part
-// of current state by calling UseProgram.
+// Uniform3fv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
 // uniform variable or a uniform variable array. These functions receive a
@@ -2218,8 +2192,6 @@ func (gl *GL) Uniform4fv(location glbase.Uniform, value []float32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform3fv.xml
 func (gl *GL) Uniform3fv(location glbase.Uniform, value []float32) {
 	if len(value) == 0 {
 		return
@@ -2234,8 +2206,8 @@ func (gl *GL) Uniform3fv(location glbase.Uniform, value []float32) {
 // Uniform2fv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// Uniform2fv operates on the program object that was made part
-// of current state by calling UseProgram.
+// Uniform2fv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
 // uniform variable or a uniform variable array. These functions receive a
@@ -2263,8 +2235,6 @@ func (gl *GL) Uniform3fv(location glbase.Uniform, value []float32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform2fv.xml
 func (gl *GL) Uniform2fv(location glbase.Uniform, value []float32) {
 	if len(value) == 0 {
 		return
@@ -2279,8 +2249,8 @@ func (gl *GL) Uniform2fv(location glbase.Uniform, value []float32) {
 // Uniform1fv modifies the value of a uniform variable or a uniform
 // variable array. The location of the uniform variable to be modified is
 // specified by location, which should be a value returned by GetUniformLocation.
-// Uniform1fv operates on the program object that was made part
-// of current state by calling UseProgram.
+// Uniform1fv operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
 // uniform variable or a uniform variable array. These functions receive a
@@ -2308,8 +2278,6 @@ func (gl *GL) Uniform2fv(location glbase.Uniform, value []float32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform1fv.xml
 func (gl *GL) Uniform1fv(location glbase.Uniform, value []float32) {
 	if len(value) == 0 {
 		return
@@ -2321,8 +2289,8 @@ func (gl *GL) Uniform1fv(location glbase.Uniform, value []float32) {
 // Uniform4i modifies the value of a single uniform variable.
 // The location of the uniform variable to be modified is specified by
 // location, which should be a value returned by GetUniformLocation.
-// Uniform4i operates on the program object that was made part of current
-// state by calling UseProgram.
+// Uniform4i operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
 // uniform variable specified by location using the values passed as
@@ -2353,8 +2321,6 @@ func (gl *GL) Uniform1fv(location glbase.Uniform, value []float32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform4i.xml
 func (gl *GL) Uniform4i(location glbase.Uniform, v0, v1, v2, v3 int32) {
 	C.gl2_0_glUniform4i(gl.funcs, C.GLint(location), C.GLint(v0), C.GLint(v1), C.GLint(v2), C.GLint(v3))
 }
@@ -2362,8 +2328,8 @@ func (gl *GL) Uniform4i(location glbase.Uniform, v0, v1, v2, v3 int32) {
 // Uniform3i modifies the value of a single uniform variable.
 // The location of the uniform variable to be modified is specified by
 // location, which should be a value returned by GetUniformLocation.
-// Uniform3i operates on the program object that was made part of current
-// state by calling UseProgram.
+// Uniform3i operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
 // uniform variable specified by location using the values passed as
@@ -2394,8 +2360,6 @@ func (gl *GL) Uniform4i(location glbase.Uniform, v0, v1, v2, v3 int32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform3i.xml
 func (gl *GL) Uniform3i(location glbase.Uniform, v0, v1, v2 int32) {
 	C.gl2_0_glUniform3i(gl.funcs, C.GLint(location), C.GLint(v0), C.GLint(v1), C.GLint(v2))
 }
@@ -2403,8 +2367,8 @@ func (gl *GL) Uniform3i(location glbase.Uniform, v0, v1, v2 int32) {
 // Uniform2i modifies the value of a single uniform variable.
 // The location of the uniform variable to be modified is specified by
 // location, which should be a value returned by GetUniformLocation.
-// Uniform2i operates on the program object that was made part of current
-// state by calling UseProgram.
+// Uniform2i operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
 // uniform variable specified by location using the values passed as
@@ -2435,8 +2399,6 @@ func (gl *GL) Uniform3i(location glbase.Uniform, v0, v1, v2 int32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform2i.xml
 func (gl *GL) Uniform2i(location glbase.Uniform, v0, v1 int32) {
 	C.gl2_0_glUniform2i(gl.funcs, C.GLint(location), C.GLint(v0), C.GLint(v1))
 }
@@ -2444,8 +2406,8 @@ func (gl *GL) Uniform2i(location glbase.Uniform, v0, v1 int32) {
 // Uniform1i modifies the value of a single uniform variable.
 // The location of the uniform variable to be modified is specified by
 // location, which should be a value returned by GetUniformLocation.
-// Uniform1i operates on the program object that was made part of current
-// state by calling UseProgram.
+// Uniform1i operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
 // uniform variable specified by location using the values passed as
@@ -2476,8 +2438,6 @@ func (gl *GL) Uniform2i(location glbase.Uniform, v0, v1 int32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform1i.xml
 func (gl *GL) Uniform1i(location glbase.Uniform, v0 int32) {
 	C.gl2_0_glUniform1i(gl.funcs, C.GLint(location), C.GLint(v0))
 }
@@ -2485,8 +2445,8 @@ func (gl *GL) Uniform1i(location glbase.Uniform, v0 int32) {
 // Uniform4f modifies the value of a single uniform variable.
 // The location of the uniform variable to be modified is specified by
 // location, which should be a value returned by GetUniformLocation.
-// Uniform4f operates on the program object that was made part of current
-// state by calling UseProgram.
+// Uniform4f operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
 // uniform variable specified by location using the values passed as
@@ -2517,8 +2477,6 @@ func (gl *GL) Uniform1i(location glbase.Uniform, v0 int32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform4f.xml
 func (gl *GL) Uniform4f(location glbase.Uniform, v0, v1, v2, v3 float32) {
 	C.gl2_0_glUniform4f(gl.funcs, C.GLint(location), C.GLfloat(v0), C.GLfloat(v1), C.GLfloat(v2), C.GLfloat(v3))
 }
@@ -2526,8 +2484,8 @@ func (gl *GL) Uniform4f(location glbase.Uniform, v0, v1, v2, v3 float32) {
 // Uniform3f modifies the value of a single uniform variable.
 // The location of the uniform variable to be modified is specified by
 // location, which should be a value returned by GetUniformLocation.
-// Uniform3f operates on the program object that was made part of current
-// state by calling UseProgram.
+// Uniform3f operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
 // uniform variable specified by location using the values passed as
@@ -2558,8 +2516,6 @@ func (gl *GL) Uniform4f(location glbase.Uniform, v0, v1, v2, v3 float32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform3f.xml
 func (gl *GL) Uniform3f(location glbase.Uniform, v0, v1, v2 float32) {
 	C.gl2_0_glUniform3f(gl.funcs, C.GLint(location), C.GLfloat(v0), C.GLfloat(v1), C.GLfloat(v2))
 }
@@ -2567,8 +2523,8 @@ func (gl *GL) Uniform3f(location glbase.Uniform, v0, v1, v2 float32) {
 // Uniform2f modifies the value of a single uniform variable.
 // The location of the uniform variable to be modified is specified by
 // location, which should be a value returned by GetUniformLocation.
-// Uniform2f operates on the program object that was made part of current
-// state by calling UseProgram.
+// Uniform2f operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
 // uniform variable specified by location using the values passed as
@@ -2599,8 +2555,6 @@ func (gl *GL) Uniform3f(location glbase.Uniform, v0, v1, v2 float32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform2f.xml
 func (gl *GL) Uniform2f(location glbase.Uniform, v0, v1 float32) {
 	C.gl2_0_glUniform2f(gl.funcs, C.GLint(location), C.GLfloat(v0), C.GLfloat(v1))
 }
@@ -2608,8 +2562,8 @@ func (gl *GL) Uniform2f(location glbase.Uniform, v0, v1 float32) {
 // Uniform1f modifies the value of a single uniform variable.
 // The location of the uniform variable to be modified is specified by
 // location, which should be a value returned by GetUniformLocation.
-// Uniform1f operates on the program object that was made part of current
-// state by calling UseProgram.
+// Uniform1f operates on the program object that was made part of
+// current state by calling UseProgram.
 //
 // The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
 // uniform variable specified by location using the values passed as
@@ -2640,8 +2594,6 @@ func (gl *GL) Uniform2f(location glbase.Uniform, v0, v1 float32) {
 // values assigned to them by a call to Uniform* until the next successful
 // link operation occurs on the program object, when they are once again
 // initialized to 0.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform1f.xml
 func (gl *GL) Uniform1f(location glbase.Uniform, v0 float32) {
 	C.gl2_0_glUniform1f(gl.funcs, C.GLint(location), C.GLfloat(v0))
 }
@@ -2745,8 +2697,6 @@ func (gl *GL) Uniform1f(location glbase.Uniform, v0 float32) {
 // corresponding execution of End.
 //
 // UseProgram is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glUseProgram.xml
 func (gl *GL) UseProgram(program glbase.Program) {
 	C.gl2_0_glUseProgram(gl.funcs, C.GLuint(program))
 }
@@ -2761,8 +2711,6 @@ func (gl *GL) UseProgram(program glbase.Program) {
 // execution of Begin and the corresponding execution of End.
 //
 // ShaderSource is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glShaderSource.xml
 func (gl *GL) ShaderSource(shader glbase.Shader, source ...string) {
 	count := len(source)
 	length := make([]int32, count)
@@ -2874,8 +2822,6 @@ func (gl *GL) ShaderSource(shader glbase.Shader, source ...string) {
 // between the execution of Begin and the corresponding execution of End.
 //
 // LinkProgram is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glLinkProgram.xml
 func (gl *GL) LinkProgram(program glbase.Program) {
 	C.gl2_0_glLinkProgram(gl.funcs, C.GLuint(program))
 }
@@ -2950,8 +2896,6 @@ func (gl *GL) IsProgram(program glbase.Program) bool {
 // is GL.CURRENT_VERTEX_ATTRIB.
 //
 // GetVertexAttribiv is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetVertexAttribiv.xml
 func (gl *GL) GetVertexAttribiv(index glbase.Attrib, pname glbase.Enum, params []int32) {
 	var params_c [4]int32
 	C.gl2_0_glGetVertexAttribiv(gl.funcs, C.GLuint(index), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params_c[0])))
@@ -3016,8 +2960,6 @@ func (gl *GL) GetVertexAttribiv(index glbase.Attrib, pname glbase.Enum, params [
 // is GL.CURRENT_VERTEX_ATTRIB.
 //
 // GetVertexAttribfv is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetVertexAttribfv.xml
 func (gl *GL) GetVertexAttribfv(index glbase.Attrib, pname glbase.Enum, params []float32) {
 	var params_c [4]float32
 	C.gl2_0_glGetVertexAttribfv(gl.funcs, C.GLuint(index), C.GLenum(pname), (*C.GLfloat)(unsafe.Pointer(&params_c[0])))
@@ -3082,8 +3024,6 @@ func (gl *GL) GetVertexAttribfv(index glbase.Attrib, pname glbase.Enum, params [
 // is GL.CURRENT_VERTEX_ATTRIB.
 //
 // GetVertexAttribdv is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetVertexAttribdv.xml
 func (gl *GL) GetVertexAttribdv(index glbase.Attrib, pname glbase.Enum, params []float64) {
 	var params_c [4]float64
 	C.gl2_0_glGetVertexAttribdv(gl.funcs, C.GLuint(index), C.GLenum(pname), (*C.GLdouble)(unsafe.Pointer(&params_c[0])))
@@ -3121,8 +3061,6 @@ func (gl *GL) GetVertexAttribdv(index glbase.Attrib, pname glbase.Enum, params [
 // End.
 //
 // GetUniformiv is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetUniformiv.xml
 func (gl *GL) GetUniformiv(program glbase.Program, location glbase.Uniform, params []int32) {
 	var params_c [4]int32
 	C.gl2_0_glGetUniformiv(gl.funcs, C.GLuint(program), C.GLint(location), (*C.GLint)(unsafe.Pointer(&params_c[0])))
@@ -3160,8 +3098,6 @@ func (gl *GL) GetUniformiv(program glbase.Program, location glbase.Uniform, para
 // End.
 //
 // GetUniformfv is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetUniformfv.xml
 func (gl *GL) GetUniformfv(program glbase.Program, location glbase.Uniform, params []float32) {
 	var params_c [4]float32
 	C.gl2_0_glGetUniformfv(gl.funcs, C.GLuint(program), C.GLint(location), (*C.GLfloat)(unsafe.Pointer(&params_c[0])))
@@ -3203,8 +3139,6 @@ func (gl *GL) GetUniformfv(program glbase.Program, location glbase.Uniform, para
 // between the execution of Begin and the corresponding execution of End.
 //
 // GetUniformLocation is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetUniformLocation.xml
 func (gl *GL) GetUniformLocation(program glbase.Program, name string) glbase.Uniform {
 	name_cstr := C.CString(name)
 	glresult := C.gl2_0_glGetUniformLocation(gl.funcs, C.GLuint(program), (*C.GLchar)(name_cstr))
@@ -3241,8 +3175,6 @@ func (gl *GL) GetShaderSource(shader glbase.Shader, bufSize int32, length []int3
 // between the execution of Begin and the corresponding execution of End.
 //
 // GetShaderInfoLog is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetShaderInfoLog.xml
 func (gl *GL) GetShaderInfoLog(shader glbase.Shader) []byte {
 	var params [1]int32
 	var length int32
@@ -3288,8 +3220,6 @@ func (gl *GL) GetShaderInfoLog(shader glbase.Shader) []byte {
 // between the execution of Begin and the corresponding execution of End.
 //
 // GetShaderiv is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetShaderiv.xml
 func (gl *GL) GetShaderiv(shader glbase.Shader, pname glbase.Enum, params []int32) {
 	C.gl2_0_glGetShaderiv(gl.funcs, C.GLuint(shader), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
@@ -3331,8 +3261,6 @@ func (gl *GL) GetProgramiv(program glbase.Program, pname glbase.Enum, params []i
 // corresponding execution of End.
 //
 // GetAttribLocation is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGetAttribLocation.xml
 func (gl *GL) GetAttribLocation(program glbase.Program, name string) glbase.Attrib {
 	name_cstr := C.CString(name)
 	glresult := C.gl2_0_glGetAttribLocation(gl.funcs, C.GLuint(program), (*C.GLchar)(name_cstr))
@@ -3409,8 +3337,6 @@ func (gl *GL) DeleteProgram(program glbase.Program) {
 // execution of Begin and the corresponding execution of End.
 //
 // CreateShader is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glCreateShader.xml
 func (gl *GL) CreateShader(gltype glbase.Enum) glbase.Shader {
 	glresult := C.gl2_0_glCreateShader(gl.funcs, C.GLenum(gltype))
 	return glbase.Shader(glresult)
@@ -3449,8 +3375,6 @@ func (gl *GL) CreateShader(gltype glbase.Enum) glbase.Shader {
 // between the execution of Begin and the corresponding execution of End.
 //
 // CreateProgram is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glCreateProgram.xml
 func (gl *GL) CreateProgram() glbase.Program {
 	glresult := C.gl2_0_glCreateProgram(gl.funcs)
 	return glbase.Program(glresult)
@@ -3475,8 +3399,6 @@ func (gl *GL) CreateProgram() glbase.Program {
 // between the execution of Begin and the corresponding execution of End.
 //
 // CompileShader is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glCompileShader.xml
 func (gl *GL) CompileShader(shader glbase.Shader) {
 	C.gl2_0_glCompileShader(gl.funcs, C.GLuint(shader))
 }
@@ -3550,8 +3472,6 @@ func (gl *GL) CompileShader(shader glbase.Shader) {
 // between the execution of Begin and the corresponding execution of End.
 //
 // BindAttribLocation is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glBindAttribLocation.xml
 func (gl *GL) BindAttribLocation(program glbase.Program, index glbase.Attrib, name string) {
 	name_cstr := C.CString(name)
 	C.gl2_0_glBindAttribLocation(gl.funcs, C.GLuint(program), C.GLuint(index), (*C.GLchar)(name_cstr))
@@ -3587,8 +3507,6 @@ func (gl *GL) BindAttribLocation(program glbase.Program, index glbase.Attrib, na
 // corresponding execution of End.
 //
 // AttachShader is available in GL version 2.0 or greater.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glAttachShader.xml
 func (gl *GL) AttachShader(program glbase.Program, shader glbase.Shader) {
 	C.gl2_0_glAttachShader(gl.funcs, C.GLuint(program), C.GLuint(shader))
 }
@@ -3703,8 +3621,6 @@ func (gl *GL) Ortho(left, right, bottom, top, zNear, zFar float64) {
 //
 // GL.INVALID_OPERATION is generated if MultMatrix is executed between the
 // execution of Begin and the corresponding execution of End.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glMultMatrixd.xml
 func (gl *GL) MultMatrixd(m []float64) {
 	if len(m) != 16 {
 		panic("parameter m must have length 16 for the 4x4 matrix")
@@ -3752,8 +3668,6 @@ func (gl *GL) MultMatrixd(m []float64) {
 //
 // GL.INVALID_OPERATION is generated if MultMatrix is executed between the
 // execution of Begin and the corresponding execution of End.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glMultMatrixf.xml
 func (gl *GL) MultMatrixf(m []float32) {
 	if len(m) != 16 {
 		panic("parameter m must have length 16 for the 4x4 matrix")
@@ -4117,8 +4031,6 @@ func (gl *GL) PopAttrib() {
 // GL.INVALID_OPERATION is generated if there is no accumulation buffer.
 // GL.INVALID_OPERATION is generated if Accum is executed between the
 // execution of Begin and the corresponding execution of End.
-//
-// https://www.opengl.org/sdk/docs/man2/xhtml/glAccum.xml
 func (gl *GL) Accum(op glbase.Enum, value float32) {
 	C.gl2_0_glAccum(gl.funcs, C.GLenum(op), C.GLfloat(value))
 }
