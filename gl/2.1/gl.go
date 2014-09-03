@@ -1828,17 +1828,41 @@ func (gl *GL) GenQueries(n int32, ids []uint32) {
 	C.gl2_1_glGenQueries(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&ids[0])))
 }
 
+// VertexAttribPointer specifies the location and data format of the array
+// of generic vertex attributes at index to use when rendering. size
+// specifies the number of components per attribute and must be 1, 2, 3, or
+// 4. type specifies the data type of each component, and stride specifies
+// the byte stride from one attribute to the next, allowing vertices and
+// attributes to be packed into a single array or stored in separate arrays.
+// normalized indicates whether the values stored in an integer format are
+// to be mapped to the range [-1,1] (for signed values) or [0,1]
+// (for unsigned values) when they are accessed and converted to floating
+// point; otherwise, values will be converted to floats directly without
+// normalization. offset is a byte offset into the buffer object's data
+// store, which must be bound to the GL.ARRAY_BUFFER target with BindBuffer.
+//
+// The buffer object binding (GL.ARRAY_BUFFER_BINDING) is saved as
+// generic vertex attribute array client-side state
+// (GL.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING) for the provided index.
+//
+// To enable and disable a generic vertex attribute array, call
+// EnableVertexAttribArray and DisableVertexAttribArray with index. If
+// enabled, the generic vertex attribute array is used when DrawArrays or
+// DrawElements is called. Each generic vertex attribute array is initially
+// disabled.
+//
+// VertexAttribPointer is typically implemented on the client side.
+//
+// Error GL.INVALID_ENUM is generated if type is not an accepted value.
+// GL.INVALID_VALUE is generated if index is greater than or equal to
+// GL.MAX_VERTEX_ATTRIBS. GL.INVALID_VALUE is generated if size is not 1, 2,
+// 3, or 4. GL.INVALID_VALUE is generated if stride is negative.
+//
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribPointer.xml
-func (gl *GL) VertexAttribPointer(index glbase.Attrib, size int32, gltype glbase.Enum, normalized bool, stride int32, pointer interface{}) {
-	var pointer_ptr unsafe.Pointer
-	var pointer_v = reflect.ValueOf(pointer)
-	if pointer != nil && pointer_v.Kind() != reflect.Slice {
-		panic("parameter pointer must be a slice")
-	}
-	if pointer != nil {
-		pointer_ptr = unsafe.Pointer(pointer_v.Index(0).Addr().Pointer())
-	}
-	C.gl2_1_glVertexAttribPointer(gl.funcs, C.GLuint(index), C.GLint(size), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), C.GLsizei(stride), pointer_ptr)
+func (gl *GL) VertexAttribPointer(index glbase.Attrib, size int32, gltype glbase.Enum, normalized bool, stride int32, offset int) {
+	// What an awkward API. Just add a new function next time, please.
+	offset_ptr := unsafe.Pointer(uintptr(offset))
+	C.gl2_1_glVertexAttribPointer(gl.funcs, C.GLuint(index), C.GLint(size), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), C.GLsizei(stride), offset_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glValidateProgram.xml
@@ -2006,16 +2030,16 @@ func (gl *GL) UseProgram(program glbase.Program) {
 func (gl *GL) ShaderSource(shader glbase.Shader, source ...string) {
 	count := len(source)
 	length := make([]int32, count)
-	glstring := make([]unsafe.Pointer, count)
+	source_c := make([]unsafe.Pointer, count)
 	for i, src := range source {
 		length[i] = int32(len(src))
 		if len(src) > 0 {
-			glstring[i] = *(*unsafe.Pointer)(unsafe.Pointer(&src))
+			source_c[i] = *(*unsafe.Pointer)(unsafe.Pointer(&src))
 		} else {
-			glstring[i] = unsafe.Pointer(uintptr(0))
+			source_c[i] = unsafe.Pointer(uintptr(0))
 		}
 	}
-	C.gl2_1_glShaderSource(gl.funcs, C.GLuint(shader), C.GLsizei(count), (**C.GLchar)(unsafe.Pointer(&glstring[0])), (*C.GLint)(unsafe.Pointer(&length[0])))
+	C.gl2_1_glShaderSource(gl.funcs, C.GLuint(shader), C.GLsizei(count), (**C.GLchar)(unsafe.Pointer(&source_c[0])), (*C.GLint)(unsafe.Pointer(&length[0])))
 }
 
 // LinkProgram links the program object specified by program. If any shader

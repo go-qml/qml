@@ -97,7 +97,7 @@ void gles2_glReleaseShaderCompiler(void *_glfuncs);
 void gles2_glRenderbufferStorage(void *_glfuncs, GLenum target, GLenum internalFormat, GLsizei width, GLsizei height);
 void gles2_glSampleCoverage(void *_glfuncs, GLclampf value, GLboolean invert);
 void gles2_glShaderBinary(void *_glfuncs, GLint n, const GLuint* shaders, GLenum binaryFormat, const GLvoid* binary, GLint length);
-void gles2_glShaderSource(void *_glfuncs, GLuint shader, GLsizei count, const GLchar** glstring, const GLint* length);
+void gles2_glShaderSource(void *_glfuncs, GLuint shader, GLsizei count, const GLchar** source, const GLint* length);
 void gles2_glStencilFuncSeparate(void *_glfuncs, GLenum face, GLenum glfunc, GLint ref, GLuint mask);
 void gles2_glStencilMaskSeparate(void *_glfuncs, GLenum face, GLuint mask);
 void gles2_glStencilOpSeparate(void *_glfuncs, GLenum face, GLenum fail, GLenum zfail, GLenum zpass);
@@ -119,7 +119,7 @@ void gles2_glVertexAttrib3f(void *_glfuncs, GLuint index, GLfloat x, GLfloat y, 
 void gles2_glVertexAttrib3fv(void *_glfuncs, GLuint index, const GLfloat* values);
 void gles2_glVertexAttrib4f(void *_glfuncs, GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w);
 void gles2_glVertexAttrib4fv(void *_glfuncs, GLuint index, const GLfloat* values);
-void gles2_glVertexAttribPointer(void *_glfuncs, GLuint index, GLint size, GLenum gltype, GLboolean normalized, GLsizei stride, const GLvoid* ptr);
+void gles2_glVertexAttribPointer(void *_glfuncs, GLuint index, GLint size, GLenum gltype, GLboolean normalized, GLsizei stride, const GLvoid* offset);
 void gles2_glBindTexture(void *_glfuncs, GLenum target, GLuint texture);
 void gles2_glBlendFunc(void *_glfuncs, GLenum sfactor, GLenum dfactor);
 void gles2_glClear(void *_glfuncs, GLbitfield mask);

@@ -135,7 +135,7 @@ void gl4_2compat_glBeginQuery(void *_glfuncs, GLenum target, GLuint id);
 GLboolean gl4_2compat_glIsQuery(void *_glfuncs, GLuint id);
 void gl4_2compat_glDeleteQueries(void *_glfuncs, GLsizei n, const GLuint* ids);
 void gl4_2compat_glGenQueries(void *_glfuncs, GLsizei n, GLuint* ids);
-void gl4_2compat_glVertexAttribPointer(void *_glfuncs, GLuint index, GLint size, GLenum gltype, GLboolean normalized, GLsizei stride, const GLvoid* pointer);
+void gl4_2compat_glVertexAttribPointer(void *_glfuncs, GLuint index, GLint size, GLenum gltype, GLboolean normalized, GLsizei stride, const GLvoid* offset);
 void gl4_2compat_glValidateProgram(void *_glfuncs, GLuint program);
 void gl4_2compat_glUniform4i(void *_glfuncs, GLint location, GLint v0, GLint v1, GLint v2, GLint v3);
 void gl4_2compat_glUniform3i(void *_glfuncs, GLint location, GLint v0, GLint v1, GLint v2);
@@ -146,7 +146,7 @@ void gl4_2compat_glUniform3f(void *_glfuncs, GLint location, GLfloat v0, GLfloat
 void gl4_2compat_glUniform2f(void *_glfuncs, GLint location, GLfloat v0, GLfloat v1);
 void gl4_2compat_glUniform1f(void *_glfuncs, GLint location, GLfloat v0);
 void gl4_2compat_glUseProgram(void *_glfuncs, GLuint program);
-void gl4_2compat_glShaderSource(void *_glfuncs, GLuint shader, GLsizei count, const GLchar** glstring, const GLint* length);
+void gl4_2compat_glShaderSource(void *_glfuncs, GLuint shader, GLsizei count, const GLchar** source, const GLint* length);
 void gl4_2compat_glLinkProgram(void *_glfuncs, GLuint program);
 GLboolean gl4_2compat_glIsShader(void *_glfuncs, GLuint shader);
 GLboolean gl4_2compat_glIsProgram(void *_glfuncs, GLuint program);

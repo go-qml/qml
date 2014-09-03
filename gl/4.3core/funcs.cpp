@@ -616,10 +616,10 @@ void gl4_3core_glGenQueries(void *_glfuncs, GLsizei n, GLuint* ids)
 	_qglfuncs->glGenQueries(n, ids);
 }
 
-void gl4_3core_glVertexAttribPointer(void *_glfuncs, GLuint index, GLint size, GLenum gltype, GLboolean normalized, GLsizei stride, const GLvoid* pointer)
+void gl4_3core_glVertexAttribPointer(void *_glfuncs, GLuint index, GLint size, GLenum gltype, GLboolean normalized, GLsizei stride, const GLvoid* offset)
 {
 	QOpenGLFunctions_4_3_Core* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_3_Core*>(_glfuncs);
-	_qglfuncs->glVertexAttribPointer(index, size, gltype, normalized, stride, pointer);
+	_qglfuncs->glVertexAttribPointer(index, size, gltype, normalized, stride, offset);
 }
 
 void gl4_3core_glValidateProgram(void *_glfuncs, GLuint program)
@@ -682,10 +682,10 @@ void gl4_3core_glUseProgram(void *_glfuncs, GLuint program)
 	_qglfuncs->glUseProgram(program);
 }
 
-void gl4_3core_glShaderSource(void *_glfuncs, GLuint shader, GLsizei count, const GLchar** glstring, const GLint* length)
+void gl4_3core_glShaderSource(void *_glfuncs, GLuint shader, GLsizei count, const GLchar** source, const GLint* length)
 {
 	QOpenGLFunctions_4_3_Core* _qglfuncs = reinterpret_cast<QOpenGLFunctions_4_3_Core*>(_glfuncs);
-	_qglfuncs->glShaderSource(shader, count, glstring, length);
+	_qglfuncs->glShaderSource(shader, count, source, length);
 }
 
 void gl4_3core_glLinkProgram(void *_glfuncs, GLuint program)

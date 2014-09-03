@@ -60,8 +60,9 @@ type Param struct {
 	Array int
 	Const bool
 
-	GoName string
-	GoType string
+	GoName     string
+	GoNameOrig string
+	GoType     string
 }
 
 type Type struct {
@@ -560,12 +561,15 @@ func prepareHeader(header *Header) error {
 			f.GoType = goTypeName(f.Type)
 		}
 
-		tweak := funcTweaks[f.GoName]
-		if tweak.result != "" {
-			f.GoType = tweak.result
+		tweaks := funcTweaks[f.GoName]
+		if tweaks.result != "" {
+			f.GoType = tweaks.result
 		}
 
 		for pi, p := range f.Param {
+			if name, ok := paramNameFixes[p.Name]; ok {
+				p.Name = name
+			}
 			switch p.Name {
 			case "type", "func", "map", "string":
 				p.GoName = "gl" + p.Name
@@ -575,9 +579,6 @@ func prepareHeader(header *Header) error {
 				} else {
 					p.GoName = p.Name
 				}
-			}
-			if name, ok := paramNameFixes[p.GoName]; ok {
-				p.GoName = name
 			}
 			// Some consistency. Those are a gl* function after all.
 			switch p.Type {
@@ -609,8 +610,13 @@ func prepareHeader(header *Header) error {
 			if p.GoType == "int32" && p.GoName == "location" && strings.Contains(f.Name, "Uniform") {
 				p.GoType = "glbase.Uniform"
 			}
-			if retype := tweak.params[p.GoName].retype; retype != "" {
-				p.GoType = retype
+			p.GoNameOrig = p.GoName
+			tweak := tweaks.params[p.GoNameOrig]
+			if tweak.retype != "" {
+				p.GoType = tweak.retype
+			}
+			if tweak.rename != "" {
+				p.GoName = tweak.rename
 			}
 			f.Param[pi] = p
 		}
@@ -765,16 +771,11 @@ func appendParamsList(list []paramItem, f Func, output bool) []paramItem {
 	var tweaks = funcTweaks[f.GoName]
 	var buf bytes.Buffer
 	for _, param := range f.Param {
-		tweak := tweaks.params[param.GoName]
+		tweak := tweaks.params[param.GoNameOrig]
 		if tweak.omit || tweak.output != output {
 			continue
 		}
-		var item paramItem
-		if tweak.rename != "" {
-			item.GoName = tweak.rename
-		} else {
-			item.GoName = param.GoName
-		}
+		item := paramItem{GoName: param.GoName}
 		if tweak.retype != "" {
 			item.GoType = param.GoType
 		} else if param.Addr == 1 && param.Type == "GLvoid" {
@@ -848,7 +849,7 @@ func funcCallParams(f Func) string {
 		if i > 0 {
 			buf.WriteString(", ")
 		}
-		tweak := tweaks.params[param.GoName]
+		tweak := tweaks.params[param.GoNameOrig]
 		name := param.GoName
 		if tweak.replace {
 			name += "_c"
@@ -891,19 +892,18 @@ func funcCallParams(f Func) string {
 func funcCallParamsPrep(f Func) string {
 	var buf bytes.Buffer
 	for _, param := range f.Param {
+		name := param.GoName
 		if param.Addr == 1 && param.Type == "GLchar" && param.GoType == "string" {
-			fmt.Fprintf(&buf, "%s_cstr := C.CString(%s)\n", param.GoName, param.GoName)
+			fmt.Fprintf(&buf, "%s_cstr := C.CString(%s)\n", name, name)
 		}
-		if param.Addr == 1 && param.Type == "GLvoid" {
-			fmt.Fprintf(&buf, "var %s_ptr unsafe.Pointer\n", param.GoName)
-			fmt.Fprintf(&buf, "var %s_v = reflect.ValueOf(%s)\n", param.GoName, param.GoName)
-			fmt.Fprintf(&buf, "if %s != nil && %s_v.Kind() != reflect.Slice { panic(\"parameter %s must be a slice\") }\n",
-				param.GoName, param.GoName, param.GoName)
-			fmt.Fprintf(&buf, "if %s != nil { %s_ptr = unsafe.Pointer(%s_v.Index(0).Addr().Pointer()) }\n",
-				param.GoName, param.GoName, param.GoName)
+		if param.Addr == 1 && param.Type == "GLvoid" && param.GoType == "glbase.Void" {
+			fmt.Fprintf(&buf, "var %s_ptr unsafe.Pointer\n", name)
+			fmt.Fprintf(&buf, "var %s_v = reflect.ValueOf(%s)\n", name, name)
+			fmt.Fprintf(&buf, "if %s != nil && %s_v.Kind() != reflect.Slice { panic(\"parameter %s must be a slice\") }\n", name, name, name)
+			fmt.Fprintf(&buf, "if %s != nil { %s_ptr = unsafe.Pointer(%s_v.Index(0).Addr().Pointer()) }\n", name, name, name)
 		}
 		if plen := funcParamLen(f, param); plen != "" {
-			fmt.Fprintf(&buf, "if len(%s) != %s { panic(\"parameter %s has incorrect length\") }\n", param.GoName, plen, param.GoName)
+			fmt.Fprintf(&buf, "if len(%s) != %s { panic(\"parameter %s has incorrect length\") }\n", name, plen, name)
 		}
 	}
 	return buf.String()
@@ -933,7 +933,7 @@ func funcReturnResult(f Func) string {
 		}
 	}
 	for _, param := range f.Param {
-		tweak := tweaks.params[param.GoName]
+		tweak := tweaks.params[param.GoNameOrig]
 		if tweak.omit || !tweak.output {
 			continue
 		}

@@ -105,7 +105,7 @@ func (r *GoRect) Paint(p *qml.Painter) {
 	gl.UseProgram(program)
 
 	position := gl.GetAttribLocation(program, "position")
-	gl.VertexAttribPointer(position, 2, GL.FLOAT, false, 0, nil)
+	gl.VertexAttribPointer(position, 2, GL.FLOAT, false, 0, 0)
 	gl.EnableVertexAttribArray(position)
 
 	gl.Enable(GL.BLEND)

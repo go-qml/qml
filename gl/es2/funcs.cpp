@@ -387,10 +387,10 @@ void gles2_glShaderBinary(void *_glfuncs, GLint n, const GLuint* shaders, GLenum
 	_qglfuncs->glShaderBinary(n, shaders, binaryFormat, binary, length);
 }
 
-void gles2_glShaderSource(void *_glfuncs, GLuint shader, GLsizei count, const GLchar** glstring, const GLint* length)
+void gles2_glShaderSource(void *_glfuncs, GLuint shader, GLsizei count, const GLchar** source, const GLint* length)
 {
 	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glShaderSource(shader, count, glstring, length);
+	_qglfuncs->glShaderSource(shader, count, source, length);
 }
 
 void gles2_glStencilFuncSeparate(void *_glfuncs, GLenum face, GLenum glfunc, GLint ref, GLuint mask)
@@ -519,10 +519,10 @@ void gles2_glVertexAttrib4fv(void *_glfuncs, GLuint index, const GLfloat* values
 	_qglfuncs->glVertexAttrib4fv(index, values);
 }
 
-void gles2_glVertexAttribPointer(void *_glfuncs, GLuint index, GLint size, GLenum gltype, GLboolean normalized, GLsizei stride, const GLvoid* ptr)
+void gles2_glVertexAttribPointer(void *_glfuncs, GLuint index, GLint size, GLenum gltype, GLboolean normalized, GLsizei stride, const GLvoid* offset)
 {
 	QOpenGLFunctions* _qglfuncs = reinterpret_cast<QOpenGLFunctions*>(_glfuncs);
-	_qglfuncs->glVertexAttribPointer(index, size, gltype, normalized, stride, ptr);
+	_qglfuncs->glVertexAttribPointer(index, size, gltype, normalized, stride, offset);
 }
 
 void gles2_glBindTexture(void *_glfuncs, GLenum target, GLuint texture)

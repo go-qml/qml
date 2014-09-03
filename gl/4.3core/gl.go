@@ -95,9 +95,6 @@ const (
 
 	CONTEXT_FLAG_FORWARD_COMPATIBLE_BIT = 0x00000001
 
-	CONTEXT_COMPATIBILITY_PROFILE_BIT = 0x00000002
-	CONTEXT_CORE_PROFILE_BIT          = 0x00000001
-
 	BACK_LEFT   = 0x0402
 	BACK_RIGHT  = 0x0403
 	FRONT_LEFT  = 0x0400
@@ -289,17 +286,13 @@ const (
 
 	POINT_FADE_THRESHOLD_SIZE = 0x8128
 
-	LINES                    = 0x0001
-	LINES_ADJACENCY          = 0x000A
-	LINE_LOOP                = 0x0002
-	LINE_STRIP               = 0x0003
-	LINE_STRIP_ADJACENCY     = 0x000B
-	POINTS                   = 0x0000
-	TRIANGLES                = 0x0004
-	TRIANGLES_ADJACENCY      = 0x000C
-	TRIANGLE_FAN             = 0x0006
-	TRIANGLE_STRIP           = 0x0005
-	TRIANGLE_STRIP_ADJACENCY = 0x000D
+	LINES          = 0x0001
+	LINE_LOOP      = 0x0002
+	LINE_STRIP     = 0x0003
+	POINTS         = 0x0000
+	TRIANGLES      = 0x0004
+	TRIANGLE_FAN   = 0x0006
+	TRIANGLE_STRIP = 0x0005
 
 	DECR = 0x1E03
 	INCR = 0x1E02
@@ -332,9 +325,7 @@ const (
 	CLAMP_TO_EDGE   = 0x812F
 	REPEAT          = 0x2901
 
-	SYNC_FLUSH_COMMANDS_BIT                       = 0x00000001
 	INVALID_INDEX                                 = 0xFFFFFFFF
-	TIMEOUT_IGNORED                               = 0xFFFFFFFFFFFFFFFF
 	CONSTANT_COLOR                                = 0x8001
 	ONE_MINUS_CONSTANT_COLOR                      = 0x8002
 	CONSTANT_ALPHA                                = 0x8003
@@ -478,9 +469,7 @@ const (
 	VERTEX_ATTRIB_ARRAY_TYPE                      = 0x8625
 	CURRENT_VERTEX_ATTRIB                         = 0x8626
 	VERTEX_PROGRAM_POINT_SIZE                     = 0x8642
-	PROGRAM_POINT_SIZE                            = 0x8642
 	VERTEX_ATTRIB_ARRAY_POINTER                   = 0x8645
-	DEPTH_CLAMP                                   = 0x864F
 	TEXTURE_COMPRESSED_IMAGE_SIZE                 = 0x86A0
 	TEXTURE_COMPRESSED                            = 0x86A1
 	NUM_COMPRESSED_TEXTURE_FORMATS                = 0x86A2
@@ -517,7 +506,6 @@ const (
 	TEXTURE_COMPARE_MODE                          = 0x884C
 	TEXTURE_COMPARE_FUNC                          = 0x884D
 	COMPARE_REF_TO_TEXTURE                        = 0x884E
-	TEXTURE_CUBE_MAP_SEAMLESS                     = 0x884F
 	QUERY_COUNTER_BITS                            = 0x8864
 	CURRENT_QUERY                                 = 0x8865
 	QUERY_RESULT                                  = 0x8866
@@ -556,9 +544,6 @@ const (
 	MIN_PROGRAM_TEXEL_OFFSET                      = 0x8904
 	MAX_PROGRAM_TEXEL_OFFSET                      = 0x8905
 	SAMPLES_PASSED                                = 0x8914
-	GEOMETRY_VERTICES_OUT                         = 0x8916
-	GEOMETRY_INPUT_TYPE                           = 0x8917
-	GEOMETRY_OUTPUT_TYPE                          = 0x8918
 	CLAMP_READ_COLOR                              = 0x891C
 	FIXED_ONLY                                    = 0x891D
 	UNIFORM_BUFFER                                = 0x8A11
@@ -654,7 +639,6 @@ const (
 	PROXY_TEXTURE_2D_ARRAY                        = 0x8C1B
 	TEXTURE_BINDING_1D_ARRAY                      = 0x8C1C
 	TEXTURE_BINDING_2D_ARRAY                      = 0x8C1D
-	MAX_GEOMETRY_TEXTURE_IMAGE_UNITS              = 0x8C29
 	TEXTURE_BUFFER                                = 0x8C2A
 	MAX_TEXTURE_BUFFER_SIZE                       = 0x8C2B
 	TEXTURE_BINDING_BUFFER                        = 0x8C2C
@@ -766,8 +750,6 @@ const (
 	RGBA_INTEGER                                  = 0x8D99
 	BGR_INTEGER                                   = 0x8D9A
 	BGRA_INTEGER                                  = 0x8D9B
-	FRAMEBUFFER_ATTACHMENT_LAYERED                = 0x8DA7
-	FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS          = 0x8DA8
 	FLOAT_32_UNSIGNED_INT_24_8_REV                = 0x8DAD
 	FRAMEBUFFER_SRGB                              = 0x8DB9
 	COMPRESSED_RED_RGTC1                          = 0x8DBB
@@ -799,22 +781,10 @@ const (
 	UNSIGNED_INT_SAMPLER_1D_ARRAY                 = 0x8DD6
 	UNSIGNED_INT_SAMPLER_2D_ARRAY                 = 0x8DD7
 	UNSIGNED_INT_SAMPLER_BUFFER                   = 0x8DD8
-	GEOMETRY_SHADER                               = 0x8DD9
-	MAX_GEOMETRY_UNIFORM_COMPONENTS               = 0x8DDF
-	MAX_GEOMETRY_OUTPUT_VERTICES                  = 0x8DE0
-	MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS          = 0x8DE1
 	QUERY_WAIT                                    = 0x8E13
 	QUERY_NO_WAIT                                 = 0x8E14
 	QUERY_BY_REGION_WAIT                          = 0x8E15
 	QUERY_BY_REGION_NO_WAIT                       = 0x8E16
-	QUADS_FOLLOW_PROVOKING_VERTEX_CONVENTION      = 0x8E4C
-	FIRST_VERTEX_CONVENTION                       = 0x8E4D
-	LAST_VERTEX_CONVENTION                        = 0x8E4E
-	PROVOKING_VERTEX                              = 0x8E4F
-	SAMPLE_POSITION                               = 0x8E50
-	SAMPLE_MASK                                   = 0x8E51
-	SAMPLE_MASK_VALUE                             = 0x8E52
-	MAX_SAMPLE_MASK_WORDS                         = 0x8E59
 	COPY_READ_BUFFER                              = 0x8F36
 	COPY_WRITE_BUFFER                             = 0x8F37
 	R8_SNORM                                      = 0x8F94
@@ -828,44 +798,9 @@ const (
 	SIGNED_NORMALIZED                             = 0x8F9C
 	PRIMITIVE_RESTART                             = 0x8F9D
 	PRIMITIVE_RESTART_INDEX                       = 0x8F9E
-	TEXTURE_2D_MULTISAMPLE                        = 0x9100
-	PROXY_TEXTURE_2D_MULTISAMPLE                  = 0x9101
-	TEXTURE_2D_MULTISAMPLE_ARRAY                  = 0x9102
-	PROXY_TEXTURE_2D_MULTISAMPLE_ARRAY            = 0x9103
-	TEXTURE_BINDING_2D_MULTISAMPLE                = 0x9104
-	TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY          = 0x9105
-	TEXTURE_SAMPLES                               = 0x9106
-	TEXTURE_FIXED_SAMPLE_LOCATIONS                = 0x9107
-	SAMPLER_2D_MULTISAMPLE                        = 0x9108
-	INT_SAMPLER_2D_MULTISAMPLE                    = 0x9109
-	UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE           = 0x910A
-	SAMPLER_2D_MULTISAMPLE_ARRAY                  = 0x910B
-	INT_SAMPLER_2D_MULTISAMPLE_ARRAY              = 0x910C
-	UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY     = 0x910D
-	MAX_COLOR_TEXTURE_SAMPLES                     = 0x910E
-	MAX_DEPTH_TEXTURE_SAMPLES                     = 0x910F
-	MAX_INTEGER_SAMPLES                           = 0x9110
-	MAX_SERVER_WAIT_TIMEOUT                       = 0x9111
-	OBJECT_TYPE                                   = 0x9112
-	SYNC_CONDITION                                = 0x9113
-	SYNC_STATUS                                   = 0x9114
-	SYNC_FLAGS                                    = 0x9115
-	SYNC_FENCE                                    = 0x9116
-	SYNC_GPU_COMMANDS_COMPLETE                    = 0x9117
-	UNSIGNALED                                    = 0x9118
-	SIGNALED                                      = 0x9119
-	ALREADY_SIGNALED                              = 0x911A
-	TIMEOUT_EXPIRED                               = 0x911B
-	CONDITION_SATISFIED                           = 0x911C
-	WAIT_FAILED                                   = 0x911D
 	BUFFER_ACCESS_FLAGS                           = 0x911F
 	BUFFER_MAP_LENGTH                             = 0x9120
 	BUFFER_MAP_OFFSET                             = 0x9121
-	MAX_VERTEX_OUTPUT_COMPONENTS                  = 0x9122
-	MAX_GEOMETRY_INPUT_COMPONENTS                 = 0x9123
-	MAX_GEOMETRY_OUTPUT_COMPONENTS                = 0x9124
-	MAX_FRAGMENT_INPUT_COMPONENTS                 = 0x9125
-	CONTEXT_PROFILE_MASK                          = 0x9126
 )
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glViewport.xml
@@ -1725,17 +1660,41 @@ func (gl *GL) GenQueries(n int32, ids []uint32) {
 	C.gl4_3core_glGenQueries(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&ids[0])))
 }
 
+// VertexAttribPointer specifies the location and data format of the array
+// of generic vertex attributes at index to use when rendering. size
+// specifies the number of components per attribute and must be 1, 2, 3, or
+// 4. type specifies the data type of each component, and stride specifies
+// the byte stride from one attribute to the next, allowing vertices and
+// attributes to be packed into a single array or stored in separate arrays.
+// normalized indicates whether the values stored in an integer format are
+// to be mapped to the range [-1,1] (for signed values) or [0,1]
+// (for unsigned values) when they are accessed and converted to floating
+// point; otherwise, values will be converted to floats directly without
+// normalization. offset is a byte offset into the buffer object's data
+// store, which must be bound to the GL.ARRAY_BUFFER target with BindBuffer.
+//
+// The buffer object binding (GL.ARRAY_BUFFER_BINDING) is saved as
+// generic vertex attribute array client-side state
+// (GL.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING) for the provided index.
+//
+// To enable and disable a generic vertex attribute array, call
+// EnableVertexAttribArray and DisableVertexAttribArray with index. If
+// enabled, the generic vertex attribute array is used when DrawArrays or
+// DrawElements is called. Each generic vertex attribute array is initially
+// disabled.
+//
+// VertexAttribPointer is typically implemented on the client side.
+//
+// Error GL.INVALID_ENUM is generated if type is not an accepted value.
+// GL.INVALID_VALUE is generated if index is greater than or equal to
+// GL.MAX_VERTEX_ATTRIBS. GL.INVALID_VALUE is generated if size is not 1, 2,
+// 3, or 4. GL.INVALID_VALUE is generated if stride is negative.
+//
 // https://www.opengl.org/sdk/docs/man2/xhtml/glVertexAttribPointer.xml
-func (gl *GL) VertexAttribPointer(index glbase.Attrib, size int32, gltype glbase.Enum, normalized bool, stride int32, pointer interface{}) {
-	var pointer_ptr unsafe.Pointer
-	var pointer_v = reflect.ValueOf(pointer)
-	if pointer != nil && pointer_v.Kind() != reflect.Slice {
-		panic("parameter pointer must be a slice")
-	}
-	if pointer != nil {
-		pointer_ptr = unsafe.Pointer(pointer_v.Index(0).Addr().Pointer())
-	}
-	C.gl4_3core_glVertexAttribPointer(gl.funcs, C.GLuint(index), C.GLint(size), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), C.GLsizei(stride), pointer_ptr)
+func (gl *GL) VertexAttribPointer(index glbase.Attrib, size int32, gltype glbase.Enum, normalized bool, stride int32, offset int) {
+	// What an awkward API. Just add a new function next time, please.
+	offset_ptr := unsafe.Pointer(uintptr(offset))
+	C.gl4_3core_glVertexAttribPointer(gl.funcs, C.GLuint(index), C.GLint(size), C.GLenum(gltype), *(*C.GLboolean)(unsafe.Pointer(&normalized)), C.GLsizei(stride), offset_ptr)
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glValidateProgram.xml
@@ -1903,16 +1862,16 @@ func (gl *GL) UseProgram(program glbase.Program) {
 func (gl *GL) ShaderSource(shader glbase.Shader, source ...string) {
 	count := len(source)
 	length := make([]int32, count)
-	glstring := make([]unsafe.Pointer, count)
+	source_c := make([]unsafe.Pointer, count)
 	for i, src := range source {
 		length[i] = int32(len(src))
 		if len(src) > 0 {
-			glstring[i] = *(*unsafe.Pointer)(unsafe.Pointer(&src))
+			source_c[i] = *(*unsafe.Pointer)(unsafe.Pointer(&src))
 		} else {
-			glstring[i] = unsafe.Pointer(uintptr(0))
+			source_c[i] = unsafe.Pointer(uintptr(0))
 		}
 	}
-	C.gl4_3core_glShaderSource(gl.funcs, C.GLuint(shader), C.GLsizei(count), (**C.GLchar)(unsafe.Pointer(&glstring[0])), (*C.GLint)(unsafe.Pointer(&length[0])))
+	C.gl4_3core_glShaderSource(gl.funcs, C.GLuint(shader), C.GLsizei(count), (**C.GLchar)(unsafe.Pointer(&source_c[0])), (*C.GLint)(unsafe.Pointer(&length[0])))
 }
 
 // LinkProgram links the program object specified by program. If any shader
