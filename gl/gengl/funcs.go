@@ -743,15 +743,15 @@ var funcTweakList = []funcTweak{{
 		returned. If it is defined as a vec2, ivec2, or bvec2, two values will be
 		returned. If it is defined as a vec3, ivec3, or bvec3, three values will
 		be returned, and so on. To query values stored in uniform variables
-		declared as arrays, call {{.Name}} for each element of the array. To
+		declared as arrays, call {{.GoName}} for each element of the array. To
 		query values stored in uniform variables declared as structures, call
-		{{.Name}} for each field in the structure. The values for uniform
+		{{.GoName}} for each field in the structure. The values for uniform
 		variables declared as a matrix will be returned in column major order.
 
 		The locations assigned to uniform variables are not known until the
 		program object is linked. After linking has occurred, the command
 		GetUniformLocation can be used to obtain the location of a uniform
-		variable. This location value can then be passed to {{.Name}} in order
+		variable. This location value can then be passed to {{.GoName}} in order
 		to query the current value of the uniform variable. After a program object
 		has been linked successfully, the index values for uniform variables
 		remain fixed until the next link command occurs. The uniform variable
@@ -762,7 +762,7 @@ var funcTweakList = []funcTweak{{
 		object. GL.INVALID_OPERATION is generated if program has not been
 		successfully linked. GL.INVALID_OPERATION is generated if location does
 		not correspond to a valid uniform variable location for the specified
-		program object. GL.INVALID_OPERATION is generated if {{.Name}} is
+		program object. GL.INVALID_OPERATION is generated if {{.GoName}} is
 		executed between the execution of Begin and the corresponding execution of
 		End.
 
@@ -1028,6 +1028,234 @@ var funcTweakList = []funcTweak{{
 		execution of Begin and the corresponding execution of End.
 
 		{{funcSince . "2.0+"}}
+	`,
+}, {
+	name: "Uniform1f",
+	copy: "Uniform4ui",
+}, {
+	name: "Uniform2f",
+	copy: "Uniform4ui",
+}, {
+	name: "Uniform3f",
+	copy: "Uniform4ui",
+}, {
+	name: "Uniform4f",
+	copy: "Uniform4ui",
+}, {
+	name: "Uniform1i",
+	copy: "Uniform4ui",
+}, {
+	name: "Uniform2i",
+	copy: "Uniform4ui",
+}, {
+	name: "Uniform3i",
+	copy: "Uniform4ui",
+}, {
+	name: "Uniform4i",
+	copy: "Uniform4ui",
+}, {
+	name: "Uniform1ui",
+	copy: "Uniform4ui",
+}, {
+	name: "Uniform2ui",
+	copy: "Uniform4ui",
+}, {
+	name: "Uniform3ui",
+	copy: "Uniform4ui",
+}, {
+	name: "Uniform4ui",
+	doc: `
+		modifies the value of a single uniform variable.
+		The location of the uniform variable to be modified is specified by
+		location, which should be a value returned by GetUniformLocation.
+		{{.GoName}} operates on the program object that was made part of
+		current state by calling UseProgram.
+
+		The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
+		uniform variable specified by location using the values passed as
+		arguments. The number specified in the function should match the number of
+		components in the data type of the specified uniform variable (1 for
+		float, int, unsigned int, bool; 2 for vec2, ivec2, uvec2, bvec2, etc.).
+		The suffix f indicates that floating-point values are being passed; the
+		suffix i indicates that integer values are being passed; the suffix ui
+		indicates that unsigned integer values are being passed, and this type
+		should also match the data type of the specified uniform variable. The i
+		variants of this function should be used to provide values for uniform
+		variables defined as int, ivec2, ivec3, ivec4, or arrays of these. The ui
+		variants of this function should be used to provide values for uniform
+		variables defined as unsigned int, uvec2, uvec3, uvec4, or arrays of
+		these. The f variants should be used to provide values for uniform
+		variables of type float, vec2, vec3, vec4, or arrays of these. Either the
+		i, ui or f variants may be used to provide values for uniform variables of
+		type bool, bvec2, bvec3, bvec4, or arrays of these. The uniform variable
+		will be set to false if the input value is 0 or 0.0f, and it will be set
+		to true otherwise.
+
+		Uniform1i and Uniform1iv are the only two functions that may be used to
+		load uniform variables defined as sampler types. Loading samplers with any
+		other function will result in a GL.INVALID_OPERATION error.
+
+		All active uniform variables defined in a program object are initialized
+		to 0 when the program object is linked successfully. They retain the
+		values assigned to them by a call to Uniform* until the next successful
+		link operation occurs on the program object, when they are once again
+		initialized to 0.
+	`,
+}, {
+	name: "Uniform1fv",
+	copy: "Uniform4uiv",
+}, {
+	name: "Uniform2fv",
+	copy: "Uniform4uiv",
+}, {
+	name: "Uniform3fv",
+	copy: "Uniform4uiv",
+}, {
+	name: "Uniform4fv",
+	copy: "Uniform4uiv",
+}, {
+	name: "Uniform1iv",
+	copy: "Uniform4uiv",
+}, {
+	name: "Uniform2iv",
+	copy: "Uniform4uiv",
+}, {
+	name: "Uniform3iv",
+	copy: "Uniform4uiv",
+}, {
+	name: "Uniform4iv",
+	copy: "Uniform4uiv",
+}, {
+	name: "Uniform1uiv",
+	copy: "Uniform4uiv",
+}, {
+	name: "Uniform2uiv",
+	copy: "Uniform4uiv",
+}, {
+	name: "Uniform3uiv",
+	copy: "Uniform4uiv",
+}, {
+	name: "Uniform4uiv",
+	params: paramTweaks{
+		"count": {omit: true},
+	},
+	before: `
+		if len(value) == 0 {
+			return
+		} {{with $n := substr .GoName 7 8}}{{if ne $n "1"}}
+		if len(value)%{{$n}} != 0 {
+			panic("invalid value length for {{$.GoName}}")
+		}
+		count := len(value)/{{$n}}
+		{{else}}
+		count := len(value)
+		{{end}}{{end}}
+	`,
+	doc: `
+		modifies the value of a uniform variable or a uniform
+		variable array. The location of the uniform variable to be modified is
+		specified by location, which should be a value returned by GetUniformLocation.
+		{{.GoName}} operates on the program object that was made part of
+		current state by calling UseProgram.
+
+		The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
+		uniform variable or a uniform variable array. These functions receive a
+		slice with the values to be loaded into a uniform variable or a uniform
+		variable array. A slice with length 1 should be used if modifying the value
+		of a single uniform variable, and a length of 1 or greater can be used to
+		modify an entire array or part of an array. When loading n elements
+		starting at an arbitrary position m in a uniform variable array, elements
+		m + n - 1 in the array will be replaced with the new values. If m + n - 1
+		is larger than the size of the uniform variable array, values for all
+		array elements beyond the end of the array will be ignored. The number
+		specified in the name of the command indicates the number of components
+		for each element in value, and it should match the number of components in
+		the data type of the specified uniform variable (1 for float, int, bool;
+		2 for vec2, ivec2, bvec2, etc.). The data type specified in the name
+		of the command must match the data type for the specified uniform variable
+		as described for Uniform{1|2|3|4}{f|i|ui}.
+
+		Uniform1i and Uniform1iv are the only two functions that may be used to
+		load uniform variables defined as sampler types. Loading samplers with any
+		other function will result in a GL.INVALID_OPERATION error.
+
+		All active uniform variables defined in a program object are initialized
+		to 0 when the program object is linked successfully. They retain the
+		values assigned to them by a call to Uniform* until the next successful
+		link operation occurs on the program object, when they are once again
+		initialized to 0.
+	`,
+}, {
+	name: "UniformMatrix2fv",
+	copy: "UniformMatrix4x3fv",
+}, {
+	name: "UniformMatrix2x3fv",
+	copy: "UniformMatrix4x3fv",
+}, {
+	name: "UniformMatrix2x4fv",
+	copy: "UniformMatrix4x3fv",
+}, {
+	name: "UniformMatrix3fv",
+	copy: "UniformMatrix4x3fv",
+}, {
+	name: "UniformMatrix3x2fv",
+	copy: "UniformMatrix4x3fv",
+}, {
+	name: "UniformMatrix3x4fv",
+	copy: "UniformMatrix4x3fv",
+}, {
+	name: "UniformMatrix4fv",
+	copy: "UniformMatrix4x3fv",
+}, {
+	name: "UniformMatrix4x2fv",
+	copy: "UniformMatrix4x3fv",
+}, {
+	name: "UniformMatrix4x3fv",
+	params: paramTweaks{
+		"count": {omit: true},
+	},
+	before: `
+		if len(value) == 0 {
+			return
+		} {{with $n := substr $.GoName 13 14}}{{with $m := substr $.GoName 15 16}}{{if eq $m "v"}}
+		if len(value)%({{$n}}*{{$n}}) != 0 {
+			panic("invalid value length for {{$.GoName}}")
+		}
+		count := len(value)/({{$n}}*{{$n}})
+		{{else}}
+		if len(value)%({{$n}}*{{$m}}) != 0 {
+			panic("invalid value length for {{$.GoName}}")
+		}
+		count := len(value)/({{$n}}*{{$m}})
+		{{end}}{{end}}{{end}}
+	`,
+	doc: `
+		modifies the value of a uniform variable or a uniform
+		variable array. The location of the uniform variable to be modified is
+		specified by location, which should be a value returned by GetUniformLocation.
+		{{.GoName}} operates on the program object that was made part of
+		current state by calling UseProgram.
+
+		The functions UniformMatrix{2|3|4|2x3|3x2|2x4|4x2|3x4|4x3}fv are used to
+		modify a matrix or an array of matrices. The numbers in the function name
+		are interpreted as the dimensionality of the matrix. The number 2
+		indicates a 2x2 matrix (4 values), the number 3 indicates a 3x3 matrix (9
+		values), and the number 4 indicates a 4x4 matrix (16 values). Non-square
+		matrix dimensionality is explicit, with the first number representing the
+		number of columns and the second number representing the number of rows.
+		For example, 2x4 indicates a 2x4 matrix with 2 columns and 4 rows (8
+		values). The length of the provided slice must be a multiple of the number
+		of values per matrix, to update one or more consecutive matrices.
+
+		If transpose is false, each matrix is assumed to be supplied in column
+		major order. If transpose is true, each matrix is assumed to be supplied
+		in row major order.
+
+		All active uniform variables defined in a program object are initialized
+		to 0 when the program object is linked successfully. They retain the
+		values assigned to them by a call to Uniform* until the next successful
+		link operation occurs on the program object, when they are once again
+		initialized to 0.
 	`,
 }, {
 	name: "UseProgram",

@@ -503,6 +503,65 @@ func parseConsts(filename string) (map[glVersion][]Const, error) {
 	return consts, nil
 }
 
+func prepareHeader(header *Header) error {
+	funcNameDocCount := make(map[string]int)
+
+	for fi, f := range header.Func {
+		docPrefix := funcNameDocPrefix(f.Name)
+		if docPrefix != f.Name {
+			funcNameDocCount[docPrefix]++
+		}
+		if !strings.HasPrefix(f.Name, "gl") || len(f.Name) < 3 {
+			panic("unexpected C function name: " + f.Name)
+		}
+		f.GoName = f.Name[2:]
+		if f.Type == "int" {
+			// Some consistency. It's in a gl* function after all.
+			f.Type = "GLint"
+		}
+		if f.Type != "void" {
+			f.GoType = goTypeName(f.Type)
+		}
+		tweaks := funcTweaks[f.GoName]
+		if tweaks.result != "" {
+			f.GoType = tweaks.result
+		}
+		for pi := range f.Param {
+			f.Param[pi] = prepareParam(f, pi)
+		}
+		header.Func[fi] = f
+	}
+
+	for fi, f := range header.Func {
+		prefix := funcNameDocPrefix(f.Name)
+		if funcNameDocCount[prefix] > 1 {
+			f.DocName = prefix
+		} else {
+			f.DocName = f.Name
+		}
+		header.Func[fi] = f
+	}
+
+	for ti, t := range header.Type {
+		t.GoName = goTypeName(t.Name)
+		header.Type[ti] = t
+	}
+
+	for ci, c := range header.Const {
+		if !strings.HasPrefix(c.Name, "GL") || len(c.Name) < 3 {
+			panic("unexpected C define name: " + c.Name)
+		}
+		if c.Name[3] >= '0' && c.Name[3] <= '9' {
+			c.GoName = "N" + c.Name[3:]
+		} else {
+			c.GoName = c.Name[3:]
+		}
+		header.Const[ci] = c
+	}
+
+	return nil
+}
+
 func goTypeName(ctypeName string) string {
 	// These types carry very little meaning, so it's more
 	// convenient to have their native counterparts instead.
@@ -540,126 +599,93 @@ func goTypeName(ctypeName string) string {
 	return "glbase." + string(ctypeName[2]-('a'-'A')) + ctypeName[3:]
 }
 
-func prepareHeader(header *Header) error {
-	funcNameDocCount := make(map[string]int)
+func prepareParam(f Func, pi int) Param {
+	p := f.Param[pi]
 
-	for fi, f := range header.Func {
-		docPrefix := funcNameDocPrefix(f.Name)
-		if docPrefix != f.Name {
-			funcNameDocCount[docPrefix]++
-		}
-
-		if !strings.HasPrefix(f.Name, "gl") || len(f.Name) < 3 {
-			panic("unexpected C function name: " + f.Name)
-		}
-		f.GoName = f.Name[2:]
-		if f.Type == "int" {
-			// Some consistency. It's in a gl* function after all.
-			f.Type = "GLint"
-		}
-		if f.Type != "void" {
-			f.GoType = goTypeName(f.Type)
-		}
-
-		tweaks := funcTweaks[f.GoName]
-		if tweaks.result != "" {
-			f.GoType = tweaks.result
-		}
-
-		for pi, p := range f.Param {
-			if name, ok := paramNameFixes[p.Name]; ok {
-				p.Name = name
-			}
-			switch p.Name {
-			case "type", "func", "map", "string":
-				p.GoName = "gl" + p.Name
-			default:
-				if token.Lookup(p.Name) != token.IDENT {
-					p.GoName = p.Name + "_"
-				} else {
-					p.GoName = p.Name
-				}
-			}
-			// Some consistency. Those are a gl* function after all.
-			switch p.Type {
-			case "void":
-				p.Type = "GLvoid"
-			case "char":
-				p.Type = "GLchar"
-			case "qopengl_GLsizeiptr", "qopengl_GLintptr":
-				p.Type = p.Type[8:]
-			}
-			p.GoType = goTypeName(p.Type)
-			switch p.GoType {
-			case "uint32":
-				// TODO Check plurals.
-				switch p.GoName {
-				case "program":
-					p.GoType = "glbase.Program"
-				case "shader":
-					p.GoType = "glbase.Shader"
-				case "buffer":
-					p.GoType = "glbase.Buffer"
-				case "texture":
-					p.GoType = "glbase.Texture"
-				case "index":
-					if strings.Contains(f.Name, "Attrib") {
-						p.GoType = "glbase.Attrib"
-					}
-				}
-			case "int32":
-				switch p.GoName {
-				case "size", "count", "stride", "offset", "xoffset", "yoffset", "order", "level":
-					p.GoType = "int"
-				case "n", "first", "x", "y", "z", "w", "width", "height", "border", "imageSize":
-					p.GoType = "int"
-				case "location":
-					if strings.Contains(f.Name, "Uniform") {
-						p.GoType = "glbase.Uniform"
-					}
-				}
-			}
-			p.GoNameOrig = p.GoName
-			tweak := tweaks.params[p.GoNameOrig]
-			if tweak.retype != "" {
-				p.GoType = tweak.retype
-			}
-			if tweak.rename != "" {
-				p.GoName = tweak.rename
-			}
-			f.Param[pi] = p
-		}
-		header.Func[fi] = f
+	// Qt seems to have gratuitously changed some names. 
+	if name, ok := paramNameFixes[p.Name]; ok {
+		p.Name = name
 	}
-
-	for fi, f := range header.Func {
-		prefix := funcNameDocPrefix(f.Name)
-		if funcNameDocCount[prefix] > 1 {
-			f.DocName = prefix
+	if pi > 0 && strings.HasPrefix(f.GoName, "Uniform") && p.Name != "count" && p.Name != "transpose" {
+		if strings.HasSuffix(f.GoName, "v") {
+			p.Name = "value"
+		} else if f.Param[1].Name == "count" {
+			p.Name = "v" + string('0' + pi-2)
 		} else {
-			f.DocName = f.Name
+			p.Name = "v" + string('0' + pi-1)
 		}
-		header.Func[fi] = f
 	}
 
-	for ti, t := range header.Type {
-		t.GoName = goTypeName(t.Name)
-		header.Type[ti] = t
-	}
-
-	for ci, c := range header.Const {
-		if !strings.HasPrefix(c.Name, "GL") || len(c.Name) < 3 {
-			panic("unexpected C define name: " + c.Name)
-		}
-		if c.Name[3] >= '0' && c.Name[3] <= '9' {
-			c.GoName = "N" + c.Name[3:]
+	// Other names conflict with Go keywords.
+	switch p.Name {
+	case "type", "func", "map", "string":
+		p.GoName = "gl" + p.Name
+	default:
+		if token.Lookup(p.Name) != token.IDENT {
+			p.GoName = p.Name + "_"
 		} else {
-			c.GoName = c.Name[3:]
+			p.GoName = p.Name
 		}
-		header.Const[ci] = c
 	}
 
-	return nil
+	// Some consistency. Those are a gl* function after all.
+	switch p.Type {
+	case "void":
+		p.Type = "GLvoid"
+	case "char":
+		p.Type = "GLchar"
+	case "qopengl_GLsizeiptr", "qopengl_GLintptr":
+		p.Type = p.Type[8:]
+	}
+
+	// Prepare the parameter type.
+	p.GoType = goTypeName(p.Type)
+	switch p.GoType {
+	case "uint32":
+		// TODO Check plurals.
+		switch p.GoName {
+		case "program":
+			p.GoType = "glbase.Program"
+		case "shader":
+			p.GoType = "glbase.Shader"
+		case "buffer":
+			p.GoType = "glbase.Buffer"
+		case "texture":
+			p.GoType = "glbase.Texture"
+		case "index":
+			if strings.Contains(f.Name, "Attrib") {
+				p.GoType = "glbase.Attrib"
+			}
+		}
+	case "int32":
+		switch p.GoName {
+		case "size", "count", "stride", "offset", "xoffset", "yoffset", "order", "level":
+			p.GoType = "int"
+		case "n", "first", "width", "height", "border", "imageSize":
+			p.GoType = "int"
+		case "x", "y", "z", "w":
+			if !strings.HasPrefix(f.GoName, "Uniform") {
+				p.GoType = "int"
+			}
+		case "location":
+			if strings.Contains(f.Name, "Uniform") {
+				p.GoType = "glbase.Uniform"
+			}
+		}
+	}
+
+	// Save the original name so that future tweaks can still refer
+	// to it, and apply the tweaks.
+	p.GoNameOrig = p.GoName
+	tweak := funcTweaks[f.GoName].params[p.GoNameOrig]
+	if tweak.retype != "" {
+		p.GoType = tweak.retype
+	}
+	if tweak.rename != "" {
+		p.GoName = tweak.rename
+	}
+
+	return p
 }
 
 func funcNameDocPrefix(cfuncName string) string {
@@ -689,6 +715,16 @@ func constNewLine(lineBlock int) bool {
 	}
 	constLineBlock = lineBlock
 	return true
+}
+
+func substr(s string, i ...int) string {
+	switch len(i) {
+	case 1:
+		return s[i[0]:]
+	case 2:
+		return s[i[0]:i[1]]
+	}
+	panic("invalid number of arguments for substr")
 }
 
 var funcTweaks = make(map[string]funcTweak)
@@ -842,13 +878,13 @@ func funcResult(f Func) string {
 }
 
 func funcBefore(f Func) string {
-	content := strings.TrimSpace(funcTweaks[f.GoName].before)
-	return execTemplate(f.GoName+":before", content, f)
+	content := funcTweaks[f.GoName].before
+	return strings.TrimSpace(execTemplate(f.GoName+":before", content, f))
 }
 
 func funcAfter(f Func) string {
-	content := strings.TrimSpace(funcTweaks[f.GoName].after)
-	return execTemplate(f.GoName+":after", content, f)
+	content := funcTweaks[f.GoName].after
+	return strings.TrimSpace(execTemplate(f.GoName+":after", content, f))
 }
 
 func funcCallParams(f Func) string {
@@ -911,8 +947,8 @@ func funcCallParamsPrep(f Func) string {
 			fmt.Fprintf(&buf, "if %s != nil && %s_v.Kind() != reflect.Slice { panic(\"parameter %s must be a slice\") }\n", name, name, name)
 			fmt.Fprintf(&buf, "if %s != nil { %s_ptr = unsafe.Pointer(%s_v.Index(0).Addr().Pointer()) }\n", name, name, name)
 		}
-		if plen := funcParamLen(f, param); plen != "" {
-			fmt.Fprintf(&buf, "if len(%s) != %s { panic(\"parameter %s has incorrect length\") }\n", name, plen, name)
+		if plen := funcParamLen(f, param); plen > 0 {
+			fmt.Fprintf(&buf, "if len(%s) != %d { panic(\"parameter %s has incorrect length\") }\n", name, plen, name)
 		}
 	}
 	return buf.String()
@@ -989,26 +1025,26 @@ func funcCCallParams(f Func) string {
 	return buf.String()
 }
 
-func funcParamLen(f Func, param Param) string {
+func funcParamLen(f Func, param Param) int {
+	if strings.HasPrefix(f.GoName, "Uniform") {
+		return 0
+	}
 	if param.Addr == 0 || len(f.Name) < 3 || f.Name[len(f.Name)-1] != 'v' {
-		return ""
+		return 0
 	}
 	switch f.Name[len(f.Name)-2] {
 	case 'i', 'f', 'd', 's':
 		switch c := f.Name[len(f.Name)-3]; c {
 		case '2', '3', '4':
-			return string(c)
+			return int(c - '0')
 		}
 	}
-	return ""
+	return 0
 }
 
 // funcSupported returns whether the given function has wrapping
 // properly implemented already.
 func funcSupported(f Func) bool {
-	if strings.HasPrefix(f.GoName, "Uniform") && strings.HasSuffix(f.GoName, "v") {
-		return false
-	}
 	if _, ok := funcTweaks[f.GoName]; ok {
 		return true
 	}
@@ -1078,14 +1114,14 @@ func init() {
 		"funcSince":   funcSince,
 
 		"constNewLine": constNewLine,
-		"toLower":      strings.ToLower,
+		"lower":        strings.ToLower,
+		"substr":       substr,
 
 		"funcSupported":      funcSupported,
 		"funcComment":        funcComment,
 		"funcParams":         funcParams,
 		"funcResult":         funcResult,
 		"funcBefore":         funcBefore,
-		"funcParamLen":       funcParamLen,
 		"funcCallParams":     funcCallParams,
 		"funcCallParamsPrep": funcCallParamsPrep,
 		"funcCallParamsPost": funcCallParamsPost,
@@ -1171,7 +1207,7 @@ var tmplFuncsCpp = `
 // ** file automatically generated by glgen -- do not edit manually **
 
 #include <QOpenGLContext>
-#include <QtGui/{{$.Class | toLower}}.h>
+#include <QtGui/{{lower $.Class}}.h>
 
 #include "funcs.h"
 

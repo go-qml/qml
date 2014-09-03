@@ -1765,41 +1765,800 @@ func (gl *GL) ValidateProgram(program glbase.Program) {
 	C.gl3_2core_glValidateProgram(gl.funcs, C.GLuint(program))
 }
 
+// UniformMatrix4fv modifies the value of a uniform variable or a uniform
+// variable array. The location of the uniform variable to be modified is
+// specified by location, which should be a value returned by GetUniformLocation.
+// UniformMatrix4fv operates on the program object that was made part
+// of current state by calling UseProgram.
+//
+// The functions UniformMatrix{2|3|4|2x3|3x2|2x4|4x2|3x4|4x3}fv are used to
+// modify a matrix or an array of matrices. The numbers in the function name
+// are interpreted as the dimensionality of the matrix. The number 2
+// indicates a 2x2 matrix (4 values), the number 3 indicates a 3x3 matrix (9
+// values), and the number 4 indicates a 4x4 matrix (16 values). Non-square
+// matrix dimensionality is explicit, with the first number representing the
+// number of columns and the second number representing the number of rows.
+// For example, 2x4 indicates a 2x4 matrix with 2 columns and 4 rows (8
+// values). The length of the provided slice must be a multiple of the number
+// of values per matrix, to update one or more consecutive matrices.
+//
+// If transpose is false, each matrix is assumed to be supplied in column
+// major order. If transpose is true, each matrix is assumed to be supplied
+// in row major order.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
+// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix4fv.xml
+func (gl *GL) UniformMatrix4fv(location glbase.Uniform, transpose bool, value []float32) {
+	if len(value) == 0 {
+		return
+	}
+	if len(value)%(4*4) != 0 {
+		panic("invalid value length for UniformMatrix4fv")
+	}
+	count := len(value) / (4 * 4)
+	C.gl3_2core_glUniformMatrix4fv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLfloat)(unsafe.Pointer(&value[0])))
+}
+
+// UniformMatrix3fv modifies the value of a uniform variable or a uniform
+// variable array. The location of the uniform variable to be modified is
+// specified by location, which should be a value returned by GetUniformLocation.
+// UniformMatrix3fv operates on the program object that was made part
+// of current state by calling UseProgram.
+//
+// The functions UniformMatrix{2|3|4|2x3|3x2|2x4|4x2|3x4|4x3}fv are used to
+// modify a matrix or an array of matrices. The numbers in the function name
+// are interpreted as the dimensionality of the matrix. The number 2
+// indicates a 2x2 matrix (4 values), the number 3 indicates a 3x3 matrix (9
+// values), and the number 4 indicates a 4x4 matrix (16 values). Non-square
+// matrix dimensionality is explicit, with the first number representing the
+// number of columns and the second number representing the number of rows.
+// For example, 2x4 indicates a 2x4 matrix with 2 columns and 4 rows (8
+// values). The length of the provided slice must be a multiple of the number
+// of values per matrix, to update one or more consecutive matrices.
+//
+// If transpose is false, each matrix is assumed to be supplied in column
+// major order. If transpose is true, each matrix is assumed to be supplied
+// in row major order.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
+// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix3fv.xml
+func (gl *GL) UniformMatrix3fv(location glbase.Uniform, transpose bool, value []float32) {
+	if len(value) == 0 {
+		return
+	}
+	if len(value)%(3*3) != 0 {
+		panic("invalid value length for UniformMatrix3fv")
+	}
+	count := len(value) / (3 * 3)
+	C.gl3_2core_glUniformMatrix3fv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLfloat)(unsafe.Pointer(&value[0])))
+}
+
+// UniformMatrix2fv modifies the value of a uniform variable or a uniform
+// variable array. The location of the uniform variable to be modified is
+// specified by location, which should be a value returned by GetUniformLocation.
+// UniformMatrix2fv operates on the program object that was made part
+// of current state by calling UseProgram.
+//
+// The functions UniformMatrix{2|3|4|2x3|3x2|2x4|4x2|3x4|4x3}fv are used to
+// modify a matrix or an array of matrices. The numbers in the function name
+// are interpreted as the dimensionality of the matrix. The number 2
+// indicates a 2x2 matrix (4 values), the number 3 indicates a 3x3 matrix (9
+// values), and the number 4 indicates a 4x4 matrix (16 values). Non-square
+// matrix dimensionality is explicit, with the first number representing the
+// number of columns and the second number representing the number of rows.
+// For example, 2x4 indicates a 2x4 matrix with 2 columns and 4 rows (8
+// values). The length of the provided slice must be a multiple of the number
+// of values per matrix, to update one or more consecutive matrices.
+//
+// If transpose is false, each matrix is assumed to be supplied in column
+// major order. If transpose is true, each matrix is assumed to be supplied
+// in row major order.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
+// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix2fv.xml
+func (gl *GL) UniformMatrix2fv(location glbase.Uniform, transpose bool, value []float32) {
+	if len(value) == 0 {
+		return
+	}
+	if len(value)%(2*2) != 0 {
+		panic("invalid value length for UniformMatrix2fv")
+	}
+	count := len(value) / (2 * 2)
+	C.gl3_2core_glUniformMatrix2fv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLfloat)(unsafe.Pointer(&value[0])))
+}
+
+// Uniform4iv modifies the value of a uniform variable or a uniform
+// variable array. The location of the uniform variable to be modified is
+// specified by location, which should be a value returned by GetUniformLocation.
+// Uniform4iv operates on the program object that was made part
+// of current state by calling UseProgram.
+//
+// The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
+// uniform variable or a uniform variable array. These functions receive a
+// slice with the values to be loaded into a uniform variable or a uniform
+// variable array. A slice with length 1 should be used if modifying the value
+// of a single uniform variable, and a length of 1 or greater can be used to
+// modify an entire array or part of an array. When loading n elements
+// starting at an arbitrary position m in a uniform variable array, elements
+// m + n - 1 in the array will be replaced with the new values. If m + n - 1
+// is larger than the size of the uniform variable array, values for all
+// array elements beyond the end of the array will be ignored. The number
+// specified in the name of the command indicates the number of components
+// for each element in value, and it should match the number of components in
+// the data type of the specified uniform variable (1 for float, int, bool;
+// 2 for vec2, ivec2, bvec2, etc.). The data type specified in the name
+// of the command must match the data type for the specified uniform variable
+// as described for Uniform{1|2|3|4}{f|i|ui}.
+//
+// Uniform1i and Uniform1iv are the only two functions that may be used to
+// load uniform variables defined as sampler types. Loading samplers with any
+// other function will result in a GL.INVALID_OPERATION error.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
+// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform4iv.xml
+func (gl *GL) Uniform4iv(location glbase.Uniform, value []int32) {
+	if len(value) == 0 {
+		return
+	}
+	if len(value)%4 != 0 {
+		panic("invalid value length for Uniform4iv")
+	}
+	count := len(value) / 4
+	C.gl3_2core_glUniform4iv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLint)(unsafe.Pointer(&value[0])))
+}
+
+// Uniform3iv modifies the value of a uniform variable or a uniform
+// variable array. The location of the uniform variable to be modified is
+// specified by location, which should be a value returned by GetUniformLocation.
+// Uniform3iv operates on the program object that was made part
+// of current state by calling UseProgram.
+//
+// The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
+// uniform variable or a uniform variable array. These functions receive a
+// slice with the values to be loaded into a uniform variable or a uniform
+// variable array. A slice with length 1 should be used if modifying the value
+// of a single uniform variable, and a length of 1 or greater can be used to
+// modify an entire array or part of an array. When loading n elements
+// starting at an arbitrary position m in a uniform variable array, elements
+// m + n - 1 in the array will be replaced with the new values. If m + n - 1
+// is larger than the size of the uniform variable array, values for all
+// array elements beyond the end of the array will be ignored. The number
+// specified in the name of the command indicates the number of components
+// for each element in value, and it should match the number of components in
+// the data type of the specified uniform variable (1 for float, int, bool;
+// 2 for vec2, ivec2, bvec2, etc.). The data type specified in the name
+// of the command must match the data type for the specified uniform variable
+// as described for Uniform{1|2|3|4}{f|i|ui}.
+//
+// Uniform1i and Uniform1iv are the only two functions that may be used to
+// load uniform variables defined as sampler types. Loading samplers with any
+// other function will result in a GL.INVALID_OPERATION error.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
+// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform3iv.xml
+func (gl *GL) Uniform3iv(location glbase.Uniform, value []int32) {
+	if len(value) == 0 {
+		return
+	}
+	if len(value)%3 != 0 {
+		panic("invalid value length for Uniform3iv")
+	}
+	count := len(value) / 3
+	C.gl3_2core_glUniform3iv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLint)(unsafe.Pointer(&value[0])))
+}
+
+// Uniform2iv modifies the value of a uniform variable or a uniform
+// variable array. The location of the uniform variable to be modified is
+// specified by location, which should be a value returned by GetUniformLocation.
+// Uniform2iv operates on the program object that was made part
+// of current state by calling UseProgram.
+//
+// The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
+// uniform variable or a uniform variable array. These functions receive a
+// slice with the values to be loaded into a uniform variable or a uniform
+// variable array. A slice with length 1 should be used if modifying the value
+// of a single uniform variable, and a length of 1 or greater can be used to
+// modify an entire array or part of an array. When loading n elements
+// starting at an arbitrary position m in a uniform variable array, elements
+// m + n - 1 in the array will be replaced with the new values. If m + n - 1
+// is larger than the size of the uniform variable array, values for all
+// array elements beyond the end of the array will be ignored. The number
+// specified in the name of the command indicates the number of components
+// for each element in value, and it should match the number of components in
+// the data type of the specified uniform variable (1 for float, int, bool;
+// 2 for vec2, ivec2, bvec2, etc.). The data type specified in the name
+// of the command must match the data type for the specified uniform variable
+// as described for Uniform{1|2|3|4}{f|i|ui}.
+//
+// Uniform1i and Uniform1iv are the only two functions that may be used to
+// load uniform variables defined as sampler types. Loading samplers with any
+// other function will result in a GL.INVALID_OPERATION error.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
+// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform2iv.xml
+func (gl *GL) Uniform2iv(location glbase.Uniform, value []int32) {
+	if len(value) == 0 {
+		return
+	}
+	if len(value)%2 != 0 {
+		panic("invalid value length for Uniform2iv")
+	}
+	count := len(value) / 2
+	C.gl3_2core_glUniform2iv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLint)(unsafe.Pointer(&value[0])))
+}
+
+// Uniform1iv modifies the value of a uniform variable or a uniform
+// variable array. The location of the uniform variable to be modified is
+// specified by location, which should be a value returned by GetUniformLocation.
+// Uniform1iv operates on the program object that was made part
+// of current state by calling UseProgram.
+//
+// The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
+// uniform variable or a uniform variable array. These functions receive a
+// slice with the values to be loaded into a uniform variable or a uniform
+// variable array. A slice with length 1 should be used if modifying the value
+// of a single uniform variable, and a length of 1 or greater can be used to
+// modify an entire array or part of an array. When loading n elements
+// starting at an arbitrary position m in a uniform variable array, elements
+// m + n - 1 in the array will be replaced with the new values. If m + n - 1
+// is larger than the size of the uniform variable array, values for all
+// array elements beyond the end of the array will be ignored. The number
+// specified in the name of the command indicates the number of components
+// for each element in value, and it should match the number of components in
+// the data type of the specified uniform variable (1 for float, int, bool;
+// 2 for vec2, ivec2, bvec2, etc.). The data type specified in the name
+// of the command must match the data type for the specified uniform variable
+// as described for Uniform{1|2|3|4}{f|i|ui}.
+//
+// Uniform1i and Uniform1iv are the only two functions that may be used to
+// load uniform variables defined as sampler types. Loading samplers with any
+// other function will result in a GL.INVALID_OPERATION error.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
+// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform1iv.xml
+func (gl *GL) Uniform1iv(location glbase.Uniform, value []int32) {
+	if len(value) == 0 {
+		return
+	}
+	count := len(value)
+	C.gl3_2core_glUniform1iv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLint)(unsafe.Pointer(&value[0])))
+}
+
+// Uniform4fv modifies the value of a uniform variable or a uniform
+// variable array. The location of the uniform variable to be modified is
+// specified by location, which should be a value returned by GetUniformLocation.
+// Uniform4fv operates on the program object that was made part
+// of current state by calling UseProgram.
+//
+// The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
+// uniform variable or a uniform variable array. These functions receive a
+// slice with the values to be loaded into a uniform variable or a uniform
+// variable array. A slice with length 1 should be used if modifying the value
+// of a single uniform variable, and a length of 1 or greater can be used to
+// modify an entire array or part of an array. When loading n elements
+// starting at an arbitrary position m in a uniform variable array, elements
+// m + n - 1 in the array will be replaced with the new values. If m + n - 1
+// is larger than the size of the uniform variable array, values for all
+// array elements beyond the end of the array will be ignored. The number
+// specified in the name of the command indicates the number of components
+// for each element in value, and it should match the number of components in
+// the data type of the specified uniform variable (1 for float, int, bool;
+// 2 for vec2, ivec2, bvec2, etc.). The data type specified in the name
+// of the command must match the data type for the specified uniform variable
+// as described for Uniform{1|2|3|4}{f|i|ui}.
+//
+// Uniform1i and Uniform1iv are the only two functions that may be used to
+// load uniform variables defined as sampler types. Loading samplers with any
+// other function will result in a GL.INVALID_OPERATION error.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
+// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform4fv.xml
+func (gl *GL) Uniform4fv(location glbase.Uniform, value []float32) {
+	if len(value) == 0 {
+		return
+	}
+	if len(value)%4 != 0 {
+		panic("invalid value length for Uniform4fv")
+	}
+	count := len(value) / 4
+	C.gl3_2core_glUniform4fv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLfloat)(unsafe.Pointer(&value[0])))
+}
+
+// Uniform3fv modifies the value of a uniform variable or a uniform
+// variable array. The location of the uniform variable to be modified is
+// specified by location, which should be a value returned by GetUniformLocation.
+// Uniform3fv operates on the program object that was made part
+// of current state by calling UseProgram.
+//
+// The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
+// uniform variable or a uniform variable array. These functions receive a
+// slice with the values to be loaded into a uniform variable or a uniform
+// variable array. A slice with length 1 should be used if modifying the value
+// of a single uniform variable, and a length of 1 or greater can be used to
+// modify an entire array or part of an array. When loading n elements
+// starting at an arbitrary position m in a uniform variable array, elements
+// m + n - 1 in the array will be replaced with the new values. If m + n - 1
+// is larger than the size of the uniform variable array, values for all
+// array elements beyond the end of the array will be ignored. The number
+// specified in the name of the command indicates the number of components
+// for each element in value, and it should match the number of components in
+// the data type of the specified uniform variable (1 for float, int, bool;
+// 2 for vec2, ivec2, bvec2, etc.). The data type specified in the name
+// of the command must match the data type for the specified uniform variable
+// as described for Uniform{1|2|3|4}{f|i|ui}.
+//
+// Uniform1i and Uniform1iv are the only two functions that may be used to
+// load uniform variables defined as sampler types. Loading samplers with any
+// other function will result in a GL.INVALID_OPERATION error.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
+// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform3fv.xml
+func (gl *GL) Uniform3fv(location glbase.Uniform, value []float32) {
+	if len(value) == 0 {
+		return
+	}
+	if len(value)%3 != 0 {
+		panic("invalid value length for Uniform3fv")
+	}
+	count := len(value) / 3
+	C.gl3_2core_glUniform3fv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLfloat)(unsafe.Pointer(&value[0])))
+}
+
+// Uniform2fv modifies the value of a uniform variable or a uniform
+// variable array. The location of the uniform variable to be modified is
+// specified by location, which should be a value returned by GetUniformLocation.
+// Uniform2fv operates on the program object that was made part
+// of current state by calling UseProgram.
+//
+// The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
+// uniform variable or a uniform variable array. These functions receive a
+// slice with the values to be loaded into a uniform variable or a uniform
+// variable array. A slice with length 1 should be used if modifying the value
+// of a single uniform variable, and a length of 1 or greater can be used to
+// modify an entire array or part of an array. When loading n elements
+// starting at an arbitrary position m in a uniform variable array, elements
+// m + n - 1 in the array will be replaced with the new values. If m + n - 1
+// is larger than the size of the uniform variable array, values for all
+// array elements beyond the end of the array will be ignored. The number
+// specified in the name of the command indicates the number of components
+// for each element in value, and it should match the number of components in
+// the data type of the specified uniform variable (1 for float, int, bool;
+// 2 for vec2, ivec2, bvec2, etc.). The data type specified in the name
+// of the command must match the data type for the specified uniform variable
+// as described for Uniform{1|2|3|4}{f|i|ui}.
+//
+// Uniform1i and Uniform1iv are the only two functions that may be used to
+// load uniform variables defined as sampler types. Loading samplers with any
+// other function will result in a GL.INVALID_OPERATION error.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
+// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform2fv.xml
+func (gl *GL) Uniform2fv(location glbase.Uniform, value []float32) {
+	if len(value) == 0 {
+		return
+	}
+	if len(value)%2 != 0 {
+		panic("invalid value length for Uniform2fv")
+	}
+	count := len(value) / 2
+	C.gl3_2core_glUniform2fv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLfloat)(unsafe.Pointer(&value[0])))
+}
+
+// Uniform1fv modifies the value of a uniform variable or a uniform
+// variable array. The location of the uniform variable to be modified is
+// specified by location, which should be a value returned by GetUniformLocation.
+// Uniform1fv operates on the program object that was made part
+// of current state by calling UseProgram.
+//
+// The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
+// uniform variable or a uniform variable array. These functions receive a
+// slice with the values to be loaded into a uniform variable or a uniform
+// variable array. A slice with length 1 should be used if modifying the value
+// of a single uniform variable, and a length of 1 or greater can be used to
+// modify an entire array or part of an array. When loading n elements
+// starting at an arbitrary position m in a uniform variable array, elements
+// m + n - 1 in the array will be replaced with the new values. If m + n - 1
+// is larger than the size of the uniform variable array, values for all
+// array elements beyond the end of the array will be ignored. The number
+// specified in the name of the command indicates the number of components
+// for each element in value, and it should match the number of components in
+// the data type of the specified uniform variable (1 for float, int, bool;
+// 2 for vec2, ivec2, bvec2, etc.). The data type specified in the name
+// of the command must match the data type for the specified uniform variable
+// as described for Uniform{1|2|3|4}{f|i|ui}.
+//
+// Uniform1i and Uniform1iv are the only two functions that may be used to
+// load uniform variables defined as sampler types. Loading samplers with any
+// other function will result in a GL.INVALID_OPERATION error.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
+// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform1fv.xml
+func (gl *GL) Uniform1fv(location glbase.Uniform, value []float32) {
+	if len(value) == 0 {
+		return
+	}
+	count := len(value)
+	C.gl3_2core_glUniform1fv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLfloat)(unsafe.Pointer(&value[0])))
+}
+
+// Uniform4i modifies the value of a single uniform variable.
+// The location of the uniform variable to be modified is specified by
+// location, which should be a value returned by GetUniformLocation.
+// Uniform4i operates on the program object that was made part of current
+// state by calling UseProgram.
+//
+// The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
+// uniform variable specified by location using the values passed as
+// arguments. The number specified in the function should match the number of
+// components in the data type of the specified uniform variable (1 for
+// float, int, unsigned int, bool; 2 for vec2, ivec2, uvec2, bvec2, etc.).
+// The suffix f indicates that floating-point values are being passed; the
+// suffix i indicates that integer values are being passed; the suffix ui
+// indicates that unsigned integer values are being passed, and this type
+// should also match the data type of the specified uniform variable. The i
+// variants of this function should be used to provide values for uniform
+// variables defined as int, ivec2, ivec3, ivec4, or arrays of these. The ui
+// variants of this function should be used to provide values for uniform
+// variables defined as unsigned int, uvec2, uvec3, uvec4, or arrays of
+// these. The f variants should be used to provide values for uniform
+// variables of type float, vec2, vec3, vec4, or arrays of these. Either the
+// i, ui or f variants may be used to provide values for uniform variables of
+// type bool, bvec2, bvec3, bvec4, or arrays of these. The uniform variable
+// will be set to false if the input value is 0 or 0.0f, and it will be set
+// to true otherwise.
+//
+// Uniform1i and Uniform1iv are the only two functions that may be used to
+// load uniform variables defined as sampler types. Loading samplers with any
+// other function will result in a GL.INVALID_OPERATION error.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniform4i.xml
 func (gl *GL) Uniform4i(location glbase.Uniform, v0, v1, v2, v3 int32) {
 	C.gl3_2core_glUniform4i(gl.funcs, C.GLint(location), C.GLint(v0), C.GLint(v1), C.GLint(v2), C.GLint(v3))
 }
 
+// Uniform3i modifies the value of a single uniform variable.
+// The location of the uniform variable to be modified is specified by
+// location, which should be a value returned by GetUniformLocation.
+// Uniform3i operates on the program object that was made part of current
+// state by calling UseProgram.
+//
+// The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
+// uniform variable specified by location using the values passed as
+// arguments. The number specified in the function should match the number of
+// components in the data type of the specified uniform variable (1 for
+// float, int, unsigned int, bool; 2 for vec2, ivec2, uvec2, bvec2, etc.).
+// The suffix f indicates that floating-point values are being passed; the
+// suffix i indicates that integer values are being passed; the suffix ui
+// indicates that unsigned integer values are being passed, and this type
+// should also match the data type of the specified uniform variable. The i
+// variants of this function should be used to provide values for uniform
+// variables defined as int, ivec2, ivec3, ivec4, or arrays of these. The ui
+// variants of this function should be used to provide values for uniform
+// variables defined as unsigned int, uvec2, uvec3, uvec4, or arrays of
+// these. The f variants should be used to provide values for uniform
+// variables of type float, vec2, vec3, vec4, or arrays of these. Either the
+// i, ui or f variants may be used to provide values for uniform variables of
+// type bool, bvec2, bvec3, bvec4, or arrays of these. The uniform variable
+// will be set to false if the input value is 0 or 0.0f, and it will be set
+// to true otherwise.
+//
+// Uniform1i and Uniform1iv are the only two functions that may be used to
+// load uniform variables defined as sampler types. Loading samplers with any
+// other function will result in a GL.INVALID_OPERATION error.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniform3i.xml
 func (gl *GL) Uniform3i(location glbase.Uniform, v0, v1, v2 int32) {
 	C.gl3_2core_glUniform3i(gl.funcs, C.GLint(location), C.GLint(v0), C.GLint(v1), C.GLint(v2))
 }
 
+// Uniform2i modifies the value of a single uniform variable.
+// The location of the uniform variable to be modified is specified by
+// location, which should be a value returned by GetUniformLocation.
+// Uniform2i operates on the program object that was made part of current
+// state by calling UseProgram.
+//
+// The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
+// uniform variable specified by location using the values passed as
+// arguments. The number specified in the function should match the number of
+// components in the data type of the specified uniform variable (1 for
+// float, int, unsigned int, bool; 2 for vec2, ivec2, uvec2, bvec2, etc.).
+// The suffix f indicates that floating-point values are being passed; the
+// suffix i indicates that integer values are being passed; the suffix ui
+// indicates that unsigned integer values are being passed, and this type
+// should also match the data type of the specified uniform variable. The i
+// variants of this function should be used to provide values for uniform
+// variables defined as int, ivec2, ivec3, ivec4, or arrays of these. The ui
+// variants of this function should be used to provide values for uniform
+// variables defined as unsigned int, uvec2, uvec3, uvec4, or arrays of
+// these. The f variants should be used to provide values for uniform
+// variables of type float, vec2, vec3, vec4, or arrays of these. Either the
+// i, ui or f variants may be used to provide values for uniform variables of
+// type bool, bvec2, bvec3, bvec4, or arrays of these. The uniform variable
+// will be set to false if the input value is 0 or 0.0f, and it will be set
+// to true otherwise.
+//
+// Uniform1i and Uniform1iv are the only two functions that may be used to
+// load uniform variables defined as sampler types. Loading samplers with any
+// other function will result in a GL.INVALID_OPERATION error.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniform2i.xml
 func (gl *GL) Uniform2i(location glbase.Uniform, v0, v1 int32) {
 	C.gl3_2core_glUniform2i(gl.funcs, C.GLint(location), C.GLint(v0), C.GLint(v1))
 }
 
+// Uniform1i modifies the value of a single uniform variable.
+// The location of the uniform variable to be modified is specified by
+// location, which should be a value returned by GetUniformLocation.
+// Uniform1i operates on the program object that was made part of current
+// state by calling UseProgram.
+//
+// The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
+// uniform variable specified by location using the values passed as
+// arguments. The number specified in the function should match the number of
+// components in the data type of the specified uniform variable (1 for
+// float, int, unsigned int, bool; 2 for vec2, ivec2, uvec2, bvec2, etc.).
+// The suffix f indicates that floating-point values are being passed; the
+// suffix i indicates that integer values are being passed; the suffix ui
+// indicates that unsigned integer values are being passed, and this type
+// should also match the data type of the specified uniform variable. The i
+// variants of this function should be used to provide values for uniform
+// variables defined as int, ivec2, ivec3, ivec4, or arrays of these. The ui
+// variants of this function should be used to provide values for uniform
+// variables defined as unsigned int, uvec2, uvec3, uvec4, or arrays of
+// these. The f variants should be used to provide values for uniform
+// variables of type float, vec2, vec3, vec4, or arrays of these. Either the
+// i, ui or f variants may be used to provide values for uniform variables of
+// type bool, bvec2, bvec3, bvec4, or arrays of these. The uniform variable
+// will be set to false if the input value is 0 or 0.0f, and it will be set
+// to true otherwise.
+//
+// Uniform1i and Uniform1iv are the only two functions that may be used to
+// load uniform variables defined as sampler types. Loading samplers with any
+// other function will result in a GL.INVALID_OPERATION error.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniform1i.xml
 func (gl *GL) Uniform1i(location glbase.Uniform, v0 int32) {
 	C.gl3_2core_glUniform1i(gl.funcs, C.GLint(location), C.GLint(v0))
 }
 
+// Uniform4f modifies the value of a single uniform variable.
+// The location of the uniform variable to be modified is specified by
+// location, which should be a value returned by GetUniformLocation.
+// Uniform4f operates on the program object that was made part of current
+// state by calling UseProgram.
+//
+// The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
+// uniform variable specified by location using the values passed as
+// arguments. The number specified in the function should match the number of
+// components in the data type of the specified uniform variable (1 for
+// float, int, unsigned int, bool; 2 for vec2, ivec2, uvec2, bvec2, etc.).
+// The suffix f indicates that floating-point values are being passed; the
+// suffix i indicates that integer values are being passed; the suffix ui
+// indicates that unsigned integer values are being passed, and this type
+// should also match the data type of the specified uniform variable. The i
+// variants of this function should be used to provide values for uniform
+// variables defined as int, ivec2, ivec3, ivec4, or arrays of these. The ui
+// variants of this function should be used to provide values for uniform
+// variables defined as unsigned int, uvec2, uvec3, uvec4, or arrays of
+// these. The f variants should be used to provide values for uniform
+// variables of type float, vec2, vec3, vec4, or arrays of these. Either the
+// i, ui or f variants may be used to provide values for uniform variables of
+// type bool, bvec2, bvec3, bvec4, or arrays of these. The uniform variable
+// will be set to false if the input value is 0 or 0.0f, and it will be set
+// to true otherwise.
+//
+// Uniform1i and Uniform1iv are the only two functions that may be used to
+// load uniform variables defined as sampler types. Loading samplers with any
+// other function will result in a GL.INVALID_OPERATION error.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniform4f.xml
 func (gl *GL) Uniform4f(location glbase.Uniform, v0, v1, v2, v3 float32) {
 	C.gl3_2core_glUniform4f(gl.funcs, C.GLint(location), C.GLfloat(v0), C.GLfloat(v1), C.GLfloat(v2), C.GLfloat(v3))
 }
 
+// Uniform3f modifies the value of a single uniform variable.
+// The location of the uniform variable to be modified is specified by
+// location, which should be a value returned by GetUniformLocation.
+// Uniform3f operates on the program object that was made part of current
+// state by calling UseProgram.
+//
+// The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
+// uniform variable specified by location using the values passed as
+// arguments. The number specified in the function should match the number of
+// components in the data type of the specified uniform variable (1 for
+// float, int, unsigned int, bool; 2 for vec2, ivec2, uvec2, bvec2, etc.).
+// The suffix f indicates that floating-point values are being passed; the
+// suffix i indicates that integer values are being passed; the suffix ui
+// indicates that unsigned integer values are being passed, and this type
+// should also match the data type of the specified uniform variable. The i
+// variants of this function should be used to provide values for uniform
+// variables defined as int, ivec2, ivec3, ivec4, or arrays of these. The ui
+// variants of this function should be used to provide values for uniform
+// variables defined as unsigned int, uvec2, uvec3, uvec4, or arrays of
+// these. The f variants should be used to provide values for uniform
+// variables of type float, vec2, vec3, vec4, or arrays of these. Either the
+// i, ui or f variants may be used to provide values for uniform variables of
+// type bool, bvec2, bvec3, bvec4, or arrays of these. The uniform variable
+// will be set to false if the input value is 0 or 0.0f, and it will be set
+// to true otherwise.
+//
+// Uniform1i and Uniform1iv are the only two functions that may be used to
+// load uniform variables defined as sampler types. Loading samplers with any
+// other function will result in a GL.INVALID_OPERATION error.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniform3f.xml
 func (gl *GL) Uniform3f(location glbase.Uniform, v0, v1, v2 float32) {
 	C.gl3_2core_glUniform3f(gl.funcs, C.GLint(location), C.GLfloat(v0), C.GLfloat(v1), C.GLfloat(v2))
 }
 
+// Uniform2f modifies the value of a single uniform variable.
+// The location of the uniform variable to be modified is specified by
+// location, which should be a value returned by GetUniformLocation.
+// Uniform2f operates on the program object that was made part of current
+// state by calling UseProgram.
+//
+// The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
+// uniform variable specified by location using the values passed as
+// arguments. The number specified in the function should match the number of
+// components in the data type of the specified uniform variable (1 for
+// float, int, unsigned int, bool; 2 for vec2, ivec2, uvec2, bvec2, etc.).
+// The suffix f indicates that floating-point values are being passed; the
+// suffix i indicates that integer values are being passed; the suffix ui
+// indicates that unsigned integer values are being passed, and this type
+// should also match the data type of the specified uniform variable. The i
+// variants of this function should be used to provide values for uniform
+// variables defined as int, ivec2, ivec3, ivec4, or arrays of these. The ui
+// variants of this function should be used to provide values for uniform
+// variables defined as unsigned int, uvec2, uvec3, uvec4, or arrays of
+// these. The f variants should be used to provide values for uniform
+// variables of type float, vec2, vec3, vec4, or arrays of these. Either the
+// i, ui or f variants may be used to provide values for uniform variables of
+// type bool, bvec2, bvec3, bvec4, or arrays of these. The uniform variable
+// will be set to false if the input value is 0 or 0.0f, and it will be set
+// to true otherwise.
+//
+// Uniform1i and Uniform1iv are the only two functions that may be used to
+// load uniform variables defined as sampler types. Loading samplers with any
+// other function will result in a GL.INVALID_OPERATION error.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniform2f.xml
 func (gl *GL) Uniform2f(location glbase.Uniform, v0, v1 float32) {
 	C.gl3_2core_glUniform2f(gl.funcs, C.GLint(location), C.GLfloat(v0), C.GLfloat(v1))
 }
 
+// Uniform1f modifies the value of a single uniform variable.
+// The location of the uniform variable to be modified is specified by
+// location, which should be a value returned by GetUniformLocation.
+// Uniform1f operates on the program object that was made part of current
+// state by calling UseProgram.
+//
+// The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
+// uniform variable specified by location using the values passed as
+// arguments. The number specified in the function should match the number of
+// components in the data type of the specified uniform variable (1 for
+// float, int, unsigned int, bool; 2 for vec2, ivec2, uvec2, bvec2, etc.).
+// The suffix f indicates that floating-point values are being passed; the
+// suffix i indicates that integer values are being passed; the suffix ui
+// indicates that unsigned integer values are being passed, and this type
+// should also match the data type of the specified uniform variable. The i
+// variants of this function should be used to provide values for uniform
+// variables defined as int, ivec2, ivec3, ivec4, or arrays of these. The ui
+// variants of this function should be used to provide values for uniform
+// variables defined as unsigned int, uvec2, uvec3, uvec4, or arrays of
+// these. The f variants should be used to provide values for uniform
+// variables of type float, vec2, vec3, vec4, or arrays of these. Either the
+// i, ui or f variants may be used to provide values for uniform variables of
+// type bool, bvec2, bvec3, bvec4, or arrays of these. The uniform variable
+// will be set to false if the input value is 0 or 0.0f, and it will be set
+// to true otherwise.
+//
+// Uniform1i and Uniform1iv are the only two functions that may be used to
+// load uniform variables defined as sampler types. Loading samplers with any
+// other function will result in a GL.INVALID_OPERATION error.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniform1f.xml
 func (gl *GL) Uniform1f(location glbase.Uniform, v0 float32) {
 	C.gl3_2core_glUniform1f(gl.funcs, C.GLint(location), C.GLfloat(v0))
@@ -2256,15 +3015,15 @@ func (gl *GL) GetVertexAttribdv(index glbase.Attrib, pname glbase.Enum, params [
 // returned. If it is defined as a vec2, ivec2, or bvec2, two values will be
 // returned. If it is defined as a vec3, ivec3, or bvec3, three values will
 // be returned, and so on. To query values stored in uniform variables
-// declared as arrays, call glGetUniformiv for each element of the array. To
+// declared as arrays, call GetUniformiv for each element of the array. To
 // query values stored in uniform variables declared as structures, call
-// glGetUniformiv for each field in the structure. The values for uniform
+// GetUniformiv for each field in the structure. The values for uniform
 // variables declared as a matrix will be returned in column major order.
 //
 // The locations assigned to uniform variables are not known until the
 // program object is linked. After linking has occurred, the command
 // GetUniformLocation can be used to obtain the location of a uniform
-// variable. This location value can then be passed to glGetUniformiv in order
+// variable. This location value can then be passed to GetUniformiv in order
 // to query the current value of the uniform variable. After a program object
 // has been linked successfully, the index values for uniform variables
 // remain fixed until the next link command occurs. The uniform variable
@@ -2275,7 +3034,7 @@ func (gl *GL) GetVertexAttribdv(index glbase.Attrib, pname glbase.Enum, params [
 // object. GL.INVALID_OPERATION is generated if program has not been
 // successfully linked. GL.INVALID_OPERATION is generated if location does
 // not correspond to a valid uniform variable location for the specified
-// program object. GL.INVALID_OPERATION is generated if glGetUniformiv is
+// program object. GL.INVALID_OPERATION is generated if GetUniformiv is
 // executed between the execution of Begin and the corresponding execution of
 // End.
 //
@@ -2295,15 +3054,15 @@ func (gl *GL) GetUniformiv(program glbase.Program, location glbase.Uniform, para
 // returned. If it is defined as a vec2, ivec2, or bvec2, two values will be
 // returned. If it is defined as a vec3, ivec3, or bvec3, three values will
 // be returned, and so on. To query values stored in uniform variables
-// declared as arrays, call glGetUniformfv for each element of the array. To
+// declared as arrays, call GetUniformfv for each element of the array. To
 // query values stored in uniform variables declared as structures, call
-// glGetUniformfv for each field in the structure. The values for uniform
+// GetUniformfv for each field in the structure. The values for uniform
 // variables declared as a matrix will be returned in column major order.
 //
 // The locations assigned to uniform variables are not known until the
 // program object is linked. After linking has occurred, the command
 // GetUniformLocation can be used to obtain the location of a uniform
-// variable. This location value can then be passed to glGetUniformfv in order
+// variable. This location value can then be passed to GetUniformfv in order
 // to query the current value of the uniform variable. After a program object
 // has been linked successfully, the index values for uniform variables
 // remain fixed until the next link command occurs. The uniform variable
@@ -2314,7 +3073,7 @@ func (gl *GL) GetUniformiv(program glbase.Program, location glbase.Uniform, para
 // object. GL.INVALID_OPERATION is generated if program has not been
 // successfully linked. GL.INVALID_OPERATION is generated if location does
 // not correspond to a valid uniform variable location for the specified
-// program object. GL.INVALID_OPERATION is generated if glGetUniformfv is
+// program object. GL.INVALID_OPERATION is generated if GetUniformfv is
 // executed between the execution of Begin and the corresponding execution of
 // End.
 //
@@ -2777,6 +3536,240 @@ func (gl *GL) BlendEquationSeparate(modeRGB, modeAlpha glbase.Enum) {
 	C.gl3_2core_glBlendEquationSeparate(gl.funcs, C.GLenum(modeRGB), C.GLenum(modeAlpha))
 }
 
+// UniformMatrix4x3fv modifies the value of a uniform variable or a uniform
+// variable array. The location of the uniform variable to be modified is
+// specified by location, which should be a value returned by GetUniformLocation.
+// UniformMatrix4x3fv operates on the program object that was made part
+// of current state by calling UseProgram.
+//
+// The functions UniformMatrix{2|3|4|2x3|3x2|2x4|4x2|3x4|4x3}fv are used to
+// modify a matrix or an array of matrices. The numbers in the function name
+// are interpreted as the dimensionality of the matrix. The number 2
+// indicates a 2x2 matrix (4 values), the number 3 indicates a 3x3 matrix (9
+// values), and the number 4 indicates a 4x4 matrix (16 values). Non-square
+// matrix dimensionality is explicit, with the first number representing the
+// number of columns and the second number representing the number of rows.
+// For example, 2x4 indicates a 2x4 matrix with 2 columns and 4 rows (8
+// values). The length of the provided slice must be a multiple of the number
+// of values per matrix, to update one or more consecutive matrices.
+//
+// If transpose is false, each matrix is assumed to be supplied in column
+// major order. If transpose is true, each matrix is assumed to be supplied
+// in row major order.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
+// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix4x3fv.xml
+func (gl *GL) UniformMatrix4x3fv(location glbase.Uniform, transpose bool, value []float32) {
+	if len(value) == 0 {
+		return
+	}
+	if len(value)%(4*3) != 0 {
+		panic("invalid value length for UniformMatrix4x3fv")
+	}
+	count := len(value) / (4 * 3)
+	C.gl3_2core_glUniformMatrix4x3fv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLfloat)(unsafe.Pointer(&value[0])))
+}
+
+// UniformMatrix3x4fv modifies the value of a uniform variable or a uniform
+// variable array. The location of the uniform variable to be modified is
+// specified by location, which should be a value returned by GetUniformLocation.
+// UniformMatrix3x4fv operates on the program object that was made part
+// of current state by calling UseProgram.
+//
+// The functions UniformMatrix{2|3|4|2x3|3x2|2x4|4x2|3x4|4x3}fv are used to
+// modify a matrix or an array of matrices. The numbers in the function name
+// are interpreted as the dimensionality of the matrix. The number 2
+// indicates a 2x2 matrix (4 values), the number 3 indicates a 3x3 matrix (9
+// values), and the number 4 indicates a 4x4 matrix (16 values). Non-square
+// matrix dimensionality is explicit, with the first number representing the
+// number of columns and the second number representing the number of rows.
+// For example, 2x4 indicates a 2x4 matrix with 2 columns and 4 rows (8
+// values). The length of the provided slice must be a multiple of the number
+// of values per matrix, to update one or more consecutive matrices.
+//
+// If transpose is false, each matrix is assumed to be supplied in column
+// major order. If transpose is true, each matrix is assumed to be supplied
+// in row major order.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
+// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix3x4fv.xml
+func (gl *GL) UniformMatrix3x4fv(location glbase.Uniform, transpose bool, value []float32) {
+	if len(value) == 0 {
+		return
+	}
+	if len(value)%(3*4) != 0 {
+		panic("invalid value length for UniformMatrix3x4fv")
+	}
+	count := len(value) / (3 * 4)
+	C.gl3_2core_glUniformMatrix3x4fv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLfloat)(unsafe.Pointer(&value[0])))
+}
+
+// UniformMatrix4x2fv modifies the value of a uniform variable or a uniform
+// variable array. The location of the uniform variable to be modified is
+// specified by location, which should be a value returned by GetUniformLocation.
+// UniformMatrix4x2fv operates on the program object that was made part
+// of current state by calling UseProgram.
+//
+// The functions UniformMatrix{2|3|4|2x3|3x2|2x4|4x2|3x4|4x3}fv are used to
+// modify a matrix or an array of matrices. The numbers in the function name
+// are interpreted as the dimensionality of the matrix. The number 2
+// indicates a 2x2 matrix (4 values), the number 3 indicates a 3x3 matrix (9
+// values), and the number 4 indicates a 4x4 matrix (16 values). Non-square
+// matrix dimensionality is explicit, with the first number representing the
+// number of columns and the second number representing the number of rows.
+// For example, 2x4 indicates a 2x4 matrix with 2 columns and 4 rows (8
+// values). The length of the provided slice must be a multiple of the number
+// of values per matrix, to update one or more consecutive matrices.
+//
+// If transpose is false, each matrix is assumed to be supplied in column
+// major order. If transpose is true, each matrix is assumed to be supplied
+// in row major order.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
+// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix4x2fv.xml
+func (gl *GL) UniformMatrix4x2fv(location glbase.Uniform, transpose bool, value []float32) {
+	if len(value) == 0 {
+		return
+	}
+	if len(value)%(4*2) != 0 {
+		panic("invalid value length for UniformMatrix4x2fv")
+	}
+	count := len(value) / (4 * 2)
+	C.gl3_2core_glUniformMatrix4x2fv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLfloat)(unsafe.Pointer(&value[0])))
+}
+
+// UniformMatrix2x4fv modifies the value of a uniform variable or a uniform
+// variable array. The location of the uniform variable to be modified is
+// specified by location, which should be a value returned by GetUniformLocation.
+// UniformMatrix2x4fv operates on the program object that was made part
+// of current state by calling UseProgram.
+//
+// The functions UniformMatrix{2|3|4|2x3|3x2|2x4|4x2|3x4|4x3}fv are used to
+// modify a matrix or an array of matrices. The numbers in the function name
+// are interpreted as the dimensionality of the matrix. The number 2
+// indicates a 2x2 matrix (4 values), the number 3 indicates a 3x3 matrix (9
+// values), and the number 4 indicates a 4x4 matrix (16 values). Non-square
+// matrix dimensionality is explicit, with the first number representing the
+// number of columns and the second number representing the number of rows.
+// For example, 2x4 indicates a 2x4 matrix with 2 columns and 4 rows (8
+// values). The length of the provided slice must be a multiple of the number
+// of values per matrix, to update one or more consecutive matrices.
+//
+// If transpose is false, each matrix is assumed to be supplied in column
+// major order. If transpose is true, each matrix is assumed to be supplied
+// in row major order.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
+// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix2x4fv.xml
+func (gl *GL) UniformMatrix2x4fv(location glbase.Uniform, transpose bool, value []float32) {
+	if len(value) == 0 {
+		return
+	}
+	if len(value)%(2*4) != 0 {
+		panic("invalid value length for UniformMatrix2x4fv")
+	}
+	count := len(value) / (2 * 4)
+	C.gl3_2core_glUniformMatrix2x4fv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLfloat)(unsafe.Pointer(&value[0])))
+}
+
+// UniformMatrix3x2fv modifies the value of a uniform variable or a uniform
+// variable array. The location of the uniform variable to be modified is
+// specified by location, which should be a value returned by GetUniformLocation.
+// UniformMatrix3x2fv operates on the program object that was made part
+// of current state by calling UseProgram.
+//
+// The functions UniformMatrix{2|3|4|2x3|3x2|2x4|4x2|3x4|4x3}fv are used to
+// modify a matrix or an array of matrices. The numbers in the function name
+// are interpreted as the dimensionality of the matrix. The number 2
+// indicates a 2x2 matrix (4 values), the number 3 indicates a 3x3 matrix (9
+// values), and the number 4 indicates a 4x4 matrix (16 values). Non-square
+// matrix dimensionality is explicit, with the first number representing the
+// number of columns and the second number representing the number of rows.
+// For example, 2x4 indicates a 2x4 matrix with 2 columns and 4 rows (8
+// values). The length of the provided slice must be a multiple of the number
+// of values per matrix, to update one or more consecutive matrices.
+//
+// If transpose is false, each matrix is assumed to be supplied in column
+// major order. If transpose is true, each matrix is assumed to be supplied
+// in row major order.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
+// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix3x2fv.xml
+func (gl *GL) UniformMatrix3x2fv(location glbase.Uniform, transpose bool, value []float32) {
+	if len(value) == 0 {
+		return
+	}
+	if len(value)%(3*2) != 0 {
+		panic("invalid value length for UniformMatrix3x2fv")
+	}
+	count := len(value) / (3 * 2)
+	C.gl3_2core_glUniformMatrix3x2fv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLfloat)(unsafe.Pointer(&value[0])))
+}
+
+// UniformMatrix2x3fv modifies the value of a uniform variable or a uniform
+// variable array. The location of the uniform variable to be modified is
+// specified by location, which should be a value returned by GetUniformLocation.
+// UniformMatrix2x3fv operates on the program object that was made part
+// of current state by calling UseProgram.
+//
+// The functions UniformMatrix{2|3|4|2x3|3x2|2x4|4x2|3x4|4x3}fv are used to
+// modify a matrix or an array of matrices. The numbers in the function name
+// are interpreted as the dimensionality of the matrix. The number 2
+// indicates a 2x2 matrix (4 values), the number 3 indicates a 3x3 matrix (9
+// values), and the number 4 indicates a 4x4 matrix (16 values). Non-square
+// matrix dimensionality is explicit, with the first number representing the
+// number of columns and the second number representing the number of rows.
+// For example, 2x4 indicates a 2x4 matrix with 2 columns and 4 rows (8
+// values). The length of the provided slice must be a multiple of the number
+// of values per matrix, to update one or more consecutive matrices.
+//
+// If transpose is false, each matrix is assumed to be supplied in column
+// major order. If transpose is true, each matrix is assumed to be supplied
+// in row major order.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
+// https://www.opengl.org/sdk/docs/man2/xhtml/glUniformMatrix2x3fv.xml
+func (gl *GL) UniformMatrix2x3fv(location glbase.Uniform, transpose bool, value []float32) {
+	if len(value) == 0 {
+		return
+	}
+	if len(value)%(2*3) != 0 {
+		panic("invalid value length for UniformMatrix2x3fv")
+	}
+	count := len(value) / (2 * 3)
+	C.gl3_2core_glUniformMatrix2x3fv(gl.funcs, C.GLint(location), C.GLsizei(count), *(*C.GLboolean)(unsafe.Pointer(&transpose)), (*C.GLfloat)(unsafe.Pointer(&value[0])))
+}
+
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsVertexArray.xml
 func (gl *GL) IsVertexArray(array uint32) bool {
 	glresult := C.gl3_2core_glIsVertexArray(gl.funcs, C.GLuint(array))
@@ -2946,21 +3939,342 @@ func (gl *GL) TexParameterIiv(target, pname glbase.Enum, params []int32) {
 	C.gl3_2core_glTexParameterIiv(gl.funcs, C.GLenum(target), C.GLenum(pname), (*C.GLint)(unsafe.Pointer(&params[0])))
 }
 
+// Uniform4uiv modifies the value of a uniform variable or a uniform
+// variable array. The location of the uniform variable to be modified is
+// specified by location, which should be a value returned by GetUniformLocation.
+// Uniform4uiv operates on the program object that was made part
+// of current state by calling UseProgram.
+//
+// The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
+// uniform variable or a uniform variable array. These functions receive a
+// slice with the values to be loaded into a uniform variable or a uniform
+// variable array. A slice with length 1 should be used if modifying the value
+// of a single uniform variable, and a length of 1 or greater can be used to
+// modify an entire array or part of an array. When loading n elements
+// starting at an arbitrary position m in a uniform variable array, elements
+// m + n - 1 in the array will be replaced with the new values. If m + n - 1
+// is larger than the size of the uniform variable array, values for all
+// array elements beyond the end of the array will be ignored. The number
+// specified in the name of the command indicates the number of components
+// for each element in value, and it should match the number of components in
+// the data type of the specified uniform variable (1 for float, int, bool;
+// 2 for vec2, ivec2, bvec2, etc.). The data type specified in the name
+// of the command must match the data type for the specified uniform variable
+// as described for Uniform{1|2|3|4}{f|i|ui}.
+//
+// Uniform1i and Uniform1iv are the only two functions that may be used to
+// load uniform variables defined as sampler types. Loading samplers with any
+// other function will result in a GL.INVALID_OPERATION error.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
+// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform4uiv.xml
+func (gl *GL) Uniform4uiv(location glbase.Uniform, value []uint32) {
+	if len(value) == 0 {
+		return
+	}
+	if len(value)%4 != 0 {
+		panic("invalid value length for Uniform4uiv")
+	}
+	count := len(value) / 4
+	C.gl3_2core_glUniform4uiv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLuint)(unsafe.Pointer(&value[0])))
+}
+
+// Uniform3uiv modifies the value of a uniform variable or a uniform
+// variable array. The location of the uniform variable to be modified is
+// specified by location, which should be a value returned by GetUniformLocation.
+// Uniform3uiv operates on the program object that was made part
+// of current state by calling UseProgram.
+//
+// The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
+// uniform variable or a uniform variable array. These functions receive a
+// slice with the values to be loaded into a uniform variable or a uniform
+// variable array. A slice with length 1 should be used if modifying the value
+// of a single uniform variable, and a length of 1 or greater can be used to
+// modify an entire array or part of an array. When loading n elements
+// starting at an arbitrary position m in a uniform variable array, elements
+// m + n - 1 in the array will be replaced with the new values. If m + n - 1
+// is larger than the size of the uniform variable array, values for all
+// array elements beyond the end of the array will be ignored. The number
+// specified in the name of the command indicates the number of components
+// for each element in value, and it should match the number of components in
+// the data type of the specified uniform variable (1 for float, int, bool;
+// 2 for vec2, ivec2, bvec2, etc.). The data type specified in the name
+// of the command must match the data type for the specified uniform variable
+// as described for Uniform{1|2|3|4}{f|i|ui}.
+//
+// Uniform1i and Uniform1iv are the only two functions that may be used to
+// load uniform variables defined as sampler types. Loading samplers with any
+// other function will result in a GL.INVALID_OPERATION error.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
+// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform3uiv.xml
+func (gl *GL) Uniform3uiv(location glbase.Uniform, value []uint32) {
+	if len(value) == 0 {
+		return
+	}
+	if len(value)%3 != 0 {
+		panic("invalid value length for Uniform3uiv")
+	}
+	count := len(value) / 3
+	C.gl3_2core_glUniform3uiv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLuint)(unsafe.Pointer(&value[0])))
+}
+
+// Uniform2uiv modifies the value of a uniform variable or a uniform
+// variable array. The location of the uniform variable to be modified is
+// specified by location, which should be a value returned by GetUniformLocation.
+// Uniform2uiv operates on the program object that was made part
+// of current state by calling UseProgram.
+//
+// The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
+// uniform variable or a uniform variable array. These functions receive a
+// slice with the values to be loaded into a uniform variable or a uniform
+// variable array. A slice with length 1 should be used if modifying the value
+// of a single uniform variable, and a length of 1 or greater can be used to
+// modify an entire array or part of an array. When loading n elements
+// starting at an arbitrary position m in a uniform variable array, elements
+// m + n - 1 in the array will be replaced with the new values. If m + n - 1
+// is larger than the size of the uniform variable array, values for all
+// array elements beyond the end of the array will be ignored. The number
+// specified in the name of the command indicates the number of components
+// for each element in value, and it should match the number of components in
+// the data type of the specified uniform variable (1 for float, int, bool;
+// 2 for vec2, ivec2, bvec2, etc.). The data type specified in the name
+// of the command must match the data type for the specified uniform variable
+// as described for Uniform{1|2|3|4}{f|i|ui}.
+//
+// Uniform1i and Uniform1iv are the only two functions that may be used to
+// load uniform variables defined as sampler types. Loading samplers with any
+// other function will result in a GL.INVALID_OPERATION error.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
+// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform2uiv.xml
+func (gl *GL) Uniform2uiv(location glbase.Uniform, value []uint32) {
+	if len(value) == 0 {
+		return
+	}
+	if len(value)%2 != 0 {
+		panic("invalid value length for Uniform2uiv")
+	}
+	count := len(value) / 2
+	C.gl3_2core_glUniform2uiv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLuint)(unsafe.Pointer(&value[0])))
+}
+
+// Uniform1uiv modifies the value of a uniform variable or a uniform
+// variable array. The location of the uniform variable to be modified is
+// specified by location, which should be a value returned by GetUniformLocation.
+// Uniform1uiv operates on the program object that was made part
+// of current state by calling UseProgram.
+//
+// The functions Uniform{1|2|3|4}{f|i|ui}v can be used to modify a single
+// uniform variable or a uniform variable array. These functions receive a
+// slice with the values to be loaded into a uniform variable or a uniform
+// variable array. A slice with length 1 should be used if modifying the value
+// of a single uniform variable, and a length of 1 or greater can be used to
+// modify an entire array or part of an array. When loading n elements
+// starting at an arbitrary position m in a uniform variable array, elements
+// m + n - 1 in the array will be replaced with the new values. If m + n - 1
+// is larger than the size of the uniform variable array, values for all
+// array elements beyond the end of the array will be ignored. The number
+// specified in the name of the command indicates the number of components
+// for each element in value, and it should match the number of components in
+// the data type of the specified uniform variable (1 for float, int, bool;
+// 2 for vec2, ivec2, bvec2, etc.). The data type specified in the name
+// of the command must match the data type for the specified uniform variable
+// as described for Uniform{1|2|3|4}{f|i|ui}.
+//
+// Uniform1i and Uniform1iv are the only two functions that may be used to
+// load uniform variables defined as sampler types. Loading samplers with any
+// other function will result in a GL.INVALID_OPERATION error.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
+// https://www.opengl.org/sdk/docs/man2/xhtml/glUniform1uiv.xml
+func (gl *GL) Uniform1uiv(location glbase.Uniform, value []uint32) {
+	if len(value) == 0 {
+		return
+	}
+	count := len(value)
+	C.gl3_2core_glUniform1uiv(gl.funcs, C.GLint(location), C.GLsizei(count), (*C.GLuint)(unsafe.Pointer(&value[0])))
+}
+
+// Uniform4ui modifies the value of a single uniform variable.
+// The location of the uniform variable to be modified is specified by
+// location, which should be a value returned by GetUniformLocation.
+// Uniform4ui operates on the program object that was made part of current
+// state by calling UseProgram.
+//
+// The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
+// uniform variable specified by location using the values passed as
+// arguments. The number specified in the function should match the number of
+// components in the data type of the specified uniform variable (1 for
+// float, int, unsigned int, bool; 2 for vec2, ivec2, uvec2, bvec2, etc.).
+// The suffix f indicates that floating-point values are being passed; the
+// suffix i indicates that integer values are being passed; the suffix ui
+// indicates that unsigned integer values are being passed, and this type
+// should also match the data type of the specified uniform variable. The i
+// variants of this function should be used to provide values for uniform
+// variables defined as int, ivec2, ivec3, ivec4, or arrays of these. The ui
+// variants of this function should be used to provide values for uniform
+// variables defined as unsigned int, uvec2, uvec3, uvec4, or arrays of
+// these. The f variants should be used to provide values for uniform
+// variables of type float, vec2, vec3, vec4, or arrays of these. Either the
+// i, ui or f variants may be used to provide values for uniform variables of
+// type bool, bvec2, bvec3, bvec4, or arrays of these. The uniform variable
+// will be set to false if the input value is 0 or 0.0f, and it will be set
+// to true otherwise.
+//
+// Uniform1i and Uniform1iv are the only two functions that may be used to
+// load uniform variables defined as sampler types. Loading samplers with any
+// other function will result in a GL.INVALID_OPERATION error.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniform4ui.xml
 func (gl *GL) Uniform4ui(location glbase.Uniform, v0, v1, v2, v3 uint32) {
 	C.gl3_2core_glUniform4ui(gl.funcs, C.GLint(location), C.GLuint(v0), C.GLuint(v1), C.GLuint(v2), C.GLuint(v3))
 }
 
+// Uniform3ui modifies the value of a single uniform variable.
+// The location of the uniform variable to be modified is specified by
+// location, which should be a value returned by GetUniformLocation.
+// Uniform3ui operates on the program object that was made part of current
+// state by calling UseProgram.
+//
+// The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
+// uniform variable specified by location using the values passed as
+// arguments. The number specified in the function should match the number of
+// components in the data type of the specified uniform variable (1 for
+// float, int, unsigned int, bool; 2 for vec2, ivec2, uvec2, bvec2, etc.).
+// The suffix f indicates that floating-point values are being passed; the
+// suffix i indicates that integer values are being passed; the suffix ui
+// indicates that unsigned integer values are being passed, and this type
+// should also match the data type of the specified uniform variable. The i
+// variants of this function should be used to provide values for uniform
+// variables defined as int, ivec2, ivec3, ivec4, or arrays of these. The ui
+// variants of this function should be used to provide values for uniform
+// variables defined as unsigned int, uvec2, uvec3, uvec4, or arrays of
+// these. The f variants should be used to provide values for uniform
+// variables of type float, vec2, vec3, vec4, or arrays of these. Either the
+// i, ui or f variants may be used to provide values for uniform variables of
+// type bool, bvec2, bvec3, bvec4, or arrays of these. The uniform variable
+// will be set to false if the input value is 0 or 0.0f, and it will be set
+// to true otherwise.
+//
+// Uniform1i and Uniform1iv are the only two functions that may be used to
+// load uniform variables defined as sampler types. Loading samplers with any
+// other function will result in a GL.INVALID_OPERATION error.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniform3ui.xml
 func (gl *GL) Uniform3ui(location glbase.Uniform, v0, v1, v2 uint32) {
 	C.gl3_2core_glUniform3ui(gl.funcs, C.GLint(location), C.GLuint(v0), C.GLuint(v1), C.GLuint(v2))
 }
 
+// Uniform2ui modifies the value of a single uniform variable.
+// The location of the uniform variable to be modified is specified by
+// location, which should be a value returned by GetUniformLocation.
+// Uniform2ui operates on the program object that was made part of current
+// state by calling UseProgram.
+//
+// The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
+// uniform variable specified by location using the values passed as
+// arguments. The number specified in the function should match the number of
+// components in the data type of the specified uniform variable (1 for
+// float, int, unsigned int, bool; 2 for vec2, ivec2, uvec2, bvec2, etc.).
+// The suffix f indicates that floating-point values are being passed; the
+// suffix i indicates that integer values are being passed; the suffix ui
+// indicates that unsigned integer values are being passed, and this type
+// should also match the data type of the specified uniform variable. The i
+// variants of this function should be used to provide values for uniform
+// variables defined as int, ivec2, ivec3, ivec4, or arrays of these. The ui
+// variants of this function should be used to provide values for uniform
+// variables defined as unsigned int, uvec2, uvec3, uvec4, or arrays of
+// these. The f variants should be used to provide values for uniform
+// variables of type float, vec2, vec3, vec4, or arrays of these. Either the
+// i, ui or f variants may be used to provide values for uniform variables of
+// type bool, bvec2, bvec3, bvec4, or arrays of these. The uniform variable
+// will be set to false if the input value is 0 or 0.0f, and it will be set
+// to true otherwise.
+//
+// Uniform1i and Uniform1iv are the only two functions that may be used to
+// load uniform variables defined as sampler types. Loading samplers with any
+// other function will result in a GL.INVALID_OPERATION error.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniform2ui.xml
 func (gl *GL) Uniform2ui(location glbase.Uniform, v0, v1 uint32) {
 	C.gl3_2core_glUniform2ui(gl.funcs, C.GLint(location), C.GLuint(v0), C.GLuint(v1))
 }
 
+// Uniform1ui modifies the value of a single uniform variable.
+// The location of the uniform variable to be modified is specified by
+// location, which should be a value returned by GetUniformLocation.
+// Uniform1ui operates on the program object that was made part of current
+// state by calling UseProgram.
+//
+// The functions Uniform{1|2|3|4}{f|i|ui} are used to change the value of the
+// uniform variable specified by location using the values passed as
+// arguments. The number specified in the function should match the number of
+// components in the data type of the specified uniform variable (1 for
+// float, int, unsigned int, bool; 2 for vec2, ivec2, uvec2, bvec2, etc.).
+// The suffix f indicates that floating-point values are being passed; the
+// suffix i indicates that integer values are being passed; the suffix ui
+// indicates that unsigned integer values are being passed, and this type
+// should also match the data type of the specified uniform variable. The i
+// variants of this function should be used to provide values for uniform
+// variables defined as int, ivec2, ivec3, ivec4, or arrays of these. The ui
+// variants of this function should be used to provide values for uniform
+// variables defined as unsigned int, uvec2, uvec3, uvec4, or arrays of
+// these. The f variants should be used to provide values for uniform
+// variables of type float, vec2, vec3, vec4, or arrays of these. Either the
+// i, ui or f variants may be used to provide values for uniform variables of
+// type bool, bvec2, bvec3, bvec4, or arrays of these. The uniform variable
+// will be set to false if the input value is 0 or 0.0f, and it will be set
+// to true otherwise.
+//
+// Uniform1i and Uniform1iv are the only two functions that may be used to
+// load uniform variables defined as sampler types. Loading samplers with any
+// other function will result in a GL.INVALID_OPERATION error.
+//
+// All active uniform variables defined in a program object are initialized
+// to 0 when the program object is linked successfully. They retain the
+// values assigned to them by a call to Uniform* until the next successful
+// link operation occurs on the program object, when they are once again
+// initialized to 0.
+//
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniform1ui.xml
 func (gl *GL) Uniform1ui(location glbase.Uniform, v0 uint32) {
 	C.gl3_2core_glUniform1ui(gl.funcs, C.GLint(location), C.GLuint(v0))
@@ -3082,8 +4396,8 @@ func (gl *GL) CopyBufferSubData(readTarget, writeTarget glbase.Enum, readOffset,
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glUniformBlockBinding.xml
-func (gl *GL) UniformBlockBinding(program glbase.Program, uniformBlockIndex, uniformBlockBinding uint32) {
-	C.gl3_2core_glUniformBlockBinding(gl.funcs, C.GLuint(program), C.GLuint(uniformBlockIndex), C.GLuint(uniformBlockBinding))
+func (gl *GL) UniformBlockBinding(program glbase.Program, v0, v1 uint32) {
+	C.gl3_2core_glUniformBlockBinding(gl.funcs, C.GLuint(program), C.GLuint(v0), C.GLuint(v1))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetActiveUniformBlockName.xml
