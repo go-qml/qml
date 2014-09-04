@@ -15,11 +15,10 @@ import (
 	"testing"
 	"time"
 
-	. "launchpad.net/gocheck"
-
+	. "gopkg.in/check.v1"
 	"gopkg.in/qml.v1"
 	"gopkg.in/qml.v1/cpptest"
-	"gopkg.in/qml.v1/gl"
+	"gopkg.in/qml.v1/gl/2.0"
 )
 
 func init() { qml.SetupTesting() }
@@ -84,11 +83,13 @@ func (r *GoRect) Paint(p *qml.Painter) {
 
 	obj := p.Object()
 
-	width := gl.Float(obj.Int("width"))
-	height := gl.Float(obj.Int("height"))
+	gl := GL.API(p)
+
+	width := float32(obj.Int("width"))
+	height := float32(obj.Int("height"))
 
 	gl.Color3f(1.0, 0.0, 0.0)
-	gl.Begin(gl.QUADS)
+	gl.Begin(GL.QUADS)
 	gl.Vertex2f(0, 0)
 	gl.Vertex2f(width, 0)
 	gl.Vertex2f(width, height)
