@@ -437,6 +437,8 @@ func convertAndSet(to, from reflect.Value, setMethod reflect.Value) (err error) 
 	}
 	fromType := from.Type()
 	defer func() {
+		// TODO This is catching more than it should. There are calls
+		//      to custom code below that should be isolated.
 		if v := recover(); v != nil {
 			err = fmt.Errorf("cannot use %s as a %s", fromType, toType)
 		}
@@ -534,10 +536,10 @@ func convertParam(methodName string, index int, param reflect.Value, argt reflec
 }
 
 func printPaintPanic() {
-	var buf [8192]byte
 	if v := recover(); v != nil {
-		runtime.Stack(buf[:], false)
-		fmt.Fprintf(os.Stderr, "panic while painting: %s\n\n%s", v, buf[:])
+		buf := make([]byte, 8192)
+		runtime.Stack(buf, false)
+		fmt.Fprintf(os.Stderr, "panic while painting: %s\n\n%s", v, buf)
 	}
 }
 
@@ -545,25 +547,29 @@ func printPaintPanic() {
 func hookGoValuePaint(enginep, foldp unsafe.Pointer, reflectIndex C.intptr_t) {
 	// Besides a convenience this is a workaround for http://golang.org/issue/8588
 	defer printPaintPanic()
+	defer atomic.StoreUintptr(&guiPaintRef, 0)
 
 	// The main GUI thread is mutex-locked while paint methods are called,
 	// so no two paintings should be happening at the same time.
 	atomic.StoreUintptr(&guiPaintRef, cdata.Ref())
 
 	fold := ensureEngine(enginep, foldp)
-	v := reflect.ValueOf(fold.gvalue)
+	if fold.init.IsValid() {
+		return
+	}
 
 	painter := &Painter{engine: fold.engine, obj: &Common{fold.cvalue, fold.engine}}
-
+	v := reflect.ValueOf(fold.gvalue)
 	method := v.Method(int(reflectIndex))
 	method.Call([]reflect.Value{reflect.ValueOf(painter)})
-
-	atomic.StoreUintptr(&guiPaintRef, 0)
 }
 
 func ensureEngine(enginep, foldp unsafe.Pointer) *valueFold {
 	fold := (*valueFold)(foldp)
 	if fold.engine != nil {
+		if fold.init.IsValid() {
+			initGoType(fold)
+		}
 		return fold
 	}
 
@@ -590,12 +596,29 @@ func ensureEngine(enginep, foldp unsafe.Pointer) *valueFold {
 	if len(typeNew) == before {
 		panic("value had no engine, but was not created by a registered type; who created the value?")
 	}
+	initGoType(fold)
+	return fold
+}
 
+func initGoType(fold *valueFold) {
+	if cdata.Ref() == atomic.LoadUintptr(&guiPaintRef) {
+		go RunMain(func() { _initGoType(fold, true) })
+	} else {
+		_initGoType(fold, false)
+	}
+}
+
+func _initGoType(fold *valueFold, schedulePaint bool) {
+	if !fold.init.IsValid() {
+		return
+	}
 	// TODO Would be good to preserve identity on the Go side. See unpackDataValue as well.
 	obj := &Common{engine: fold.engine, addr: fold.cvalue}
 	fold.init.Call([]reflect.Value{reflect.ValueOf(fold.gvalue), reflect.ValueOf(obj)})
-
-	return fold
+	fold.init = reflect.Value{}
+	if schedulePaint {
+		obj.Call("update")
+	}
 }
 
 //export hookPanic
