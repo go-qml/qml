@@ -1077,8 +1077,23 @@ func (gl *GL) GenTextures(n int, textures []glbase.Texture) {
 	C.gl1_3_glGenTextures(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteTextures.xml
-func (gl *GL) DeleteTextures(n int, textures []glbase.Texture) {
+// DeleteTextures deletes the textures objects whose names are stored
+// in the textures slice. After a texture is deleted, it has no contents or
+// dimensionality, and its name is free for reuse (for example by
+// GenTextures). If a texture that is currently bound is deleted, the binding
+// reverts to 0 (the default texture).
+//
+// DeleteTextures silently ignores 0's and names that do not correspond to
+// existing textures.
+//
+// Error GL.INVALID_VALUE is generated if n is negative.
+//
+// DeleteTextures is available in GL version 2.0 or greater.
+func (gl *GL) DeleteTextures(textures []glbase.Texture) {
+	n := len(textures)
+	if n == 0 {
+		return
+	}
 	C.gl1_3_glDeleteTextures(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])))
 }
 

@@ -1176,8 +1176,23 @@ func (gl *GL) GenTextures(n int, textures []glbase.Texture) {
 	C.gl1_5_glGenTextures(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteTextures.xml
-func (gl *GL) DeleteTextures(n int, textures []glbase.Texture) {
+// DeleteTextures deletes the textures objects whose names are stored
+// in the textures slice. After a texture is deleted, it has no contents or
+// dimensionality, and its name is free for reuse (for example by
+// GenTextures). If a texture that is currently bound is deleted, the binding
+// reverts to 0 (the default texture).
+//
+// DeleteTextures silently ignores 0's and names that do not correspond to
+// existing textures.
+//
+// Error GL.INVALID_VALUE is generated if n is negative.
+//
+// DeleteTextures is available in GL version 2.0 or greater.
+func (gl *GL) DeleteTextures(textures []glbase.Texture) {
+	n := len(textures)
+	if n == 0 {
+		return
+	}
 	C.gl1_5_glDeleteTextures(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])))
 }
 
@@ -1579,13 +1594,35 @@ func (gl *GL) IsBuffer(buffer glbase.Buffer) bool {
 //
 // GenBuffers is available in GL version 1.5 or greater.
 func (gl *GL) GenBuffers(n int) []glbase.Buffer {
+	if n == 0 {
+		return nil
+	}
 	buffers := make([]glbase.Buffer, n)
 	C.gl1_5_glGenBuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&buffers[0])))
 	return buffers
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteBuffers.xml
-func (gl *GL) DeleteBuffers(n int, buffers []glbase.Buffer) {
+// DeleteBuffers deletes the buffer objects whose names are stored in the
+// buffers slice.
+//
+// After a buffer object is deleted, it has no contents, and its name is free
+// for reuse (for example by GenBuffers). If a buffer object that is
+// currently bound is deleted, the binding reverts to 0 (the absence of any
+// buffer object, which reverts to client memory usage).
+//
+// DeleteBuffers silently ignores 0's and names that do not correspond to
+// existing buffer objects.
+//
+// Error GL.INVALID_VALUE is generated if n is negative. GL.INVALID_OPERATION
+// is generated if DeleteBuffers is executed between the execution of Begin
+// and the corresponding execution of End.
+//
+// DeleteBuffers is available in GL version 1.5 or greater.
+func (gl *GL) DeleteBuffers(buffers []glbase.Buffer) {
+	n := len(buffers)
+	if n == 0 {
+		return
+	}
 	C.gl1_5_glDeleteBuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&buffers[0])))
 }
 
