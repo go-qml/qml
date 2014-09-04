@@ -1027,13 +1027,15 @@ func (gl *GL) GenFramebuffers(n int) []glbase.Framebuffer {
 //
 // Renderbuffer object names returned by a call to GenRenderbuffers are not
 // returned by subsequent calls, unless they are first deleted with
-// glDeleteRenderbuffers.
+// DeleteRenderbuffers.
 //
 // The names returned in renderbuffers are marked as used, for the purposes
 // of GenRenderbuffers only, but they acquire state and type only when they
 // are first bound.
 //
 // Error GL.INVALID_VALUE is generated if n is negative.
+//
+// GenRenderbuffers is available in GL version 3.0 or greater.
 func (gl *GL) GenRenderbuffers(n int) []glbase.Renderbuffer {
 	if n == 0 {
 		return nil
@@ -2817,9 +2819,28 @@ func (gl *GL) FrontFace(mode glbase.Enum) {
 	C.gles2_glFrontFace(gl.funcs, C.GLenum(mode))
 }
 
-// https://www.opengl.org/sdk/docs/man2/xhtml/glGenTextures.xml
-func (gl *GL) GenTextures(n int, textures []glbase.Texture) {
+// GenTextures returns n texture names in textures. There is no guarantee
+// that the names form a contiguous set of integers; however, it is
+// guaranteed that none of the returned names was in use immediately before
+// the call to GenTextures.
+//
+// The generated textures have no dimensionality; they assume the
+// dimensionality of the texture target to which they are first bound (see
+// BindTexture).
+//
+// Texture names returned by a call to GenTextures are not returned by
+// subsequent calls, unless they are first deleted with DeleteTextures.
+//
+// Error GL.INVALID_VALUE is generated if n is negative.
+//
+// GenTextures is available in GL version 2.0 or greater.
+func (gl *GL) GenTextures(n int) []glbase.Texture {
+	if n == 0 {
+		return nil
+	}
+	textures := make([]glbase.Texture, n)
 	C.gles2_glGenTextures(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])))
+	return textures
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetBooleanv.xml

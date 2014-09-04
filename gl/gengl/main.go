@@ -437,14 +437,14 @@ func parseConsts(filename string) (map[glVersion][]Const, error) {
 			}
 
 			for _, require := range feature.Requires {
-				if require.Profile == profile || profile == "" {
+				if require.Profile == profile || require.Profile == "" {
 					for _, enum := range require.Enums {
 						required[enum.Name] = true
 					}
 				}
 			}
 			for _, remove := range feature.Removes {
-				if remove.Profile == profile || profile == "" {
+				if remove.Profile == profile || remove.Profile == "" {
 					for _, enum := range remove.Enums {
 						delete(required, enum.Name)
 					}

@@ -960,6 +960,7 @@ const (
 	BUFFER_ACCESS                                 = 0x88BB
 	BUFFER_MAPPED                                 = 0x88BC
 	BUFFER_MAP_POINTER                            = 0x88BD
+	TIME_ELAPSED                                  = 0x88BF
 	STREAM_DRAW                                   = 0x88E0
 	STREAM_READ                                   = 0x88E1
 	STREAM_COPY                                   = 0x88E2
@@ -975,11 +976,17 @@ const (
 	PIXEL_UNPACK_BUFFER_BINDING                   = 0x88EF
 	DEPTH24_STENCIL8                              = 0x88F0
 	TEXTURE_STENCIL_SIZE                          = 0x88F1
+	SRC1_COLOR                                    = 0x88F9
+	ONE_MINUS_SRC1_COLOR                          = 0x88FA
+	ONE_MINUS_SRC1_ALPHA                          = 0x88FB
+	MAX_DUAL_SOURCE_DRAW_BUFFERS                  = 0x88FC
 	VERTEX_ATTRIB_ARRAY_INTEGER                   = 0x88FD
+	VERTEX_ATTRIB_ARRAY_DIVISOR                   = 0x88FE
 	MAX_ARRAY_TEXTURE_LAYERS                      = 0x88FF
 	MIN_PROGRAM_TEXEL_OFFSET                      = 0x8904
 	MAX_PROGRAM_TEXEL_OFFSET                      = 0x8905
 	SAMPLES_PASSED                                = 0x8914
+	SAMPLER_BINDING                               = 0x8919
 	CLAMP_VERTEX_COLOR                            = 0x891A
 	CLAMP_FRAGMENT_COLOR                          = 0x891B
 	CLAMP_READ_COLOR                              = 0x891C
@@ -1045,6 +1052,7 @@ const (
 	PROXY_TEXTURE_2D_ARRAY                        = 0x8C1B
 	TEXTURE_BINDING_1D_ARRAY                      = 0x8C1C
 	TEXTURE_BINDING_2D_ARRAY                      = 0x8C1D
+	ANY_SAMPLES_PASSED                            = 0x8C2F
 	R11F_G11F_B10F                                = 0x8C3A
 	UNSIGNED_INT_10F_11F_11F_REV                  = 0x8C3B
 	RGB9_E5                                       = 0x8C3D
@@ -1159,6 +1167,7 @@ const (
 	RGBA_INTEGER                                  = 0x8D99
 	BGR_INTEGER                                   = 0x8D9A
 	BGRA_INTEGER                                  = 0x8D9B
+	INT_2_10_10_10_REV                            = 0x8D9F
 	FLOAT_32_UNSIGNED_INT_24_8_REV                = 0x8DAD
 	FRAMEBUFFER_SRGB                              = 0x8DB9
 	COMPRESSED_RED_RGTC1                          = 0x8DBB
@@ -1189,6 +1198,13 @@ const (
 	QUERY_NO_WAIT                                 = 0x8E14
 	QUERY_BY_REGION_WAIT                          = 0x8E15
 	QUERY_BY_REGION_NO_WAIT                       = 0x8E16
+	TIMESTAMP                                     = 0x8E28
+	TEXTURE_SWIZZLE_R                             = 0x8E42
+	TEXTURE_SWIZZLE_G                             = 0x8E43
+	TEXTURE_SWIZZLE_B                             = 0x8E44
+	TEXTURE_SWIZZLE_A                             = 0x8E45
+	TEXTURE_SWIZZLE_RGBA                          = 0x8E46
+	RGB10_A2UI                                    = 0x906F
 	BUFFER_ACCESS_FLAGS                           = 0x911F
 	BUFFER_MAP_LENGTH                             = 0x9120
 	BUFFER_MAP_OFFSET                             = 0x9121
@@ -1501,9 +1517,28 @@ func (gl *GL) IsTexture(texture glbase.Texture) bool {
 	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
-// https://www.opengl.org/sdk/docs/man3/xhtml/glGenTextures.xml
-func (gl *GL) GenTextures(n int, textures []glbase.Texture) {
+// GenTextures returns n texture names in textures. There is no guarantee
+// that the names form a contiguous set of integers; however, it is
+// guaranteed that none of the returned names was in use immediately before
+// the call to GenTextures.
+//
+// The generated textures have no dimensionality; they assume the
+// dimensionality of the texture target to which they are first bound (see
+// BindTexture).
+//
+// Texture names returned by a call to GenTextures are not returned by
+// subsequent calls, unless they are first deleted with DeleteTextures.
+//
+// Error GL.INVALID_VALUE is generated if n is negative.
+//
+// GenTextures is available in GL version 2.0 or greater.
+func (gl *GL) GenTextures(n int) []glbase.Texture {
+	if n == 0 {
+		return nil
+	}
+	textures := make([]glbase.Texture, n)
 	C.gl3_3compat_glGenTextures(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])))
+	return textures
 }
 
 // DeleteTextures deletes the textures objects whose names are stored
@@ -4327,13 +4362,15 @@ func (gl *GL) RenderbufferStorage(target, internalFormat glbase.Enum, width, hei
 //
 // Renderbuffer object names returned by a call to GenRenderbuffers are not
 // returned by subsequent calls, unless they are first deleted with
-// glDeleteRenderbuffers.
+// DeleteRenderbuffers.
 //
 // The names returned in renderbuffers are marked as used, for the purposes
 // of GenRenderbuffers only, but they acquire state and type only when they
 // are first bound.
 //
 // Error GL.INVALID_VALUE is generated if n is negative.
+//
+// GenRenderbuffers is available in GL version 3.0 or greater.
 func (gl *GL) GenRenderbuffers(n int) []glbase.Renderbuffer {
 	if n == 0 {
 		return nil
