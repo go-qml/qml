@@ -22,10 +22,12 @@ type (
 	Clampf   float32
 	Clampd   float64
 
-	Uniform int32
-	Attrib  int32
-	Texture uint32
-	Program uint32
-	Shader  uint32
-	Buffer  uint32
+	Uniform      int32
+	Attrib       int32
+	Texture      uint32
+	Program      uint32
+	Shader       uint32
+	Buffer       uint32
+	Framebuffer  uint32
+	Renderbuffer uint32
 )

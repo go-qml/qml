@@ -642,16 +642,19 @@ func prepareParam(f Func, pi int) Param {
 	p.GoType = goTypeName(p.Type)
 	switch p.GoType {
 	case "uint32":
-		// TODO Check plurals.
 		switch p.GoName {
-		case "program":
+		case "program", "programs":
 			p.GoType = "glbase.Program"
-		case "shader":
+		case "shader", "shaders":
 			p.GoType = "glbase.Shader"
-		case "buffer":
+		case "buffer", "buffers":
 			p.GoType = "glbase.Buffer"
-		case "texture":
+		case "texture", "textures":
 			p.GoType = "glbase.Texture"
+		case "framebuffer", "framebuffers":
+			p.GoType = "glbase.Framebuffer"
+		case "renderbuffer", "renderbuffers":
+			p.GoType = "glbase.Renderbuffer"
 		case "index":
 			if strings.Contains(f.Name, "Attrib") {
 				p.GoType = "glbase.Attrib"

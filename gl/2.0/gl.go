@@ -1256,12 +1256,12 @@ func (gl *GL) IsTexture(texture glbase.Texture) bool {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenTextures.xml
-func (gl *GL) GenTextures(n int, textures []uint32) {
+func (gl *GL) GenTextures(n int, textures []glbase.Texture) {
 	C.gl2_0_glGenTextures(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteTextures.xml
-func (gl *GL) DeleteTextures(n int, textures []uint32) {
+func (gl *GL) DeleteTextures(n int, textures []glbase.Texture) {
 	C.gl2_0_glDeleteTextures(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])))
 }
 
@@ -1669,7 +1669,7 @@ func (gl *GL) GenBuffers(n int) []glbase.Buffer {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteBuffers.xml
-func (gl *GL) DeleteBuffers(n int, buffers []uint32) {
+func (gl *GL) DeleteBuffers(n int, buffers []glbase.Buffer) {
 	C.gl2_0_glDeleteBuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&buffers[0])))
 }
 
@@ -5264,12 +5264,12 @@ func (gl *GL) PopClientAttrib() {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glPrioritizeTextures.xml
-func (gl *GL) PrioritizeTextures(n int, textures []uint32, priorities []float32) {
+func (gl *GL) PrioritizeTextures(n int, textures []glbase.Texture, priorities []float32) {
 	C.gl2_0_glPrioritizeTextures(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])), (*C.GLfloat)(unsafe.Pointer(&priorities[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glAreTexturesResident.xml
-func (gl *GL) AreTexturesResident(n int, textures []uint32, residences []bool) bool {
+func (gl *GL) AreTexturesResident(n int, textures []glbase.Texture, residences []bool) bool {
 	glresult := C.gl2_0_glAreTexturesResident(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])), (*C.GLboolean)(unsafe.Pointer(&residences[0])))
 	return *(*bool)(unsafe.Pointer(&glresult))
 }

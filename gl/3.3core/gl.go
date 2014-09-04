@@ -349,12 +349,12 @@ func (gl *GL) IsTexture(texture glbase.Texture) bool {
 }
 
 // https://www.opengl.org/sdk/docs/man3/xhtml/glGenTextures.xml
-func (gl *GL) GenTextures(n int, textures []uint32) {
+func (gl *GL) GenTextures(n int, textures []glbase.Texture) {
 	C.gl3_3core_glGenTextures(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man3/xhtml/glDeleteTextures.xml
-func (gl *GL) DeleteTextures(n int, textures []uint32) {
+func (gl *GL) DeleteTextures(n int, textures []glbase.Texture) {
 	C.gl3_3core_glDeleteTextures(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])))
 }
 
@@ -762,7 +762,7 @@ func (gl *GL) GenBuffers(n int) []glbase.Buffer {
 }
 
 // https://www.opengl.org/sdk/docs/man3/xhtml/glDeleteBuffers.xml
-func (gl *GL) DeleteBuffers(n int, buffers []uint32) {
+func (gl *GL) DeleteBuffers(n int, buffers []glbase.Buffer) {
 	C.gl3_3core_glDeleteBuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&buffers[0])))
 }
 
@@ -3007,7 +3007,7 @@ func (gl *GL) GetFramebufferAttachmentParameteriv(target, attachment, pname glba
 }
 
 // https://www.opengl.org/sdk/docs/man3/xhtml/glFramebufferRenderbuffer.xml
-func (gl *GL) FramebufferRenderbuffer(target, attachment, renderbuffertarget glbase.Enum, renderbuffer uint32) {
+func (gl *GL) FramebufferRenderbuffer(target, attachment, renderbuffertarget glbase.Enum, renderbuffer glbase.Renderbuffer) {
 	C.gl3_3core_glFramebufferRenderbuffer(gl.funcs, C.GLenum(target), C.GLenum(attachment), C.GLenum(renderbuffertarget), C.GLuint(renderbuffer))
 }
 
@@ -3033,22 +3033,22 @@ func (gl *GL) CheckFramebufferStatus(target glbase.Enum) glbase.Enum {
 }
 
 // https://www.opengl.org/sdk/docs/man3/xhtml/glGenFramebuffers.xml
-func (gl *GL) GenFramebuffers(n int, framebuffers []uint32) {
+func (gl *GL) GenFramebuffers(n int, framebuffers []glbase.Framebuffer) {
 	C.gl3_3core_glGenFramebuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&framebuffers[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man3/xhtml/glDeleteFramebuffers.xml
-func (gl *GL) DeleteFramebuffers(n int, framebuffers []uint32) {
+func (gl *GL) DeleteFramebuffers(n int, framebuffers []glbase.Framebuffer) {
 	C.gl3_3core_glDeleteFramebuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&framebuffers[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man3/xhtml/glBindFramebuffer.xml
-func (gl *GL) BindFramebuffer(target glbase.Enum, framebuffer uint32) {
+func (gl *GL) BindFramebuffer(target glbase.Enum, framebuffer glbase.Framebuffer) {
 	C.gl3_3core_glBindFramebuffer(gl.funcs, C.GLenum(target), C.GLuint(framebuffer))
 }
 
 // https://www.opengl.org/sdk/docs/man3/xhtml/glIsFramebuffer.xml
-func (gl *GL) IsFramebuffer(framebuffer uint32) bool {
+func (gl *GL) IsFramebuffer(framebuffer glbase.Framebuffer) bool {
 	glresult := C.gl3_3core_glIsFramebuffer(gl.funcs, C.GLuint(framebuffer))
 	return *(*bool)(unsafe.Pointer(&glresult))
 }
@@ -3064,22 +3064,22 @@ func (gl *GL) RenderbufferStorage(target, internalFormat glbase.Enum, width, hei
 }
 
 // https://www.opengl.org/sdk/docs/man3/xhtml/glGenRenderbuffers.xml
-func (gl *GL) GenRenderbuffers(n int, renderbuffers []uint32) {
+func (gl *GL) GenRenderbuffers(n int, renderbuffers []glbase.Renderbuffer) {
 	C.gl3_3core_glGenRenderbuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&renderbuffers[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man3/xhtml/glDeleteRenderbuffers.xml
-func (gl *GL) DeleteRenderbuffers(n int, renderbuffers []uint32) {
+func (gl *GL) DeleteRenderbuffers(n int, renderbuffers []glbase.Renderbuffer) {
 	C.gl3_3core_glDeleteRenderbuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&renderbuffers[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man3/xhtml/glBindRenderbuffer.xml
-func (gl *GL) BindRenderbuffer(target glbase.Enum, renderbuffer uint32) {
+func (gl *GL) BindRenderbuffer(target glbase.Enum, renderbuffer glbase.Renderbuffer) {
 	C.gl3_3core_glBindRenderbuffer(gl.funcs, C.GLenum(target), C.GLuint(renderbuffer))
 }
 
 // https://www.opengl.org/sdk/docs/man3/xhtml/glIsRenderbuffer.xml
-func (gl *GL) IsRenderbuffer(renderbuffer uint32) bool {
+func (gl *GL) IsRenderbuffer(renderbuffer glbase.Renderbuffer) bool {
 	glresult := C.gl3_3core_glIsRenderbuffer(gl.funcs, C.GLuint(renderbuffer))
 	return *(*bool)(unsafe.Pointer(&glresult))
 }

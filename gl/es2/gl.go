@@ -569,12 +569,12 @@ func (gl *GL) BindBuffer(target glbase.Enum, buffer glbase.Buffer) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glBindFramebuffer.xml
-func (gl *GL) BindFramebuffer(target glbase.Enum, framebuffer uint32) {
+func (gl *GL) BindFramebuffer(target glbase.Enum, framebuffer glbase.Framebuffer) {
 	C.gles2_glBindFramebuffer(gl.funcs, C.GLenum(target), C.GLuint(framebuffer))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glBindRenderbuffer.xml
-func (gl *GL) BindRenderbuffer(target glbase.Enum, renderbuffer uint32) {
+func (gl *GL) BindRenderbuffer(target glbase.Enum, renderbuffer glbase.Renderbuffer) {
 	C.gles2_glBindRenderbuffer(gl.funcs, C.GLenum(target), C.GLuint(renderbuffer))
 }
 
@@ -823,12 +823,12 @@ func (gl *GL) CreateShader(gltype glbase.Enum) glbase.Shader {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteBuffers.xml
-func (gl *GL) DeleteBuffers(n int, buffers []uint32) {
+func (gl *GL) DeleteBuffers(n int, buffers []glbase.Buffer) {
 	C.gles2_glDeleteBuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&buffers[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteFramebuffers.xml
-func (gl *GL) DeleteFramebuffers(n int, framebuffers []uint32) {
+func (gl *GL) DeleteFramebuffers(n int, framebuffers []glbase.Framebuffer) {
 	C.gles2_glDeleteFramebuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&framebuffers[0])))
 }
 
@@ -838,7 +838,7 @@ func (gl *GL) DeleteProgram(program glbase.Program) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteRenderbuffers.xml
-func (gl *GL) DeleteRenderbuffers(n int, renderbuffers []uint32) {
+func (gl *GL) DeleteRenderbuffers(n int, renderbuffers []glbase.Renderbuffer) {
 	C.gles2_glDeleteRenderbuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&renderbuffers[0])))
 }
 
@@ -868,7 +868,7 @@ func (gl *GL) EnableVertexAttribArray(index glbase.Attrib) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glFramebufferRenderbuffer.xml
-func (gl *GL) FramebufferRenderbuffer(target, attachment, renderbuffertarget glbase.Enum, renderbuffer uint32) {
+func (gl *GL) FramebufferRenderbuffer(target, attachment, renderbuffertarget glbase.Enum, renderbuffer glbase.Renderbuffer) {
 	C.gles2_glFramebufferRenderbuffer(gl.funcs, C.GLenum(target), C.GLenum(attachment), C.GLenum(renderbuffertarget), C.GLuint(renderbuffer))
 }
 
@@ -905,12 +905,12 @@ func (gl *GL) GenerateMipmap(target glbase.Enum) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenFramebuffers.xml
-func (gl *GL) GenFramebuffers(n int, framebuffers []uint32) {
+func (gl *GL) GenFramebuffers(n int, framebuffers []glbase.Framebuffer) {
 	C.gles2_glGenFramebuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&framebuffers[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenRenderbuffers.xml
-func (gl *GL) GenRenderbuffers(n int, renderbuffers []uint32) {
+func (gl *GL) GenRenderbuffers(n int, renderbuffers []glbase.Renderbuffer) {
 	C.gles2_glGenRenderbuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&renderbuffers[0])))
 }
 
@@ -925,7 +925,7 @@ func (gl *GL) GetActiveUniform(program glbase.Program, index uint32, bufSize int
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGetAttachedShaders.xml
-func (gl *GL) GetAttachedShaders(program glbase.Program, maxcount int32, count []int, shaders []uint32) {
+func (gl *GL) GetAttachedShaders(program glbase.Program, maxcount int32, count []int, shaders []glbase.Shader) {
 	C.gles2_glGetAttachedShaders(gl.funcs, C.GLuint(program), C.GLsizei(maxcount), (*C.GLsizei)(unsafe.Pointer(&count[0])), (*C.GLuint)(unsafe.Pointer(&shaders[0])))
 }
 
@@ -1426,7 +1426,7 @@ func (gl *GL) IsBuffer(buffer glbase.Buffer) bool {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsFramebuffer.xml
-func (gl *GL) IsFramebuffer(framebuffer uint32) bool {
+func (gl *GL) IsFramebuffer(framebuffer glbase.Framebuffer) bool {
 	glresult := C.gles2_glIsFramebuffer(gl.funcs, C.GLuint(framebuffer))
 	return *(*bool)(unsafe.Pointer(&glresult))
 }
@@ -1438,7 +1438,7 @@ func (gl *GL) IsProgram(program glbase.Program) bool {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glIsRenderbuffer.xml
-func (gl *GL) IsRenderbuffer(renderbuffer uint32) bool {
+func (gl *GL) IsRenderbuffer(renderbuffer glbase.Renderbuffer) bool {
 	glresult := C.gles2_glIsRenderbuffer(gl.funcs, C.GLuint(renderbuffer))
 	return *(*bool)(unsafe.Pointer(&glresult))
 }
@@ -1565,7 +1565,7 @@ func (gl *GL) SampleCoverage(value glbase.Clampf, invert bool) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glShaderBinary.xml
-func (gl *GL) ShaderBinary(n int, shaders []uint32, binaryFormat glbase.Enum, binary interface{}, length int32) {
+func (gl *GL) ShaderBinary(n int, shaders []glbase.Shader, binaryFormat glbase.Enum, binary interface{}, length int32) {
 	var binary_ptr unsafe.Pointer
 	var binary_v = reflect.ValueOf(binary)
 	if binary != nil && binary_v.Kind() != reflect.Slice {
@@ -2616,7 +2616,7 @@ func (gl *GL) CullFace(mode glbase.Enum) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glDeleteTextures.xml
-func (gl *GL) DeleteTextures(n int, textures []uint32) {
+func (gl *GL) DeleteTextures(n int, textures []glbase.Texture) {
 	C.gles2_glDeleteTextures(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])))
 }
 
@@ -2674,7 +2674,7 @@ func (gl *GL) FrontFace(mode glbase.Enum) {
 }
 
 // https://www.opengl.org/sdk/docs/man2/xhtml/glGenTextures.xml
-func (gl *GL) GenTextures(n int, textures []uint32) {
+func (gl *GL) GenTextures(n int, textures []glbase.Texture) {
 	C.gles2_glGenTextures(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])))
 }
 

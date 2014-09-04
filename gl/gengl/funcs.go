@@ -541,7 +541,7 @@ var funcTweakList = []funcTweak{{
 }, {
 	name: "GenBuffers",
 	params: paramTweaks{
-		"buffers": {output: true, unnamed: true, retype: "[]glbase.Buffer"},
+		"buffers": {output: true, unnamed: true},
 	},
 	before: `
 		buffers := make([]glbase.Buffer, n)

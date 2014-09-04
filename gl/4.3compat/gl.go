@@ -1503,12 +1503,12 @@ func (gl *GL) IsTexture(texture glbase.Texture) bool {
 }
 
 // https://www.opengl.org/sdk/docs/man4/xhtml/glGenTextures.xml
-func (gl *GL) GenTextures(n int, textures []uint32) {
+func (gl *GL) GenTextures(n int, textures []glbase.Texture) {
 	C.gl4_3compat_glGenTextures(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man4/xhtml/glDeleteTextures.xml
-func (gl *GL) DeleteTextures(n int, textures []uint32) {
+func (gl *GL) DeleteTextures(n int, textures []glbase.Texture) {
 	C.gl4_3compat_glDeleteTextures(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])))
 }
 
@@ -1916,7 +1916,7 @@ func (gl *GL) GenBuffers(n int) []glbase.Buffer {
 }
 
 // https://www.opengl.org/sdk/docs/man4/xhtml/glDeleteBuffers.xml
-func (gl *GL) DeleteBuffers(n int, buffers []uint32) {
+func (gl *GL) DeleteBuffers(n int, buffers []glbase.Buffer) {
 	C.gl4_3compat_glDeleteBuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&buffers[0])))
 }
 
@@ -4161,7 +4161,7 @@ func (gl *GL) GetFramebufferAttachmentParameteriv(target, attachment, pname glba
 }
 
 // https://www.opengl.org/sdk/docs/man4/xhtml/glFramebufferRenderbuffer.xml
-func (gl *GL) FramebufferRenderbuffer(target, attachment, renderbuffertarget glbase.Enum, renderbuffer uint32) {
+func (gl *GL) FramebufferRenderbuffer(target, attachment, renderbuffertarget glbase.Enum, renderbuffer glbase.Renderbuffer) {
 	C.gl4_3compat_glFramebufferRenderbuffer(gl.funcs, C.GLenum(target), C.GLenum(attachment), C.GLenum(renderbuffertarget), C.GLuint(renderbuffer))
 }
 
@@ -4187,22 +4187,22 @@ func (gl *GL) CheckFramebufferStatus(target glbase.Enum) glbase.Enum {
 }
 
 // https://www.opengl.org/sdk/docs/man4/xhtml/glGenFramebuffers.xml
-func (gl *GL) GenFramebuffers(n int, framebuffers []uint32) {
+func (gl *GL) GenFramebuffers(n int, framebuffers []glbase.Framebuffer) {
 	C.gl4_3compat_glGenFramebuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&framebuffers[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man4/xhtml/glDeleteFramebuffers.xml
-func (gl *GL) DeleteFramebuffers(n int, framebuffers []uint32) {
+func (gl *GL) DeleteFramebuffers(n int, framebuffers []glbase.Framebuffer) {
 	C.gl4_3compat_glDeleteFramebuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&framebuffers[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man4/xhtml/glBindFramebuffer.xml
-func (gl *GL) BindFramebuffer(target glbase.Enum, framebuffer uint32) {
+func (gl *GL) BindFramebuffer(target glbase.Enum, framebuffer glbase.Framebuffer) {
 	C.gl4_3compat_glBindFramebuffer(gl.funcs, C.GLenum(target), C.GLuint(framebuffer))
 }
 
 // https://www.opengl.org/sdk/docs/man4/xhtml/glIsFramebuffer.xml
-func (gl *GL) IsFramebuffer(framebuffer uint32) bool {
+func (gl *GL) IsFramebuffer(framebuffer glbase.Framebuffer) bool {
 	glresult := C.gl4_3compat_glIsFramebuffer(gl.funcs, C.GLuint(framebuffer))
 	return *(*bool)(unsafe.Pointer(&glresult))
 }
@@ -4218,22 +4218,22 @@ func (gl *GL) RenderbufferStorage(target, internalFormat glbase.Enum, width, hei
 }
 
 // https://www.opengl.org/sdk/docs/man4/xhtml/glGenRenderbuffers.xml
-func (gl *GL) GenRenderbuffers(n int, renderbuffers []uint32) {
+func (gl *GL) GenRenderbuffers(n int, renderbuffers []glbase.Renderbuffer) {
 	C.gl4_3compat_glGenRenderbuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&renderbuffers[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man4/xhtml/glDeleteRenderbuffers.xml
-func (gl *GL) DeleteRenderbuffers(n int, renderbuffers []uint32) {
+func (gl *GL) DeleteRenderbuffers(n int, renderbuffers []glbase.Renderbuffer) {
 	C.gl4_3compat_glDeleteRenderbuffers(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&renderbuffers[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man4/xhtml/glBindRenderbuffer.xml
-func (gl *GL) BindRenderbuffer(target glbase.Enum, renderbuffer uint32) {
+func (gl *GL) BindRenderbuffer(target glbase.Enum, renderbuffer glbase.Renderbuffer) {
 	C.gl4_3compat_glBindRenderbuffer(gl.funcs, C.GLenum(target), C.GLuint(renderbuffer))
 }
 
 // https://www.opengl.org/sdk/docs/man4/xhtml/glIsRenderbuffer.xml
-func (gl *GL) IsRenderbuffer(renderbuffer uint32) bool {
+func (gl *GL) IsRenderbuffer(renderbuffer glbase.Renderbuffer) bool {
 	glresult := C.gl4_3compat_glIsRenderbuffer(gl.funcs, C.GLuint(renderbuffer))
 	return *(*bool)(unsafe.Pointer(&glresult))
 }
@@ -5976,7 +5976,7 @@ func (gl *GL) GetShaderPrecisionFormat(shadertype, precisionType glbase.Enum, ra
 }
 
 // https://www.opengl.org/sdk/docs/man4/xhtml/glShaderBinary.xml
-func (gl *GL) ShaderBinary(count int, shaders []uint32, binaryFormat glbase.Enum, binary interface{}, length int32) {
+func (gl *GL) ShaderBinary(count int, shaders []glbase.Shader, binaryFormat glbase.Enum, binary interface{}, length int32) {
 	var binary_ptr unsafe.Pointer
 	var binary_v = reflect.ValueOf(binary)
 	if binary != nil && binary_v.Kind() != reflect.Slice {
@@ -7893,12 +7893,12 @@ func (gl *GL) PopClientAttrib() {
 }
 
 // https://www.opengl.org/sdk/docs/man4/xhtml/glPrioritizeTextures.xml
-func (gl *GL) PrioritizeTextures(n int, textures []uint32, priorities []float32) {
+func (gl *GL) PrioritizeTextures(n int, textures []glbase.Texture, priorities []float32) {
 	C.gl4_3compat_glPrioritizeTextures(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])), (*C.GLfloat)(unsafe.Pointer(&priorities[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man4/xhtml/glAreTexturesResident.xml
-func (gl *GL) AreTexturesResident(n int, textures []uint32, residences []bool) bool {
+func (gl *GL) AreTexturesResident(n int, textures []glbase.Texture, residences []bool) bool {
 	glresult := C.gl4_3compat_glAreTexturesResident(gl.funcs, C.GLsizei(n), (*C.GLuint)(unsafe.Pointer(&textures[0])), (*C.GLboolean)(unsafe.Pointer(&residences[0])))
 	return *(*bool)(unsafe.Pointer(&glresult))
 }
