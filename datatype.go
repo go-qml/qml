@@ -153,11 +153,15 @@ func unpackDataValue(dvalue *C.DataValue, engine *Engine) interface{} {
 		var c uint32 = *(*uint32)(datap)
 		return color.RGBA{byte(c >> 16), byte(c >> 8), byte(c), byte(c >> 24)}
 	case C.DTGoAddr:
-		return (*(**valueFold)(datap)).gvalue
+		// ObjectByName also does this fold conversion, to have access
+		// to the cvalue. Perhaps the fold should be returned.
+		fold := (*(**valueFold)(datap))
+		ensureEngine(engine.addr, unsafe.Pointer(fold))
+		return fold.gvalue
 	case C.DTInvalid:
 		return nil
 	case C.DTObject:
-		// TODO Would be good to preserve identity on the Go side. See ensureEngine as well.
+		// TODO Would be good to preserve identity on the Go side. See initGoType as well.
 		obj := &Common{
 			engine: engine,
 			addr:   *(*unsafe.Pointer)(datap),

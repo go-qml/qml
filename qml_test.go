@@ -595,8 +595,17 @@ var tests = []struct {
 		QMLLog: "Identical: true",
 	},
 	{
-		Summary: "Object finding via objectName",
+		Summary: "Object finding via ObjectByName",
 		QML:     `Item { Item { objectName: "subitem"; property string s: "<found>" } }`,
+		Done: func(c *TestData) {
+			obj := c.root.ObjectByName("subitem")
+			c.Check(obj.String("s"), Equals, "<found>")
+			c.Check(func() { c.root.ObjectByName("foo") }, Panics, `cannot find descendant with objectName == "foo"`)
+		},
+	},
+	{
+		Summary: "Object finding via ObjectByName on GoType",
+		QML:     `Item { GoType { objectName: "subitem"; property string s: "<found>" } }`,
 		Done: func(c *TestData) {
 			obj := c.root.ObjectByName("subitem")
 			c.Check(obj.String("s"), Equals, "<found>")

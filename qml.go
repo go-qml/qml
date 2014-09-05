@@ -639,13 +639,21 @@ func (obj *Common) Map(property string) *Map {
 func (obj *Common) ObjectByName(objectName string) Object {
 	cname, cnamelen := unsafeStringData(objectName)
 	var dvalue C.DataValue
+	var object Object
 	RunMain(func() {
 		qname := C.newString(cname, cnamelen)
 		defer C.delString(qname)
 		C.objectFindChild(obj.addr, qname, &dvalue)
+		value := unpackDataValue(&dvalue, obj.engine)
+		if dvalue.dataType == C.DTGoAddr {
+			datap := unsafe.Pointer(&dvalue.data)
+			fold := (*(**valueFold)(datap))
+			object = &Common{fold.cvalue, obj.engine}
+		} else {
+			object, _ = value.(Object)
+		}
 	})
-	object, ok := unpackDataValue(&dvalue, obj.engine).(Object)
-	if !ok {
+	if object == nil {
 		panic(fmt.Sprintf("cannot find descendant with objectName == %q", objectName))
 	}
 	return object
