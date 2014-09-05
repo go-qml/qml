@@ -644,11 +644,15 @@ func (obj *Common) ObjectByName(objectName string) Object {
 		qname := C.newString(cname, cnamelen)
 		defer C.delString(qname)
 		C.objectFindChild(obj.addr, qname, &dvalue)
+		// unpackDataValue will also initialize the Go type, if necessary.
 		value := unpackDataValue(&dvalue, obj.engine)
 		if dvalue.dataType == C.DTGoAddr {
 			datap := unsafe.Pointer(&dvalue.data)
 			fold := (*(**valueFold)(datap))
-			object = &Common{fold.cvalue, obj.engine}
+			if fold.init.IsValid() {
+				panic("internal error: custom Go type not initialized")
+			}
+			object = &Common{fold.cvalue, fold.engine}
 		} else {
 			object, _ = value.(Object)
 		}
