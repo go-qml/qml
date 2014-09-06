@@ -418,22 +418,15 @@ func parseConsts(filename string) (map[glVersion][]Const, error) {
 	var all = make(map[glVersion]map[string]bool)
 	var last = make(map[string]map[string]bool)
 	for _, feature := range registry.Features {
-		profiles := make(map[string]bool)
-		for _, require := range feature.Requires {
-			profiles[require.Profile] = true
-		}
-		for _, remove := range feature.Removes {
-			profiles[remove.Profile] = true
-		}
-
-		for profile := range profiles {
+		for _, profile := range []string{"", "core", "compatibility"} {
 			required := make(map[string]bool)
-			inherit, ok := last[feature.API+":"+profile]
-			if !ok && profile != "" {
-				inherit = last[feature.API+":"]
-			}
-			for name := range inherit {
+			for name := range last[feature.API+":"+profile] {
 				required[name] = true
+			}
+			if profile != "" {
+				for name := range last[feature.API+":"] {
+					required[name] = true
+				}
 			}
 
 			for _, require := range feature.Requires {
