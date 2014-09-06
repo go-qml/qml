@@ -1723,11 +1723,10 @@ var funcTweakList = []funcTweak{{
 }, {
 	name: "VertexAttribPointer",
 	params: paramTweaks{
-		"pointer": {rename: "offset", retype: "int"},
+		"pointer": {rename: "offset", retype: "uintptr"},
 	},
 	before: `
-		// What an awkward API. Just add a new function next time, please.
-		offset_ptr := unsafe.Pointer(uintptr(offset))
+		offset_ptr := unsafe.Pointer(offset)
 	`,
 	doc: `
 		specifies the location and data format of the array
