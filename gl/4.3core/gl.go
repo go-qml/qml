@@ -5582,7 +5582,7 @@ func (gl *GL) TexImage2DMultisample(target glbase.Enum, samples, internalFormat 
 
 // https://www.opengl.org/sdk/docs/man4/xhtml/glGetSynciv.xml
 func (gl *GL) GetSynciv(sync glbase.Sync, pname glbase.Enum, bufSize int32, length, values []int32) {
-	C.gl4_3core_glGetSynciv(gl.funcs, C.GLsync(sync), C.GLenum(pname), C.GLsizei(bufSize), (*C.GLsizei)(unsafe.Pointer(&length[0])), (*C.GLint)(unsafe.Pointer(&values[0])))
+	C.gl4_3core_glGetSynciv(gl.funcs, C.GLsync(unsafe.Pointer(sync)), C.GLenum(pname), C.GLsizei(bufSize), (*C.GLsizei)(unsafe.Pointer(&length[0])), (*C.GLint)(unsafe.Pointer(&values[0])))
 }
 
 // https://www.opengl.org/sdk/docs/man4/xhtml/glGetInteger64v.xml
@@ -5592,30 +5592,30 @@ func (gl *GL) GetInteger64v(pname glbase.Enum, params []int64) {
 
 // https://www.opengl.org/sdk/docs/man4/xhtml/glWaitSync.xml
 func (gl *GL) WaitSync(sync glbase.Sync, flags glbase.Bitfield, timeout uint64) {
-	C.gl4_3core_glWaitSync(gl.funcs, C.GLsync(sync), C.GLbitfield(flags), C.GLuint64(timeout))
+	C.gl4_3core_glWaitSync(gl.funcs, C.GLsync(unsafe.Pointer(sync)), C.GLbitfield(flags), C.GLuint64(timeout))
 }
 
 // https://www.opengl.org/sdk/docs/man4/xhtml/glClientWaitSync.xml
 func (gl *GL) ClientWaitSync(sync glbase.Sync, flags glbase.Bitfield, timeout uint64) glbase.Enum {
-	glresult := C.gl4_3core_glClientWaitSync(gl.funcs, C.GLsync(sync), C.GLbitfield(flags), C.GLuint64(timeout))
+	glresult := C.gl4_3core_glClientWaitSync(gl.funcs, C.GLsync(unsafe.Pointer(sync)), C.GLbitfield(flags), C.GLuint64(timeout))
 	return glbase.Enum(glresult)
 }
 
 // https://www.opengl.org/sdk/docs/man4/xhtml/glDeleteSync.xml
 func (gl *GL) DeleteSync(sync glbase.Sync) {
-	C.gl4_3core_glDeleteSync(gl.funcs, C.GLsync(sync))
+	C.gl4_3core_glDeleteSync(gl.funcs, C.GLsync(unsafe.Pointer(sync)))
 }
 
 // https://www.opengl.org/sdk/docs/man4/xhtml/glIsSync.xml
 func (gl *GL) IsSync(sync glbase.Sync) bool {
-	glresult := C.gl4_3core_glIsSync(gl.funcs, C.GLsync(sync))
+	glresult := C.gl4_3core_glIsSync(gl.funcs, C.GLsync(unsafe.Pointer(sync)))
 	return *(*bool)(unsafe.Pointer(&glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man4/xhtml/glFenceSync.xml
 func (gl *GL) FenceSync(condition glbase.Enum, flags glbase.Bitfield) glbase.Sync {
 	glresult := C.gl4_3core_glFenceSync(gl.funcs, C.GLenum(condition), C.GLbitfield(flags))
-	return glbase.Sync(glresult)
+	return glbase.Sync(unsafe.Pointer(glresult))
 }
 
 // https://www.opengl.org/sdk/docs/man4/xhtml/glProvokingVertex.xml

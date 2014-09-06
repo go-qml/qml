@@ -920,8 +920,13 @@ func funcCallParams(f Func) string {
 				buf.WriteString("[0]")
 			}
 			buf.WriteString("))")
+
 		} else if param.Type == "GLboolean" {
 			buf.WriteString("*(*C.GLboolean)(unsafe.Pointer(&")
+			buf.WriteString(name)
+			buf.WriteString("))")
+		} else if param.Type == "GLsync" {
+			buf.WriteString("C.GLsync(unsafe.Pointer(")
 			buf.WriteString(name)
 			buf.WriteString("))")
 		} else {
@@ -973,6 +978,8 @@ func funcReturnResult(f Func) string {
 	if f.GoType != "" {
 		if f.Type == "GLboolean" {
 			buf.WriteString("*(*bool)(unsafe.Pointer(&glresult))")
+		} else if f.Type == "GLsync" {
+			buf.WriteString("glbase.Sync(unsafe.Pointer(glresult))")
 		} else {
 			buf.WriteString(f.GoType)
 			buf.WriteString("(glresult)")
