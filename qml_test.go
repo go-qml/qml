@@ -19,6 +19,7 @@ import (
 	"gopkg.in/qml.v1"
 	"gopkg.in/qml.v1/cpptest"
 	"gopkg.in/qml.v1/gl/2.0"
+	"path/filepath"
 )
 
 func init() { qml.SetupTesting() }
@@ -334,6 +335,34 @@ func (s *S) TestRegisterConverterPlainObject(c *C) {
 	})
 	obj.Call("emitPlain")
 	c.Assert(calls, Equals, 3)
+}
+
+func (s *S) TestIssue84(c *C) {
+	// Regression test for issue #84 (QTBUG-41193).
+	data := `
+		import QtQuick 2.0
+		Item {
+			id: item
+			property string s1: "<before>"
+			property string s2: "<after>"
+			states: State {
+				name: "after";
+				PropertyChanges { target: item; s1: s2 }
+			}
+			Component.onCompleted: state = "after"
+		}
+	`
+	filename := filepath.Join(c.MkDir(), "file.qml")
+	err := ioutil.WriteFile(filename, []byte(data), 0644)
+	c.Assert(err, IsNil)
+
+	component, err := s.engine.LoadString(filename, data)
+	c.Assert(err, IsNil)
+
+	root := component.Create(nil)
+	defer root.Destroy()
+
+	c.Assert(root.String("s1"), Equals, "<after>")
 }
 
 type TestData struct {
