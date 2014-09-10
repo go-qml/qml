@@ -9,7 +9,6 @@ import "C"
 import (
 	"errors"
 	"fmt"
-	"gopkg.in/qml.v1/gl/glbase"
 	"image"
 	"image/color"
 	"io"
@@ -20,6 +19,8 @@ import (
 	"strings"
 	"sync"
 	"unsafe"
+
+	"gopkg.in/qml.v1/gl/glbase"
 )
 
 // Engine provides an environment for instantiating QML components.

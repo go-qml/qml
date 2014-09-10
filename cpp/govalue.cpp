@@ -8,7 +8,7 @@
 #include <QDebug>
 
 #include "govalue.h"
-#include "capi.h"
+#include "goqml_private.h"
 
 class GoValueMetaObject : public QAbstractDynamicMetaObject
 {

@@ -9,7 +9,7 @@
 #include <QQuickPaintedItem>
 #include <QPainter>
 
-#include "capi.h"
+#include "goqml_private.h"
 
 class GoValueMetaObject;
 

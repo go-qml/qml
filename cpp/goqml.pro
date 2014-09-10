@@ -2,7 +2,7 @@ TEMPLATE = lib
 CONFIG  += dll release
 CONFIG  -= embed_manifest_exe embed_manifest_dll
 QT      += gui widgets qml quick
-TARGET   = go-qml
+TARGET   = goqml
 
 DESTDIR = $${PWD}
 INCLUDEPATH += .
@@ -19,6 +19,7 @@ SOURCES += ./connector.cpp ./moc_connector.cpp
 HEADERS += ./idletimer.h
 SOURCES += ./idletimer.cpp
 
-HEADERS += ./capi.h
-SOURCES += ./capi.cpp
-DEF_FILE+= ./capi.def
+HEADERS += ./goqml.h
+HEADERS += ./goqml_private.h
+SOURCES += ./goqml.cpp
+DEF_FILE+= ./goqml.def

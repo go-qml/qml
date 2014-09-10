@@ -6,7 +6,7 @@
 #include <QDebug>
 #include <mutex>
 
-#include "capi.h"
+#include "goqml_private.h"
 
 class IdleTimer : public QObject
 {

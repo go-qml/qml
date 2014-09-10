@@ -6,13 +6,14 @@
 :: NMake: go-qml.dll
 
 qmake
+nmake clean
 nmake release
 
 :: ----------------------------------------------------------------------------
-:: MinGW: generate libleveldb.a
+:: MinGW: generate libgoqml.a
 
-dlltool -dllname go-qml.dll --def capi.def --output-lib libgo-qml.dll.a
-copy go-qml.dll ..
+dlltool -dllname goqml.dll --def goqml.def --output-lib libgoqml.a
+copy goqml.dll ..
 
 :: ----------------------------------------------------------------------------
 :: PAUSE

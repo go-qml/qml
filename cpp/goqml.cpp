@@ -1,3 +1,9 @@
+#include "goqml_private.h"
+
+#include "govalue.h"
+#include "govaluetype.h"
+#include "connector.h"
+
 #include <QApplication>
 #include <QQuickView>
 #include <QQuickItem>
@@ -6,11 +12,6 @@
 #include <QQuickImageProvider>
 
 #include <string.h>
-
-#include "govalue.h"
-#include "govaluetype.h"
-#include "connector.h"
-#include "capi.h"
 
 // ----------------------------------------------------------------------------
 

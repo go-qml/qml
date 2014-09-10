@@ -1,5 +1,5 @@
 #include "idletimer.h"
-#include "capi.h"
+#include "goqml_private.h"
 
 
 #if defined(_MSC_VER)
