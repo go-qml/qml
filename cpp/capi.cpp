@@ -12,6 +12,102 @@
 #include "connector.h"
 #include "capi.h"
 
+// ----------------------------------------------------------------------------
+
+static HookHandlers _HookHandlers;
+
+void initHooks(HookHandlers* h) {
+	HookHandlers* p = &_HookHandlers;
+	p->hookIdleTimer = h->hookIdleTimer;
+	p->hookLogHandler = h->hookLogHandler;
+	p->hookGoValueReadField = h->hookGoValueReadField;
+	p->hookGoValueWriteField = h->hookGoValueWriteField;
+	p->hookGoValueCallMethod = h->hookGoValueCallMethod;
+	p->hookGoValueDestroyed = h->hookGoValueDestroyed;
+	p->hookGoValuePaint = h->hookGoValuePaint;
+	p->hookRequestImage = h->hookRequestImage;
+	p->hookGoValueTypeNew = h->hookGoValueTypeNew;
+	p->hookWindowHidden = h->hookWindowHidden;
+	p->hookSignalCall = h->hookSignalCall;
+	p->hookSignalDisconnect = h->hookSignalDisconnect;
+	p->hookPanic = h->hookPanic;
+	p->hookListPropertyCount = h->hookListPropertyCount;
+	p->hookListPropertyAt = h->hookListPropertyAt;
+	p->hookListPropertyAppend = h->hookListPropertyAppend;
+	p->hookListPropertyClear = h->hookListPropertyClear;
+}
+
+void hookIdleTimer() {
+	HookHandlers* p = &_HookHandlers;
+	p->hookIdleTimer();
+}
+void hookLogHandler(LogMessage *message) {
+	HookHandlers* p = &_HookHandlers;
+	p->hookLogHandler(message);
+}
+void hookGoValueReadField(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, int getIndex, int setIndex, DataValue *result) {
+	HookHandlers* p = &_HookHandlers;
+	p->hookGoValueReadField(engine, addr, memberIndex, getIndex, setIndex, result);
+}
+void hookGoValueWriteField(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, int setIndex, DataValue *assign) {
+	HookHandlers* p = &_HookHandlers;
+	p->hookGoValueWriteField(engine, addr, memberIndex, setIndex, assign);
+}
+void hookGoValueCallMethod(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, DataValue *result) {
+	HookHandlers* p = &_HookHandlers;
+	p->hookGoValueCallMethod(engine, addr, memberIndex, result);
+}
+void hookGoValueDestroyed(QQmlEngine_ *engine, GoAddr *addr) {
+	HookHandlers* p = &_HookHandlers;
+	p->hookGoValueDestroyed(engine, addr);
+}
+void hookGoValuePaint(QQmlEngine_ *engine, GoAddr *addr, intptr_t reflextIndex) {
+	HookHandlers* p = &_HookHandlers;
+	p->hookGoValuePaint(engine, addr, reflextIndex);
+}
+QImage_ *hookRequestImage(void *imageFunc, char *id, int idLen, int width, int height) {
+	HookHandlers* p = &_HookHandlers;
+	return p->hookRequestImage(imageFunc, id, idLen, width, height);
+}
+GoAddr *hookGoValueTypeNew(GoValue_ *value, GoTypeSpec_ *spec) {
+	HookHandlers* p = &_HookHandlers;
+	return p->hookGoValueTypeNew(value, spec);
+}
+void hookWindowHidden(QObject_ *addr) {
+	HookHandlers* p = &_HookHandlers;
+	p->hookWindowHidden(addr);
+}
+void hookSignalCall(QQmlEngine_ *engine, void *func, DataValue *params) {
+	HookHandlers* p = &_HookHandlers;
+	p->hookSignalCall(engine, func, params);
+}
+void hookSignalDisconnect(void *func) {
+	HookHandlers* p = &_HookHandlers;
+	p->hookSignalDisconnect(func);
+}
+void hookPanic(char *message) {
+	HookHandlers* p = &_HookHandlers;
+	p->hookPanic(message);
+}
+int hookListPropertyCount(GoAddr *addr, intptr_t reflectIndex, intptr_t setIndex) {
+	HookHandlers* p = &_HookHandlers;
+	return p->hookListPropertyCount(addr, reflectIndex, setIndex);
+}
+QObject_ *hookListPropertyAt(GoAddr *addr, intptr_t reflectIndex, intptr_t setIndex, int i) {
+	HookHandlers* p = &_HookHandlers;
+	return p->hookListPropertyAt(addr, reflectIndex, setIndex, i);
+}
+void hookListPropertyAppend(GoAddr *addr, intptr_t reflectIndex, intptr_t setIndex, QObject_ *obj) {
+	HookHandlers* p = &_HookHandlers;
+	p->hookListPropertyAppend(addr, reflectIndex, setIndex, obj);
+}
+void hookListPropertyClear(GoAddr *addr, intptr_t reflectIndex, intptr_t setIndex) {
+	HookHandlers* p = &_HookHandlers;
+	p->hookListPropertyClear(addr, reflectIndex, setIndex);
+}
+
+// ----------------------------------------------------------------------------
+
 static char *local_strdup(const char *str)
 {
     char *strcopy = 0;
@@ -837,6 +933,7 @@ QQmlListProperty_ *newListProperty(GoAddr *addr, intptr_t reflectIndex, intptr_t
     return list;
 }
 
+#if 0
 void internalLogHandler(QtMsgType severity, const QMessageLogContext &context, const QString &text)
 {
     QByteArray textba = text.toUtf8();
@@ -848,5 +945,6 @@ void installLogHandler()
 {
     qInstallMessageHandler(internalLogHandler);
 }
+#endif
 
 // vim:ts=4:sw=4:et:ft=cpp

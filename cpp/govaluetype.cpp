@@ -1,5 +1,7 @@
 #include "govaluetype.h"
 
+#include <QQmlEngine>
+
 #define DEFINE_GOVALUETYPE(N) \
     template<> QMetaObject GoValueType<N>::staticMetaObject = QMetaObject(); \
     template<> GoTypeInfo *GoValueType<N>::typeInfo = 0; \

@@ -3,11 +3,11 @@ package qml
 // #cgo CPPFLAGS: -I./cpp
 // #cgo CXXFLAGS: -std=c++0x -pedantic-errors -Wall -fno-strict-aliasing
 // #cgo LDFLAGS: -lstdc++
-// #cgo pkg-config: Qt5Core Qt5Widgets Qt5Quick
+// #cgo !windows pkg-config: Qt5Core Qt5Widgets Qt5Quick
 //
 // #include <stdlib.h>
 //
-// #include "cpp/capi.h"
+// #include "capi.h"
 //
 import "C"
 
@@ -23,12 +23,12 @@ import (
 )
 
 var (
-	guiFunc      = make(chan func())
-	guiDone      = make(chan struct{})
-	guiLock      = 0
-	guiMainRef   uintptr
-	guiPaintRef  uintptr
-	guiIdleRun   int32
+	guiFunc     = make(chan func())
+	guiDone     = make(chan struct{})
+	guiLock     = 0
+	guiMainRef  uintptr
+	guiPaintRef uintptr
+	guiIdleRun  int32
 
 	initialized int32
 )

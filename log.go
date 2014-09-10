@@ -89,11 +89,6 @@ func (defaultLogger) QmlOutput(msg LogMessage) error {
 	return nil
 }
 
-func init() {
-	// Install the C++ log handler that diverts calls to the hook below.
-	C.installLogHandler()
-}
-
 //export hookLogHandler
 func hookLogHandler(cmsg *C.LogMessage) {
 	// Workarund for QTBUG-35943

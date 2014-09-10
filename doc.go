@@ -93,7 +93,7 @@
 //        Init: func(p *Person, obj qml.Object) { p.Name = "<none>" },
 //    }})
 //
-// With this logic in place, QML code can create new instances of Person by itself:     
+// With this logic in place, QML code can create new instances of Person by itself:
 //
 //    import QtQuick 2.0
 //    import GoExtensions 1.0
@@ -107,7 +107,7 @@
 //
 //
 // Lowercasing of names
-// 
+//
 // Independently from the mechanism used to publish a Go value to QML code, its methods
 // and fields are available to QML logic as methods and properties of the
 // respective QML object representing it. As required by QML, though, the Go

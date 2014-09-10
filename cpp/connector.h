@@ -1,9 +1,12 @@
 #ifndef CONNECTOR_H
 #define CONNECTOR_H
 
-#include <QObject>
-
 #include <stdint.h>
+
+#include <QObject>
+#include <QMetaMethod>
+
+class QQmlEngine;
 
 class Connector : public QObject
 {
@@ -12,7 +15,7 @@ class Connector : public QObject
     public:
 
     Connector(QObject *sender, QMetaMethod method, QQmlEngine *engine, void *func, int argsLen)
-        : QObject(sender), engine(engine), method(method), func(func), argsLen(argsLen) {};
+		: QObject(sender), engine(engine), method(method), func(func), argsLen(argsLen) {}
 
     virtual ~Connector();
 

@@ -1,5 +1,6 @@
 package qml
 
+// #cgo windows CPPFLAGS: -I./cpp/windows
 // #include <sys/mman.h>
 import "C"
 
