@@ -134,7 +134,12 @@ On Windows you'll need the following:
   * [Qt 5 with OpenGL](http://download.qt-project.org/archive/qt/5.2/5.2.1/) for MSVC2012
   * [Go 1.3](http://golang.org/dl/) for Windows
 
-Then opening the shell for the environment changes to take effect, this should work:
+Then, assuming Qt was installed under `C:\Qt5.2.1\`, set up the following environment variables in the respective configuration:
+
+    set QTDIR=C:\Qt\Qt5.2.1\5.2.1\msvc2012_64_opengl
+    set PATH=%QTDIR%\bin;%PATH%
+
+After reopening the shell for the environment changes to take effect, this should work:
 
     go get -d gopkg.in/qml.v1
 	cd gopkg.in/qml.v1/cpp && build_msvc.bat
