@@ -3,17 +3,17 @@
 :: license that can be found in the LICENSE file.
 
 :: ----------------------------------------------------------------------------
-:: NMake: goqml.dll
+:: NMake: goqgl.dll
 
 qmake
 nmake clean
 nmake release
 
 :: ----------------------------------------------------------------------------
-:: MinGW: generate libgoqml.a
+:: MinGW: generate libgoqgl.a
 
-dlltool -dllname goqml.dll --def goqml.def --output-lib libgoqml.a
-copy goqml.dll %QTDIR%\bin
+dlltool -dllname goqgl.dll --def goqgl.def --output-lib libgoqgl.a
+copy goqgl.dll %QTDIR%\bin
 
 :: ----------------------------------------------------------------------------
 :: PAUSE

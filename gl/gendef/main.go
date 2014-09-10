@@ -19,7 +19,10 @@ var (
 	// void *gl1_0_funcs();
 	// void gl1_0_glViewport(void *_glfuncs, GLint x, GLint y, GLsizei width, GLsizei height);
 	// ...
-	re = regexp.MustCompile(`gl\d+_\d+[a-zA-Z_]+\(`)
+	// void *gles2_funcs();
+	// void gles2_glActiveTexture(void *_glfuncs, GLenum texture);
+	// ...
+	re = regexp.MustCompile(`gl(es)?\d+_(\d+_)?[0-9a-zA-Z_]+\(`)
 )
 
 func main() {
