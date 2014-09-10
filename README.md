@@ -144,6 +144,10 @@ After reopening the shell for the environment changes to take effect, this shoul
 
     go get gopkg.in/qml.v1
 
+**Screenshot**
+
+[![](https://raw.githubusercontent.com/chai2010/qml/master/screenshot/windows/particle.png)](https://github.com/chai2010/qml/blob/master/examples/particle/main.go)
+
 
 Requirements everywhere else
 ----------------------------
