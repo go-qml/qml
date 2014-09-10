@@ -71,7 +71,7 @@ and Go 1.2 may be installed using [godeb](http://blog.labix.org/2013/06/15/in-fl
     godeb
     $ sudo mv godeb /usr/local/bin
     $ godeb install 1.2
-    $ go get gopkg.in/qml.v0
+    $ go get gopkg.in/qml.v1
 
 
 Requirements on Ubuntu Touch
