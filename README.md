@@ -146,7 +146,7 @@ After reopening the shell for the environment changes to take effect, this shoul
 
 **Screenshot**
 
-[![](https://raw.githubusercontent.com/chai2010/qml/master/screenshot/windows/particle.png)](https://github.com/chai2010/qml/blob/master/examples/particle/main.go)
+[![](https://raw.githubusercontent.com/chai2010/qml/v1/screenshot/windows/particle.png)](https://github.com/chai2010/qml/blob/v1/examples/particle/main.go)
 
 
 Requirements everywhere else
