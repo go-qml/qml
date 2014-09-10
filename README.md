@@ -130,19 +130,20 @@ Requirements on Windows
 
 On Windows you'll need the following:
 
-  * [MinGW gcc](http://sourceforge.net/projects/mingw/files/latest/download) 4.8.1 (install mingw-get and install the gcc from within the setup GUI)
-  * [Qt 5.1.1](http://download.qt-project.org/official_releases/qt/5.1/5.1.1/qt-windows-opensource-5.1.1-mingw48_opengl-x86-offline.exe) for MinGW 4.8
-  * [Go 1.2rc1](https://code.google.com/p/go/downloads/list?can=1&q=go1.2rc1) for Windows
+  * [MinGW gcc](http://tdm-gcc.tdragon.net/download)
+  * [Qt 5 with OpenGL](http://download.qt-project.org/archive/qt/5.2/5.2.1/) for MSVC2012
+  * [Go 1.3](http://golang.org/dl/) for Windows
 
-Then, assuming Qt was installed under `C:\Qt5.1.1\`, set up the following environment variables in the respective configuration:
+Then opening the shell for the environment changes to take effect, this should work:
 
-    CPATH += C:\Qt5.1.1\5.1.1\mingw48_32\include
-    LIBRARY_PATH += C:\Qt5.1.1\5.1.1\mingw48_32\lib
-    PATH += C:\Qt5.1.1\5.1.1\mingw48_32\bin
+    go get -d gopkg.in/qml.v1
+	cd gopkg.in/qml.v1/cpp && build_msvc.bat
+	cd gopkg.in/qml.v1/gl/2.0 && build_msvc.bat
 
-After reopening the shell for the environment changes to take effect, this should work:
+	go install gopkg.in/qml.v1
+	go install gopkg.in/qml.v1/gl/2.0
 
-    go get gopkg.in/qml.v1
+Try to run `exmaples/*`.
 
 **Screenshot(Qt5.2/MSVC2012/64bit)**
 
