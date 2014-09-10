@@ -1,3 +1,5 @@
+LIBRARY goqml.dll
+
 EXPORTS
 initHooks
 

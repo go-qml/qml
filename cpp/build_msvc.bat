@@ -13,7 +13,7 @@ nmake release
 :: MinGW: generate libgoqml.a
 
 dlltool -dllname goqml.dll --def goqml.def --output-lib libgoqml.a
-copy goqml.dll ..
+copy goqml.dll %QTDIR%\bin
 
 :: ----------------------------------------------------------------------------
 :: PAUSE
