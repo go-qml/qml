@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"gopkg.in/qml.v1"
 	"gopkg.in/qml.v1/gl/2.0"
-	"os"
 )
 
 var filename = "gopher.qml"
