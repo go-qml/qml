@@ -1213,6 +1213,21 @@ var tests = []struct {
 		},
 		DoneLog: "Signal has run.",
 	},
+	{
+		Summary: "References handed out must not be GCd (issue #68)",
+		Init: func(c *TestData) {
+			type B struct{ S string }
+			type A struct{ B *B }
+			c.context.SetVar("a", &A{&B{}})
+		},
+		QML: `Item { function f() { var x = [[],[],[]]; gc(); if (!a.b) console.log("BUG"); } }`,
+		Done: func(c *TestData) {
+			for i := 0; i < 100; i++ {
+				c.root.Call("f")
+			}
+		},
+		DoneLog: "!BUG",
+	},
 }
 
 var tablef = flag.String("tablef", "", "if provided, TestTable only runs tests with a summary matching the regexp")
