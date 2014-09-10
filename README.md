@@ -136,15 +136,23 @@ On Windows you'll need the following:
 
 Then, assuming Qt was installed under `C:\Qt5.2.1\`, set up the following environment variables in the respective configuration:
 
-    set QTDIR=C:\Qt\Qt5.2.1\5.2.1\msvc2012_64_opengl
-    set PATH=%QTDIR%\bin;%PATH%
+	set QTDIR=C:\Qt\Qt5.2.1\5.2.1\msvc2012_64_opengl
+	set PATH=%QTDIR%\bin;%PATH%
 
-After reopening the shell for the environment changes to take effect, this should work:
+After reopening the msvc shell for the environment changes to take effect, this should work:
 
-    go get -d gopkg.in/qml.v1
+	# download qml.v1
+	go get -d gopkg.in/qml.v1
+
+	# Go1.3: build shared library
 	cd gopkg.in/qml.v1/cpp && build_msvc.bat
 	cd gopkg.in/qml.v1/gl/2.0 && build_msvc.bat
 
+	# Go1.4: build shared library
+	go generate gopkg.in/qml.v1
+	go generate gopkg.in/qml.v1/gl/2.0
+
+	# install pacakge
 	go install gopkg.in/qml.v1
 	go install gopkg.in/qml.v1/gl/2.0
 
