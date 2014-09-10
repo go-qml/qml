@@ -144,7 +144,7 @@ After reopening the shell for the environment changes to take effect, this shoul
 
     go get gopkg.in/qml.v1
 
-**Screenshot**
+**Screenshot(Qt5.2/MSVC2012/64bit)**
 
 [![](https://raw.githubusercontent.com/chai2010/qml/v1/screenshot/windows/particle.png)](https://github.com/chai2010/qml/blob/v1/examples/particle/main.go)
 
