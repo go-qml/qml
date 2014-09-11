@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"go/format"
 	"io/ioutil"
 	"log"
 	"os"
@@ -41,6 +42,7 @@ func main() {
 	for i := 0; i < len(matches); i++ {
 		dirName := matches[i][:len(matches[i])-len("/funcs.h")]
 		processFuncsCpp(dirName)
+		processGlGo(dirName)
 		generatePro(dirName)
 		generateDef(dirName)
 		generateBat(dirName)
@@ -56,20 +58,52 @@ func processFuncsCpp(dirName string) {
 		log.Fatal("ioutil.ReadFile: ", err)
 	}
 
+	if *flagRevert {
+		data = bytes.Replace(data, []byte(`// +build !windows`+"\n"), []byte(""), -1)
+		err = ioutil.WriteFile(dirName+"/funcs.cpp", data, 0666)
+		if err != nil {
+			log.Fatal("ioutil.WriteFile: ", err)
+		}
+		return
+	}
+
 	if !strings.Contains(string(data), `// +build !windows`) {
 		data = append([]byte(`// +build !windows`+"\n"), data...)
 		err = ioutil.WriteFile(dirName+"/funcs.cpp", data, 0666)
 		if err != nil {
 			log.Fatal("ioutil.WriteFile: ", err)
 		}
-	} else {
-		if *flagRevert {
-			data = bytes.Replace(data, []byte(`// +build !windows`+"\n"), []byte(""), -1)
-			err = ioutil.WriteFile(dirName+"/funcs.cpp", data, 0666)
-			if err != nil {
-				log.Fatal("ioutil.WriteFile: ", err)
-			}
+	}
+}
+
+func processGlGo(dirName string) {
+	data, err := ioutil.ReadFile(dirName + "/gl.go")
+	if err != nil {
+		log.Fatal("ioutil.ReadFile: ", err)
+	}
+	data, _ = format.Source(data)
+
+	oldStr := "// #cgo pkg-config: Qt5Core Qt5OpenGL\n"
+	newStr := "// #cgo !windows pkg-config: Qt5Core Qt5OpenGL\n// #cgo windows LDFLAGS: -L./goqgl -lgoqgl\n"
+
+	if *flagRevert {
+		data = bytes.Replace(data, []byte(newStr), []byte(oldStr), -1)
+		data, _ = format.Source(data)
+
+		err = ioutil.WriteFile(dirName+"/gl.go", data, 0666)
+		if err != nil {
+			log.Fatal("ioutil.WriteFile: ", err)
 		}
+		return
+	} else {
+		data = bytes.Replace(data, []byte(oldStr), []byte(newStr), -1)
+		data, _ = format.Source(data)
+
+		err = ioutil.WriteFile(dirName+"/gl.go", data, 0666)
+		if err != nil {
+			log.Fatal("ioutil.WriteFile: ", err)
+		}
+		return
 	}
 }
 
@@ -188,6 +222,7 @@ package GL
 		os.Remove(dirName + "/generate_windows.go")
 		return
 	}
+
 	err := ioutil.WriteFile(dirName+"/generate_windows.go", []byte(gen), 0666)
 	if err != nil {
 		log.Fatal("ioutil.WriteFile: ", err)
