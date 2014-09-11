@@ -60,7 +60,7 @@ If you are using Ubuntu, the [Ubuntu SDK](http://developer.ubuntu.com/get-starte
 
     $ sudo add-apt-repository ppa:ubuntu-sdk-team/ppa
     $ sudo apt-get update
-    $ sudo apt-get install ubuntu-sdk qtbase5-private-dev qtdeclarative5-private-dev libqt5opengl5-dev
+    $ sudo apt-get install qtdeclarative5-dev qtbase5-private-dev qtdeclarative5-private-dev libqt5opengl5-dev qtdeclarative5-qtquick2-plugin
 
 and Go 1.2 may be installed using [godeb](http://blog.labix.org/2013/06/15/in-flight-deb-packages-of-go):
 
@@ -71,7 +71,7 @@ and Go 1.2 may be installed using [godeb](http://blog.labix.org/2013/06/15/in-fl
     godeb
     $ sudo mv godeb /usr/local/bin
     $ godeb install 1.2
-    $ go get gopkg.in/qml.v0
+    $ go get gopkg.in/qml.v1
 
 
 Requirements on Ubuntu Touch
@@ -122,7 +122,7 @@ Then, force brew to "link" qt5 (this makes it available under /usr/local):
 
 And finally, fetch and install go-qml:
 
-    $ go get gopkg.in/qml.v0
+    $ go get gopkg.in/qml.v1
 
 
 Requirements on Windows

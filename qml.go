@@ -100,7 +100,13 @@ func (e *Engine) Load(location string, r io.Reader) (Object, error) {
 			}
 			location = "file:///" + filepath.ToSlash(filepath.Join(dir, location))
 		}
+	}
 
+	// Workaround issue #84 (QTBUG-41193) by not refering to an existent file.
+	if s := strings.TrimPrefix(location, "file:///"); s != location {
+		if _, err := os.Stat(filepath.FromSlash(s)); err == nil {
+			location = location + "."
+		}
 	}
 
 	cdata, cdatalen := unsafeBytesData(data)

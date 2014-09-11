@@ -19,6 +19,7 @@ import (
 	"gopkg.in/qml.v1"
 	"gopkg.in/qml.v1/cpptest"
 	"gopkg.in/qml.v1/gl/2.0"
+	"path/filepath"
 )
 
 func init() { qml.SetupTesting() }
@@ -334,6 +335,34 @@ func (s *S) TestRegisterConverterPlainObject(c *C) {
 	})
 	obj.Call("emitPlain")
 	c.Assert(calls, Equals, 3)
+}
+
+func (s *S) TestIssue84(c *C) {
+	// Regression test for issue #84 (QTBUG-41193).
+	data := `
+		import QtQuick 2.0
+		Item {
+			id: item
+			property string s1: "<before>"
+			property string s2: "<after>"
+			states: State {
+				name: "after";
+				PropertyChanges { target: item; s1: s2 }
+			}
+			Component.onCompleted: state = "after"
+		}
+	`
+	filename := filepath.Join(c.MkDir(), "file.qml")
+	err := ioutil.WriteFile(filename, []byte(data), 0644)
+	c.Assert(err, IsNil)
+
+	component, err := s.engine.LoadString(filename, data)
+	c.Assert(err, IsNil)
+
+	root := component.Create(nil)
+	defer root.Destroy()
+
+	c.Assert(root.String("s1"), Equals, "<after>")
 }
 
 type TestData struct {
@@ -1183,6 +1212,21 @@ var tests = []struct {
 			c.Check(ok, Equals, true)
 		},
 		DoneLog: "Signal has run.",
+	},
+	{
+		Summary: "References handed out must not be GCd (issue #68)",
+		Init: func(c *TestData) {
+			type B struct{ S string }
+			type A struct{ B *B }
+			c.context.SetVar("a", &A{&B{}})
+		},
+		QML: `Item { function f() { var x = [[],[],[]]; gc(); if (!a.b) console.log("BUG"); } }`,
+		Done: func(c *TestData) {
+			for i := 0; i < 100; i++ {
+				c.root.Call("f")
+			}
+		},
+		DoneLog: "!BUG",
 	},
 }
 

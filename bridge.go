@@ -230,8 +230,11 @@ func wrapGoValue(engine *Engine, gvalue interface{}, owner valueOwner) (cvalue u
 
 	painting := cdata.Ref() == atomic.LoadUintptr(&guiPaintRef)
 
+	// Cannot reuse a jsOwner because the QML runtime may choose to destroy
+	// the value _after_ we hand it a new reference to the same value.
+	// See issue #68 for details.
 	prev, ok := engine.values[gvalue]
-	if ok && (prev.owner == owner || owner != cppOwner || painting) {
+	if ok && (prev.owner == cppOwner || painting) {
 		return prev.cvalue
 	}
 
@@ -250,11 +253,12 @@ func wrapGoValue(engine *Engine, gvalue interface{}, owner valueOwner) (cvalue u
 	}
 	fold.cvalue = C.newGoValue(unsafe.Pointer(fold), typeInfo(gvalue), parent)
 	if prev != nil {
-		prev.next = fold
-		fold.prev = prev
-	} else {
-		engine.values[gvalue] = fold
+		// Put new fold first so the single cppOwner, if any, is always the first entry.
+		fold.next = prev
+		prev.prev = fold
 	}
+	engine.values[gvalue] = fold
+
 	//fmt.Printf("[DEBUG] value alive (wrapped): cvalue=%x gvalue=%x/%#v\n", fold.cvalue, addrOf(fold.gvalue), fold.gvalue)
 	stats.valuesAlive(+1)
 	C.engineSetContextForObject(engine.addr, fold.cvalue)
