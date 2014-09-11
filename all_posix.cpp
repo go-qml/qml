@@ -1,3 +1,4 @@
+// +build !windows
 
 #include "cpp/capi.cpp"
 #include "cpp/govalue.cpp"

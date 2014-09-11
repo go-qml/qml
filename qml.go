@@ -9,7 +9,6 @@ import "C"
 import (
 	"errors"
 	"fmt"
-	"gopkg.in/qml.v1/gl/glbase"
 	"image"
 	"image/color"
 	"io"
@@ -20,6 +19,8 @@ import (
 	"strings"
 	"sync"
 	"unsafe"
+
+	"gopkg.in/qml.v1/gl/glbase"
 )
 
 // Engine provides an environment for instantiating QML components.
@@ -222,8 +223,8 @@ func (e *Engine) AddImageProvider(prvId string, f func(imgId string, width, heig
 	})
 }
 
-//export hookRequestImage
-func hookRequestImage(imageFunc unsafe.Pointer, cid *C.char, cidLen, cwidth, cheight C.int) unsafe.Pointer {
+//export cgoHookRequestImage
+func cgoHookRequestImage(imageFunc unsafe.Pointer, cid *C.char, cidLen, cwidth, cheight C.int) unsafe.Pointer {
 	f := *(*func(imgId string, width, height int) image.Image)(imageFunc)
 
 	id := unsafeString(cid, cidLen)
@@ -789,8 +790,8 @@ func (obj *Common) On(signal string, function interface{}) {
 	cmust(cerr)
 }
 
-//export hookSignalDisconnect
-func hookSignalDisconnect(funcp unsafe.Pointer) {
+//export cgoHookSignalDisconnect
+func cgoHookSignalDisconnect(funcp unsafe.Pointer) {
 	before := len(connectedFunction)
 	delete(connectedFunction, (*interface{})(funcp))
 	if before == len(connectedFunction) {
@@ -799,8 +800,8 @@ func hookSignalDisconnect(funcp unsafe.Pointer) {
 	stats.connectionsAlive(-1)
 }
 
-//export hookSignalCall
-func hookSignalCall(enginep unsafe.Pointer, funcp unsafe.Pointer, args *C.DataValue) {
+//export cgoHookSignalCall
+func cgoHookSignalCall(enginep unsafe.Pointer, funcp unsafe.Pointer, args *C.DataValue) {
 	engine := engines[enginep]
 	if engine == nil {
 		panic("signal called after engine was destroyed")
@@ -894,8 +895,8 @@ func (win *Window) Wait() {
 
 var waitingWindows = make(map[unsafe.Pointer]*sync.Mutex)
 
-//export hookWindowHidden
-func hookWindowHidden(addr unsafe.Pointer) {
+//export cgoHookWindowHidden
+func cgoHookWindowHidden(addr unsafe.Pointer) {
 	m, ok := waitingWindows[addr]
 	if !ok {
 		panic("window is not waiting")

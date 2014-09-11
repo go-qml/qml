@@ -1,14 +1,14 @@
 package qml
 
-// #cgo CPPFLAGS: -I./cpp
-// #cgo CXXFLAGS: -std=c++0x -pedantic-errors -Wall -fno-strict-aliasing
-// #cgo LDFLAGS: -lstdc++
-// #cgo pkg-config: Qt5Core Qt5Widgets Qt5Quick
-//
-// #include <stdlib.h>
-//
-// #include "cpp/capi.h"
-//
+/*
+#cgo CPPFLAGS: -I./cpp
+#cgo CXXFLAGS: -std=c++0x -pedantic-errors -Wall -fno-strict-aliasing
+#cgo !windows LDFLAGS: -lstdc++
+#cgo !windows pkg-config: Qt5Core Qt5Widgets Qt5Quick
+#cgo windows LDFLAGS: -L./cpp -lgoqml -lstdc++
+
+#include "capi.h"
+*/
 import "C"
 
 import (
@@ -23,12 +23,12 @@ import (
 )
 
 var (
-	guiFunc      = make(chan func())
-	guiDone      = make(chan struct{})
-	guiLock      = 0
-	guiMainRef   uintptr
-	guiPaintRef  uintptr
-	guiIdleRun   int32
+	guiFunc     = make(chan func())
+	guiDone     = make(chan struct{})
+	guiLock     = 0
+	guiMainRef  uintptr
+	guiPaintRef uintptr
+	guiIdleRun  int32
 
 	initialized int32
 )
@@ -170,12 +170,12 @@ func Changed(value, fieldAddr interface{}) {
 	})
 }
 
-// hookIdleTimer is run once per iteration of the Qt event loop,
+// cgoHookIdleTimer is run once per iteration of the Qt event loop,
 // within the main GUI thread, but only if at least one goroutine
 // has atomically incremented guiIdleRun.
 //
-//export hookIdleTimer
-func hookIdleTimer() {
+//export cgoHookIdleTimer
+func cgoHookIdleTimer() {
 	var f func()
 	for {
 		select {
@@ -288,8 +288,8 @@ func addrOf(gvalue interface{}) uintptr {
 // gvalue may occur.
 var typeNew = make(map[*valueFold]bool)
 
-//export hookGoValueTypeNew
-func hookGoValueTypeNew(cvalue unsafe.Pointer, specp unsafe.Pointer) (foldp unsafe.Pointer) {
+//export cgoHookGoValueTypeNew
+func cgoHookGoValueTypeNew(cvalue unsafe.Pointer, specp unsafe.Pointer) (foldp unsafe.Pointer) {
 	// Initialization is postponed until the engine is available, so that
 	// we can hand Init the qml.Object that represents the object.
 	init := reflect.ValueOf((*TypeSpec)(specp).Init)
@@ -305,8 +305,8 @@ func hookGoValueTypeNew(cvalue unsafe.Pointer, specp unsafe.Pointer) (foldp unsa
 	return unsafe.Pointer(fold)
 }
 
-//export hookGoValueDestroyed
-func hookGoValueDestroyed(enginep unsafe.Pointer, foldp unsafe.Pointer) {
+//export cgoHookGoValueDestroyed
+func cgoHookGoValueDestroyed(enginep unsafe.Pointer, foldp unsafe.Pointer) {
 	fold := (*valueFold)(foldp)
 	engine := fold.engine
 	if engine == nil {
@@ -359,8 +359,8 @@ func deref(value reflect.Value) reflect.Value {
 	panic("cannot happen")
 }
 
-//export hookGoValueReadField
-func hookGoValueReadField(enginep, foldp unsafe.Pointer, reflectIndex, getIndex, setIndex C.int, resultdv *C.DataValue) {
+//export cgoHookGoValueReadField
+func cgoHookGoValueReadField(enginep, foldp unsafe.Pointer, reflectIndex, getIndex, setIndex C.int, resultdv *C.DataValue) {
 	fold := ensureEngine(enginep, foldp)
 
 	var field reflect.Value
@@ -405,8 +405,8 @@ func hookGoValueReadField(enginep, foldp unsafe.Pointer, reflectIndex, getIndex,
 	packDataValue(gvalue, resultdv, fold.engine, jsOwner)
 }
 
-//export hookGoValueWriteField
-func hookGoValueWriteField(enginep, foldp unsafe.Pointer, reflectIndex, setIndex C.int, assigndv *C.DataValue) {
+//export cgoHookGoValueWriteField
+func cgoHookGoValueWriteField(enginep, foldp unsafe.Pointer, reflectIndex, setIndex C.int, assigndv *C.DataValue) {
 	fold := ensureEngine(enginep, foldp)
 	v := reflect.ValueOf(fold.gvalue)
 	ve := v
@@ -482,8 +482,8 @@ var (
 	dataValueArray [C.MaxParams]C.DataValue
 )
 
-//export hookGoValueCallMethod
-func hookGoValueCallMethod(enginep, foldp unsafe.Pointer, reflectIndex C.int, args *C.DataValue) {
+//export cgoHookGoValueCallMethod
+func cgoHookGoValueCallMethod(enginep, foldp unsafe.Pointer, reflectIndex C.int, args *C.DataValue) {
 	fold := ensureEngine(enginep, foldp)
 	v := reflect.ValueOf(fold.gvalue)
 
@@ -547,8 +547,8 @@ func printPaintPanic() {
 	}
 }
 
-//export hookGoValuePaint
-func hookGoValuePaint(enginep, foldp unsafe.Pointer, reflectIndex C.intptr_t) {
+//export cgoHookGoValuePaint
+func cgoHookGoValuePaint(enginep, foldp unsafe.Pointer, reflectIndex C.intptr_t) {
 	// Besides a convenience this is a workaround for http://golang.org/issue/8588
 	defer printPaintPanic()
 	defer atomic.StoreUintptr(&guiPaintRef, 0)
@@ -625,8 +625,8 @@ func _initGoType(fold *valueFold, schedulePaint bool) {
 	}
 }
 
-//export hookPanic
-func hookPanic(message *C.char) {
+//export cgoHookPanic
+func cgoHookPanic(message *C.char) {
 	defer C.free(unsafe.Pointer(message))
 	panic(C.GoString(message))
 }
@@ -636,22 +636,22 @@ func listSlice(fold *valueFold, reflectIndex C.intptr_t) *[]Object {
 	return field.Addr().Interface().(*[]Object)
 }
 
-//export hookListPropertyAt
-func hookListPropertyAt(foldp unsafe.Pointer, reflectIndex, setIndex C.intptr_t, index C.int) (objp unsafe.Pointer) {
+//export cgoHookListPropertyAt
+func cgoHookListPropertyAt(foldp unsafe.Pointer, reflectIndex, setIndex C.intptr_t, index C.int) (objp unsafe.Pointer) {
 	fold := (*valueFold)(foldp)
 	slice := listSlice(fold, reflectIndex)
 	return (*slice)[int(index)].Common().addr
 }
 
-//export hookListPropertyCount
-func hookListPropertyCount(foldp unsafe.Pointer, reflectIndex, setIndex C.intptr_t) C.int {
+//export cgoHookListPropertyCount
+func cgoHookListPropertyCount(foldp unsafe.Pointer, reflectIndex, setIndex C.intptr_t) C.int {
 	fold := (*valueFold)(foldp)
 	slice := listSlice(fold, reflectIndex)
 	return C.int(len(*slice))
 }
 
-//export hookListPropertyAppend
-func hookListPropertyAppend(foldp unsafe.Pointer, reflectIndex, setIndex C.intptr_t, objp unsafe.Pointer) {
+//export cgoHookListPropertyAppend
+func cgoHookListPropertyAppend(foldp unsafe.Pointer, reflectIndex, setIndex C.intptr_t, objp unsafe.Pointer) {
 	fold := (*valueFold)(foldp)
 	slice := listSlice(fold, reflectIndex)
 	var objdv C.DataValue
@@ -665,8 +665,8 @@ func hookListPropertyAppend(foldp unsafe.Pointer, reflectIndex, setIndex C.intpt
 	}
 }
 
-//export hookListPropertyClear
-func hookListPropertyClear(foldp unsafe.Pointer, reflectIndex, setIndex C.intptr_t) {
+//export cgoHookListPropertyClear
+func cgoHookListPropertyClear(foldp unsafe.Pointer, reflectIndex, setIndex C.intptr_t) {
 	fold := (*valueFold)(foldp)
 	slice := listSlice(fold, reflectIndex)
 	newslice := (*slice)[0:0]

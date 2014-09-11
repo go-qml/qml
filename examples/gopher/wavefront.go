@@ -271,7 +271,7 @@ func readMaterials(filename string) (map[string]*Material, error) {
 		for i := 0; i < 3; i++ {
 			material.Diffuse[i] *= 1.3
 			if material.Diffuse[i] > 1 {
-				material.Diffuse[i]  = 1
+				material.Diffuse[i] = 1
 			}
 		}
 	}

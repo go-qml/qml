@@ -1,7 +1,7 @@
 #include <QObject>
 
 #include "connector.h"
-#include "capi.h"
+#include "goqml_private.h"
 
 Connector::~Connector()
 {
