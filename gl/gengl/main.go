@@ -595,7 +595,7 @@ func goTypeName(ctypeName string) string {
 func prepareParam(f Func, pi int) Param {
 	p := f.Param[pi]
 
-	// Qt seems to have gratuitously changed some names. 
+	// Qt seems to have gratuitously changed some names.
 	if name, ok := paramNameFixes[p.Name]; ok {
 		p.Name = name
 	}
@@ -603,9 +603,9 @@ func prepareParam(f Func, pi int) Param {
 		if strings.HasSuffix(f.GoName, "v") {
 			p.Name = "value"
 		} else if f.Param[1].Name == "count" {
-			p.Name = "v" + string('0' + pi-2)
+			p.Name = "v" + string('0'+pi-2)
 		} else {
-			p.Name = "v" + string('0' + pi-1)
+			p.Name = "v" + string('0'+pi-1)
 		}
 	}
 
