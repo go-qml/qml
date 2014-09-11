@@ -6,6 +6,7 @@ package main
 
 import (
 	"bytes"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -17,16 +18,22 @@ import (
 )
 
 var (
+	flagRevert = flag.Bool("revert", false, "revert all changes")
+)
+
+var (
 	// void *gl1_0_funcs();
 	// void gl1_0_glViewport(void *_glfuncs, GLint x, GLint y, GLsizei width, GLsizei height);
 	// ...
 	// void *gles2_funcs();
 	// void gles2_glActiveTexture(void *_glfuncs, GLenum texture);
 	// ...
-	re = regexp.MustCompile(`gl(es)?\d+_(\d+_)?[0-9a-zA-Z_]+\(`)
+	reGLFunc = regexp.MustCompile(`gl(es)?\d+_(\d+_)?[0-9a-zA-Z_]+\(`)
 )
 
 func main() {
+	flag.Parse()
+
 	matches, err := filepath.Glob(`../*/funcs.h`)
 	if err != nil {
 		log.Fatal("filepath.Glob: ", err)
@@ -34,7 +41,10 @@ func main() {
 	for i := 0; i < len(matches); i++ {
 		dirName := matches[i][:len(matches[i])-len("/funcs.h")]
 		processFuncsCpp(dirName)
-		makeDef(dirName)
+		generatePro(dirName)
+		generateDef(dirName)
+		generateBat(dirName)
+		supportGenCmd(dirName)
 		fmt.Printf("%s ok\n", matches[i])
 	}
 	fmt.Printf("Done\n")
@@ -45,16 +55,65 @@ func processFuncsCpp(dirName string) {
 	if err != nil {
 		log.Fatal("ioutil.ReadFile: ", err)
 	}
+
 	if !strings.Contains(string(data), `// +build !windows`) {
 		data = append([]byte(`// +build !windows`+"\n"), data...)
 		err = ioutil.WriteFile(dirName+"/funcs.cpp", data, 0666)
 		if err != nil {
 			log.Fatal("ioutil.WriteFile: ", err)
 		}
+	} else {
+		if *flagRevert {
+			data = bytes.Replace(data, []byte(`// +build !windows`+"\n"), nil, -1)
+			err = ioutil.WriteFile(dirName+"/funcs.cpp", data, 0666)
+			if err != nil {
+				log.Fatal("ioutil.WriteFile: ", err)
+			}
+		}
 	}
 }
 
-func makeDef(dirName string) {
+func generatePro(dirName string) {
+	var pro = `
+TEMPLATE = lib
+CONFIG  += dll release
+CONFIG  -= embed_manifest_exe embed_manifest_dll
+QT      += opengl gui
+TARGET   = goqgl
+
+DESTDIR = $${PWD}
+INCLUDEPATH += ..
+
+HEADERS += ../funcs.h
+SOURCES += ../funcs.cpp
+
+DEF_FILE+= ./goqgl.def
+`
+
+	err := ioutil.WriteFile(dirName+"/goqgl/goqgl.pro", []byte(pro), 0666)
+	if err != nil {
+		log.Fatal("ioutil.WriteFile: ", err)
+	}
+}
+
+func generateDef(dirName string) {
+	var defHeader = `
+; Copyright 2014 <chaishushan{AT}gmail.com>. All rights reserved.
+; Use of this source code is governed by a BSD-style
+; license that can be found in the LICENSE file.
+
+; Auto Genrated by makedef.go; DO NOT EDIT!!
+
+LIBRARY goqgl.dll
+
+EXPORTS
+`
+
+	if *flagRevert {
+		os.RemoveAll(dirName + "/goqgl")
+		return
+	}
+
 	data, err := ioutil.ReadFile(dirName + "/funcs.h")
 	if err != nil {
 		log.Fatal("ioutil.ReadFile: ", err)
@@ -62,7 +121,7 @@ func makeDef(dirName string) {
 
 	var funcs []string
 	for _, line := range strings.Split(string(data), "\n") {
-		if s := re.FindString(line); s != "" {
+		if s := reGLFunc.FindString(line); s != "" {
 			funcs = append(funcs, s[:len(s)-1])
 		}
 	}
@@ -83,14 +142,40 @@ func makeDef(dirName string) {
 	}
 }
 
-var defHeader = `
-; Copyright 2014 <chaishushan{AT}gmail.com>. All rights reserved.
-; Use of this source code is governed by a BSD-style
-; license that can be found in the LICENSE file.
+func generateBat(dirName string) {
+	var bat = `
+@echo off
 
-; Auto Genrated by makedef.go; DO NOT EDIT!!
+cd %~dp0
+setlocal
 
-LIBRARY goqgl.dll
+:: NMake: goqgl.dll
+qmake
+nmake clean
+nmake release
 
-EXPORTS
+:: MinGW: generate libgoqgl.a
+dlltool -dllname goqgl.dll --def goqgl.def --output-lib libgoqgl.a
+
+:: install
+copy goqgl.dll %QTDIR%\bin
 `
+
+	err := ioutil.WriteFile(dirName+"/goqgl/build_msvc.bat", []byte(bat), 0666)
+	if err != nil {
+		log.Fatal("ioutil.WriteFile: ", err)
+	}
+}
+
+func supportGenCmd(dirName string) {
+	var gen = `
+//go:generate cmd /c call goqgl\build_msvc.bat
+
+package GL
+`
+
+	err := ioutil.WriteFile(dirName+"/generate_windows.go", []byte(gen), 0666)
+	if err != nil {
+		log.Fatal("ioutil.WriteFile: ", err)
+	}
+}
