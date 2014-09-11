@@ -4,7 +4,7 @@ package qml
 #cgo CPPFLAGS: -I./cpp
 #cgo CXXFLAGS: -std=c++0x -pedantic-errors -Wall -fno-strict-aliasing
 #cgo !windows LDFLAGS: -lstdc++
-// cgo !windows pkg-config: Qt5Core Qt5Widgets Qt5Quick
+#cgo !windows pkg-config: Qt5Core Qt5Widgets Qt5Quick
 #cgo windows LDFLAGS: -L./cpp -lgoqml -lstdc++
 
 #include "capi.h"
