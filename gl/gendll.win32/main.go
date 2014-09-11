@@ -64,7 +64,7 @@ func processFuncsCpp(dirName string) {
 		}
 	} else {
 		if *flagRevert {
-			data = bytes.Replace(data, []byte(`// +build !windows`+"\n"), nil, -1)
+			data = bytes.Replace(data, []byte(`// +build !windows`+"\n"), []byte(""), -1)
 			err = ioutil.WriteFile(dirName+"/funcs.cpp", data, 0666)
 			if err != nil {
 				log.Fatal("ioutil.WriteFile: ", err)
@@ -90,6 +90,12 @@ SOURCES += ../funcs.cpp
 DEF_FILE+= ./goqgl.def
 `
 
+	if *flagRevert {
+		os.RemoveAll(dirName + "/goqgl")
+		return
+	}
+
+	os.MkdirAll(dirName+"/goqgl", 0666)
 	err := ioutil.WriteFile(dirName+"/goqgl/goqgl.pro", []byte(pro), 0666)
 	if err != nil {
 		log.Fatal("ioutil.WriteFile: ", err)
@@ -134,8 +140,6 @@ EXPORTS
 	}
 
 	os.MkdirAll(dirName+"/goqgl", 0666)
-	os.Remove(dirName + "/goqgl.def")
-
 	err = ioutil.WriteFile(dirName+"/goqgl/goqgl.def", b.Bytes(), 0666)
 	if err != nil {
 		log.Fatal("ioutil.WriteFile: ", err)
@@ -161,6 +165,12 @@ dlltool -dllname goqgl.dll --def goqgl.def --output-lib libgoqgl.a
 copy goqgl.dll %QTDIR%\bin
 `
 
+	if *flagRevert {
+		os.RemoveAll(dirName + "/goqgl")
+		return
+	}
+
+	os.MkdirAll(dirName+"/goqgl", 0666)
 	err := ioutil.WriteFile(dirName+"/goqgl/build_msvc.bat", []byte(bat), 0666)
 	if err != nil {
 		log.Fatal("ioutil.WriteFile: ", err)
@@ -174,6 +184,10 @@ func supportGenCmd(dirName string) {
 package GL
 `
 
+	if *flagRevert {
+		os.Remove(dirName + "/generate_windows.go")
+		return
+	}
 	err := ioutil.WriteFile(dirName+"/generate_windows.go", []byte(gen), 0666)
 	if err != nil {
 		log.Fatal("ioutil.WriteFile: ", err)
