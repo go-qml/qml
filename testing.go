@@ -1,6 +1,7 @@
 package qml
 
-// #include <sys/mman.h>
+// #include <stdlib.h>
+// int mprotect(void *addr, size_t len, int prot);
 import "C"
 
 import (
@@ -27,6 +28,12 @@ func SetupTesting() {
 	fset(ptr(tmain), ptr(tstub), mmain)
 }
 
+const (
+	protREAD  = 1
+	protWRITE = 2
+	protEXEC  = 4
+)
+
 func fset(target, old, new uintptr) {
 	pageOffset := target % pageSize
 	pageAddr := target - pageOffset
@@ -44,8 +51,8 @@ func fset(target, old, new uintptr) {
 	binary.LittleEndian.PutUint64(newAddr, uint64(new))
 
 	// BSD's syscall package misses Mprotect. Use cgo instead.
-	C.mprotect(unsafe.Pointer(pageAddr), C.size_t(len(mem)), C.PROT_EXEC|C.PROT_READ|C.PROT_WRITE)
-	defer C.mprotect(unsafe.Pointer(pageAddr), C.size_t(len(mem)), C.PROT_EXEC|C.PROT_READ)
+	C.mprotect(unsafe.Pointer(pageAddr), C.size_t(len(mem)), protEXEC|protREAD|protWRITE)
+	defer C.mprotect(unsafe.Pointer(pageAddr), C.size_t(len(mem)), protEXEC|protREAD)
 
 	delta := make([]byte, 4)
 	for i, c := range mem[pageOffset:] {
