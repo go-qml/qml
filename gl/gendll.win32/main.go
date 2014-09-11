@@ -84,7 +84,9 @@ func processGlGo(dirName string) {
 	data, _ = format.Source(data)
 
 	oldStr := "// #cgo pkg-config: Qt5Core Qt5OpenGL\n"
-	newStr := "// #cgo !windows pkg-config: Qt5Core Qt5OpenGL\n// #cgo windows LDFLAGS: -L./goqgl -lgoqgl\n"
+	newStr := "// #cgo !windows pkg-config: Qt5Core Qt5OpenGL\n// #cgo windows LDFLAGS: -L./goqgl -lgoqgl_{{.LibSuffix}}\n"
+
+	newStr = strings.Replace(newStr, "{{.LibSuffix}}", libSuffix(dirName), -1)
 
 	if *flagRevert {
 		data = bytes.Replace(data, []byte(newStr), []byte(oldStr), -1)
@@ -113,7 +115,7 @@ TEMPLATE = lib
 CONFIG  += dll release
 CONFIG  -= embed_manifest_exe embed_manifest_dll
 QT      += opengl gui
-TARGET   = goqgl
+TARGET   = goqgl_{{.LibSuffix}}
 
 DESTDIR = $${PWD}
 INCLUDEPATH += ..
@@ -123,6 +125,7 @@ SOURCES += ../funcs.cpp
 
 DEF_FILE+= ./goqgl.def
 `
+	pro = strings.Replace(pro, "{{.LibSuffix}}", libSuffix(dirName), -1)
 
 	if *flagRevert {
 		os.RemoveAll(dirName + "/goqgl")
@@ -144,10 +147,11 @@ func generateDef(dirName string) {
 
 ; Auto Genrated by makedef.go; DO NOT EDIT!!
 
-LIBRARY goqgl.dll
+LIBRARY goqgl_{{.LibSuffix}}.dll
 
 EXPORTS
 `
+	defHeader = strings.Replace(defHeader, "{{.LibSuffix}}", libSuffix(dirName), -1)
 
 	if *flagRevert {
 		os.RemoveAll(dirName + "/goqgl")
@@ -187,17 +191,18 @@ func generateBat(dirName string) {
 cd %~dp0
 setlocal
 
-:: NMake: goqgl.dll
+:: NMake: goqgl_{{.LibSuffix}}.dll
 qmake
 nmake clean
 nmake release
 
-:: MinGW: generate libgoqgl.a
-dlltool -dllname goqgl.dll --def goqgl.def --output-lib libgoqgl.a
+:: MinGW: generate libgoqgl_{{.LibSuffix}}.a
+dlltool -dllname goqgl_{{.LibSuffix}}.dll --def goqgl.def --output-lib libgoqgl_{{.LibSuffix}}.a
 
 :: install
-copy goqgl.dll %QTDIR%\bin
+copy goqgl_{{.LibSuffix}}.dll %QTDIR%\bin
 `
+	bat = strings.Replace(bat, "{{.LibSuffix}}", libSuffix(dirName), -1)
 
 	if *flagRevert {
 		os.RemoveAll(dirName + "/goqgl")
@@ -227,4 +232,8 @@ package GL
 	if err != nil {
 		log.Fatal("ioutil.WriteFile: ", err)
 	}
+}
+
+func libSuffix(dirName string) string {
+	return strings.Replace(filepath.Base(dirName), ".", "_", -1)
 }
