@@ -89,8 +89,8 @@ func (defaultLogger) QmlOutput(msg LogMessage) error {
 	return nil
 }
 
-//export hookLogHandler
-func hookLogHandler(cmsg *C.LogMessage) {
+//export cgoHookLogHandler
+func cgoHookLogHandler(cmsg *C.LogMessage) {
 	// Workarund for QTBUG-35943
 	text := unsafeString(cmsg.text, cmsg.textLen)
 	if strings.HasPrefix(text, `"Qt Warning: Compose file:`) {

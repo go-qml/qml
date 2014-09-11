@@ -10,22 +10,22 @@ extern "C" {
 
 void initGoQmlLib() {
 	HookHandlers p[1];
-	p->hookIdleTimer = hookIdleTimer;
-	p->hookLogHandler = hookLogHandler;
-	p->hookGoValueReadField = hookGoValueReadField;
-	p->hookGoValueWriteField = hookGoValueWriteField;
-	p->hookGoValueCallMethod = hookGoValueCallMethod;
-	p->hookGoValueDestroyed = hookGoValueDestroyed;
-	p->hookGoValuePaint = hookGoValuePaint;
-	p->hookRequestImage = hookRequestImage;
-	p->hookGoValueTypeNew = hookGoValueTypeNew;
-	p->hookWindowHidden = hookWindowHidden;
-	p->hookSignalCall = hookSignalCall;
-	p->hookSignalDisconnect = hookSignalDisconnect;
-	p->hookPanic = hookPanic;
-	p->hookListPropertyCount = hookListPropertyCount;
-	p->hookListPropertyAt = hookListPropertyAt;
-	p->hookListPropertyAppend = hookListPropertyAppend;
-	p->hookListPropertyClear = hookListPropertyClear;
+	p->hookIdleTimer = cgoHookIdleTimer;
+	p->hookLogHandler = cgoHookLogHandler;
+	p->hookGoValueReadField = cgoHookGoValueReadField;
+	p->hookGoValueWriteField = cgoHookGoValueWriteField;
+	p->hookGoValueCallMethod = cgoHookGoValueCallMethod;
+	p->hookGoValueDestroyed = cgoHookGoValueDestroyed;
+	p->hookGoValuePaint = cgoHookGoValuePaint;
+	p->hookRequestImage = cgoHookRequestImage;
+	p->hookGoValueTypeNew = cgoHookGoValueTypeNew;
+	p->hookWindowHidden = cgoHookWindowHidden;
+	p->hookSignalCall = cgoHookSignalCall;
+	p->hookSignalDisconnect = cgoHookSignalDisconnect;
+	p->hookPanic = cgoHookPanic;
+	p->hookListPropertyCount = cgoHookListPropertyCount;
+	p->hookListPropertyAt = cgoHookListPropertyAt;
+	p->hookListPropertyAppend = cgoHookListPropertyAppend;
+	p->hookListPropertyClear = cgoHookListPropertyClear;
 	initHooks(p);
 }
