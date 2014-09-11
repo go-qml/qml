@@ -1,7 +1,3 @@
-// Copyright 2014 <chaishushan{AT}gmail.com>. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
 package main
 
 import (
@@ -141,12 +137,6 @@ DEF_FILE+= ./goqgl.def
 
 func generateDef(dirName string) {
 	var defHeader = `
-; Copyright 2014 <chaishushan{AT}gmail.com>. All rights reserved.
-; Use of this source code is governed by a BSD-style
-; license that can be found in the LICENSE file.
-
-; Auto Genrated by makedef.go; DO NOT EDIT!!
-
 LIBRARY goqgl_{{.LibSuffix}}.dll
 
 EXPORTS
