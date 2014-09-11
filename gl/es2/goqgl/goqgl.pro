@@ -5,9 +5,9 @@ QT      += opengl gui
 TARGET   = goqgl
 
 DESTDIR = $${PWD}
-INCLUDEPATH += .
+INCLUDEPATH += ..
 
-HEADERS += ./funcs.h
-SOURCES += ./funcs.cpp
+HEADERS += ../funcs.h
+SOURCES += ../funcs.cpp
 
 DEF_FILE+= ./goqgl.def

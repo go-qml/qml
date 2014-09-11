@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -31,14 +32,30 @@ func main() {
 		log.Fatal("filepath.Glob: ", err)
 	}
 	for i := 0; i < len(matches); i++ {
-		makeDef(matches[i])
+		dirName := matches[i][:len(matches[i])-len("/funcs.h")]
+		processFuncsCpp(dirName)
+		makeDef(dirName)
 		fmt.Printf("%s ok\n", matches[i])
 	}
 	fmt.Printf("Done\n")
 }
 
-func makeDef(filename string) {
-	data, err := ioutil.ReadFile(filename)
+func processFuncsCpp(dirName string) {
+	data, err := ioutil.ReadFile(dirName + "/funcs.cpp")
+	if err != nil {
+		log.Fatal("ioutil.ReadFile: ", err)
+	}
+	if !strings.Contains(string(data), `// +build !windows`) {
+		data = append([]byte(`// +build !windows`+"\n"), data...)
+		err = ioutil.WriteFile(dirName+"/funcs.cpp", data, 0666)
+		if err != nil {
+			log.Fatal("ioutil.WriteFile: ", err)
+		}
+	}
+}
+
+func makeDef(dirName string) {
+	data, err := ioutil.ReadFile(dirName + "/funcs.h")
 	if err != nil {
 		log.Fatal("ioutil.ReadFile: ", err)
 	}
@@ -52,19 +69,21 @@ func makeDef(filename string) {
 	sort.Strings(funcs)
 
 	var b bytes.Buffer
-	fmt.Fprintf(&b, header[1:])
+	fmt.Fprintf(&b, defHeader[1:])
 	for _, s := range funcs {
 		fmt.Fprintf(&b, "\t%s\n", s)
 	}
 
-	defName := strings.Replace(filename, "funcs.h", "goqgl.def", -1)
-	err = ioutil.WriteFile(defName, b.Bytes(), 0666)
+	os.MkdirAll(dirName+"/goqgl", 0666)
+	os.Remove(dirName + "/goqgl.def")
+
+	err = ioutil.WriteFile(dirName+"/goqgl/goqgl.def", b.Bytes(), 0666)
 	if err != nil {
 		log.Fatal("ioutil.WriteFile: ", err)
 	}
 }
 
-var header = `
+var defHeader = `
 ; Copyright 2014 <chaishushan{AT}gmail.com>. All rights reserved.
 ; Use of this source code is governed by a BSD-style
 ; license that can be found in the LICENSE file.
