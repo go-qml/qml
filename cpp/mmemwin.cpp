@@ -12,7 +12,7 @@ int mprotect(void *addr, size_t len, int prot)
 	if (prot & protWRITE) {
 		wprot = PAGE_READWRITE;
 	} else if (prot & protREAD) {
-		wprot = PAGE_READ;
+		wprot = PAGE_READONLY;
 	}
 	if (prot & protEXEC) {
 		wprot <<= 4;
