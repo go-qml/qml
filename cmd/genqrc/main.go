@@ -1,19 +1,24 @@
 
-// NOTE: The documentation is duplicated here and in the the doc variable
+// XXX: The documentation is duplicated here and in the the doc variable
 // below. Update both at the same time.
 
 // Command genqrc packs resource files into the Go binary.
 //
 // Usage: genqrc [options] <subdir1> [<subdir2> ...]
-//
+// 
 // The genqrc tool packs all resource files under the provided subdirectories into
 // a single qrc.go file that may be built into the generated binary. Bundled files
 // may then be loaded by Go or QML code under the URL "qrc:///some/path", where
 // "some/path" matches the original path for the resource file locally.
 // 
+// For example, the following will load a .qml file from the resource pack, and
+// that file may in turn reference other content (code, images, etc) in the pack:
+// 
+//     component, err := engine.LoadFile("qrc://path/to/file.qml")
+// 
 // Starting with Go 1.4, this tool may be conveniently run by the "go generate"
 // subcommand by adding a line similar to the following one to any existent .go
-// file in the project (assuming the subdirectories ./code/ and ./images/):
+// file in the project (assuming the subdirectories ./code/ and ./images/ exist):
 // 
 //     //go:generate genqrc code images
 // 
@@ -75,7 +80,7 @@ the changes are performed, genqrc must be run again to update the content that
 will ship with built binaries.
 `
 
-// NOTE: The documentation is duplicated here and in the the package comment
+// XXX: The documentation is duplicated here and in the the package comment
 // above. Update both at the same time.
 
 var packageName = flag.String("package", "main", "package name that qrc.go will be under (not needed for go generate)")
