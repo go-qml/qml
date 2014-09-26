@@ -2,6 +2,10 @@
 // NOTE: The documentation is duplicated here and in the the doc variable
 // below. Update both at the same time.
 
+// Command genqrc packs resource files into the Go binary.
+//
+// Usage: genqrc [options] <subdir1> [<subdir2> ...]
+//
 // The genqrc tool packs all resource files under the provided subdirectories into
 // a single qrc.go file that may be built into the generated binary. Bundled files
 // may then be loaded by Go or QML code under the URL "qrc:///some/path", where
