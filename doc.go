@@ -42,22 +42,22 @@
 //
 // The following logic demonstrates loading a QML file into a window:
 //
-//     func main() {
-//             err := qml.Run(run)
-//             ...
-//     }
+//    func main() {
+//            err := qml.Run(run)
+//            ...
+//    }
 //
-//     func run() error {
-//     	       engine := qml.NewEngine()
-//     	       component, err := engine.LoadFile("file.qml")
-//     	       if err != nil {
-//     	               return err
-//     	       }
-//     	       win := component.CreateWindow(nil)
-//     	       win.Show()
-//     	       win.Wait()
-//     	       return nil
-//     }
+//    func run() error {
+//            engine := qml.NewEngine()
+//            component, err := engine.LoadFile("file.qml")
+//            if err != nil {
+//                    return err
+//            }
+//            win := component.CreateWindow(nil)
+//            win.Show()
+//            win.Wait()
+//            return nil
+//    }
 //
 // Handling QML objects in Go
 //
@@ -71,9 +71,9 @@
 //
 //    win := component.CreateWindow(nil)
 //    win.On("visibleChanged", func(visible bool) {
-//        if (visible) {
-//            fmt.Println("Width:", win.Int("width"))
-//        }
+//            if (visible) {
+//                    fmt.Println("Width:", win.Int("width"))
+//            }
 //    })
 //
 // Information about the methods, properties, and signals that are available for QML
@@ -111,7 +111,7 @@
 // the following example demonstrates:
 //
 //    qml.RegisterTypes("GoExtensions", 1, 0, []qml.TypeSpec{{
-//        Init: func(p *Person, obj qml.Object) { p.Name = "<none>" },
+//            Init: func(p *Person, obj qml.Object) { p.Name = "<none>" },
 //    }})
 //
 // With this logic in place, QML code can create new instances of Person by itself:     
@@ -150,13 +150,13 @@
 // For example:
 //
 //    type Person struct {
-//        Name string
+//            Name string
 //    }
 //
 //    func (p *Person) SetName(name string) {
-//        fmt.Println("Old name is", p.Name)
-//        p.Name = name
-//        fmt.Println("New name is", p.Name)
+//            fmt.Println("Old name is", p.Name)
+//            p.Name = name
+//            fmt.Println("New name is", p.Name)
 //    }
 //
 // In the example above, whenever QML code attempts to update the Person.Name field
@@ -177,7 +177,7 @@
 // a Paint method such as:
 //
 //    func (p *Person) Paint(painter *qml.Painter) {
-//        // ... OpenGL calls with the gopkg.in/qml.v1/gl/<VERSION> package ...
+//            // ... OpenGL calls with the gopkg.in/qml.v1/gl/<VERSION> package ...
 //    }
 //
 // A simple example is available at:
