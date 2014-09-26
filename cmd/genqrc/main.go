@@ -50,9 +50,14 @@ a single qrc.go file that may be built into the generated binary. Bundled files
 may then be loaded by Go or QML code under the URL "qrc:///some/path", where
 "some/path" matches the original path for the resource file locally.
 
+For example, the following will load a .qml file from the resource pack, and
+that file may in turn reference other content (code, images, etc) in the pack:
+
+    component, err := engine.LoadFile("qrc://path/to/file.qml")
+
 Starting with Go 1.4, this tool may be conveniently run by the "go generate"
 subcommand by adding a line similar to the following one to any existent .go
-file in the project (assuming the subdirectories ./code/ and ./images/):
+file in the project (assuming the subdirectories ./code/ and ./images/ exist):
 
     //go:generate genqrc code images
 

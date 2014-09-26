@@ -1,19 +1,27 @@
 # QML support for the Go language
 
-This is an ALPHA release
-------------------------
+Documentation
+-------------
 
-This package is in an alpha stage, and still in heavy development. APIs
-may change, and things may break.
-
-At this time contributors and developers that are interested in tracking
-the development closely are encouraged to use it. If you'd prefer a more
-stable release, please hold on a bit and subscribe to the mailing list
-for news. It's in a pretty good state, so it shall not take too long.
+The introductory documentation as well as the detailed API documentation is
+available at [gopkg.in/qml.v1](http://godoc.org/gopkg.in/qml.v1).
 
 
-Demos
------
+Blog posts
+----------
+
+Some relevant blog posts:
+
+  * [Announcing qml v1 for Go](http://blog.labix.org/2014/08/13/announcing-qml-v1-for-go)
+  * [Packing resources into Go qml binaries](http://blog.labix.org/2014/09/26/packing-resources-into-go-qml-binaries)
+  * [Go qml contest results](http://blog.labix.org/2014/04/25/qml-contest-results)
+  * [Arbitrary Qt extensions with Go qml](http://blog.labix.org/2014/03/21/arbitrary-qt-extensions-with-go-qml)
+  * [The new Go qml OpenGL API](http://blog.labix.org/2014/08/29/the-new-go-qml-opengl-api)
+  * [QML components with Go and OpenGL](http://blog.labix.org/2013/12/23/qml-components-with-go-and-opengl)
+
+
+Videos
+------
 
 These introductory videos demonstrate the use of Go QML:
 
@@ -28,13 +36,6 @@ Community
 
 Please join the [mailing list](https://groups.google.com/forum/#!forum/go-qml) for
 following relevant development news and discussing project details.
-
-
-Documentation
--------------
-
-The introductory documentation as well as the detailed API documentation is
-available at [gopkg.in/qml.v1](http://godoc.org/gopkg.in/qml.v1).
 
 
 Installation

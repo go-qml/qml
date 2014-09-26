@@ -38,6 +38,27 @@
 //   https://github.com/go-qml/qml/tree/v1/examples
 //
 //
+// Simple example
+//
+// The following logic demonstrates loading a QML file into a window:
+//
+//     func main() {
+//             err := qml.Run(run)
+//             ...
+//     }
+//
+//     func run() error {
+//     	       engine := qml.NewEngine()
+//     	       component, err := engine.LoadFile("file.qml")
+//     	       if err != nil {
+//     	               return err
+//     	       }
+//     	       win := component.CreateWindow(nil)
+//     	       win.Show()
+//     	       win.Wait()
+//     	       return nil
+//     }
+//
 // Handling QML objects in Go
 //
 // Any QML object may be manipulated by Go via the Object interface. That
@@ -162,5 +183,17 @@
 // A simple example is available at:
 //
 //   https://github.com/go-qml/qml/tree/v1/examples/painting
+//
+//
+// Packing resources into the Go qml binary
+//
+// Resource files (qml code, images, etc) may be packed into the Go qml application
+// binary to simplify its handling and distribution. This is done with the genqrc tool:
+//
+//   http://gopkg.in/qml.v1/cmd/genqrc#usage
+//
+// The following blog post provides more details:
+//
+//   http://blog.labix.org/2014/09/26/packing-resources-into-go-qml-binaries
 //
 package qml
