@@ -163,6 +163,13 @@ void engineAddImageProvider(QQmlEngine_ *engine, QString_ *providerId, void *ima
     qengine->addImageProvider(*qproviderId, new GoImageProvider(imageFunc));
 }
 
+void componentLoadURL(QQmlComponent_ *component, const char *url, int urlLen)
+{
+    QByteArray qurl(url, urlLen);
+    QString qsurl = QString::fromUtf8(qurl);
+    reinterpret_cast<QQmlComponent *>(component)->loadUrl(qsurl);
+}
+
 void componentSetData(QQmlComponent_ *component, const char *data, int dataLen, const char *url, int urlLen)
 {
     QByteArray qdata(data, dataLen);
@@ -847,6 +854,20 @@ void internalLogHandler(QtMsgType severity, const QMessageLogContext &context, c
 void installLogHandler()
 {
     qInstallMessageHandler(internalLogHandler);
+}
+
+
+extern bool qRegisterResourceData(int version, const unsigned char *tree, const unsigned char *name, const unsigned char *data);
+extern bool qUnregisterResourceData(int version, const unsigned char *tree, const unsigned char *name, const unsigned char *data);
+
+void registerResourceData(int version, char *tree, char *name, char *data)
+{
+    qRegisterResourceData(version, (unsigned char*)tree, (unsigned char*)name, (unsigned char*)data);
+}
+
+void unregisterResourceData(int version, char *tree, char *name, char *data)
+{
+    qUnregisterResourceData(version, (unsigned char*)tree, (unsigned char*)name, (unsigned char*)data);
 }
 
 // vim:ts=4:sw=4:et:ft=cpp

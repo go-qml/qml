@@ -365,6 +365,50 @@ func (s *S) TestIssue84(c *C) {
 	c.Assert(root.String("s1"), Equals, "<after>")
 }
 
+func (s *S) TestResources(c *C) {
+	var rp qml.ResourcesPacker
+	rp.Add("sub/path/Foo.qml", []byte("import QtQuick 2.0\nItem { Component.onCompleted: console.log('<Foo>') }"))
+	rp.AddString("sub/path/Bar.qml", "import QtQuick 2.0\nItem { Component.onCompleted: console.log('<Bar>') }")
+	rp.AddString("/sub/Main.qml", "import QtQuick 2.0\nimport \"./path\"\nItem {\nFoo{}\nBar{}\n}")
+
+	r := rp.Pack()
+	qml.LoadResources(r)
+	testResourcesLoaded(c, true)
+	qml.UnloadResources(r)
+	testResourcesLoaded(c, false)
+
+	data := r.Bytes()
+
+	rb, err := qml.ParseResources(data)
+	c.Assert(err, IsNil)
+	qml.LoadResources(rb)
+	testResourcesLoaded(c, true)
+	qml.UnloadResources(rb)
+	testResourcesLoaded(c, false)
+
+	rs, err := qml.ParseResourcesString(string(data))
+	c.Assert(err, IsNil)
+	qml.LoadResources(rs)
+	testResourcesLoaded(c, true)
+	qml.UnloadResources(rs)
+	testResourcesLoaded(c, false)
+}
+
+func testResourcesLoaded(c *C, loaded bool) {
+	engine := qml.NewEngine()
+	defer engine.Destroy()
+	component, err := engine.LoadFile("qrc:///sub/Main.qml")
+	if loaded {
+		c.Assert(err, IsNil)
+	} else {
+		c.Assert(err, ErrorMatches, "qrc:///sub/Main.qml:-1 File not found")
+		return
+	}
+	root := component.Create(nil)
+	defer root.Destroy()
+	c.Assert(c.GetTestLog(), Matches, "(?s).*(<Foo>.*<Bar>|<Bar>.*<Foo>).*")
+}
+
 type TestData struct {
 	*C
 	engine           *qml.Engine

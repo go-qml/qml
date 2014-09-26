@@ -85,36 +85,52 @@ func (e *Engine) Destroy() {
 // Once a component is loaded, component instances may be created from
 // the resulting object via its Create and CreateWindow methods.
 func (e *Engine) Load(location string, r io.Reader) (Object, error) {
-	data, err := ioutil.ReadAll(r)
-	if err != nil {
-		return nil, err
-	}
-	if colon, slash := strings.Index(location, ":"), strings.Index(location, "/"); colon == -1 || slash <= colon {
-		if filepath.IsAbs(location) {
-			location = "file:///" + filepath.ToSlash(location)
-		} else {
-			dir, err := os.Getwd()
-			if err != nil {
-				return nil, fmt.Errorf("cannot obtain absolute path: %v", err)
+	var cdata *C.char
+	var cdatalen C.int
+
+	qrc := strings.HasPrefix(location, "qrc:")
+	if qrc {
+		if r != nil {
+			return nil, fmt.Errorf("cannot load qrc resource while providing data: %s", location)
+		}
+	} else {
+		data, err := ioutil.ReadAll(r)
+		if err != nil {
+			return nil, err
+		}
+		if colon, slash := strings.Index(location, ":"), strings.Index(location, "/"); colon == -1 || slash <= colon {
+			if filepath.IsAbs(location) {
+				location = "file:///" + filepath.ToSlash(location)
+			} else {
+				dir, err := os.Getwd()
+				if err != nil {
+					return nil, fmt.Errorf("cannot obtain absolute path: %v", err)
+				}
+				location = "file:///" + filepath.ToSlash(filepath.Join(dir, location))
 			}
-			location = "file:///" + filepath.ToSlash(filepath.Join(dir, location))
 		}
+
+		// Workaround issue #84 (QTBUG-41193) by not refering to an existent file.
+		if s := strings.TrimPrefix(location, "file:///"); s != location {
+			if _, err := os.Stat(filepath.FromSlash(s)); err == nil {
+				location = location + "."
+			}
+		}
+
+		cdata, cdatalen = unsafeBytesData(data)
 	}
 
-	// Workaround issue #84 (QTBUG-41193) by not refering to an existent file.
-	if s := strings.TrimPrefix(location, "file:///"); s != location {
-		if _, err := os.Stat(filepath.FromSlash(s)); err == nil {
-			location = location + "."
-		}
-	}
-
-	cdata, cdatalen := unsafeBytesData(data)
+	var err error
 	cloc, cloclen := unsafeStringData(location)
 	comp := &Common{engine: e}
 	RunMain(func() {
 		// TODO The component's parent should probably be the engine.
 		comp.addr = C.newComponent(e.addr, nilPtr)
-		C.componentSetData(comp.addr, cdata, cdatalen, cloc, cloclen)
+		if qrc {
+			C.componentLoadURL(comp.addr, cloc, cloclen)
+		} else {
+			C.componentSetData(comp.addr, cdata, cdatalen, cloc, cloclen)
+		}
 		message := C.componentErrorString(comp.addr)
 		if message != nilCharPtr {
 			err = errors.New(strings.TrimRight(C.GoString(message), "\n"))
@@ -133,6 +149,9 @@ func (e *Engine) Load(location string, r io.Reader) (Object, error) {
 // Once a component is loaded, component instances may be created from
 // the resulting object via its Create and CreateWindow methods.
 func (e *Engine) LoadFile(path string) (Object, error) {
+	if strings.HasPrefix(path, "qrc:") {
+		return e.Load(path, nil)
+	}
 	// TODO Test this.
 	f, err := os.Open(path)
 	if err != nil {
@@ -1057,3 +1076,34 @@ func RegisterConverter(typeName string, converter func(engine *Engine, obj Objec
 }
 
 var converters = make(map[string]func(engine *Engine, obj Object) interface{})
+
+// LoadResources registers all resources in the provided resources collection,
+// making them available to be loaded by any Engine and QML file.
+// Registered resources are made available under "qrc:///some/path", where
+// "some/path" is the path the resource was added with.
+func LoadResources(r *Resources) {
+	var base unsafe.Pointer
+	if len(r.sdata) > 0 {
+		base = *(*unsafe.Pointer)(unsafe.Pointer(&r.sdata))
+	} else if len(r.bdata) > 0 {
+		base = *(*unsafe.Pointer)(unsafe.Pointer(&r.bdata))
+	}
+	tree := (*C.char)(unsafe.Pointer(uintptr(base)+uintptr(r.treeOffset)))
+	name := (*C.char)(unsafe.Pointer(uintptr(base)+uintptr(r.nameOffset)))
+	data := (*C.char)(unsafe.Pointer(uintptr(base)+uintptr(r.dataOffset)))
+	C.registerResourceData(C.int(r.version), tree, name, data)
+}
+
+// UnloadResources unregisters all previously registered resources from r.
+func UnloadResources(r *Resources) {
+	var base unsafe.Pointer
+	if len(r.sdata) > 0 {
+		base = *(*unsafe.Pointer)(unsafe.Pointer(&r.sdata))
+	} else if len(r.bdata) > 0 {
+		base = *(*unsafe.Pointer)(unsafe.Pointer(&r.bdata))
+	}
+	tree := (*C.char)(unsafe.Pointer(uintptr(base)+uintptr(r.treeOffset)))
+	name := (*C.char)(unsafe.Pointer(uintptr(base)+uintptr(r.nameOffset)))
+	data := (*C.char)(unsafe.Pointer(uintptr(base)+uintptr(r.dataOffset)))
+	C.unregisterResourceData(C.int(r.version), tree, name, data)
+}

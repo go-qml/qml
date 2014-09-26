@@ -144,6 +144,7 @@ error *objectConnect(QObject_ *object, const char *signal, int signalLen, QQmlEn
 error *objectGoAddr(QObject_ *object, GoAddr **addr);
 
 QQmlComponent_ *newComponent(QQmlEngine_ *engine, QObject_ *parent);
+void componentLoadURL(QQmlComponent_ *component, const char *url, int urlLen);
 void componentSetData(QQmlComponent_ *component, const char *data, int dataLen, const char *url, int urlLen);
 char *componentErrorString(QQmlComponent_ *component);
 QObject_ *componentCreate(QQmlComponent_ *component, QQmlContext_ *context);
@@ -197,6 +198,9 @@ int hookListPropertyCount(GoAddr *addr, intptr_t reflectIndex, intptr_t setIndex
 QObject_ *hookListPropertyAt(GoAddr *addr, intptr_t reflectIndex, intptr_t setIndex, int i);
 void hookListPropertyAppend(GoAddr *addr, intptr_t reflectIndex, intptr_t setIndex, QObject_ *obj);
 void hookListPropertyClear(GoAddr *addr, intptr_t reflectIndex, intptr_t setIndex);
+
+void registerResourceData(int version, char *tree, char *name, char *data);
+void unregisterResourceData(int version, char *tree, char *name, char *data);
 
 #ifdef __cplusplus
 } // extern "C"
