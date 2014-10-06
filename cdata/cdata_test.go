@@ -6,29 +6,37 @@ import (
 	"testing"
 )
 
+type refPair struct {
+	ref1, ref2 uintptr
+}
+
 func TestRef(t *testing.T) {
 	const N = 10
 	runtime.LockOSThread()
+	exit := sync.WaitGroup{}
+	exit.Add(1)
+	defer exit.Done()
 	wg := sync.WaitGroup{}
 	wg.Add(N)
-	ch := make(chan uintptr)
+	ch := make(chan refPair)
 	for i := 0; i < N; i++ {
 		go func() {
 			runtime.LockOSThread()
 			wg.Done()
-			ch <- Ref()
-			wg.Wait()
+			ch <- refPair{Ref(), Ref()}
+			exit.Wait()
 		}()
 	}
 	wg.Wait()
-	refs := []uintptr{Ref()}
+	refs := make(map[uintptr]bool)
 	for i := 0; i < N; i++ {
-		chref := <-ch
-		for _, ref := range refs {
-			if chref == ref {
-				t.Fatalf("found duplicated ref: %d == %d", chref, ref)
-			}
+		pair := <-ch
+		if pair.ref1 != pair.ref2 {
+			t.Fatalf("found inconsistent ref: %d != %d", pair.ref1, pair.ref2)
 		}
-		refs = append(refs, chref)
+		if refs[pair.ref1] {
+			t.Fatalf("found duplicated ref: %d", pair.ref1)
+		}
+		refs[pair.ref1] = true
 	}
 }

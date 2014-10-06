@@ -1,5 +1,4 @@
-// This package supports the implementation of the qml package,
-// and must not be used by itself.
+// Package cdata supports the implementation of the qml package.
 package cdata
 
 func Ref() uintptr
