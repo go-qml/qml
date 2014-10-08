@@ -15,7 +15,7 @@ echo 'Installing Go and dependencies -------------------------------------------
 
 apt-get update
 apt-get install -y \
-	golang-go g++ git pkg-config \
+	golang-go g++ git pkg-config ubuntu-app-launch\
 	qtbase5-private-dev qtdeclarative5-private-dev libqt5opengl5-dev
 apt-get clean
 
@@ -38,4 +38,4 @@ su -l phablet -c 'cd $HOME/src/gopkg.in/qml.v0/examples/particle; go build'
 
 echo 'Launching particle example ---------------------------------------------------'
 
-su -l phablet -c "upstart-app-launch $APP_ID"
+su -l phablet -c "ubuntu-app-launch $APP_ID"
