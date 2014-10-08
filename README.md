@@ -83,7 +83,7 @@ run the following commands to get a working build environment inside the device:
 
     $ adb shell
     # cd /tmp
-    # wget https://github.com/go-qml/qml/raw/master/cmd/ubuntu-touch/setup.sh
+    # wget https://github.com/go-qml/qml/raw/v1/cmd/ubuntu-touch/setup.sh
     # /bin/bash setup.sh
     # su - phablet
     $
@@ -92,11 +92,11 @@ At the end of setup.sh, the phablet user will have GOPATH=$HOME in the environme
 the qml package will be built, and the particle example will be built and run. For
 stopping it from the command line, run as the phablet user:
 
-    $ upstart-app-stop gopkg.in.qml.particle-example
+    $ ubuntu-app-stop gopkg.in.qml.particle-example
 
 for running it again:
 
-    $ upstart-app-launch gopkg.in.qml.particle-example
+    $ ubuntu-app-launch gopkg.in.qml.particle-example
 
 These commands depend on the following file, installed by setup.sh:
 
