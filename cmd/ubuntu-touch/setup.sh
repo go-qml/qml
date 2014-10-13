@@ -22,10 +22,9 @@ apt-get clean
 echo 'Setting up environment for phablet user --------------------------------------'
 
 echo 'export GOPATH=$HOME' >> ~phablet/.bash_profile
-
 echo 'Fetching the qml package -----------------------------------------------------'
 
-su -l phablet -c 'go get gopkg.in/qml.v0'
+su -l phablet -c 'go get gopkg.in/qml.v1'
 
 echo 'Installing the .desktop file for the particle example ------------------------'
 
@@ -34,7 +33,7 @@ cp ~phablet/src/gopkg.in/qml.v*/cmd/ubuntu-touch/particle.desktop ~phablet/.loca
 
 echo 'Building and launching particle example --------------------------------------'
 
-su -l phablet -c 'cd $HOME/src/gopkg.in/qml.v0/examples/particle; go build'
+su -l phablet -c 'cd $HOME/src/gopkg.in/qml.v1/examples/particle; go build'
 
 echo 'Launching particle example ---------------------------------------------------'
 
