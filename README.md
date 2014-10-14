@@ -43,7 +43,7 @@ Installation
 
 To try the alpha release you'll need:
 
-  * Go 1.2, for the C++ support of _go build_
+  * Go >= 1.2, for the C++ support of _go build_
   * Qt 5.0.X or 5.1.X with the development files
   * The Qt headers qmetaobject_p.h and qmetaobjectbuilder_p.h, for the dynamic meta object support
 
@@ -63,7 +63,7 @@ If you are using Ubuntu, the [Ubuntu SDK](http://developer.ubuntu.com/get-starte
     $ sudo apt-get update
     $ sudo apt-get install qtdeclarative5-dev qtbase5-private-dev qtdeclarative5-private-dev libqt5opengl5-dev qtdeclarative5-qtquick2-plugin
 
-and Go 1.2 may be installed using [godeb](http://blog.labix.org/2013/06/15/in-flight-deb-packages-of-go):
+and Go >= 1.2 may be installed using [godeb](http://blog.labix.org/2013/06/15/in-flight-deb-packages-of-go):
 
     $ # Pick the right one for your system: 386 or amd64
     $ ARCH=amd64
@@ -71,7 +71,7 @@ and Go 1.2 may be installed using [godeb](http://blog.labix.org/2013/06/15/in-fl
     $ tar xzvf godeb-$ARCH.tar.gz
     godeb
     $ sudo mv godeb /usr/local/bin
-    $ godeb install 1.2
+    $ godeb install
     $ go get gopkg.in/qml.v1
 
 
@@ -83,7 +83,7 @@ run the following commands to get a working build environment inside the device:
 
     $ adb shell
     # cd /tmp
-    # wget https://github.com/go-qml/qml/raw/master/cmd/ubuntu-touch/setup.sh
+    # wget https://github.com/go-qml/qml/raw/v1/cmd/ubuntu-touch/setup.sh
     # /bin/bash setup.sh
     # su - phablet
     $
@@ -92,11 +92,11 @@ At the end of setup.sh, the phablet user will have GOPATH=$HOME in the environme
 the qml package will be built, and the particle example will be built and run. For
 stopping it from the command line, run as the phablet user:
 
-    $ upstart-app-stop gopkg.in.qml.particle-example
+    $ ubuntu-app-stop gopkg.in.qml.particle-example
 
 for running it again:
 
-    $ upstart-app-launch gopkg.in.qml.particle-example
+    $ ubuntu-app-launch gopkg.in.qml.particle-example
 
 These commands depend on the following file, installed by setup.sh:
 
@@ -134,7 +134,7 @@ On Windows you'll need the following:
   * [MinGW gcc](http://sourceforge.net/projects/mingw/files/latest/download) 4.8.1 (install mingw-get and install the gcc from within the setup GUI)
   * [Qt 5.1.1](http://download.qt-project.org/official_releases/qt/5.1/5.1.1/qt-windows-opensource-5.1.1-mingw48_opengl-x86-offline.exe) for MinGW 4.8
   * [GTK+ 2](http://www.gtk.org/download/win32.php) 2.24 all-in-one bundle
-  * [Go 1.2rc1](https://code.google.com/p/go/downloads/list?can=1&q=go1.2rc1) for Windows 32 bit
+  * [Go >= 1.2](http://golang.org/doc/install)
 
 Then, assuming Qt was installed under `C:\Qt\Qt5.1.1\`, set up the following environment variables in the respective configuration:
     
@@ -156,7 +156,7 @@ Requirements everywhere else
 ----------------------------
 
 If your operating system does not offer these dependencies readily,
-you may still have success installing [Go 1.2rc1](https://code.google.com/p/go/downloads/list?can=1&q=go1.2rc1)
+you may still have success installing [Go >= 1.2](http://golang.org/doc/install)
 and [Qt 5.0.2](http://download.qt-project.org/archive/qt/5.0/5.0.2/)
 directly from the upstreams.  Note that you'll likely have to adapt
 environment variables to reflect the custom installation path for
