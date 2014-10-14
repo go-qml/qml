@@ -133,13 +133,19 @@ On Windows you'll need the following:
 
   * [MinGW gcc](http://sourceforge.net/projects/mingw/files/latest/download) 4.8.1 (install mingw-get and install the gcc from within the setup GUI)
   * [Qt 5.1.1](http://download.qt-project.org/official_releases/qt/5.1/5.1.1/qt-windows-opensource-5.1.1-mingw48_opengl-x86-offline.exe) for MinGW 4.8
-  * [Go 1.2rc1](https://code.google.com/p/go/downloads/list?can=1&q=go1.2rc1) for Windows
+  * [GTK+ 2](http://www.gtk.org/download/win32.php) 2.24 all-in-one bundle
+  * [Go 1.2rc1](https://code.google.com/p/go/downloads/list?can=1&q=go1.2rc1) for Windows 32 bit
 
-Then, assuming Qt was installed under `C:\Qt5.1.1\`, set up the following environment variables in the respective configuration:
-
-    CPATH += C:\Qt5.1.1\5.1.1\mingw48_32\include
-    LIBRARY_PATH += C:\Qt5.1.1\5.1.1\mingw48_32\lib
-    PATH += C:\Qt5.1.1\5.1.1\mingw48_32\bin
+Then, assuming Qt was installed under `C:\Qt\Qt5.1.1\`, set up the following environment variables in the respective configuration:
+    
+    QT_PATH = C:\Qt\Qt5.1.1\5.1.1\mingw48_32
+    MINGW_PATH = C:\MinGW32
+    GTK_PATH = C:\GTK+\gtk+-bundle_2.24.10-20120208_win32
+    
+    CPATH += %QT_PATH%\include;%MINGW_PATH%\include
+    LIBRARY_PATH += %QT_PATH%\lib;%MINGW_PATH%\lib;%GTK_PATH%\lib
+    PATH += %QT_PATH%\bin;%MINGW_PATH%\bin;%GTK_PATH%\bin
+    PKG_CONFIG_PATH = %QT_PATH%\lib\pkgconfig
 
 After reopening the shell for the environment changes to take effect, this should work:
 
