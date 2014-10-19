@@ -134,6 +134,7 @@ On Windows you'll need the following:
   * [MinGW gcc](http://sourceforge.net/projects/mingw/files/latest/download) 4.8.1 (install mingw-get and install the gcc from within the setup GUI)
   * [Qt 5.1.1](http://download.qt-project.org/official_releases/qt/5.1/5.1.1/qt-windows-opensource-5.1.1-mingw48_opengl-x86-offline.exe) for MinGW 4.8
   * [Go >= 1.2](http://golang.org/doc/install)
+  * [pkg-config](http://www.freedesktop.org/wiki/Software/pkg-config/)
 
 Then, assuming Qt was installed under `C:\Qt5.1.1\`, set up the following environment variables in the respective configuration:
 
