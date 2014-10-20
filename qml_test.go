@@ -409,6 +409,26 @@ func testResourcesLoaded(c *C, loaded bool) {
 	c.Assert(c.GetTestLog(), Matches, "(?s).*(<Foo>.*<Bar>|<Bar>.*<Foo>).*")
 }
 
+func (s *S) TestResourcesIssue107(c *C) {
+	var rp qml.ResourcesPacker
+
+	rp.Add("a/Foo.qml", []byte("import QtQuick 2.0\nItem { Component.onCompleted: console.log('<Foo>') }"))
+	rp.Add("b/Bar.qml", []byte("import QtQuick 2.0\nItem { Component.onCompleted: console.log('<Bar>') }"))
+	rp.Add("c/Baz.qml", []byte("import QtQuick 2.0\nItem { Component.onCompleted: console.log('<Baz>') }"))
+	rp.Add("d/Buz.qml", []byte("import QtQuick 2.0\nItem { Component.onCompleted: console.log('<Buz>') }"))
+
+	r := rp.Pack()
+	qml.LoadResources(r)
+
+	for _, name := range []string{"a/Foo", "b/Bar", "c/Baz", "d/Buz"} {
+		component, err := s.engine.LoadFile("qrc:///" + name + ".qml")
+		c.Assert(err, IsNil)
+		root := component.Create(nil)
+		defer root.Destroy()
+	}
+	c.Assert(c.GetTestLog(), Matches, "(?s).*<Foo>.*<Bar>.*<Baz>.*<Buz>.*")
+}
+
 type TestData struct {
 	*C
 	engine           *qml.Engine

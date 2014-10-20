@@ -164,7 +164,7 @@ func newResourcesWriter(rp *ResourcesPacker) *resWriter {
 		treeOffsets: make(map[*resFile]int),
 		dataOffsets: make(map[*resFile]int),
 		nameOffsets: make(map[string]int),
-		pending:     make([]*resFile, maxDepth(&rp.root)),
+		pending:     make([]*resFile, maxPending(&rp.root)),
 	}
 
 	pending := rw.pending
@@ -185,14 +185,14 @@ func newResourcesWriter(rp *ResourcesPacker) *resWriter {
 	return rw
 }
 
-func maxDepth(file *resFile) int {
-	max := 0
+func maxPending(file *resFile) int {
+	max := 1
 	for i := range file.children {
-		if n := maxDepth(&file.children[i]); n > max {
-			max = n
+		if len(file.children) > 0 {
+			max += maxPending(&file.children[i])
 		}
 	}
-	return max + 1
+	return max
 }
 
 func (rw *resWriter) write() {
