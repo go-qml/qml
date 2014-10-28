@@ -847,7 +847,7 @@ QQmlListProperty_ *newListProperty(GoAddr *addr, intptr_t reflectIndex, intptr_t
 void internalLogHandler(QtMsgType severity, const QMessageLogContext &context, const QString &text)
 {
     QByteArray textba = text.toUtf8();
-    LogMessage message = {severity, textba.constData(), textba.size(), context.file, (int)strlen(context.file), context.line};
+    LogMessage message = {static_cast<int>(severity), textba.constData(), textba.size(), context.file, (int)strlen(context.file), context.line};
     hookLogHandler(&message);
 }
 
