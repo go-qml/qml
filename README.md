@@ -61,7 +61,7 @@ If you are using Ubuntu, the [Ubuntu SDK](http://developer.ubuntu.com/get-starte
 
     $ sudo add-apt-repository ppa:ubuntu-sdk-team/ppa
     $ sudo apt-get update
-    $ sudo apt-get install qtdeclarative5-dev qtbase5-private-dev qtdeclarative5-private-dev libqt5opengl5-dev qtdeclarative5-qtquick2-plugin qtdeclarative5-quicklayouts-plugin qtdeclarative5-controls-plugin
+    $ sudo apt-get install qtdeclarative5-dev qtbase5-private-dev qtdeclarative5-private-dev libqt5opengl5-dev qtdeclarative5-qtquick2-plugin qtdeclarative5-quicklayouts-plugin qtdeclarative5-controls-plugin qtdeclarative5-particles-plugin qtdeclarative5-xmllistmodel-plugin
 
 and Go >= 1.2 may be installed using [godeb](http://blog.labix.org/2013/06/15/in-flight-deb-packages-of-go):
 
