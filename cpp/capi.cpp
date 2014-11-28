@@ -1,9 +1,9 @@
-#include <QApplication>
-#include <QQuickView>
-#include <QQuickItem>
-#include <QtQml>
-#include <QDebug>
-#include <QQuickImageProvider>
+#include <QtWidgets/QApplication>
+#include <QtQuick/QQuickView>
+#include <QtQuick/QQuickItem>
+#include <QtQml/QtQml>
+#include <QtCore/QDebug>
+#include <QtQuick/QQuickImageProvider>
 
 #include <string.h>
 

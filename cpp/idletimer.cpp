@@ -1,6 +1,6 @@
-#include <QBasicTimer>
-#include <QThread>
-#include <QDebug>
+#include <QtCore/QBasicTimer>
+#include <QtCore/QThread>
+#include <QtCore/QDebug>
 #include <mutex>
 
 #include "capi.h"
