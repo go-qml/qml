@@ -12,8 +12,8 @@ class IdleTimer : public QObject
     public:
 
     static IdleTimer *singleton() {
-        static IdleTimer singleton;
-        return &singleton;
+		if (_singleton == nullptr) _singleton = new IdleTimer;
+        return _singleton;
     }
 
     void init(int32_t *guiIdleRun)
@@ -38,12 +38,15 @@ class IdleTimer : public QObject
         }
     }
 
+	static IdleTimer* _singleton;
     private:
 
     int32_t *guiIdleRun;
 
     QBasicTimer timer;    
 };
+
+IdleTimer* IdleTimer::_singleton;
 
 void idleTimerInit(int32_t *guiIdleRun)
 {
