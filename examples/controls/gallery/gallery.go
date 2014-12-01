@@ -16,6 +16,8 @@ func main() {
 func run() error {
 	engine := qml.NewEngine()
 
+	engine.On("quit", func() { os.Exit(0) })
+
 	controls, err := engine.LoadFile("main.qml")
 	if err != nil {
 		return err
