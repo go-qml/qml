@@ -763,6 +763,14 @@ void packDataValue(QVariant_ *var, DataValue *value)
             *(DataValue**)(value->data) = dvlist;
         }
         break;
+    case QMetaType::User:
+        {
+            if (qvar->userType() == 1034) {
+                auto var = qvar->value<QJSValue>().toVariant();
+                packDataValue(&var, value);
+            }
+        }
+        break;
     default:
         if (qvar->type() == (int)QMetaType::QObjectStar || qvar->canConvert<QObject *>()) {
             QObject *qobject = qvar->value<QObject *>();
