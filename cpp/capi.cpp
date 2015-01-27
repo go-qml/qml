@@ -742,10 +742,11 @@ void packDataValue(QVariant_ *var, DataValue *value)
             value->len = len;
             *(DataValue**)(value->data) = dvlist;
         }
-        break;
+	break;
     case QMetaType::User:
 	{
-	    if (qvar->userType() == 1034) {
+	    static const int qjstype = QVariant::fromValue(QJSValue()).userType();
+	    if (qvar->userType() == qjstype) {
 		auto var = qvar->value<QJSValue>().toVariant();
 		packDataValue(&var, value);
 	    }
