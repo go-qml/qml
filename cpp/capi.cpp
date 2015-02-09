@@ -743,6 +743,15 @@ void packDataValue(QVariant_ *var, DataValue *value)
             *(DataValue**)(value->data) = dvlist;
         }
         break;
+    case QMetaType::User:
+        {
+            static const int qjstype = QVariant::fromValue(QJSValue()).userType();
+            if (qvar->userType() == qjstype) {
+                auto var = qvar->value<QJSValue>().toVariant();
+                packDataValue(&var, value);
+            }
+        }
+        break;
     default:
         if (qvar->type() == (int)QMetaType::QObjectStar || qvar->canConvert<QObject *>()) {
             QObject *qobject = qvar->value<QObject *>();
@@ -846,6 +855,8 @@ QQmlListProperty_ *newListProperty(GoAddr *addr, intptr_t reflectIndex, intptr_t
 
 void internalLogHandler(QtMsgType severity, const QMessageLogContext &context, const QString &text)
 {
+    if (context.file == NULL) return;
+
     QByteArray textba = text.toUtf8();
     const int fileLength = context.file ? strlen(context.file) : 0;
     LogMessage message = {severity, textba.constData(), textba.size(), context.file, fileLength, context.line};
