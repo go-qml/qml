@@ -23,12 +23,12 @@ import (
 )
 
 var (
-	guiFunc      = make(chan func())
-	guiDone      = make(chan struct{})
-	guiLock      = 0
-	guiMainRef   uintptr
-	guiPaintRef  uintptr
-	guiIdleRun   int32
+	guiFunc     = make(chan func())
+	guiDone     = make(chan struct{})
+	guiLock     = 0
+	guiMainRef  uintptr
+	guiPaintRef uintptr
+	guiIdleRun  int32
 
 	initialized int32
 )
@@ -503,6 +503,11 @@ func hookGoValueCallMethod(enginep, foldp unsafe.Pointer, reflectIndex C.int, ar
 	for i := 0; i < numIn; i++ {
 		paramdv := (*C.DataValue)(unsafe.Pointer(uintptr(unsafe.Pointer(args)) + (uintptr(i)+1)*dataValueSize))
 		param := reflect.ValueOf(unpackDataValue(paramdv, fold.engine))
+		if !param.IsValid() {
+			panic(fmt.Sprintf("Function %s has an invalid parameter #%d. Expected type: %s",
+				methodName, i, methodt.In(i).Name()))
+		}
+
 		if argt := methodt.In(i); param.Type() != argt {
 			param, err = convertParam(methodName, i, param, argt)
 			if err != nil {
