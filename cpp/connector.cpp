@@ -1,4 +1,4 @@
-#include <QObject>
+#include <QtCore/QObject>
 
 #include "connector.h"
 #include "capi.h"

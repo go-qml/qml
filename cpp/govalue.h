@@ -6,8 +6,8 @@
 // away, and without it this package wouldn't exist.
 #include <private/qmetaobject_p.h>
 
-#include <QQuickPaintedItem>
-#include <QPainter>
+#include <QtQuick/QQuickPaintedItem>
+#include <QtGui/QPainter>
 
 #include "capi.h"
 
