@@ -4,7 +4,7 @@
 #include <QtQml/QtQml>
 #include <QtCore/QDebug>
 #include <QtQuick/QQuickImageProvider>
-//#include <QtGui/QIcon>
+#include <QtGui/QIcon>
 
 #include <string.h>
 
