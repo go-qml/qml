@@ -7,6 +7,8 @@
 
 #include <string.h>
 
+#include <stdio.h>
+
 #include "govalue.h"
 #include "govaluetype.h"
 #include "connector.h"
@@ -528,34 +530,37 @@ QQmlContext_ *objectContext(QObject_ *object)
 int objectIsComponent(QObject_ *object)
 {
     QObject *qobject = static_cast<QObject *>(object);
-    return dynamic_cast<QQmlComponent *>(qobject) ? 1 : 0;
+    return qobject->inherits("QQmlComponent") ? 1 : 0;
+    //return dynamic_cast<QQmlComponent *>(qobject) ? 1 : 0;
 }
 
 int objectIsWindow(QObject_ *object)
 {
     QObject *qobject = static_cast<QObject *>(object);
-    return dynamic_cast<QQuickWindow *>(qobject) ? 1 : 0;
+    return qobject->inherits("QQuickWindow") ? 1 : 0;
+    //return dynamic_cast<QQuickWindow *>(qobject) ? 1 : 0;
 }
 
 int objectIsView(QObject_ *object)
 {
     QObject *qobject = static_cast<QObject *>(object);
-    return dynamic_cast<QQuickView *>(qobject) ? 1 : 0;
+    return qobject->inherits("QQuickView") ? 1 : 0;
+    //return dynamic_cast<QQuickView *>(qobject) ? 1 : 0;
 }
 
 error *objectGoAddr(QObject_ *object, GoAddr **addr)
 {
-    QObject *qobject = static_cast<QObject *>(object);
-    GoValue *goValue = dynamic_cast<GoValue *>(qobject);
-    if (goValue) {
+	QObject *qobject = static_cast<QObject *>(object);
+    if (qobject->inherits("GoValue")) {
+		GoValue *goValue = static_cast<GoValue *>(qobject);
         *addr = goValue->addr;
-        return 0;
-    }
-    GoPaintedValue *goPaintedValue = dynamic_cast<GoPaintedValue *>(qobject);
-    if (goPaintedValue) {
+		return 0;
+	}
+    if (qobject->inherits("GoPaintedValue")) {
+	    GoPaintedValue *goPaintedValue = static_cast<GoPaintedValue *>(qobject);
         *addr = goPaintedValue->addr;
-        return 0;
-    }
+		return 0;
+	}
     return errorf("QML object is not backed by a Go value");
 }
 
@@ -746,18 +751,16 @@ void packDataValue(QVariant_ *var, DataValue *value)
     default:
         if (qvar->type() == (int)QMetaType::QObjectStar || qvar->canConvert<QObject *>()) {
             QObject *qobject = qvar->value<QObject *>();
-            GoValue *goValue = dynamic_cast<GoValue *>(qobject);
-            if (goValue) {
+		    if (qobject->inherits("GoValue")) {
                 value->dataType = DTGoAddr;
-                *(void **)(value->data) = goValue->addr;
+                *(void **)(value->data) = (static_cast<GoValue*>(qobject))->addr;
                 break;
-            }
-            GoPaintedValue *goPaintedValue = dynamic_cast<GoPaintedValue *>(qobject);
-            if (goPaintedValue) {
+			}
+		    if (qobject->inherits("GoPaintedValue")) {
                 value->dataType = DTGoAddr;
-                *(void **)(value->data) = goPaintedValue->addr;
+                *(void **)(value->data) = (static_cast<GoPaintedValue*>(qobject))->addr;
                 break;
-            }
+			}
             value->dataType = DTObject;
             *(void **)(value->data) = qobject;
             break;
