@@ -545,17 +545,17 @@ int objectIsView(QObject_ *object)
 
 error *objectGoAddr(QObject_ *object, GoAddr **addr)
 {
-	QObject *qobject = static_cast<QObject *>(object);
+    QObject *qobject = static_cast<QObject *>(object);
     if (qobject->inherits("GoValue")) {
-		GoValue *goValue = static_cast<GoValue *>(qobject);
+        GoValue *goValue = static_cast<GoValue *>(qobject);
         *addr = goValue->addr;
-		return 0;
-	}
+        return 0;
+    }
     if (qobject->inherits("GoPaintedValue")) {
-	    GoPaintedValue *goPaintedValue = static_cast<GoPaintedValue *>(qobject);
+        GoPaintedValue *goPaintedValue = static_cast<GoPaintedValue *>(qobject);
         *addr = goPaintedValue->addr;
-		return 0;
-	}
+        return 0;
+    }
     return errorf("QML object is not backed by a Go value");
 }
 
@@ -746,16 +746,16 @@ void packDataValue(QVariant_ *var, DataValue *value)
     default:
         if (qvar->type() == (int)QMetaType::QObjectStar || qvar->canConvert<QObject *>()) {
             QObject *qobject = qvar->value<QObject *>();
-		    if (qobject->inherits("GoValue")) {
+            if (qobject->inherits("GoValue")) {
                 value->dataType = DTGoAddr;
                 *(void **)(value->data) = (static_cast<GoValue*>(qobject))->addr;
                 break;
-			}
-		    if (qobject->inherits("GoPaintedValue")) {
+            }
+            if (qobject->inherits("GoPaintedValue")) {
                 value->dataType = DTGoAddr;
                 *(void **)(value->data) = (static_cast<GoPaintedValue*>(qobject))->addr;
                 break;
-			}
+            }
             value->dataType = DTObject;
             *(void **)(value->data) = qobject;
             break;
