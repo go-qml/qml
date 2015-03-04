@@ -7,8 +7,6 @@
 
 #include <string.h>
 
-#include <stdio.h>
-
 #include "govalue.h"
 #include "govaluetype.h"
 #include "connector.h"
@@ -531,21 +529,18 @@ int objectIsComponent(QObject_ *object)
 {
     QObject *qobject = static_cast<QObject *>(object);
     return qobject->inherits("QQmlComponent") ? 1 : 0;
-    //return dynamic_cast<QQmlComponent *>(qobject) ? 1 : 0;
 }
 
 int objectIsWindow(QObject_ *object)
 {
     QObject *qobject = static_cast<QObject *>(object);
     return qobject->inherits("QQuickWindow") ? 1 : 0;
-    //return dynamic_cast<QQuickWindow *>(qobject) ? 1 : 0;
 }
 
 int objectIsView(QObject_ *object)
 {
     QObject *qobject = static_cast<QObject *>(object);
     return qobject->inherits("QQuickView") ? 1 : 0;
-    //return dynamic_cast<QQuickView *>(qobject) ? 1 : 0;
 }
 
 error *objectGoAddr(QObject_ *object, GoAddr **addr)
