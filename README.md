@@ -1,3 +1,7 @@
+This fork aims to make go-qml work under Windows, for which the absence of external linking in go build makes global variable initialization and dynamic_cast unusable. See golang/go#4069.
+
+Solves go-qml#19 and go-qml#142.
+
 # QML support for the Go language
 
 Documentation
