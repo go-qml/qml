@@ -163,6 +163,14 @@ void engineAddImageProvider(QQmlEngine_ *engine, QString_ *providerId, void *ima
     qengine->addImageProvider(*qproviderId, new GoImageProvider(imageFunc));
 }
 
+void engineAddImportPath(QQmlEngine_ *engine, QString_ *path)
+{
+    QQmlEngine *qengine = reinterpret_cast<QQmlEngine *>(engine);
+    QString *qpath = reinterpret_cast<QString *>(path);
+
+    qengine->addImportPath(*qpath);
+}
+
 void componentLoadURL(QQmlComponent_ *component, const char *url, int urlLen)
 {
     QByteArray qurl(url, urlLen);
