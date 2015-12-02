@@ -241,6 +241,22 @@ func (e *Engine) AddImageProvider(prvId string, f func(imgId string, width, heig
 	})
 }
 
+// AddImportPath adds path as a directory where the engine searches for installed modules in a
+// URL-based directory structure.
+//
+// The path may be a local filesystem directory, a Qt Resource path (:/imports),
+// a Qt Resource url (qrc:/imports) or a URL.
+//
+// The newly added path will be first in the importPathList().
+func (e *Engine) AddImportPath(path string) {
+	cpath, cpathLen := unsafeStringData(path)
+	RunMain(func() {
+		qpath := C.newString(cpath, cpathLen)
+		defer C.delString(qpath)
+		C.engineAddImportPath(e.addr, qpath)
+	})
+}
+
 //export hookRequestImage
 func hookRequestImage(imageFunc unsafe.Pointer, cid *C.char, cidLen, cwidth, cheight C.int) unsafe.Pointer {
 	f := *(*func(imgId string, width, height int) image.Image)(imageFunc)

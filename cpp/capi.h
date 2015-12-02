@@ -122,6 +122,7 @@ void engineSetOwnershipCPP(QQmlEngine_ *engine, QObject_ *object);
 void engineSetOwnershipJS(QQmlEngine_ *engine, QObject_ *object);
 void engineSetContextForObject(QQmlEngine_ *engine, QObject_ *object);
 void engineAddImageProvider(QQmlEngine_ *engine, QString_ *providerId, void *imageFunc);
+void engineAddImportPath(QQmlEngine_ *engine, QString_ *path);
 
 void contextGetProperty(QQmlContext_ *context, QString_ *name, DataValue *value);
 void contextSetProperty(QQmlContext_ *context, QString_ *name, DataValue *value);
