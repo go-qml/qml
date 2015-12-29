@@ -885,6 +885,15 @@ func (win *Window) PlatformId() uintptr {
 	return id
 }
 
+func (win *Window) SetIcon(iconPath string) {
+	ciconPath, ciconPathLen := unsafeStringData(iconPath)
+	RunMain(func() {
+		qiconPath := C.newString(ciconPath, ciconPathLen)
+		defer C.delString(qiconPath)
+		C.windowSetIcon(win.addr, qiconPath)
+	})
+}
+
 // Root returns the root object being rendered.
 //
 // If the window was defined in QML code, the root object is the window itself.

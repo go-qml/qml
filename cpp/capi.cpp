@@ -244,6 +244,13 @@ uintptr_t windowPlatformId(QQuickWindow_ *win)
     return reinterpret_cast<QQuickWindow *>(win)->winId();
 }
 
+void windowSetIcon(QQuickWindow_ *win, QString_ *iconPath)
+{
+  const QString *qiconPath = reinterpret_cast<QString *>(iconPath);
+  const QIcon *icon = new QIcon(*qiconPath);
+  reinterpret_cast<QQuickWindow *>(win)->setIcon(*icon);
+}
+
 void windowConnectHidden(QQuickWindow_ *win)
 {
     QQuickWindow *qwin = reinterpret_cast<QQuickWindow *>(win);
