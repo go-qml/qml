@@ -45,8 +45,7 @@ void panicf(const char *format, ...)
 
 void newGuiApplication()
 {
-    static char empty[1] = {0};
-    static char *argv[] = {empty, 0};
+    static char *argv[] = {(char *)"go-qml", 0};
     static int argc = 1;
     new QApplication(argc, argv);
 
