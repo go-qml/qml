@@ -362,7 +362,7 @@ const char *objectTypeName(QObject_ *object)
 int objectGetProperty(QObject_ *object, const char *name, DataValue *result)
 {
     QObject *qobject = reinterpret_cast<QObject *>(object);
-    
+
     QVariant var = qobject->property(name);
     packDataValue(&var, result);
 
@@ -437,6 +437,10 @@ error *objectInvoke(QObject_ *object, const char *method, int methodLen, DataVal
         panicf("fix the parameter dispatching");
     }
 
+    if (qobject == 0) {
+      return errorf("method called on null object: %s", method);
+    }
+
     const QMetaObject *metaObject = qobject->metaObject();
     // Walk backwards so descendants have priority.
     for (int i = metaObject->methodCount()-1; i >= 0; i--) {
@@ -452,7 +456,7 @@ error *objectInvoke(QObject_ *object, const char *method, int methodLen, DataVal
 
                 bool ok;
                 if (metaMethod.returnType() == QMetaType::Void) {
-                    ok = metaMethod.invoke(qobject, Qt::DirectConnection, 
+                    ok = metaMethod.invoke(qobject, Qt::DirectConnection,
                         arg[0], arg[1], arg[2], arg[3], arg[4], arg[5], arg[6], arg[7], arg[8], arg[9]);
                 } else {
                     ok = metaMethod.invoke(qobject, Qt::DirectConnection, Q_RETURN_ARG(QVariant, result),
@@ -475,7 +479,7 @@ void objectFindChild(QObject_ *object, QString_ *name, DataValue *resultdv)
 {
     QObject *qobject = reinterpret_cast<QObject *>(object);
     QString *qname = reinterpret_cast<QString *>(name);
-    
+
     QVariant var;
     QObject *result = qobject->findChild<QObject *>(*qname);
     if (result) {
