@@ -183,6 +183,19 @@ func (e *Engine) Context() *Context {
 	return &ctx
 }
 
+func (e *Engine) AddImportPath(path string) {
+	cpath, cpathLen := unsafeStringData(path)
+	RunMain(func() {
+		C.engineAddImportPath(e.addr, cpath, cpathLen)
+	})
+}
+
+func (e *Engine) ClearComponentCache() {
+	RunMain(func() {
+		C.engineClearComponentCache(e.addr)
+	})
+}
+
 // TODO ObjectOf is probably still worth it, but turned out unnecessary
 //      for GL functionality. Test it properly before introducing it.
 

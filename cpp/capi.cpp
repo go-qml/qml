@@ -113,6 +113,22 @@ void engineSetOwnershipJS(QQmlEngine_ *engine, QObject_ *object)
     qengine->setObjectOwnership(qobject, QQmlEngine::JavaScriptOwnership);
 }
 
+void engineAddImportPath(QQmlEngine_ *engine, const char *path, int pathLen)
+{
+    QQmlEngine *qengine = reinterpret_cast<QQmlEngine *>(engine);
+
+    QByteArray qimportPath(path, pathLen);
+    QString qsimportPath = QString::fromUtf8(qimportPath);
+
+    qengine->addImportPath(qsimportPath);
+}
+
+void engineClearComponentCache(QQmlEngine_ *engine)
+{
+    QQmlEngine *qengine = reinterpret_cast<QQmlEngine *>(engine);
+    qengine->clearComponentCache();
+}
+
 QQmlComponent_ *newComponent(QQmlEngine_ *engine, QObject_ *parent)
 {
     QQmlEngine *qengine = reinterpret_cast<QQmlEngine *>(engine);
