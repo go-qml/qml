@@ -475,7 +475,9 @@ func (obj *Common) setAddr(addr unsafe.Pointer) {
 	obj.addr = addr
 	obj.initialized = true
 
-	obj.On("destroyed", func() { obj.addr = nil; obj.destroyed = true })
+	if addr != nil {
+		obj.On("destroyed", func() { obj.addr = nil; obj.destroyed = true })
+	}
 }
 
 func (obj *Common) assertInitialized() {
