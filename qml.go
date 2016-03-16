@@ -183,6 +183,12 @@ func (e *Engine) Context() *Context {
 	return &ctx
 }
 
+func (e *Engine) ClearImportPaths() {
+	RunMain(func() {
+		C.engineClearImportPaths(e.addr)
+	})
+}
+
 func (e *Engine) AddImportPath(path string) {
 	cpath, cpathLen := unsafeStringData(path)
 	RunMain(func() {
@@ -190,9 +196,29 @@ func (e *Engine) AddImportPath(path string) {
 	})
 }
 
+func (e *Engine) ClearPluginPaths() {
+	RunMain(func() {
+		C.engineClearPluginPaths(e.addr)
+	})
+}
+
+func (e *Engine) AddPluginPath(path string) {
+	cpath, cpathLen := unsafeStringData(path)
+	RunMain(func() {
+		C.engineAddPluginPath(e.addr, cpath, cpathLen)
+	})
+}
+
 func (e *Engine) ClearComponentCache() {
 	RunMain(func() {
 		C.engineClearComponentCache(e.addr)
+	})
+}
+
+func AddLibraryPath(path string) {
+	cpath, cpathLen := unsafeStringData(path)
+	RunMain(func() {
+		C.coreAddLibraryPath(cpath, cpathLen)
 	})
 }
 
