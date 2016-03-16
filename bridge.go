@@ -521,7 +521,11 @@ func hookGoValueCallMethod(enginep, foldp unsafe.Pointer, reflectIndex C.int, ar
 	for i := 0; i < numIn; i++ {
 		paramdv := (*C.DataValue)(unsafe.Pointer(uintptr(unsafe.Pointer(args)) + (uintptr(i)+1)*dataValueSize))
 		param := reflect.ValueOf(unpackDataValue(paramdv, fold.engine))
-		if argt := methodt.In(i); param.Type() != argt {
+		argt := methodt.In(i)
+		if !param.IsValid() {
+			fmt.Printf("Warning: %s called with zero parameter\n", methodName)
+			param = reflect.Zero(argt)
+		} else if param.Type() != argt {
 			param, err = convertParam(methodName, i, param, argt)
 			if err != nil {
 				panic(err.Error())
