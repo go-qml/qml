@@ -552,8 +552,9 @@ func (obj *Common) Interface() interface{} {
 	var result interface{}
 	var cerr *C.error
 	RunMain(func() {
-		var fold *valueFold
-		if cerr = C.objectGoAddr(obj.addr, (*unsafe.Pointer)(unsafe.Pointer(&fold))); cerr == nil {
+		var foldr C.GoRef
+		if cerr = C.objectGoRef(obj.addr, &foldr); cerr == nil {
+			fold := restoreFold(uintptr(foldr))
 			result = fold.gvalue
 		}
 	})

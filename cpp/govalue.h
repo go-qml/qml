@@ -20,10 +20,10 @@ class GoValue : public QObject
     Q_OBJECT
 
 public:
-    GoAddr *addr;
+    GoRef ref;
     GoTypeInfo *typeInfo;
 
-    GoValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject *parent);
+    GoValue(GoRef ref, GoTypeInfo *typeInfo, QObject *parent);
     virtual ~GoValue();
 
     void activate(int propIndex);
@@ -37,10 +37,10 @@ class GoPaintedValue : public QQuickPaintedItem
     Q_OBJECT
 
 public:
-    GoAddr *addr;
+    GoRef ref;
     GoTypeInfo *typeInfo;
 
-    GoPaintedValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject *parent);
+    GoPaintedValue(GoRef ref, GoTypeInfo *typeInfo, QObject *parent);
     virtual ~GoPaintedValue();
 
     void activate(int propIndex);

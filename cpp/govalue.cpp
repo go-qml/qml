@@ -13,7 +13,7 @@
 class GoValueMetaObject : public QAbstractDynamicMetaObject
 {
 public:
-    GoValueMetaObject(QObject* value, GoAddr *addr, GoTypeInfo *typeInfo);
+    GoValueMetaObject(QObject* value, GoRef ref, GoTypeInfo *typeInfo);
 
     void activatePropIndex(int propIndex);
 
@@ -22,12 +22,12 @@ protected:
 
 private:
     QObject *value;
-    GoAddr *addr;
+    GoRef ref;
     GoTypeInfo *typeInfo;
 };
 
-GoValueMetaObject::GoValueMetaObject(QObject *value, GoAddr *addr, GoTypeInfo *typeInfo)
-    : value(value), addr(addr), typeInfo(typeInfo)
+GoValueMetaObject::GoValueMetaObject(QObject *value, GoRef ref, GoTypeInfo *typeInfo)
+    : value(value), ref(ref), typeInfo(typeInfo)
 {
     //d->parent = static_cast<QAbstractDynamicMetaObject *>(priv->metaObject);
     *static_cast<QMetaObject *>(this) = *metaObjectFor(typeInfo);
@@ -53,7 +53,7 @@ int GoValueMetaObject::metaCall(QMetaObject::Call c, int idx, void **a)
                 if (memberInfo->metaIndex == idx) {
                     if (c == QMetaObject::ReadProperty) {
                         DataValue result;
-                        hookGoValueReadField(qmlEngine(value), addr, memberInfo->reflectIndex, memberInfo->reflectGetIndex, memberInfo->reflectSetIndex, &result);
+                        hookGoValueReadField(qmlEngine(value), ref, memberInfo->reflectIndex, memberInfo->reflectGetIndex, memberInfo->reflectSetIndex, &result);
                         if (memberInfo->memberType == DTListProperty) {
                             if (result.dataType != DTListProperty) {
                                 panicf("reading DTListProperty field returned non-DTListProperty result");
@@ -71,7 +71,7 @@ int GoValueMetaObject::metaCall(QMetaObject::Call c, int idx, void **a)
                         DataValue assign;
                         QVariant *in = reinterpret_cast<QVariant *>(a[0]);
                         packDataValue(in, &assign);
-                        hookGoValueWriteField(qmlEngine(value), addr, memberInfo->reflectIndex, memberInfo->reflectSetIndex, &assign);
+                        hookGoValueWriteField(qmlEngine(value), ref, memberInfo->reflectIndex, memberInfo->reflectSetIndex, &assign);
                         activate(value, methodOffset() + (idx - propOffset), 0);
                     }
                     return -1;
@@ -95,7 +95,7 @@ int GoValueMetaObject::metaCall(QMetaObject::Call c, int idx, void **a)
                     for (int i = 1; i < memberInfo->numIn+1; i++) {
                         packDataValue(reinterpret_cast<QVariant *>(a[i]), &args[i]);
                     }
-                    hookGoValueCallMethod(qmlEngine(value), addr, memberInfo->reflectIndex, args);
+                    hookGoValueCallMethod(qmlEngine(value), ref, memberInfo->reflectIndex, args);
                     if (memberInfo->numOut > 0) {
                         unpackDataValue(&args[0], reinterpret_cast<QVariant *>(a[0]));
                     }
@@ -121,16 +121,16 @@ void GoValueMetaObject::activatePropIndex(int propIndex)
     activate(value, methodOffset() + relativeIndex, 0);
 }
 
-GoValue::GoValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject *parent)
-    : addr(addr), typeInfo(typeInfo)
+GoValue::GoValue(GoRef ref, GoTypeInfo *typeInfo, QObject *parent)
+    : ref(ref), typeInfo(typeInfo)
 {
-    valueMeta = new GoValueMetaObject(this, addr, typeInfo);
+    valueMeta = new GoValueMetaObject(this, ref, typeInfo);
     setParent(parent);
 }
 
 GoValue::~GoValue()
 {
-    hookGoValueDestroyed(qmlEngine(this), addr);
+    hookGoValueDestroyed(qmlEngine(this), ref);
 }
 
 void GoValue::activate(int propIndex)
@@ -138,10 +138,10 @@ void GoValue::activate(int propIndex)
     valueMeta->activatePropIndex(propIndex);
 }
 
-GoPaintedValue::GoPaintedValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject *parent)
-    : addr(addr), typeInfo(typeInfo)
+GoPaintedValue::GoPaintedValue(GoRef ref, GoTypeInfo *typeInfo, QObject *parent)
+    : ref(ref), typeInfo(typeInfo)
 {
-    valueMeta = new GoValueMetaObject(this, addr, typeInfo);
+    valueMeta = new GoValueMetaObject(this, ref, typeInfo);
     setParent(parent);
 
     QQuickItem::setFlag(QQuickItem::ItemHasContents, true);
@@ -150,7 +150,7 @@ GoPaintedValue::GoPaintedValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject *pare
 
 GoPaintedValue::~GoPaintedValue()
 {
-    hookGoValueDestroyed(qmlEngine(this), addr);
+    hookGoValueDestroyed(qmlEngine(this), ref);
 }
 
 void GoPaintedValue::activate(int propIndex)
@@ -161,7 +161,7 @@ void GoPaintedValue::activate(int propIndex)
 void GoPaintedValue::paint(QPainter *painter)
 {
     painter->beginNativePainting();
-    hookGoValuePaint(qmlEngine(this), addr, typeInfo->paint->reflectIndex);
+    hookGoValuePaint(qmlEngine(this), ref, typeInfo->paint->reflectIndex);
     painter->endNativePainting();
 }
 
