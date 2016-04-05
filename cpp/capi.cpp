@@ -599,17 +599,17 @@ int objectIsView(QObject_ *object)
     return qobject->inherits("QQuickView") ? 1 : 0;
 }
 
-error *objectGoAddr(QObject_ *object, GoAddr **addr)
+error *objectGoRef(QObject_ *object, GoRef *ref)
 {
     QObject *qobject = static_cast<QObject *>(object);
     if (qobject->inherits("GoValue")) {
         GoValue *goValue = static_cast<GoValue *>(qobject);
-        *addr = goValue->addr;
+        *ref = goValue->ref;
         return 0;
     }
     if (qobject->inherits("GoPaintedValue")) {
         GoPaintedValue *goPaintedValue = static_cast<GoPaintedValue *>(qobject);
-        *addr = goPaintedValue->addr;
+        *ref = goPaintedValue->ref;
         return 0;
     }
     return errorf("QML object is not backed by a Go value");
@@ -627,13 +627,13 @@ void delString(QString_ *s)
     delete reinterpret_cast<QString *>(s);
 }
 
-GoValue_ *newGoValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject_ *parent)
+GoValue_ *newGoValue(GoRef ref, GoTypeInfo *typeInfo, QObject_ *parent)
 {
     QObject *qparent = reinterpret_cast<QObject *>(parent);
     if (typeInfo->paint) {
-        return new GoPaintedValue(addr, typeInfo, qparent);
+        return new GoPaintedValue(ref, typeInfo, qparent);
     }
-    return new GoValue(addr, typeInfo, qparent);
+    return new GoValue(ref, typeInfo, qparent);
 }
 
 void goValueActivate(GoValue_ *value, GoTypeInfo *typeInfo, int addrOffset)
@@ -813,12 +813,12 @@ void packDataValue(QVariant_ *var, DataValue *value)
             QObject *qobject = qvar->value<QObject *>();
             if (qobject->inherits("GoValue")) {
                 value->dataType = DTGoAddr;
-                *(void **)(value->data) = (static_cast<GoValue*>(qobject))->addr;
+                *(uintptr_t*)(value->data) = (static_cast<GoValue*>(qobject))->ref;
                 break;
             }
             if (qobject->inherits("GoPaintedValue")) {
                 value->dataType = DTGoAddr;
-                *(void **)(value->data) = (static_cast<GoPaintedValue*>(qobject))->addr;
+                *(uintptr_t*)(value->data) = (static_cast<GoPaintedValue*>(qobject))->ref;
                 break;
             }
             value->dataType = DTObject;
@@ -876,28 +876,28 @@ QVariantList_ *newVariantList(DataValue *list, int len)
 
 QObject *listPropertyAt(QQmlListProperty<QObject> *list, int i)
 {
-    return reinterpret_cast<QObject *>(hookListPropertyAt(list->data, (intptr_t)list->dummy1, (intptr_t)list->dummy2, i));
+    return reinterpret_cast<QObject *>(hookListPropertyAt((uintptr_t)list->data, (intptr_t)list->dummy1, (intptr_t)list->dummy2, i));
 }
 
 int listPropertyCount(QQmlListProperty<QObject> *list)
 {
-    return hookListPropertyCount(list->data, (intptr_t)list->dummy1, (intptr_t)list->dummy2);
+    return hookListPropertyCount((uintptr_t)list->data, (intptr_t)list->dummy1, (intptr_t)list->dummy2);
 }
 
 void listPropertyAppend(QQmlListProperty<QObject> *list, QObject *obj)
 {
-    hookListPropertyAppend(list->data, (intptr_t)list->dummy1, (intptr_t)list->dummy2, obj);
+    hookListPropertyAppend((uintptr_t)list->data, (intptr_t)list->dummy1, (intptr_t)list->dummy2, obj);
 }
 
 void listPropertyClear(QQmlListProperty<QObject> *list)
 {
-    hookListPropertyClear(list->data, (intptr_t)list->dummy1, (intptr_t)list->dummy2);
+    hookListPropertyClear((uintptr_t)list->data, (intptr_t)list->dummy1, (intptr_t)list->dummy2);
 }
 
-QQmlListProperty_ *newListProperty(GoAddr *addr, intptr_t reflectIndex, intptr_t setIndex)
+QQmlListProperty_ *newListProperty(GoRef ref, intptr_t reflectIndex, intptr_t setIndex)
 {
     QQmlListProperty<QObject> *list = new QQmlListProperty<QObject>();
-    list->data = addr;
+    list->data = (void*)ref;
     list->dummy1 = (void*)reflectIndex;
     list->dummy2 = (void*)setIndex;
     list->at = listPropertyAt;
