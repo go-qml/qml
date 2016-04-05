@@ -4,8 +4,8 @@
 #include <QtOpenGL/QGLFunctions>
 
 #include <QtQml/QtQml>
-#include <QQmlEngine>
-#include <QDebug>
+#include <QtQml/QQmlEngine>
+#include <QtCore/QDebug>
 
 #include "govalue.h"
 #include "capi.h"

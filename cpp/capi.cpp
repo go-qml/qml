@@ -1,9 +1,10 @@
-#include <QApplication>
-#include <QQuickView>
-#include <QQuickItem>
-#include <QtQml>
-#include <QDebug>
-#include <QQuickImageProvider>
+#include <QtWidgets/QApplication>
+#include <QtQuick/QQuickView>
+#include <QtQuick/QQuickItem>
+#include <QtQml/QtQml>
+#include <QtCore/QDebug>
+#include <QtQuick/QQuickImageProvider>
+#include <QtGui/QIcon>
 
 #include <string.h>
 
@@ -67,6 +68,12 @@ void applicationExit()
 void applicationFlushAll()
 {
     qApp->processEvents();
+}
+
+void setWindowIcon(QString_ *path){
+	QString *str = reinterpret_cast<QString *>(path);
+	QIcon icon(*str);
+	qApp->setWindowIcon(icon);
 }
 
 void *currentThread()
