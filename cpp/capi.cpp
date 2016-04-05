@@ -113,6 +113,58 @@ void engineSetOwnershipJS(QQmlEngine_ *engine, QObject_ *object)
     qengine->setObjectOwnership(qobject, QQmlEngine::JavaScriptOwnership);
 }
 
+void engineClearImportPaths(QQmlEngine_ *engine)
+{
+    QQmlEngine *qengine = reinterpret_cast<QQmlEngine *>(engine);
+
+    QStringList empty;
+
+    qengine->setImportPathList(empty);
+}
+
+void engineAddImportPath(QQmlEngine_ *engine, const char *path, int pathLen)
+{
+    QQmlEngine *qengine = reinterpret_cast<QQmlEngine *>(engine);
+
+    QByteArray qimportPath(path, pathLen);
+    QString qsimportPath = QString::fromUtf8(qimportPath);
+
+    qengine->addImportPath(qsimportPath);
+}
+
+void engineClearPluginPaths(QQmlEngine_ *engine)
+{
+    QQmlEngine *qengine = reinterpret_cast<QQmlEngine *>(engine);
+
+    QStringList empty;
+
+    qengine->setPluginPathList(empty);
+}
+
+void engineAddPluginPath(QQmlEngine_ *engine, const char *path, int pathLen)
+{
+    QQmlEngine *qengine = reinterpret_cast<QQmlEngine *>(engine);
+
+    QByteArray qpluginPath(path, pathLen);
+    QString qspluginPath = QString::fromUtf8(qpluginPath);
+
+    qengine->addPluginPath(qspluginPath);
+}
+
+void engineClearComponentCache(QQmlEngine_ *engine)
+{
+    QQmlEngine *qengine = reinterpret_cast<QQmlEngine *>(engine);
+    qengine->clearComponentCache();
+}
+
+void coreAddLibraryPath(const char *path, int pathLen)
+{
+    QByteArray qlibraryPath(path, pathLen);
+    QString qslibraryPath = QString::fromUtf8(qlibraryPath);
+
+    QCoreApplication::addLibraryPath(qslibraryPath);
+}
+
 QQmlComponent_ *newComponent(QQmlEngine_ *engine, QObject_ *parent)
 {
     QQmlEngine *qengine = reinterpret_cast<QQmlEngine *>(engine);
@@ -362,7 +414,7 @@ const char *objectTypeName(QObject_ *object)
 int objectGetProperty(QObject_ *object, const char *name, DataValue *result)
 {
     QObject *qobject = reinterpret_cast<QObject *>(object);
-    
+
     QVariant var = qobject->property(name);
     packDataValue(&var, result);
 
@@ -437,6 +489,10 @@ error *objectInvoke(QObject_ *object, const char *method, int methodLen, DataVal
         panicf("fix the parameter dispatching");
     }
 
+    if (qobject == 0) {
+      return errorf("method called on null object: %s", method);
+    }
+
     const QMetaObject *metaObject = qobject->metaObject();
     // Walk backwards so descendants have priority.
     for (int i = metaObject->methodCount()-1; i >= 0; i--) {
@@ -452,7 +508,7 @@ error *objectInvoke(QObject_ *object, const char *method, int methodLen, DataVal
 
                 bool ok;
                 if (metaMethod.returnType() == QMetaType::Void) {
-                    ok = metaMethod.invoke(qobject, Qt::DirectConnection, 
+                    ok = metaMethod.invoke(qobject, Qt::DirectConnection,
                         arg[0], arg[1], arg[2], arg[3], arg[4], arg[5], arg[6], arg[7], arg[8], arg[9]);
                 } else {
                     ok = metaMethod.invoke(qobject, Qt::DirectConnection, Q_RETURN_ARG(QVariant, result),
@@ -475,7 +531,7 @@ void objectFindChild(QObject_ *object, QString_ *name, DataValue *resultdv)
 {
     QObject *qobject = reinterpret_cast<QObject *>(object);
     QString *qname = reinterpret_cast<QString *>(name);
-    
+
     QVariant var;
     QObject *result = qobject->findChild<QObject *>(*qname);
     if (result) {
@@ -741,6 +797,15 @@ void packDataValue(QVariant_ *var, DataValue *value)
             value->dataType = DTValueMap;
             value->len = len;
             *(DataValue**)(value->data) = dvlist;
+        }
+        break;
+    case QMetaType::User:
+        {
+            static const int qjstype = QVariant::fromValue(QJSValue()).userType();
+            if (qvar->userType() == qjstype) {
+                auto var = qvar->value<QJSValue>().toVariant();
+                packDataValue(&var, value);
+            }
         }
         break;
     default:

@@ -162,10 +162,7 @@ func unpackDataValue(dvalue *C.DataValue, engine *Engine) interface{} {
 		return nil
 	case C.DTObject:
 		// TODO Would be good to preserve identity on the Go side. See initGoType as well.
-		obj := &Common{
-			engine: engine,
-			addr:   *(*unsafe.Pointer)(datap),
-		}
+		obj := CommonOf(*(*unsafe.Pointer)(datap), engine)
 		if len(converters) > 0 {
 			// TODO Embed the type name in DataValue to drop these calls.
 			typeName := obj.TypeName()

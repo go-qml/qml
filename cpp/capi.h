@@ -122,6 +122,12 @@ void engineSetOwnershipCPP(QQmlEngine_ *engine, QObject_ *object);
 void engineSetOwnershipJS(QQmlEngine_ *engine, QObject_ *object);
 void engineSetContextForObject(QQmlEngine_ *engine, QObject_ *object);
 void engineAddImageProvider(QQmlEngine_ *engine, QString_ *providerId, void *imageFunc);
+void engineClearImportPaths(QQmlEngine_ *engine);
+void engineAddImportPath(QQmlEngine_ *engine, const char *path, int pathLen);
+void engineClearPluginPaths(QQmlEngine_ *engine);
+void engineAddPluginPath(QQmlEngine_ *engine, const char *path, int pathLen);
+void engineClearComponentCache(QQmlEngine_ *engine);
+void coreAddLibraryPath(const char *path, int pathLen);
 
 void contextGetProperty(QQmlContext_ *context, QString_ *name, DataValue *value);
 void contextSetProperty(QQmlContext_ *context, QString_ *name, DataValue *value);
