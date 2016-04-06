@@ -30,7 +30,7 @@ typedef void QImage_;
 typedef void GoValue_;
 typedef void GoAddr;
 typedef uintptr_t GoRef;
-typedef void GoTypeSpec_;
+typedef uintptr_t GoTypeSpec_;
 
 typedef char error;
 error *errorf(const char *format, ...);
@@ -148,7 +148,7 @@ QQmlContext_ *objectContext(QObject_ *object);
 int objectIsComponent(QObject_ *object);
 int objectIsWindow(QObject_ *object);
 int objectIsView(QObject_ *object);
-error *objectConnect(QObject_ *object, const char *signal, int signalLen, QQmlEngine_ *engine, void *func, int argsLen);
+error *objectConnect(QObject_ *object, const char *signal, int signalLen, QQmlEngine_ *engine, GoRef func, int argsLen);
 error *objectGoRef(QObject_ *object, GoRef *ref);
 
 QQmlComponent_ *newComponent(QQmlEngine_ *engine, QObject_ *parent);
@@ -184,8 +184,8 @@ QVariantList_ *newVariantList(DataValue *list, int len);
 
 QQmlListProperty_ *newListProperty(GoRef ref, intptr_t reflectIndex, intptr_t setIndex);
 
-int registerType(char *location, int major, int minor, char *name, GoTypeInfo *typeInfo, GoTypeSpec_ *spec);
-int registerSingleton(char *location, int major, int minor, char *name, GoTypeInfo *typeInfo, GoTypeSpec_ *spec);
+int registerType(char *location, int major, int minor, char *name, GoTypeInfo *typeInfo, GoTypeSpec_ spec);
+int registerSingleton(char *location, int major, int minor, char *name, GoTypeInfo *typeInfo, GoTypeSpec_ spec);
 
 void installLogHandler();
 
@@ -197,10 +197,10 @@ void hookGoValueCallMethod(QQmlEngine_ *engine, GoRef ref, int memberIndex, Data
 void hookGoValueDestroyed(QQmlEngine_ *engine, GoRef ref);
 void hookGoValuePaint(QQmlEngine_ *engine, GoRef ref, intptr_t reflextIndex);
 QImage_ *hookRequestImage(void *imageFunc, char *id, int idLen, int width, int height);
-uintptr_t hookGoValueTypeNew(GoValue_ *value, GoTypeSpec_ *spec);
+GoRef hookGoValueTypeNew(GoValue_ *value, GoTypeSpec_ spec);
 void hookWindowHidden(QObject_ *addr);
-void hookSignalCall(QQmlEngine_ *engine, void *func, DataValue *params);
-void hookSignalDisconnect(void *func);
+void hookSignalCall(QQmlEngine_ *engine, GoRef func, DataValue *params);
+void hookSignalDisconnect(GoRef func);
 void hookPanic(char *message);
 int hookListPropertyCount(GoRef ref, intptr_t reflectIndex, intptr_t setIndex);
 QObject_ *hookListPropertyAt(GoRef ref, intptr_t reflectIndex, intptr_t setIndex, int i);

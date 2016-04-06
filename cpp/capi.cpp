@@ -555,7 +555,7 @@ void objectSetParent(QObject_ *object, QObject_ *parent)
     qobject->setParent(qparent);
 }
 
-error *objectConnect(QObject_ *object, const char *signal, int signalLen, QQmlEngine_ *engine, void *func, int argsLen)
+error *objectConnect(QObject_ *object, const char *signal, int signalLen, QQmlEngine_ *engine, GoRef func, int argsLen)
 {
     QObject *qobject = reinterpret_cast<QObject *>(object);
     QQmlEngine *qengine = reinterpret_cast<QQmlEngine *>(engine);
