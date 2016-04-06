@@ -219,7 +219,7 @@ func (f *valueFold) goRef() C.GoRef {
 
 // destroyRef remove the valueFold reference from the lookup table.
 func (f *valueFold) destroyRef() {
-	ref := goRef(f)
+	ref := C.GoRef(uintptr(unsafe.Pointer(f)))
 	delete(cgoFolds, ref)
 }
 

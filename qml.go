@@ -800,7 +800,7 @@ func (obj *Common) On(signal string, function interface{}) {
 	csignal, csignallen := unsafeStringData(signal)
 	var cerr *C.error
 	RunMain(func() {
-		funcr := goRef(function)
+		funcr := C.GoRef(uintptr(unsafe.Pointer(&function)))
 		cerr = C.objectConnect(obj.addr, csignal, csignallen, obj.engine.addr, funcr, C.int(funcv.Type().NumIn()))
 		if cerr == nil {
 			connectedFunction[funcr] = function
