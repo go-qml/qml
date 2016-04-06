@@ -3,12 +3,12 @@
 #define DEFINE_GOVALUETYPE(N) \
     template<> QMetaObject GoValueType<N>::staticMetaObject = QMetaObject(); \
     template<> GoTypeInfo *GoValueType<N>::typeInfo = 0; \
-    template<> GoTypeSpec_ *GoValueType<N>::typeSpec = 0;
+    template<> GoTypeSpec_ GoValueType<N>::typeSpec = 0;
 
 #define DEFINE_GOPAINTEDVALUETYPE(N) \
     template<> QMetaObject GoPaintedValueType<N>::staticMetaObject = QMetaObject(); \
     template<> GoTypeInfo *GoPaintedValueType<N>::typeInfo = 0; \
-    template<> GoTypeSpec_ *GoPaintedValueType<N>::typeSpec = 0;
+    template<> GoTypeSpec_ GoPaintedValueType<N>::typeSpec = 0;
 
 DEFINE_GOVALUETYPE(1)
 DEFINE_GOVALUETYPE(2)
@@ -76,7 +76,7 @@ static int goValueTypeN = 0;
 static int goPaintedValueTypeN = 0;
 
 template<int N>
-int registerSingletonN(char *location, int major, int minor, char *name, GoTypeInfo *info, GoTypeSpec_ *spec) {
+int registerSingletonN(char *location, int major, int minor, char *name, GoTypeInfo *info, GoTypeSpec_ spec) {
     GoValueType<N>::init(info, spec);
     return qmlRegisterSingletonType< GoValueType<N> >(location, major, minor, name, [](QQmlEngine *qmlEngine, QJSEngine *jsEngine) -> QObject* {
         QObject *singleton = new GoValueType<N>();
@@ -86,7 +86,7 @@ int registerSingletonN(char *location, int major, int minor, char *name, GoTypeI
 }
 
 template<int N>
-int registerPaintedSingletonN(char *location, int major, int minor, char *name, GoTypeInfo *info, GoTypeSpec_ *spec) {
+int registerPaintedSingletonN(char *location, int major, int minor, char *name, GoTypeInfo *info, GoTypeSpec_ spec) {
     GoPaintedValueType<N>::init(info, spec);
     return qmlRegisterSingletonType< GoPaintedValueType<N> >(location, major, minor, name, [](QQmlEngine *qmlEngine, QJSEngine *jsEngine) -> QObject* {
         QObject *singleton = new GoPaintedValueType<N>();
@@ -100,7 +100,7 @@ int registerPaintedSingletonN(char *location, int major, int minor, char *name, 
 #define GOPAINTEDVALUETYPE_CASE_SINGLETON(N) \
         case N: return registerPaintedSingletonN<N>(location, major, minor, name, info, spec);
 
-int registerSingleton(char *location, int major, int minor, char *name, GoTypeInfo *info, GoTypeSpec_ *spec)
+int registerSingleton(char *location, int major, int minor, char *name, GoTypeInfo *info, GoTypeSpec_ spec)
 {
     if (!info->paint) {
         switch (++goValueTypeN) {
@@ -178,7 +178,7 @@ int registerSingleton(char *location, int major, int minor, char *name, GoTypeIn
 #define GOPAINTEDVALUETYPE_CASE(N) \
     case N: GoPaintedValueType<N>::init(info, spec); return qmlRegisterType< GoPaintedValueType<N> >(location, major, minor, name);
 
-int registerType(char *location, int major, int minor, char *name, GoTypeInfo *info, GoTypeSpec_ *spec)
+int registerType(char *location, int major, int minor, char *name, GoTypeInfo *info, GoTypeSpec_ spec)
 {
     if (!info->paint) {
         switch (++goValueTypeN) {

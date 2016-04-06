@@ -318,10 +318,15 @@ func addrOf(gvalue interface{}) uintptr {
 var typeNew = make(map[*valueFold]bool)
 
 //export hookGoValueTypeNew
-func hookGoValueTypeNew(cvalue unsafe.Pointer, specp unsafe.Pointer) (foldr C.GoRef) {
+func hookGoValueTypeNew(cvalue unsafe.Pointer, specr C.GoTypeSpec_) (foldr C.GoRef) {
 	// Initialization is postponed until the engine is available, so that
 	// we can hand Init the qml.Object that represents the object.
-	init := reflect.ValueOf((*TypeSpec)(specp).Init)
+	spec := types[specr]
+	if spec == nil {
+		panic("cannot find the specified TypeSpec")
+	}
+
+	init := reflect.ValueOf(spec.Init)
 	fold := &valueFold{
 		init:   init,
 		gvalue: reflect.New(init.Type().In(0).Elem()).Interface(),

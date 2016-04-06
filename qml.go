@@ -998,7 +998,7 @@ type TypeSpec struct {
 	private struct{} // Force use of fields by name.
 }
 
-var types []*TypeSpec
+var types = make(map[C.GoTypeSpec_]*TypeSpec)
 
 // RegisterTypes registers the provided list of type specifications for use
 // by QML code. To access the registered types, they must be imported from the
@@ -1054,10 +1054,11 @@ func registerType(location string, major, minor int, spec *TypeSpec) error {
 		cloc := C.CString(location)
 		cname := C.CString(localSpec.Name)
 		cres := C.int(0)
+		localSpecRef := C.GoTypeSpec_(uintptr(unsafe.Pointer(&localSpec)))
 		if localSpec.Singleton {
-			cres = C.registerSingleton(cloc, C.int(major), C.int(minor), cname, customType, unsafe.Pointer(&localSpec))
+			cres = C.registerSingleton(cloc, C.int(major), C.int(minor), cname, customType, localSpecRef)
 		} else {
-			cres = C.registerType(cloc, C.int(major), C.int(minor), cname, customType, unsafe.Pointer(&localSpec))
+			cres = C.registerType(cloc, C.int(major), C.int(minor), cname, customType, localSpecRef)
 		}
 		// It doesn't look like it keeps references to these, but it's undocumented and unclear.
 		C.free(unsafe.Pointer(cloc))
@@ -1065,7 +1066,7 @@ func registerType(location string, major, minor int, spec *TypeSpec) error {
 		if cres == -1 {
 			err = fmt.Errorf("QML engine failed to register type; invalid type location or name?")
 		} else {
-			types = append(types, &localSpec)
+			types[localSpecRef] = &localSpec
 		}
 	})
 
