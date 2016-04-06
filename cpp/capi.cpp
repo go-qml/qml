@@ -492,7 +492,7 @@ void objectSetParent(QObject_ *object, QObject_ *parent)
     qobject->setParent(qparent);
 }
 
-error *objectConnect(QObject_ *object, const char *signal, int signalLen, QQmlEngine_ *engine, void *func, int argsLen)
+error *objectConnect(QObject_ *object, const char *signal, int signalLen, QQmlEngine_ *engine, GoRef func, int argsLen)
 {
     QObject *qobject = reinterpret_cast<QObject *>(object);
     QQmlEngine *qengine = reinterpret_cast<QQmlEngine *>(engine);
@@ -543,17 +543,17 @@ int objectIsView(QObject_ *object)
     return dynamic_cast<QQuickView *>(qobject) ? 1 : 0;
 }
 
-error *objectGoAddr(QObject_ *object, GoAddr **addr)
+error *objectGoRef(QObject_ *object, GoRef *ref)
 {
     QObject *qobject = static_cast<QObject *>(object);
     GoValue *goValue = dynamic_cast<GoValue *>(qobject);
     if (goValue) {
-        *addr = goValue->addr;
+        *ref = goValue->ref;
         return 0;
     }
     GoPaintedValue *goPaintedValue = dynamic_cast<GoPaintedValue *>(qobject);
     if (goPaintedValue) {
-        *addr = goPaintedValue->addr;
+        *ref= goPaintedValue->ref;
         return 0;
     }
     return errorf("QML object is not backed by a Go value");
@@ -571,13 +571,13 @@ void delString(QString_ *s)
     delete reinterpret_cast<QString *>(s);
 }
 
-GoValue_ *newGoValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject_ *parent)
+GoValue_ *newGoValue(GoRef ref, GoTypeInfo *typeInfo, QObject_ *parent)
 {
     QObject *qparent = reinterpret_cast<QObject *>(parent);
     if (typeInfo->paint) {
-        return new GoPaintedValue(addr, typeInfo, qparent);
+        return new GoPaintedValue(ref, typeInfo, qparent);
     }
-    return new GoValue(addr, typeInfo, qparent);
+    return new GoValue(ref, typeInfo, qparent);
 }
 
 void goValueActivate(GoValue_ *value, GoTypeInfo *typeInfo, int addrOffset)
@@ -749,13 +749,13 @@ void packDataValue(QVariant_ *var, DataValue *value)
             GoValue *goValue = dynamic_cast<GoValue *>(qobject);
             if (goValue) {
                 value->dataType = DTGoAddr;
-                *(void **)(value->data) = goValue->addr;
+                *(uintptr_t*)(value->data) = goValue->ref;
                 break;
             }
             GoPaintedValue *goPaintedValue = dynamic_cast<GoPaintedValue *>(qobject);
             if (goPaintedValue) {
                 value->dataType = DTGoAddr;
-                *(void **)(value->data) = goPaintedValue->addr;
+                *(uintptr_t*)(value->data) = goPaintedValue->ref;
                 break;
             }
             value->dataType = DTObject;
@@ -813,28 +813,28 @@ QVariantList_ *newVariantList(DataValue *list, int len)
 
 QObject *listPropertyAt(QQmlListProperty<QObject> *list, int i)
 {
-    return reinterpret_cast<QObject *>(hookListPropertyAt(list->data, (intptr_t)list->dummy1, (intptr_t)list->dummy2, i));
+    return reinterpret_cast<QObject *>(hookListPropertyAt((uintptr_t)list->data, (intptr_t)list->dummy1, (intptr_t)list->dummy2, i));
 }
 
 int listPropertyCount(QQmlListProperty<QObject> *list)
 {
-    return hookListPropertyCount(list->data, (intptr_t)list->dummy1, (intptr_t)list->dummy2);
+    return hookListPropertyCount((uintptr_t)list->data, (intptr_t)list->dummy1, (intptr_t)list->dummy2);
 }
 
 void listPropertyAppend(QQmlListProperty<QObject> *list, QObject *obj)
 {
-    hookListPropertyAppend(list->data, (intptr_t)list->dummy1, (intptr_t)list->dummy2, obj);
+    hookListPropertyAppend((uintptr_t)list->data, (intptr_t)list->dummy1, (intptr_t)list->dummy2, obj);
 }
 
 void listPropertyClear(QQmlListProperty<QObject> *list)
 {
-    hookListPropertyClear(list->data, (intptr_t)list->dummy1, (intptr_t)list->dummy2);
+    hookListPropertyClear((uintptr_t)list->data, (intptr_t)list->dummy1, (intptr_t)list->dummy2);
 }
 
-QQmlListProperty_ *newListProperty(GoAddr *addr, intptr_t reflectIndex, intptr_t setIndex)
+QQmlListProperty_ *newListProperty(GoRef ref, intptr_t reflectIndex, intptr_t setIndex)
 {
     QQmlListProperty<QObject> *list = new QQmlListProperty<QObject>();
-    list->data = addr;
+    list->data = (void*)ref;
     list->dummy1 = (void*)reflectIndex;
     list->dummy2 = (void*)setIndex;
     list->at = listPropertyAt;
