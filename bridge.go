@@ -38,11 +38,6 @@ func init() {
 	guiMainRef = cdata.Ref()
 }
 
-// foldRefs holds all fold values that are created. Since Go Pointer
-// are not allowed to be held by cgo. We need a lookup table to
-// interface the two space.
-var foldRefs = make(map[uintptr]*valueFold)
-
 // Run runs the main QML event loop, runs f, and then terminates the
 // event loop once f returns.
 //
@@ -215,14 +210,19 @@ const (
 	jsOwner
 )
 
+// foldRefs holds all fold values that are created. Since Go Pointer
+// are not allowed to be held by cgo. We need a lookup table to
+// interface the two space.
+var foldRefs = make(map[uintptr]*valueFold)
+
 func storeFold(fold *valueFold) C.GoRef {
 	foldRef := uintptr(unsafe.Pointer(fold))
 	foldRefs[foldRef] = fold
 	return C.GoRef(foldRef)
 }
 
-func restoreFold(ref uintptr) *valueFold {
-	return foldRefs[ref]
+func restoreFold(ref C.GoRef) *valueFold {
+	return foldRefs[uintptr(ref)]
 }
 
 // wrapGoValue creates a new GoValue object in C++ land wrapping
@@ -322,7 +322,7 @@ func hookGoValueTypeNew(cvalue unsafe.Pointer, specp unsafe.Pointer) (foldr C.Go
 }
 
 //export hookGoValueDestroyed
-func hookGoValueDestroyed(enginep unsafe.Pointer, foldr uintptr) {
+func hookGoValueDestroyed(enginep unsafe.Pointer, foldr C.GoRef) {
 	fold := restoreFold(foldr)
 
 	engine := fold.engine
@@ -377,7 +377,7 @@ func deref(value reflect.Value) reflect.Value {
 }
 
 //export hookGoValueReadField
-func hookGoValueReadField(enginep unsafe.Pointer, foldr uintptr, reflectIndex, getIndex, setIndex C.int, resultdv *C.DataValue) {
+func hookGoValueReadField(enginep unsafe.Pointer, foldr C.GoRef, reflectIndex, getIndex, setIndex C.int, resultdv *C.DataValue) {
 	fold := ensureEngine(enginep, foldr)
 
 	var field reflect.Value
@@ -423,7 +423,7 @@ func hookGoValueReadField(enginep unsafe.Pointer, foldr uintptr, reflectIndex, g
 }
 
 //export hookGoValueWriteField
-func hookGoValueWriteField(enginep unsafe.Pointer, foldr uintptr, reflectIndex, setIndex C.int, assigndv *C.DataValue) {
+func hookGoValueWriteField(enginep unsafe.Pointer, foldr C.GoRef, reflectIndex, setIndex C.int, assigndv *C.DataValue) {
 	fold := ensureEngine(enginep, foldr)
 	v := reflect.ValueOf(fold.gvalue)
 	ve := v
@@ -500,7 +500,7 @@ var (
 )
 
 //export hookGoValueCallMethod
-func hookGoValueCallMethod(enginep unsafe.Pointer, foldr uintptr, reflectIndex C.int, args *C.DataValue) {
+func hookGoValueCallMethod(enginep unsafe.Pointer, foldr C.GoRef, reflectIndex C.int, args *C.DataValue) {
 	fold := ensureEngine(enginep, foldr)
 	v := reflect.ValueOf(fold.gvalue)
 
@@ -565,7 +565,7 @@ func printPaintPanic() {
 }
 
 //export hookGoValuePaint
-func hookGoValuePaint(enginep unsafe.Pointer, foldr uintptr, reflectIndex C.intptr_t) {
+func hookGoValuePaint(enginep unsafe.Pointer, foldr C.GoRef, reflectIndex C.intptr_t) {
 	// Besides a convenience this is a workaround for http://golang.org/issue/8588
 	defer printPaintPanic()
 	defer atomic.StoreUintptr(&guiPaintRef, 0)
@@ -585,7 +585,7 @@ func hookGoValuePaint(enginep unsafe.Pointer, foldr uintptr, reflectIndex C.intp
 	method.Call([]reflect.Value{reflect.ValueOf(painter)})
 }
 
-func ensureEngine(enginep unsafe.Pointer, foldr uintptr) *valueFold {
+func ensureEngine(enginep unsafe.Pointer, foldr C.GoRef) *valueFold {
 	fold := restoreFold(foldr)
 	if fold.engine != nil {
 		if fold.init.IsValid() {
@@ -654,21 +654,21 @@ func listSlice(fold *valueFold, reflectIndex C.intptr_t) *[]Object {
 }
 
 //export hookListPropertyAt
-func hookListPropertyAt(foldr uintptr, reflectIndex, setIndex C.intptr_t, index C.int) (objp unsafe.Pointer) {
+func hookListPropertyAt(foldr C.GoRef, reflectIndex, setIndex C.intptr_t, index C.int) (objp unsafe.Pointer) {
 	fold := restoreFold(foldr)
 	slice := listSlice(fold, reflectIndex)
 	return (*slice)[int(index)].Common().addr
 }
 
 //export hookListPropertyCount
-func hookListPropertyCount(foldr uintptr, reflectIndex, setIndex C.intptr_t) C.int {
+func hookListPropertyCount(foldr C.GoRef, reflectIndex, setIndex C.intptr_t) C.int {
 	fold := restoreFold(foldr)
 	slice := listSlice(fold, reflectIndex)
 	return C.int(len(*slice))
 }
 
 //export hookListPropertyAppend
-func hookListPropertyAppend(foldr uintptr, reflectIndex, setIndex C.intptr_t, objp unsafe.Pointer) {
+func hookListPropertyAppend(foldr C.GoRef, reflectIndex, setIndex C.intptr_t, objp unsafe.Pointer) {
 	fold := restoreFold(foldr)
 	slice := listSlice(fold, reflectIndex)
 	var objdv C.DataValue
@@ -683,7 +683,7 @@ func hookListPropertyAppend(foldr uintptr, reflectIndex, setIndex C.intptr_t, ob
 }
 
 //export hookListPropertyClear
-func hookListPropertyClear(foldr uintptr, reflectIndex, setIndex C.intptr_t) {
+func hookListPropertyClear(foldr C.GoRef, reflectIndex, setIndex C.intptr_t) {
 	fold := restoreFold(foldr)
 	slice := listSlice(fold, reflectIndex)
 	newslice := (*slice)[0:0]
