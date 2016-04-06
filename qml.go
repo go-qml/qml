@@ -486,7 +486,7 @@ func (obj *Common) Interface() interface{} {
 	RunMain(func() {
 		var foldr C.GoRef
 		if cerr = C.objectGoRef(obj.addr, &foldr); cerr == nil {
-			fold := restoreFold(foldr)
+			fold := getFoldFromGoRef(foldr)
 			result = fold.gvalue
 		}
 	})
