@@ -766,7 +766,7 @@ func (obj *Common) Destroy() {
 	})
 }
 
-var connectedFunction = make(map[*interface{}]bool)
+var connectedFunction = make(map[C.GoRef]interface{})
 
 // On connects the named signal from obj with the provided function, so that
 // when obj next emits that signal, the function is called with the parameters
@@ -800,9 +800,10 @@ func (obj *Common) On(signal string, function interface{}) {
 	csignal, csignallen := unsafeStringData(signal)
 	var cerr *C.error
 	RunMain(func() {
-		cerr = C.objectConnect(obj.addr, csignal, csignallen, obj.engine.addr, unsafe.Pointer(&function), C.int(funcv.Type().NumIn()))
+		funcr := goRef(function)
+		cerr = C.objectConnect(obj.addr, csignal, csignallen, obj.engine.addr, funcr, C.int(funcv.Type().NumIn()))
 		if cerr == nil {
-			connectedFunction[&function] = true
+			connectedFunction[funcr] = function
 			stats.connectionsAlive(+1)
 		}
 	})
@@ -810,9 +811,9 @@ func (obj *Common) On(signal string, function interface{}) {
 }
 
 //export hookSignalDisconnect
-func hookSignalDisconnect(funcp unsafe.Pointer) {
+func hookSignalDisconnect(funcr C.GoRef) {
 	before := len(connectedFunction)
-	delete(connectedFunction, (*interface{})(funcp))
+	delete(connectedFunction, funcr)
 	if before == len(connectedFunction) {
 		panic("disconnecting unknown signal function")
 	}
@@ -820,12 +821,18 @@ func hookSignalDisconnect(funcp unsafe.Pointer) {
 }
 
 //export hookSignalCall
-func hookSignalCall(enginep unsafe.Pointer, funcp unsafe.Pointer, args *C.DataValue) {
+func hookSignalCall(enginep unsafe.Pointer, funcr C.GoRef, args *C.DataValue) {
 	engine := engines[enginep]
 	if engine == nil {
 		panic("signal called after engine was destroyed")
 	}
-	funcv := reflect.ValueOf(*(*interface{})(funcp))
+
+	function := connectedFunction[funcr]
+	if function == nil {
+		panic("signal called on disconnected function")
+	}
+
+	funcv := reflect.ValueOf(&function)
 	funct := funcv.Type()
 	numIn := funct.NumIn()
 	var params [C.MaxParams]reflect.Value
