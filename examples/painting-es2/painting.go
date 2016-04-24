@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"gopkg.in/qml.v1"
-	"gopkg.in/qml.v1/gl/es2"
+	"github.com/limetext/qml-go"
+	"github.com/limetext/qml-go/gl/es2"
 )
 
 func main() {
@@ -77,7 +77,7 @@ func (r *GoRect) Paint(p *qml.Painter) {
 	gl.BindBuffer(GL.ELEMENT_ARRAY_BUFFER, buf[1])
 	gl.BufferData(GL.ELEMENT_ARRAY_BUFFER, 0, indices, GL.STATIC_DRAW)
 
-	vshader := gl.CreateShader(GL.VERTEX_SHADER);
+	vshader := gl.CreateShader(GL.VERTEX_SHADER)
 	gl.ShaderSource(vshader, vertexShader)
 	gl.CompileShader(vshader)
 

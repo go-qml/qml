@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"gopkg.in/qml.v1"
 	"image/png"
 	"os"
+
+	"github.com/limetext/qml-go"
 )
 
 const webview = `

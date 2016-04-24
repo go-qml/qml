@@ -19,16 +19,16 @@ import (
 	"sync/atomic"
 	"unsafe"
 
-	"gopkg.in/qml.v1/cdata"
+	"github.com/limetext/qml-go/cdata"
 )
 
 var (
-	guiFunc      = make(chan func())
-	guiDone      = make(chan struct{})
-	guiLock      = 0
-	guiMainRef   uintptr
-	guiPaintRef  uintptr
-	guiIdleRun   int32
+	guiFunc     = make(chan func())
+	guiDone     = make(chan struct{})
+	guiLock     = 0
+	guiMainRef  uintptr
+	guiPaintRef uintptr
+	guiIdleRun  int32
 
 	initialized int32
 )
