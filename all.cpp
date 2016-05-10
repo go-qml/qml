@@ -4,6 +4,7 @@
 #include "cpp/govaluetype.cpp"
 #include "cpp/idletimer.cpp"
 #include "cpp/connector.cpp"
+#include "cpp/painter.cpp"
 
 #include "cpp/moc_all.cpp"
 

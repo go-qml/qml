@@ -161,7 +161,7 @@ void GoPaintedValue::activate(int propIndex)
 void GoPaintedValue::paint(QPainter *painter)
 {
     painter->beginNativePainting();
-    hookGoValuePaint(qmlEngine(this), addr, typeInfo->paint->reflectIndex);
+    hookGoValuePaint(qmlEngine(this), addr, typeInfo->paint->reflectIndex, painter);
     painter->endNativePainting();
 }
 
@@ -181,7 +181,7 @@ QMetaObject *metaObjectFor(GoTypeInfo *typeInfo)
     mob.setFlags(QMetaObjectBuilder::DynamicMetaObject);
 
     GoMemberInfo *memberInfo;
-    
+
     memberInfo = typeInfo->fields;
     int relativePropIndex = mob.propertyCount();
     for (int i = 0; i < typeInfo->fieldsLen; i++) {

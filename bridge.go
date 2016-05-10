@@ -570,7 +570,7 @@ func printPaintPanic() {
 }
 
 //export hookGoValuePaint
-func hookGoValuePaint(enginep, foldp unsafe.Pointer, reflectIndex C.intptr_t) {
+func hookGoValuePaint(enginep, foldp unsafe.Pointer, reflectIndex C.intptr_t, qpainter unsafe.Pointer) {
 	// Besides a convenience this is a workaround for http://golang.org/issue/8588
 	defer printPaintPanic()
 	defer atomic.StoreUintptr(&guiPaintRef, 0)
@@ -584,7 +584,11 @@ func hookGoValuePaint(enginep, foldp unsafe.Pointer, reflectIndex C.intptr_t) {
 		return
 	}
 
-	painter := &Painter{engine: fold.engine, obj: CommonOf(fold.cvalue, fold.engine)}
+	painter := &Painter{
+		engine:   fold.engine,
+		obj:      CommonOf(fold.cvalue, fold.engine),
+		qpainter: qpainter,
+	}
 	v := reflect.ValueOf(fold.gvalue)
 	method := v.Method(int(reflectIndex))
 	method.Call([]reflect.Value{reflect.ValueOf(painter)})

@@ -27,6 +27,7 @@ typedef void QQuickWindow_;
 typedef void QQuickView_;
 typedef void QMessageLogContext_;
 typedef void QImage_;
+typedef void QPainter_;
 typedef void GoValue_;
 typedef void GoAddr;
 typedef void GoTypeSpec_;
@@ -193,7 +194,7 @@ void hookGoValueReadField(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, in
 void hookGoValueWriteField(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, int setIndex, DataValue *assign);
 void hookGoValueCallMethod(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, DataValue *result);
 void hookGoValueDestroyed(QQmlEngine_ *engine, GoAddr *addr);
-void hookGoValuePaint(QQmlEngine_ *engine, GoAddr *addr, intptr_t reflextIndex);
+void hookGoValuePaint(QQmlEngine_ *engine, GoAddr *addr, intptr_t reflextIndex, QPainter_* painter);
 QImage_ *hookRequestImage(void *imageFunc, char *id, int idLen, int width, int height);
 GoAddr *hookGoValueTypeNew(GoValue_ *value, GoTypeSpec_ *spec);
 void hookWindowHidden(QObject_ *addr);
