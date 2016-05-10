@@ -25,6 +25,8 @@ type Engine struct {
 	values    map[interface{}]*valueFold
 	destroyed bool
 
+	savedAddr unsafe.Pointer // addr might be cleared when destroyed, use this after destroyed
+
 	imageProviders map[string]*func(imageId string, width, height int) image.Image
 }
 
@@ -39,6 +41,7 @@ func NewEngine() *Engine {
 	RunMain(func() {
 		engine.engine = engine
 		engine.setAddr(C.newEngine(nil))
+		engine.savedAddr = engine.addr
 		engine.imageProviders = make(map[string]*func(imageId string, width, height int) image.Image)
 		engines[engine.addr] = engine
 		stats.enginesAlive(+1)

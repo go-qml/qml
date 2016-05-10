@@ -323,9 +323,9 @@ func hookGoValueDestroyed(enginep unsafe.Pointer, foldp unsafe.Pointer) {
 		if len(typeNew) == before {
 			panic("destroying value without an associated engine; who created the value?")
 		}
-	} else if engines[engine.addr] == nil {
+	} else if engines[engine.savedAddr] == nil {
 		// Must never do that. The engine holds memory references that C++ depends on.
-		panic(fmt.Sprintf("engine %p was released from global list while its values were still alive", engine.addr))
+		panic(fmt.Sprintf("engine %p was released from global list while its values were still alive", engine.savedAddr))
 	} else {
 		switch {
 		case fold.prev != nil:
@@ -347,7 +347,7 @@ func hookGoValueDestroyed(enginep unsafe.Pointer, foldp unsafe.Pointer) {
 				panic("destroying value that knows about the engine, but the engine doesn't know about the value; who cleared the engine?")
 			}
 			if engine.destroyed && len(engine.values) == 0 {
-				delete(engines, engine.addr)
+				delete(engines, engine.savedAddr)
 			}
 		}
 	}
