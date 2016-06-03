@@ -693,10 +693,7 @@ void unpackDataValue(DataValue *value, QVariant_ *var)
         qvar->setValue(*(QObject**)(value->data));
         break;
     case DTInvalid:
-        // null would be more natural, but an invalid variant means
-        // it has proper semantics when dealing with non-qml qt code.
-        //qvar->setValue(QJSValue(QJSValue::NullValue));
-        qvar->clear();
+        *qvar = QVariant(QMetaType::VoidStar, (void *)0);
         break;
     default:
         panicf("unknown data type: %d", value->dataType);
