@@ -11,7 +11,10 @@ import (
 	"image/color"
 	"os"
 	"reflect"
+	"runtime/debug"
 	"unsafe"
+
+	"github.com/limetext/qml-go/internal/util"
 )
 
 // Common implements the common behavior of all QML objects.
@@ -274,11 +277,11 @@ func (obj *Common) Map(property string) *Map {
 // ObjectByName panics if the object is not found.
 func (obj *Common) ObjectByName(objectName string) Object {
 	obj.assertInitialized()
-	cname, cnamelen := unsafeStringData(objectName)
+	cname, cnamelen := util.UnsafeStringData(objectName)
 	var dvalue C.DataValue
 	var object Object
 	RunMain(func() {
-		qname := C.newString(cname, cnamelen)
+		qname := C.newString((*C.char)(cname), C.int(cnamelen))
 		defer C.delString(qname)
 		C.objectFindChild(obj.addr, qname, &dvalue)
 		// unpackDataValue will also initialize the Go type, if necessary.
@@ -308,7 +311,7 @@ func (obj *Common) Call(method string, params ...interface{}) interface{} {
 	if len(params) > len(dataValueArray) {
 		panic("too many parameters")
 	}
-	cmethod, cmethodLen := unsafeStringData(method)
+	cmethod, cmethodLen := util.UnsafeStringData(method)
 	var result C.DataValue
 	var cerr *C.error
 	RunMain(func() {
@@ -328,7 +331,7 @@ func (obj *Common) Call(method string, params ...interface{}) interface{} {
 			// destroyed while waiting to run on the main thread
 			// TODO: What to do about this???
 		}
-		cerr = C.objectInvoke(obj.addr, cmethod, cmethodLen, &result, &dataValueArray[0], C.int(len(params)))
+		cerr = C.objectInvoke(obj.addr, (*C.char)(cmethod), C.int(cmethodLen), &result, &dataValueArray[0], C.int(len(params)))
 	})
 	if cerr != nil {
 		fmt.Fprintf(os.Stderr, "Common: %#v\n", obj)
@@ -429,10 +432,10 @@ func (obj *Common) On(signal string, function interface{}) {
 	if funct.NumIn() > C.MaxParams {
 		panic("function takes too many arguments")
 	}
-	csignal, csignallen := unsafeStringData(signal)
+	csignal, csignallen := util.UnsafeStringData(signal)
 	var cerr *C.error
 	RunMain(func() {
-		cerr = C.objectConnect(obj.addr, csignal, csignallen, obj.engine.addr, unsafe.Pointer(&function), C.int(funcv.Type().NumIn()))
+		cerr = C.objectConnect(obj.addr, (*C.char)(csignal), C.int(csignallen), obj.engine.addr, unsafe.Pointer(&function), C.int(funcv.Type().NumIn()))
 		if cerr == nil {
 			connectedFunction[&function] = true
 			stats.connectionsAlive(+1)

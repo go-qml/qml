@@ -9,12 +9,14 @@ import "C"
 import (
 	"errors"
 	"unsafe"
+
+	"github.com/limetext/qml-go/internal/util"
 )
 
 func AddLibraryPath(path string) {
-	cpath, cpathLen := unsafeStringData(path)
+	cpath, cpathLen := util.UnsafeStringData(path)
 	RunMain(func() {
-		C.coreAddLibraryPath(cpath, cpathLen)
+		C.coreAddLibraryPath((*C.char)(cpath), C.int(cpathLen))
 	})
 }
 

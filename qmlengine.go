@@ -17,6 +17,8 @@ import (
 	"reflect"
 	"strings"
 	"unsafe"
+
+	"github.com/limetext/qml-go/internal/util"
 )
 
 // Engine provides an environment for instantiating QML components.
@@ -85,8 +87,8 @@ func (e *Engine) Destroy() {
 // Once a component is loaded, component instances may be created from
 // the resulting object via its Create and CreateWindow methods.
 func (e *Engine) Load(location string, r io.Reader) (Object, error) {
-	var cdata *C.char
-	var cdatalen C.int
+	var cdata unsafe.Pointer
+	var cdatalen int
 
 	qrc := strings.HasPrefix(location, "qrc:")
 	if qrc {
@@ -117,19 +119,19 @@ func (e *Engine) Load(location string, r io.Reader) (Object, error) {
 			}
 		}
 
-		cdata, cdatalen = unsafeBytesData(data)
+		cdata, cdatalen = util.UnsafeBytesData(data)
 	}
 
 	var err error
-	cloc, cloclen := unsafeStringData(location)
+	cloc, cloclen := util.UnsafeStringData(location)
 	comp := &Common{engine: e}
 	RunMain(func() {
 		// TODO The component's parent should probably be the engine.
 		comp.setAddr(C.newComponent(e.addr, nilPtr))
 		if qrc {
-			C.componentLoadURL(comp.addr, cloc, cloclen)
+			C.componentLoadURL(comp.addr, (*C.char)(cloc), C.int(cloclen))
 		} else {
-			C.componentSetData(comp.addr, cdata, cdatalen, cloc, cloclen)
+			C.componentSetData(comp.addr, (*C.char)(cdata), C.int(cdatalen), (*C.char)(cloc), C.int(cloclen))
 		}
 		message := C.componentErrorString(comp.addr)
 		if message != nilCharPtr {
@@ -189,9 +191,9 @@ func (e *Engine) ClearImportPaths() {
 }
 
 func (e *Engine) AddImportPath(path string) {
-	cpath, cpathLen := unsafeStringData(path)
+	cpath, cpathLen := util.UnsafeStringData(path)
 	RunMain(func() {
-		C.engineAddImportPath(e.addr, cpath, cpathLen)
+		C.engineAddImportPath(e.addr, (*C.char)(cpath), C.int(cpathLen))
 	})
 }
 
@@ -202,9 +204,9 @@ func (e *Engine) ClearPluginPaths() {
 }
 
 func (e *Engine) AddPluginPath(path string) {
-	cpath, cpathLen := unsafeStringData(path)
+	cpath, cpathLen := util.UnsafeStringData(path)
 	RunMain(func() {
-		C.engineAddPluginPath(e.addr, cpath, cpathLen)
+		C.engineAddPluginPath(e.addr, (*C.char)(cpath), C.int(cpathLen))
 	})
 }
 
@@ -248,9 +250,9 @@ func (e *Engine) AddImageProvider(prvId string, f func(imgId string, width, heig
 		panic(fmt.Sprintf("engine already has an image provider with id %q", prvId))
 	}
 	e.imageProviders[prvId] = &f
-	cprvId, cprvIdLen := unsafeStringData(prvId)
+	cprvId, cprvIdLen := util.UnsafeStringData(prvId)
 	RunMain(func() {
-		qprvId := C.newString(cprvId, cprvIdLen)
+		qprvId := C.newString((*C.char)(cprvId), C.int(cprvIdLen))
 		defer C.delString(qprvId)
 		C.engineAddImageProvider(e.addr, qprvId, unsafe.Pointer(&f))
 	})
@@ -260,7 +262,7 @@ func (e *Engine) AddImageProvider(prvId string, f func(imgId string, width, heig
 func hookRequestImage(imageFunc unsafe.Pointer, cid *C.char, cidLen, cwidth, cheight C.int) unsafe.Pointer {
 	f := *(*func(imgId string, width, height int) image.Image)(imageFunc)
 
-	id := unsafeString(cid, cidLen)
+	id := util.UnsafeString(unsafe.Pointer(cid), int(cidLen))
 	width := int(cwidth)
 	height := int(cheight)
 

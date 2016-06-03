@@ -20,6 +20,7 @@ import (
 	"unsafe"
 
 	"github.com/limetext/qml-go/cdata"
+	"github.com/limetext/qml-go/internal/util"
 )
 
 type mainThreadFunc struct {
@@ -240,7 +241,7 @@ const (
 func wrapGoValue(engine *Engine, gvalue interface{}, owner valueOwner) (cvalue unsafe.Pointer) {
 	gvaluev := reflect.ValueOf(gvalue)
 	gvaluek := gvaluev.Kind()
-	if gvaluek == reflect.Struct && !hashable(gvalue) {
+	if gvaluek == reflect.Struct && !util.Hashable(gvalue) {
 		name := gvaluev.Type().Name()
 		if name != "" {
 			name = " (" + name + ")"
@@ -256,7 +257,7 @@ func wrapGoValue(engine *Engine, gvalue interface{}, owner valueOwner) (cvalue u
 	hashableGvalue := gvalue
 	if gvaluev.Kind() == reflect.Slice {
 		hashableGvalue = *(*reflect.SliceHeader)(unsafe.Pointer(gvaluev.Pointer()))
-	} else if !hashable(gvalue) {
+	} else if !util.Hashable(gvalue) {
 		panic(fmt.Sprintf("gvalue not hashable: %v %v", gvaluev.Type(), gvaluev.Kind()))
 	}
 
@@ -424,7 +425,7 @@ func hookGoValueReadField(enginep, foldp unsafe.Pointer, reflectIndex, getIndex,
 	if fieldk == reflect.Slice || fieldk == reflect.Struct && field.Type() != typeRGBA {
 		if field.CanAddr() {
 			field = field.Addr()
-		} else if !hashable(field.Interface()) {
+		} else if !util.Hashable(field.Interface()) {
 			t := reflect.ValueOf(fold.gvalue).Type()
 			for t.Kind() == reflect.Ptr {
 				t = t.Elem()

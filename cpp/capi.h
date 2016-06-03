@@ -106,6 +106,7 @@ typedef struct {
     int line;
 } LogMessage;
 
+
 void newGuiApplication();
 void applicationExec();
 void applicationExit();
@@ -116,6 +117,7 @@ void idleTimerStart();
 
 void *currentThread();
 void *appThread();
+
 
 QQmlEngine_ *newEngine(QObject_ *parent);
 QQmlContext_ *engineRootContext(QQmlEngine_ *engine);
@@ -128,6 +130,7 @@ void engineAddImportPath(QQmlEngine_ *engine, const char *path, int pathLen);
 void engineClearPluginPaths(QQmlEngine_ *engine);
 void engineAddPluginPath(QQmlEngine_ *engine, const char *path, int pathLen);
 void engineClearComponentCache(QQmlEngine_ *engine);
+
 void coreAddLibraryPath(const char *path, int pathLen);
 
 void contextGetProperty(QQmlContext_ *context, QString_ *name, DataValue *value);

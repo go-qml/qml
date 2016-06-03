@@ -12,6 +12,7 @@ import (
 	"strings"
 	"unicode"
 	"unsafe"
+	"github.com/limetext/qml-go/internal/util"
 )
 
 var (
@@ -70,9 +71,9 @@ func packDataValue(value interface{}, dvalue *C.DataValue, engine *Engine, owner
 	switch value := value.(type) {
 	case string:
 		dvalue.dataType = C.DTString
-		cstr, cstrlen := unsafeStringData(value)
-		*(**C.char)(datap) = cstr
-		dvalue.len = cstrlen
+		cstr, cstrlen := util.UnsafeStringData(value)
+		*(**C.char)(datap) = (*C.char)(cstr)
+		dvalue.len = C.int(cstrlen)
 	case bool:
 		dvalue.dataType = C.DTBool
 		*(*bool)(datap) = value
@@ -225,8 +226,8 @@ func dataTypeOf(typ reflect.Type) C.DataType {
 	return C.DTObject
 }
 
-var typeInfoSize = C.size_t(unsafe.Sizeof(C.GoTypeInfo{}))
-var memberInfoSize = C.size_t(unsafe.Sizeof(C.GoMemberInfo{}))
+const typeInfoSize = C.size_t(C.sizeof_GoTypeInfo)
+const memberInfoSize = C.size_t(C.sizeof_GoMemberInfo)
 
 var typeInfoCache = make(map[reflect.Type]*C.GoTypeInfo)
 
@@ -479,50 +480,4 @@ func methodQtSignature(method reflect.Method) (signature, result string) {
 		result = "QVariantList"
 	}
 	return
-}
-
-func hashable(value interface{}) (hashable bool) {
-	defer func() { recover() }()
-	return value == value
-}
-
-// unsafeString returns a Go string backed by C data.
-//
-// If the C data is deallocated or moved, the string will be
-// invalid and will crash the program if used. As such, the
-// resulting string must only be used inside the implementation
-// of the qml package and while the life time of the C data
-// is guaranteed.
-func unsafeString(data *C.char, size C.int) string {
-	var s string
-	sh := (*reflect.StringHeader)(unsafe.Pointer(&s))
-	sh.Data = uintptr(unsafe.Pointer(data))
-	sh.Len = int(size)
-	return s
-}
-
-// unsafeStringData returns a C string backed by Go data. The C
-// string is NOT null-terminated, so its length must be taken
-// into account.
-//
-// If the s Go string is garbage collected, the returned C data
-// will be invalid and will crash the program if used. As such,
-// the resulting data must only be used inside the implementation
-// of the qml package and while the life time of the Go string
-// is guaranteed.
-func unsafeStringData(s string) (*C.char, C.int) {
-	return *(**C.char)(unsafe.Pointer(&s)), C.int(len(s))
-}
-
-// unsafeBytesData returns a C string backed by Go data. The C
-// string is NOT null-terminated, so its length must be taken
-// into account.
-//
-// If the array backing the b Go slice is garbage collected, the
-// returned C data will be invalid and will crash the program if
-// used. As such, the resulting data must only be used inside the
-// implementation of the qml package and while the life time of
-// the Go array is guaranteed.
-func unsafeBytesData(b []byte) (*C.char, C.int) {
-	return *(**C.char)(unsafe.Pointer(&b)), C.int(len(b))
 }

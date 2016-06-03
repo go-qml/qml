@@ -5,6 +5,9 @@ package qml
 // #include "capi.h"
 //
 import "C"
+import (
+	"github.com/limetext/qml-go/internal/util"
+)
 
 // Context represents a QML context that can hold variables visible
 // to logic running within it.
@@ -25,12 +28,12 @@ type Context struct {
 // not be garbage collected until the engine is destroyed, even if the
 // value is unused or changed.
 func (ctx *Context) SetVar(name string, value interface{}) {
-	cname, cnamelen := unsafeStringData(name)
+	cname, cnamelen := util.UnsafeStringData(name)
 	RunMain(func() {
 		var dvalue C.DataValue
 		packDataValue(value, &dvalue, ctx.engine, cppOwner)
 
-		qname := C.newString(cname, cnamelen)
+		qname := C.newString((*C.char)(cname), C.int(cnamelen))
 		defer C.delString(qname)
 
 		C.contextSetProperty(ctx.addr, qname, &dvalue)
@@ -54,11 +57,11 @@ func (ctx *Context) SetVars(value interface{}) {
 
 // Var returns the context variable with the given name.
 func (ctx *Context) Var(name string) interface{} {
-	cname, cnamelen := unsafeStringData(name)
+	cname, cnamelen := util.UnsafeStringData(name)
 
 	var dvalue C.DataValue
 	RunMain(func() {
-		qname := C.newString(cname, cnamelen)
+		qname := C.newString((*C.char)(cname), C.int(cnamelen))
 		defer C.delString(qname)
 
 		C.contextGetProperty(ctx.addr, qname, &dvalue)
