@@ -1,9 +1,11 @@
-package qml
+package qpainter
 
+// #cgo CPPFLAGS: -I../cpp
+// #cgo CXXFLAGS: -std=c++0x -pedantic-errors -Wall -fno-strict-aliasing
+// #cgo LDFLAGS: -lstdc++
+// #cgo pkg-config: Qt5Core Qt5Widgets Qt5Quick
+//
 // #include <stdlib.h>
-//
-// #include "capi.h"
-//
 // #include "painter.h"
 //
 import "C"
@@ -74,16 +76,20 @@ const /* CompositionMode */ (
 
 // Painter is provided to Paint methods on Go types that have displayable content.
 type Painter struct {
-	engine   *Engine
-	obj      Object
+	// engine   *Engine
+	// obj      Object
 	glctxt   glbase.Context
 	qpainter unsafe.Pointer
 }
 
-// Object returns the underlying object being painted.
-func (p *Painter) Object() Object {
-	return p.obj
+func FromPtr(ptr unsafe.Pointer) *Painter {
+	return &Painter{qpainter: ptr}
 }
+
+// Object returns the underlying object being painted.
+// func (p *Painter) Object() Object {
+// 	return p.obj
+// }
 
 // GLContext returns the OpenGL context for this painter.
 func (p *Painter) GLContext() *glbase.Context {
@@ -103,6 +109,37 @@ func (p *Painter) Save() {
 }
 func (p *Painter) Restore() {
 	C.painterRestore(p.qpainter)
+}
+
+func (p *Painter) Scale(sx float64, sy float64) {
+	C.painterScale(p.qpainter, C.qreal(sx), C.qreal(sy))
+}
+func (p *Painter) Shear(sh float64, sv float64) {
+	C.painterShear(p.qpainter, C.qreal(sh), C.qreal(sv))
+}
+func (p *Painter) Rotate(a float64) {
+	C.painterRotate(p.qpainter, C.qreal(a))
+}
+
+//
+// void painterTranslate(QPainter_ *painter, const QPointF &offset);
+// void painterTranslate(QPainter_ *painter, const QPoint &offset);
+func (p *Painter) Translate(dx float64, dy float64) {
+	C.painterTranslate(p.qpainter, C.qreal(dx), C.qreal(dy))
+}
+
+//
+// QRect painterWindow(QPainter_ *painter) const;
+// void painterSetWindow(QPainter_ *painter, const QRect &window);
+func (p *Painter) SetWindow(x int, y int, w int, h int) {
+	C.painterSetWindow(p.qpainter, C.int(x), C.int(y), C.int(w), C.int(h))
+}
+
+//
+// QRect painterViewport(QPainter_ *painter) const;
+// void painterSetViewport(QPainter_ *painter, const QRect &viewport);
+func (p *Painter) SetViewport(x int, y int, w int, h int) {
+	C.painterSetViewport(p.qpainter, C.int(x), C.int(y), C.int(w), C.int(h))
 }
 
 func (p *Painter) BeginNativePainting() {

@@ -6,6 +6,7 @@ import (
 
 	"github.com/limetext/qml-go"
 	"github.com/limetext/qml-go/gl/es2"
+	"github.com/limetext/qml-go/qpainter"
 )
 
 func main() {
@@ -56,7 +57,7 @@ void main()
 }
 `
 
-func (r *GoRect) Paint(p *qml.Painter) {
+func (r *GoRect) Paint(obj qml.Object, p *qpainter.Painter) {
 	gl := GL.API(p)
 
 	vertices := []float32{

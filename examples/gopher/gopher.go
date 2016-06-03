@@ -6,6 +6,7 @@ import (
 
 	"github.com/limetext/qml-go"
 	"github.com/limetext/qml-go/gl/2.0"
+	"github.com/limetext/qml-go/qpainter"
 )
 
 var filename = "gopher.qml"
@@ -61,7 +62,7 @@ func (r *Gopher) SetRotation(rotation int) {
 	r.Call("update")
 }
 
-func (r *Gopher) Paint(p *qml.Painter) {
+func (r *Gopher) Paint(obj qml.Object, p *qpainter.Painter) {
 	gl := GL.API(p)
 
 	width := float32(r.Int("width"))

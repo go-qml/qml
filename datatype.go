@@ -12,7 +12,9 @@ import (
 	"strings"
 	"unicode"
 	"unsafe"
+
 	"github.com/limetext/qml-go/internal/util"
+	"github.com/limetext/qml-go/qpainter"
 )
 
 var (
@@ -35,7 +37,7 @@ var (
 	typeRGBA       = reflect.TypeOf(color.RGBA{})
 	typeObjSlice   = reflect.TypeOf([]Object(nil))
 	typeObject     = reflect.TypeOf([]Object(nil)).Elem()
-	typePainter    = reflect.TypeOf(&Painter{})
+	typePainter    = reflect.TypeOf(&qpainter.Painter{})
 	typeList       = reflect.TypeOf(&List{})
 	typeMap        = reflect.TypeOf(&Map{})
 	typeGenericMap = reflect.TypeOf(map[string]interface{}(nil))
@@ -424,7 +426,7 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 		membersi += 1
 		mnamesi += uintptr(len(method.Name)) + 1
 
-		if method.Name == "Paint" && memberInfo.numIn == 1 && memberInfo.numOut == 0 && method.Type.In(1) == typePainter {
+		if method.Name == "Paint" && memberInfo.numIn == 2 && memberInfo.numOut == 0 && method.Type.In(1) == typeObject && method.Type.In(2) == typePainter {
 			typeInfo.paint = memberInfo
 		}
 	}

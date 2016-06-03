@@ -6,6 +6,7 @@ import (
 
 	"github.com/limetext/qml-go"
 	"github.com/limetext/qml-go/gl/2.0"
+	"github.com/limetext/qml-go/qpainter"
 )
 
 func main() {
@@ -19,7 +20,7 @@ type GoRect struct {
 	qml.Object
 }
 
-func (r *GoRect) Paint(p *qml.Painter) {
+func (r *GoRect) Paint(obj qml.Object, p *qpainter.Painter) {
 	gl := GL.API(p)
 
 	width := float32(r.Int("width"))

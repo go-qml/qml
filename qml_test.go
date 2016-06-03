@@ -20,6 +20,7 @@ import (
 	"github.com/limetext/qml-go"
 	"github.com/limetext/qml-go/cpptest"
 	"github.com/limetext/qml-go/gl/2.0"
+	"github.com/limetext/qml-go/qpainter"
 	. "gopkg.in/check.v1"
 )
 
@@ -80,10 +81,8 @@ type GoRect struct {
 	PaintCount int
 }
 
-func (r *GoRect) Paint(p *qml.Painter) {
+func (r *GoRect) Paint(obj qml.Object, p *qpainter.Painter) {
 	r.PaintCount++
-
-	obj := p.Object()
 
 	gl := GL.API(p)
 

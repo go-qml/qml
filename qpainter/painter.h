@@ -1,22 +1,116 @@
-#include <private/qmetaobjectbuilder_p.h>
+#ifndef PAINTER_H
+#define PAINTER_H
 
-#include <QtQml/QtQml>
-#include <QQmlEngine>
-#include <QDebug>
-
-#include "painter.h"
 #include "capi.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define qreal double
 
 
-void painterSetCompositionMode(QPainter_ *painter, CompositionMode mode) {
-  reinterpret_cast<QPainter *>(painter)->setCompositionMode((QPainter::CompositionMode) mode);
-}
-CompositionMode painterCompositionMode(QPainter_ *painter) {
-  return (CompositionMode) reinterpret_cast<QPainter *>(painter)->compositionMode();
-}
 
+// Enums stolen from <QPainter>
+// Cannot include <QPainter> since cgo always runs go stuff through gcc, not g++
+enum RenderHint {
+    Antialiasing = 0x01,
+    TextAntialiasing = 0x02,
+    SmoothPixmapTransform = 0x04,
+    HighQualityAntialiasing = 0x08,
+    NonCosmeticDefaultPen = 0x10,
+    Qt4CompatiblePainting = 0x20
+};
+
+enum CompositionMode {
+    CompositionMode_SourceOver,
+    CompositionMode_DestinationOver,
+    CompositionMode_Clear,
+    CompositionMode_Source,
+    CompositionMode_Destination,
+    CompositionMode_SourceIn,
+    CompositionMode_DestinationIn,
+    CompositionMode_SourceOut,
+    CompositionMode_DestinationOut,
+    CompositionMode_SourceAtop,
+    CompositionMode_DestinationAtop,
+    CompositionMode_Xor,
+
+    //svg 1.2 blend modes
+    CompositionMode_Plus,
+    CompositionMode_Multiply,
+    CompositionMode_Screen,
+    CompositionMode_Overlay,
+    CompositionMode_Darken,
+    CompositionMode_Lighten,
+    CompositionMode_ColorDodge,
+    CompositionMode_ColorBurn,
+    CompositionMode_HardLight,
+    CompositionMode_SoftLight,
+    CompositionMode_Difference,
+    CompositionMode_Exclusion,
+
+    // ROPs
+    RasterOp_SourceOrDestination,
+    RasterOp_SourceAndDestination,
+    RasterOp_SourceXorDestination,
+    RasterOp_NotSourceAndNotDestination,
+    RasterOp_NotSourceOrNotDestination,
+    RasterOp_NotSourceXorDestination,
+    RasterOp_NotSource,
+    RasterOp_NotSourceAndDestination,
+    RasterOp_SourceAndNotDestination,
+    RasterOp_NotSourceOrDestination,
+    RasterOp_SourceOrNotDestination,
+    RasterOp_ClearDestination,
+    RasterOp_SetDestination,
+    RasterOp_NotDestination
+};
+
+// Q_DECLARE_FLAGS(RenderHints, RenderHint)
+
+// class PixmapFragment {
+// public:
+//     qreal x;
+//     qreal y;
+//     qreal sourceLeft;
+//     qreal sourceTop;
+//     qreal width;
+//     qreal height;
+//     qreal scaleX;
+//     qreal scaleY;
+//     qreal rotation;
+//     qreal opacity;
+//     static PixmapFragment Q_GUI_EXPORT create(const QPointF &pos, const QRectF &sourceRect,
+//                                         qreal scaleX = 1, qreal scaleY = 1,
+//                                         qreal rotation = 0, qreal opacity = 1);
+// };
+
+// enum PixmapFragmentHint {
+//     OpaqueHint = 0x01
+// };
+
+// Q_DECLARE_FLAGS(PixmapFragmentHints, PixmapFragmentHint)
+
+// // QPainter();
+// // explicit QPainter(QPaintDevice *);
+// // ~QPainter();
 //
+// // QPaintDevice *painterDevice(QPainter_ *painter) const;
+//
+// // bool painterBegin(QPainter_ *painter, QPaintDevice *);
+// // bool painterEnd(QPainter_ *painter);
+// bool painterIsActive(QPainter_ *painter) const;
+//
+// void painterInitFrom(QPainter_ *painter, const QPaintDevice *device);
+//
+
+
+
+
+void painterSetCompositionMode(QPainter_ *painter, enum CompositionMode mode);
+enum CompositionMode painterCompositionMode(QPainter_ *painter);
+
 // const QFont &painterFont(QPainter_ *painter) const;
 // void painterSetFont(QPainter_ *painter, const QFont &f);
 //
@@ -64,12 +158,8 @@ CompositionMode painterCompositionMode(QPainter_ *painter) {
 //
 // QRectF painterClipBoundingRect(QPainter_ *painter) const;
 //
-void painterSave(QPainter_ *painter){
-  reinterpret_cast<QPainter *>(painter)->save();
-}
-void painterRestore(QPainter_ *painter){
-  reinterpret_cast<QPainter *>(painter)->restore();
-}
+void painterSave(QPainter_ *painter);
+void painterRestore(QPainter_ *painter);
 //
 // // XForm functions
 // void painterSetMatrix(QPainter_ *painter, const QMatrix &matrix, bool combine = false);
@@ -97,21 +187,21 @@ void painterRestore(QPainter_ *painter){
 // void painterSetWorldMatrixEnabled(QPainter_ *painter, bool enabled);
 // bool painterWorldMatrixEnabled(QPainter_ *painter) const;
 //
-// void painterScale(QPainter_ *painter, qreal sx, qreal sy);
-// void painterShear(QPainter_ *painter, qreal sh, qreal sv);
-// void painterRotate(QPainter_ *painter, qreal a);
+void painterScale(QPainter_ *painter, qreal sx, qreal sy);
+void painterShear(QPainter_ *painter, qreal sh, qreal sv);
+void painterRotate(QPainter_ *painter, qreal a);
 //
 // void painterTranslate(QPainter_ *painter, const QPointF &offset);
 // void painterTranslate(QPainter_ *painter, const QPoint &offset);
-// void painterTranslate(QPainter_ *painter, qreal dx, qreal dy);
+void painterTranslate(QPainter_ *painter, qreal dx, qreal dy);
 //
 // QRect painterWindow(QPainter_ *painter) const;
 // void painterSetWindow(QPainter_ *painter, const QRect &window);
-// void painterSetWindow(QPainter_ *painter, int x, int y, int w, int h);
+void painterSetWindow(QPainter_ *painter, int x, int y, int w, int h);
 //
 // QRect painterViewport(QPainter_ *painter) const;
 // void painterSetViewport(QPainter_ *painter, const QRect &viewport);
-// void painterSetViewport(QPainter_ *painter, int x, int y, int w, int h);
+void painterSetViewport(QPainter_ *painter, int x, int y, int w, int h);
 //
 // void painterSetViewTransformEnabled(QPainter_ *painter, bool enable);
 // bool painterViewTransformEnabled(QPainter_ *painter) const;
@@ -305,11 +395,14 @@ void painterRestore(QPainter_ *painter){
 // static QPaintDevice *redirected(const QPaintDevice *device, QPoint *offset = 0);
 // static void restoreRedirected(const QPaintDevice *device);
 
-void painterBeginNativePainting(QPainter_ *painter) {
-  reinterpret_cast<QPainter *>(painter)->beginNativePainting();
-}
-void painterEndNativePainting(QPainter_ *painter) {
-  reinterpret_cast<QPainter *>(painter)->endNativePainting();
-}
+void painterBeginNativePainting(QPainter_ *painter);
+void painterEndNativePainting(QPainter_ *painter);
+
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
+
+#endif // PAINTER_H
 
 // vim:ts=4:sw=4:et:ft=cpp

@@ -21,6 +21,7 @@ import (
 
 	"github.com/limetext/qml-go/cdata"
 	"github.com/limetext/qml-go/internal/util"
+	"github.com/limetext/qml-go/qpainter"
 )
 
 type mainThreadFunc struct {
@@ -593,7 +594,7 @@ func printPaintPanic() {
 }
 
 //export hookGoValuePaint
-func hookGoValuePaint(enginep, foldp unsafe.Pointer, reflectIndex C.intptr_t, qpainter unsafe.Pointer) {
+func hookGoValuePaint(enginep, foldp unsafe.Pointer, reflectIndex C.intptr_t, qpainterptr unsafe.Pointer) {
 	// Besides a convenience this is a workaround for http://golang.org/issue/8588
 	defer printPaintPanic()
 	defer atomic.StoreUintptr(&guiPaintRef, 0)
@@ -607,14 +608,12 @@ func hookGoValuePaint(enginep, foldp unsafe.Pointer, reflectIndex C.intptr_t, qp
 		return
 	}
 
-	painter := &Painter{
-		engine:   fold.engine,
-		obj:      CommonOf(fold.cvalue, fold.engine),
-		qpainter: qpainter,
-	}
+	obj := CommonOf(fold.cvalue, fold.engine)
+	painter := qpainter.FromPtr(qpainterptr)
+
 	v := reflect.ValueOf(fold.gvalue)
 	method := v.Method(int(reflectIndex))
-	method.Call([]reflect.Value{reflect.ValueOf(painter)})
+	method.Call([]reflect.Value{reflect.ValueOf(obj), reflect.ValueOf(painter)})
 }
 
 func ensureEngine(enginep, foldp unsafe.Pointer) *valueFold {
