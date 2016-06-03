@@ -130,6 +130,8 @@ func packDataValue(value interface{}, dvalue *C.DataValue, engine *Engine, owner
 func unpackDataValue(dvalue *C.DataValue, engine *Engine) interface{} {
 	datap := unsafe.Pointer(&dvalue.data)
 	switch dvalue.dataType {
+	case C.DTUnknown:
+		return nil
 	case C.DTString:
 		s := C.GoStringN(*(**C.char)(datap), dvalue.len)
 		// TODO If we move all unpackDataValue calls to the GUI thread,
