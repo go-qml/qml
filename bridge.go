@@ -22,9 +22,15 @@ import (
 	"github.com/limetext/qml-go/cdata"
 )
 
+type mainThreadFunc struct {
+	f    func()
+	done chan struct{}
+}
+
 var (
-	guiFunc     = make(chan func())
-	guiDone     = make(chan struct{})
+	guiFunc        = make(chan mainThreadFunc)
+	doneChanBuffer = make(chan chan struct{}, 10)
+	// guiDone     = make(chan struct{})
 	guiLock     = 0
 	guiMainRef  uintptr
 	guiPaintRef uintptr
@@ -81,11 +87,27 @@ func RunMain(f func()) {
 		C.idleTimerStart()
 	}
 
+	var doneChan chan struct{}
+
+	select {
+	case doneChan = <-doneChanBuffer:
+		// yay
+	default:
+		doneChan = make(chan struct{})
+	}
+
 	// Send f to be executed by the idle hook in the main GUI thread.
-	guiFunc <- f
+	guiFunc <- mainThreadFunc{f: f, done: doneChan}
 
 	// Wait until f is done executing.
-	<-guiDone
+	<-doneChan
+
+	select {
+	case doneChanBuffer <- doneChan:
+		return
+	default:
+		close(doneChan)
+	}
 }
 
 // Lock freezes all QML activity by blocking the main event loop.
@@ -176,7 +198,7 @@ func Changed(value, fieldAddr interface{}) {
 //
 //export hookIdleTimer
 func hookIdleTimer() {
-	var f func()
+	var f mainThreadFunc
 	for {
 		select {
 		case f = <-guiFunc:
@@ -188,8 +210,8 @@ func hookIdleTimer() {
 			}
 		}
 		// fmt.Fprintf(os.Stderr, "hookIdleTimer: %v\n", runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name())
-		f()
-		guiDone <- struct{}{}
+		f.f()
+		f.done <- struct{}{}
 		atomic.AddInt32(&guiIdleRun, -1)
 	}
 }
