@@ -11,7 +11,6 @@ import (
 	"image/color"
 	"os"
 	"reflect"
-	"runtime/debug"
 	"unsafe"
 
 	"github.com/limetext/qml-go/internal/util"
