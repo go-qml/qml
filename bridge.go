@@ -16,6 +16,7 @@ import (
 	"os"
 	"reflect"
 	"runtime"
+	"runtime/debug"
 	"sync/atomic"
 	"unsafe"
 
@@ -30,7 +31,7 @@ type mainThreadFunc struct {
 }
 
 var (
-	guiFunc        = make(chan mainThreadFunc)
+	guiFunc        = make(chan mainThreadFunc, 10)
 	doneChanBuffer = make(chan chan struct{}, 10)
 	// guiDone     = make(chan struct{})
 	guiLock     = 0
@@ -86,7 +87,7 @@ func RunMain(f func()) {
 
 	// Tell Qt we're waiting for the idle hook to be called.
 	if atomic.AddInt32(&guiIdleRun, 1) == 1 {
-		C.idleTimerStart()
+		// C.idleTimerStart()
 	}
 
 	var doneChan chan struct{}
@@ -95,11 +96,12 @@ func RunMain(f func()) {
 	case doneChan = <-doneChanBuffer:
 		// yay
 	default:
-		doneChan = make(chan struct{})
+		doneChan = make(chan struct{}, 1)
 	}
 
 	// Send f to be executed by the idle hook in the main GUI thread.
 	guiFunc <- mainThreadFunc{f: f, done: doneChan}
+	C.idleTimerStart()
 
 	// Wait until f is done executing.
 	<-doneChan
@@ -200,6 +202,12 @@ func Changed(value, fieldAddr interface{}) {
 //
 //export hookIdleTimer
 func hookIdleTimer() {
+	ref := cdata.Ref()
+	if ref != guiMainRef && ref != atomic.LoadUintptr(&guiPaintRef) {
+		// Not within the GUI or render threads!
+		fmt.Println("AAARG! hookIdleTimer didn't run on the main thread!")
+		// return
+	}
 	var f mainThreadFunc
 	for {
 		select {
@@ -212,7 +220,17 @@ func hookIdleTimer() {
 			}
 		}
 		// fmt.Fprintf(os.Stderr, "hookIdleTimer: %v\n", runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name())
-		f.f()
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					fmt.Printf("Panic in RunMain func: %v\n", r)
+					debug.PrintStack()
+				}
+			}()
+
+			f.f()
+		}()
+
 		f.done <- struct{}{}
 		atomic.AddInt32(&guiIdleRun, -1)
 	}

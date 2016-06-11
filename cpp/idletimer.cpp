@@ -23,7 +23,8 @@ class IdleTimer : public QObject
 
     Q_INVOKABLE void start()
     {
-        timer.start(0, this);
+        // timer.start(0, this);
+        hookIdleTimer();
     }
 
     protected:
@@ -42,7 +43,7 @@ class IdleTimer : public QObject
 
     int32_t *guiIdleRun;
 
-    QBasicTimer timer;    
+    QBasicTimer timer;
 };
 
 void idleTimerInit(int32_t *guiIdleRun)
@@ -52,7 +53,7 @@ void idleTimerInit(int32_t *guiIdleRun)
 
 void idleTimerStart()
 {
-    QMetaObject::invokeMethod(IdleTimer::singleton(), "start", Qt::QueuedConnection);
+    QMetaObject::invokeMethod(IdleTimer::singleton(), "start", Qt::AutoConnection);
 }
 
 // vim:ts=4:sw=4:et:ft=cpp
