@@ -105,6 +105,9 @@ func packDataValue(value interface{}, dvalue *C.DataValue, engine *Engine, owner
 	case float32:
 		dvalue.dataType = C.DTFloat32
 		*(*float32)(datap) = value
+	case ItemModel:
+		dvalue.dataType = C.DTItemModel
+		*(*unsafe.Pointer)(datap) = value.internal_ItemModel().common.addr
 	case *Common:
 		dvalue.dataType = C.DTObject
 		*(*unsafe.Pointer)(datap) = value.addr

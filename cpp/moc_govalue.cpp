@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'govalue.h'
 **
-** Created by: The Qt Meta Object Compiler version 67 (Qt 5.2.1)
+** Created by: The Qt Meta Object Compiler version 67 (Qt 5.6.0)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
@@ -12,7 +12,7 @@
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'govalue.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 67
-#error "This file was generated using the moc from 5.2.1. It"
+#error "This file was generated using the moc from 5.6.0. It"
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
@@ -20,18 +20,19 @@
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_GoValue_t {
     QByteArrayData data[1];
-    char stringdata[9];
+    char stringdata0[8];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
-    offsetof(qt_meta_stringdata_GoValue_t, stringdata) + ofs \
-        - idx * sizeof(QByteArrayData) \
+    qptrdiff(offsetof(qt_meta_stringdata_GoValue_t, stringdata0) + ofs \
+        - idx * sizeof(QByteArrayData)) \
     )
 static const qt_meta_stringdata_GoValue_t qt_meta_stringdata_GoValue = {
     {
-QT_MOC_LITERAL(0, 0, 7)
+QT_MOC_LITERAL(0, 0, 7) // "GoValue"
+
     },
-    "GoValue\0"
+    "GoValue"
 };
 #undef QT_MOC_LITERAL
 
@@ -61,7 +62,7 @@ void GoValue::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, voi
 
 const QMetaObject GoValue::staticMetaObject = {
     { &QObject::staticMetaObject, qt_meta_stringdata_GoValue.data,
-      qt_meta_data_GoValue,  qt_static_metacall, 0, 0}
+      qt_meta_data_GoValue,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
 };
 
 
@@ -72,8 +73,8 @@ const QMetaObject *GoValue::metaObject() const
 
 void *GoValue::qt_metacast(const char *_clname)
 {
-    if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_GoValue.stringdata))
+    if (!_clname) return Q_NULLPTR;
+    if (!strcmp(_clname, qt_meta_stringdata_GoValue.stringdata0))
         return static_cast<void*>(const_cast< GoValue*>(this));
     return QObject::qt_metacast(_clname);
 }
@@ -87,18 +88,19 @@ int GoValue::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 }
 struct qt_meta_stringdata_GoPaintedValue_t {
     QByteArrayData data[1];
-    char stringdata[16];
+    char stringdata0[15];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
-    offsetof(qt_meta_stringdata_GoPaintedValue_t, stringdata) + ofs \
-        - idx * sizeof(QByteArrayData) \
+    qptrdiff(offsetof(qt_meta_stringdata_GoPaintedValue_t, stringdata0) + ofs \
+        - idx * sizeof(QByteArrayData)) \
     )
 static const qt_meta_stringdata_GoPaintedValue_t qt_meta_stringdata_GoPaintedValue = {
     {
-QT_MOC_LITERAL(0, 0, 14)
+QT_MOC_LITERAL(0, 0, 14) // "GoPaintedValue"
+
     },
-    "GoPaintedValue\0"
+    "GoPaintedValue"
 };
 #undef QT_MOC_LITERAL
 
@@ -128,7 +130,7 @@ void GoPaintedValue::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
 
 const QMetaObject GoPaintedValue::staticMetaObject = {
     { &QQuickPaintedItem::staticMetaObject, qt_meta_stringdata_GoPaintedValue.data,
-      qt_meta_data_GoPaintedValue,  qt_static_metacall, 0, 0}
+      qt_meta_data_GoPaintedValue,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
 };
 
 
@@ -139,8 +141,8 @@ const QMetaObject *GoPaintedValue::metaObject() const
 
 void *GoPaintedValue::qt_metacast(const char *_clname)
 {
-    if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_GoPaintedValue.stringdata))
+    if (!_clname) return Q_NULLPTR;
+    if (!strcmp(_clname, qt_meta_stringdata_GoPaintedValue.stringdata0))
         return static_cast<void*>(const_cast< GoPaintedValue*>(this));
     return QQuickPaintedItem::qt_metacast(_clname);
 }

@@ -11,6 +11,7 @@
 #include "govaluetype.h"
 #include "connector.h"
 #include "capi.h"
+#include "goitemmodel.h"
 
 static char *local_strdup(const char *str)
 {
@@ -689,6 +690,9 @@ void unpackDataValue(DataValue *value, QVariant_ *var)
         *qvar = **(QVariantList**)(value->data);
         delete *(QVariantList**)(value->data);
         break;
+    case DTItemModel:
+        qvar->setValue(*(GoItemModel**)(value->data));
+        break;
     case DTObject:
         qvar->setValue(*(QObject**)(value->data));
         break;
@@ -701,9 +705,9 @@ void unpackDataValue(DataValue *value, QVariant_ *var)
     }
 }
 
-void packDataValue(QVariant_ *var, DataValue *value)
+void packDataValue(const QVariant_ *var, DataValue *value)
 {
-    QVariant *qvar = reinterpret_cast<QVariant *>(var);
+    QVariant *qvar = reinterpret_cast<QVariant *>(const_cast<QVariant_ *>(var));
 
     // Some assumptions are made below regarding the size of types.
     // There's apparently no better way to handle this since that's
@@ -818,6 +822,12 @@ void packDataValue(QVariant_ *var, DataValue *value)
             if (goPaintedValue) {
                 value->dataType = DTGoAddr;
                 *(void **)(value->data) = goPaintedValue->addr;
+                break;
+            }
+            GoItemModel *goItemModel = dynamic_cast<GoItemModel *>(qobject);
+            if (goItemModel) {
+                value->dataType = DTGoAddr;
+                *(void **)(value->data) = goItemModel->addr;
                 break;
             }
             value->dataType = DTObject;

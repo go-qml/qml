@@ -57,6 +57,7 @@ typedef enum {
     DTValueList    = 103,
     DTVariantList  = 104,
     DTListProperty = 105,
+    DTItemModel    = 106,
 
     // Used in type information, not in an actual data value.
     DTAny     = 201, // Can hold any of the above types.
@@ -179,7 +180,7 @@ void delString(QString_ *s);
 GoValue_ *newGoValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject_ *parent);
 void goValueActivate(GoValue_ *value, GoTypeInfo *typeInfo, int addrOffset);
 
-void packDataValue(QVariant_ *var, DataValue *result);
+void packDataValue(const QVariant_ *var, DataValue *result);
 void unpackDataValue(DataValue *value, QVariant_ *result);
 
 QVariantList_ *newVariantList(DataValue *list, int len);
