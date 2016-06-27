@@ -1,4 +1,4 @@
-// +build go1.4,!go1.5
+// +build go1.5
 
 #include "textflag.h"
 
@@ -13,6 +13,6 @@ TEXT ·Ref(SB),NOSPLIT,$4-4
 TEXT ·Addrs(SB),NOSPLIT,$0-8
 	MOVW	$runtime·main(SB), R0
 	MOVW	R0, ret+0(FP)
-	MOVW	$runtime·main_main(SB), R0
+	MOVW	$main·main(SB), R0
 	MOVW	R0, ret+4(FP)
 	RET
