@@ -155,7 +155,7 @@ func unpackDataValue(dvalue *C.DataValue, engine *Engine) interface{} {
 	case C.DTGoAddr:
 		// ObjectByName also does this fold conversion, to have access
 		// to the cvalue. Perhaps the fold should be returned.
-		fold := ensureEngine(engine.addr, C.GoRef(uintptr(datap)))
+		fold := ensureEngine(engine.addr, C.GoRef(uintptr(*(*unsafe.Pointer)(datap))))
 		return fold.gvalue
 	case C.DTInvalid:
 		return nil
