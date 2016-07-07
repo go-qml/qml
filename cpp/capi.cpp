@@ -799,16 +799,33 @@ void packDataValue(const QVariant_ *var, DataValue *value)
             value->len = len;
             *(DataValue**)(value->data) = dvlist;
         }
-	break;
+    break;
     case QMetaType::User:
-	{
-	    static const int qjstype = QVariant::fromValue(QJSValue()).userType();
-	    if (qvar->userType() == qjstype) {
-		auto var = qvar->value<QJSValue>().toVariant();
-		packDataValue(&var, value);
-	    }
-	}
-	break;
+    {
+        static const int qjstype = QVariant::fromValue(QJSValue()).userType();
+        if (qvar->userType() == qjstype) {
+            auto var = qvar->value<QJSValue>().toVariant();
+            packDataValue(&var, value);
+            break;
+        }
+
+        static const int qlisturltype = qMetaTypeId<QList<QUrl>>();
+        if (qvar->userType() == qlisturltype) {
+            auto list = qvar->value<QList<QUrl>>();
+            int len = list.size();
+            DataValue *dvlist = (DataValue *) malloc(sizeof(DataValue) * len);
+            QVariant elem;
+            for (int i = 0; i < len; i++) {
+                elem.setValue(list.at(i));
+                packDataValue(&elem, &dvlist[i]);
+            }
+
+            value->dataType = DTValueList;
+            value->len = len;
+            *(DataValue**)(value->data) = dvlist;
+            break;
+        }
+    }
     default:
         if (qvar->type() == (int)QMetaType::QObjectStar || qvar->canConvert<QObject *>()) {
             QObject *qobject = qvar->value<QObject *>();
