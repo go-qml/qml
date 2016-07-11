@@ -65,6 +65,9 @@ func (obj *Common) assertInitialized() {
 func (obj *Common) Common() *Common {
 	return obj
 }
+func (obj *Common) Engine() *Engine {
+	return obj.engine
+}
 
 // TypeName returns the underlying type name for the held value.
 func (obj *Common) TypeName() string {
