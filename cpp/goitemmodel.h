@@ -34,6 +34,8 @@ public:
   void protEndInsertColumns();
   void protBeginInsertRows(const QModelIndex &parent, int first, int last);
   void protEndInsertRows();
+  void protBeginRemoveRows(const QModelIndex &parent, int first, int last);
+  void protEndRemoveRows();
 
 
 

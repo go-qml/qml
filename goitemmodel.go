@@ -38,6 +38,8 @@ type ItemModelInternal interface {
 	EndInsertColumns()
 	BeginInsertRows(parent ModelIndex, first int, last int)
 	EndInsertRows()
+	BeginRemoveRows(parent ModelIndex, first int, last int)
+	EndRemoveRows()
 	DataChanged(topLeft ModelIndex, bottomRight ModelIndex)
 }
 
@@ -173,6 +175,14 @@ func (qim *goItemModel) BeginInsertRows(parent ModelIndex, first int, last int) 
 
 func (qim *goItemModel) EndInsertRows() {
 	C.itemModelEndInsertRows(qim.common.addr)
+}
+
+func (qim *goItemModel) BeginRemoveRows(parent ModelIndex, first int, last int) {
+	C.itemModelBeginRemoveRows(qim.common.addr, passMI(parent), C.int(first), C.int(last))
+}
+
+func (qim *goItemModel) EndRemoveRows() {
+	C.itemModelEndRemoveRows(qim.common.addr)
 }
 
 func (qim *goItemModel) DataChanged(topLeft ModelIndex, bottomRight ModelIndex) {

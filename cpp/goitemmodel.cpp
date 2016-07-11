@@ -77,3 +77,11 @@ void GoItemModel::protBeginInsertRows(const QModelIndex &parent, int first, int 
 void GoItemModel::protEndInsertRows() {
 	return endInsertRows();
 }
+
+void GoItemModel::protBeginRemoveRows(const QModelIndex &parent, int first, int last) {
+	return beginRemoveRows(parent, first, last);
+}
+
+void GoItemModel::protEndRemoveRows() {
+	return endRemoveRows();
+}

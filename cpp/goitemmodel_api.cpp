@@ -91,6 +91,14 @@ void itemModelEndInsertRows(QItemModel_ *im) {
 	reinterpret_cast<GoItemModel*>(im)->protEndInsertRows();
 }
 
+void itemModelBeginRemoveRows(QItemModel_ *im, QModelIndex_ *parent, int first, int last) {
+	reinterpret_cast<GoItemModel*>(im)->protBeginRemoveRows(miCastFrom(parent), first, last);
+}
+
+void itemModelEndRemoveRows(QItemModel_ *im) {
+	reinterpret_cast<GoItemModel*>(im)->protEndRemoveRows();
+}
+
 void itemModelDataChanged(QItemModel_ *im, QModelIndex_ *topLeft, QModelIndex_ *bottomRight) {
 	reinterpret_cast<GoItemModel*>(im)->dataChanged(miCastFrom(topLeft), miCastFrom(bottomRight));
 }

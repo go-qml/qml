@@ -51,6 +51,8 @@ void itemModelBeginInsertColumns(QItemModel_ *im, QModelIndex_ *parent, int firs
 void itemModelEndInsertColumns(QItemModel_ *im);
 void itemModelBeginInsertRows(QItemModel_ *im, QModelIndex_ *parent, int first, int last);
 void itemModelEndInsertRows(QItemModel_ *im);
+void itemModelBeginRemoveRows(QItemModel_ *im, QModelIndex_ *parent, int first, int last);
+void itemModelEndRemoveRows(QItemModel_ *im);
 
 
 void itemModelDataChanged(QItemModel_ *im, QModelIndex_ *topLeft, QModelIndex_ *bottomRight);
