@@ -446,6 +446,16 @@ func (obj *Common) On(signal string, function interface{}) {
 	cmust(cerr)
 }
 
+// Disconnect everything connected to an object's signals
+func (obj *Common) Clear() {
+	obj.assertInitialized()
+	var cerr *C.error
+	RunMain(func() {
+		cerr = C.objectDisconnect(obj.addr)
+	})
+	cmust(cerr)
+}
+
 //export hookSignalDisconnect
 func hookSignalDisconnect(funcp unsafe.Pointer) {
 	before := len(connectedFunction)

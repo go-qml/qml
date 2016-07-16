@@ -491,7 +491,7 @@ error *objectInvoke(QObject_ *object, const char *method, int methodLen, DataVal
     }
 
     if (qobject == 0) {
-      return errorf("method called on null object: %s", method);
+        return errorf("method called on null object: %s", method);
     }
 
     const QMetaObject *metaObject = qobject->metaObject();
@@ -575,6 +575,14 @@ error *objectConnect(QObject_ *object, const char *signal, int signalLen, QQmlEn
     }
     // Cannot use constData here as the byte array is not null-terminated.
     return errorf("object does not expose a \"%s\" signal", qsignal.data());
+}
+
+error *objectDisconnect(QObject_ *object)
+{
+    const QObject *qobject = reinterpret_cast<QObject *>(object);
+    if (!qobject->disconnect())
+        return errorf("failed to disconnect signals");
+    return 0;
 }
 
 QQmlContext_ *objectContext(QObject_ *object)

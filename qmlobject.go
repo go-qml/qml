@@ -27,4 +27,5 @@ type Object interface {
 	CreateWindow(ctx *Context) *Window
 	Destroy()
 	On(signal string, function interface{})
+	Clear()
 }
