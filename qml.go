@@ -832,7 +832,7 @@ func hookSignalCall(enginep unsafe.Pointer, funcr C.GoRef, args *C.DataValue) {
 		panic("signal called on disconnected function")
 	}
 
-	funcv := reflect.ValueOf(&function)
+	funcv := reflect.ValueOf(function)
 	funct := funcv.Type()
 	numIn := funct.NumIn()
 	var params [C.MaxParams]reflect.Value
