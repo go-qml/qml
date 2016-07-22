@@ -258,6 +258,14 @@ func appendLoweredName(buf []byte, name string) []byte {
 	return append(buf, string(unicode.ToLower(last))...)
 }
 
+func isFieldPrivate(field reflect.StructField) bool {
+	return field.PkgPath != "" || !unicode.IsUpper(rune(field.Name[0]))
+}
+
+func isMethodPrivate(method reflect.Method) bool {
+	return method.PkgPath != ""
+}
+
 func typeInfo(v interface{}) *C.GoTypeInfo {
 	vt := reflect.TypeOf(v)
 	for vt.Kind() == reflect.Ptr {
@@ -293,7 +301,7 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	namesLen := 0
 	for i := 0; i < numField; i++ {
 		field := vt.Field(i)
-		if field.PkgPath != "" {
+		if isFieldPrivate(field) {
 			privateFields++
 			continue
 		}
@@ -301,7 +309,7 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	}
 	for i := 0; i < numMethod; i++ {
 		method := vtptr.Method(i)
-		if method.PkgPath != "" {
+		if isMethodPrivate(method) {
 			privateMethods++
 			continue
 		}
@@ -325,15 +333,16 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	names := make([]byte, 0, namesLen)
 	for i := 0; i < numField; i++ {
 		field := vt.Field(i)
-		if field.PkgPath != "" {
+		if isFieldPrivate(field) {
 			continue // not exported
 		}
+		// fmt.Println("Field: ", field)
 		names = appendLoweredName(names, field.Name)
 		names = append(names, 0)
 	}
 	for i := 0; i < numMethod; i++ {
 		method := vtptr.Method(i)
-		if method.PkgPath != "" {
+		if isMethodPrivate(method) {
 			continue // not exported
 		}
 		if _, ok := getters[method.Name]; !ok {
@@ -344,22 +353,24 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 			continue
 		}
 		// This is a getter method
+		// fmt.Println("Getter: ", method)
 		names = appendLoweredName(names, method.Name)
 		names = append(names, 0)
 	}
 	for i := 0; i < numMethod; i++ {
 		method := vtptr.Method(i)
-		if method.PkgPath != "" {
+		if isMethodPrivate(method) {
 			continue // not exported
 		}
 		if _, ok := getters[method.Name]; ok {
 			continue // getter already handled above
 		}
+		// fmt.Println("Method: ", method)
 		names = appendLoweredName(names, method.Name)
 		names = append(names, 0)
 	}
 	if len(names) != namesLen {
-		panic("pre-allocated buffer size was wrong")
+		panic(fmt.Sprint("pre-allocated buffer size was wrong ", namesLen, len(names), strings.Replace(string(names), "\000", "!", -1)))
 	}
 	typeInfo.memberNames = C.CString(string(names))
 
@@ -371,7 +382,7 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	mnames := uintptr(unsafe.Pointer(typeInfo.memberNames))
 	for i := 0; i < numField; i++ {
 		field := vt.Field(i)
-		if field.PkgPath != "" {
+		if isFieldPrivate(field) {
 			continue // not exported
 		}
 		memberInfo := (*C.GoMemberInfo)(unsafe.Pointer(members + uintptr(memberInfoSize)*membersi))
@@ -389,7 +400,7 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	}
 	for i := 0; i < numMethod; i++ {
 		method := vtptr.Method(i)
-		if method.PkgPath != "" {
+		if isMethodPrivate(method) {
 			continue // not exported
 		}
 		if _, ok := getters[method.Name]; !ok {
@@ -407,7 +418,7 @@ func typeInfo(v interface{}) *C.GoTypeInfo {
 	}
 	for i := 0; i < numMethod; i++ {
 		method := vtptr.Method(i)
-		if method.PkgPath != "" {
+		if isMethodPrivate(method) {
 			continue // not exported
 		}
 		if _, ok := getters[method.Name]; ok {
