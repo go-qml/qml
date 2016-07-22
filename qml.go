@@ -20,6 +20,55 @@ func AddLibraryPath(path string) {
 	})
 }
 
+func SetApplicationName(name string) {
+	cname, cnameLen := util.UnsafeStringData(name)
+	RunMain(func() {
+		C.coreSetApplicationName((*C.char)(cname), C.int(cnameLen))
+	})
+}
+
+func SetApplicationVersion(version string) {
+	cversion, cversionLen := util.UnsafeStringData(version)
+	RunMain(func() {
+		C.coreSetApplicationVersion((*C.char)(cversion), C.int(cversionLen))
+	})
+}
+
+func SetOrganizationDomain(domain string) {
+	cdomain, cdomainLen := util.UnsafeStringData(domain)
+	RunMain(func() {
+		C.coreSetOrganizationDomain((*C.char)(cdomain), C.int(cdomainLen))
+	})
+}
+
+func SetOrganizationName(name string) {
+	cname, cnameLen := util.UnsafeStringData(name)
+	RunMain(func() {
+		C.coreSetOrganizationName((*C.char)(cname), C.int(cnameLen))
+	})
+}
+
+func SetApplicationDisplayName(name string) {
+	cname, cnameLen := util.UnsafeStringData(name)
+	RunMain(func() {
+		C.guiappSetApplicationDisplayName((*C.char)(cname), C.int(cnameLen))
+	})
+}
+
+func SetDesktopFileName(path string) {
+	cpath, cpathLen := util.UnsafeStringData(path)
+	RunMain(func() {
+		C.guiappSetDesktopFileName((*C.char)(cpath), C.int(cpathLen))
+	})
+}
+
+func SetWindowIcon(path string) {
+	cpath, cpathLen := util.UnsafeStringData(path)
+	RunMain(func() {
+		C.guiappSetWindowIcon((*C.char)(cpath), C.int(cpathLen))
+	})
+}
+
 func cerror(cerr *C.error) error {
 	err := errors.New(C.GoString((*C.char)(unsafe.Pointer(cerr))))
 	C.free(unsafe.Pointer(cerr))

@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QGuiApplication>
 #include <QQuickView>
 #include <QQuickItem>
 #include <QtQml>
@@ -164,6 +165,63 @@ void coreAddLibraryPath(const char *path, int pathLen)
     QString qslibraryPath = QString::fromUtf8(qlibraryPath);
 
     QCoreApplication::addLibraryPath(qslibraryPath);
+}
+
+void coreSetApplicationName(const char *path, int pathLen)
+{
+    QByteArray qappName(path, pathLen);
+    QString qsappName = QString::fromUtf8(qappName);
+
+    QCoreApplication::setApplicationName(qsappName);
+}
+
+void coreSetApplicationVersion(const char *path, int pathLen)
+{
+    QByteArray qappVersion(path, pathLen);
+    QString qsappVersion = QString::fromUtf8(qappVersion);
+
+    QCoreApplication::setApplicationVersion(qsappVersion);
+}
+
+void coreSetOrganizationDomain(const char *path, int pathLen)
+{
+    QByteArray qorgDomain(path, pathLen);
+    QString qsorgDomain = QString::fromUtf8(qorgDomain);
+
+    QCoreApplication::setOrganizationDomain(qsorgDomain);
+}
+
+void coreSetOrganizationName(const char *path, int pathLen)
+{
+    QByteArray qorgName(path, pathLen);
+    QString qsorgName = QString::fromUtf8(qorgName);
+
+    QCoreApplication::setOrganizationName(qsorgName);
+}
+
+
+void guiappSetApplicationDisplayName(const char *path, int pathLen)
+{
+    QByteArray qappDispName(path, pathLen);
+    QString qsappDispName = QString::fromUtf8(qappDispName);
+
+    QGuiApplication::setApplicationDisplayName(qsappDispName);
+}
+void guiappSetDesktopFileName(const char *path, int pathLen)
+{
+    QByteArray qfileName(path, pathLen);
+    QString qsfileName = QString::fromUtf8(qfileName);
+
+    QGuiApplication::setDesktopFileName(qsfileName);
+}
+void guiappSetWindowIcon(const char *path, int pathLen)
+{
+    QByteArray qiconPath(path, pathLen);
+    QString qsiconPath = QString::fromUtf8(qiconPath);
+
+    QIcon icon(qsiconPath);
+
+    QGuiApplication::setWindowIcon(icon);
 }
 
 QQmlComponent_ *newComponent(QQmlEngine_ *engine, QObject_ *parent)

@@ -133,6 +133,14 @@ void engineAddPluginPath(QQmlEngine_ *engine, const char *path, int pathLen);
 void engineClearComponentCache(QQmlEngine_ *engine);
 
 void coreAddLibraryPath(const char *path, int pathLen);
+void coreSetApplicationName(const char *path, int pathLen);
+void coreSetApplicationVersion(const char *path, int pathLen);
+void coreSetOrganizationDomain(const char *path, int pathLen);
+void coreSetOrganizationName(const char *path, int pathLen);
+
+void guiappSetApplicationDisplayName(const char *path, int pathLen);
+void guiappSetDesktopFileName(const char *path, int pathLen);
+void guiappSetWindowIcon(const char *path, int pathLen);
 
 void contextGetProperty(QQmlContext_ *context, QString_ *name, DataValue *value);
 void contextSetProperty(QQmlContext_ *context, QString_ *name, DataValue *value);
