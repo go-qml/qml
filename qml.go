@@ -55,12 +55,13 @@ func SetApplicationDisplayName(name string) {
 	})
 }
 
-func SetDesktopFileName(path string) {
-	cpath, cpathLen := util.UnsafeStringData(path)
-	RunMain(func() {
-		C.guiappSetDesktopFileName((*C.char)(cpath), C.int(cpathLen))
-	})
-}
+// Qt 5.7
+// func SetDesktopFileName(path string) {
+// 	cpath, cpathLen := util.UnsafeStringData(path)
+// 	RunMain(func() {
+// 		C.guiappSetDesktopFileName((*C.char)(cpath), C.int(cpathLen))
+// 	})
+// }
 
 func SetWindowIcon(path string) {
 	cpath, cpathLen := util.UnsafeStringData(path)

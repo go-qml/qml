@@ -207,13 +207,14 @@ void guiappSetApplicationDisplayName(const char *path, int pathLen)
 
     QGuiApplication::setApplicationDisplayName(qsappDispName);
 }
-void guiappSetDesktopFileName(const char *path, int pathLen)
-{
-    QByteArray qfileName(path, pathLen);
-    QString qsfileName = QString::fromUtf8(qfileName);
-
-    QGuiApplication::setDesktopFileName(qsfileName);
-}
+// Added in Qt 5.7
+// void guiappSetDesktopFileName(const char *path, int pathLen)
+// {
+//     QByteArray qfileName(path, pathLen);
+//     QString qsfileName = QString::fromUtf8(qfileName);
+//
+//     QGuiApplication::setDesktopFileName(qsfileName);
+// }
 void guiappSetWindowIcon(const char *path, int pathLen)
 {
     QByteArray qiconPath(path, pathLen);

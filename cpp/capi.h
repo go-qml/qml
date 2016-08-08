@@ -139,7 +139,7 @@ void coreSetOrganizationDomain(const char *path, int pathLen);
 void coreSetOrganizationName(const char *path, int pathLen);
 
 void guiappSetApplicationDisplayName(const char *path, int pathLen);
-void guiappSetDesktopFileName(const char *path, int pathLen);
+// void guiappSetDesktopFileName(const char *path, int pathLen); // Qt 5.7
 void guiappSetWindowIcon(const char *path, int pathLen);
 
 void contextGetProperty(QQmlContext_ *context, QString_ *name, DataValue *value);
