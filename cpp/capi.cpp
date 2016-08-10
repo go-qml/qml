@@ -222,7 +222,7 @@ void guiappSetWindowIcon(const char *path, int pathLen)
 
     QIcon icon(qsiconPath);
 
-    QGuiApplication::setWindowIcon(icon);
+    QApplication::setWindowIcon(icon);
 }
 
 QQmlComponent_ *newComponent(QQmlEngine_ *engine, QObject_ *parent)
