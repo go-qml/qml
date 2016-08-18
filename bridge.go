@@ -55,19 +55,45 @@ func init() {
 // The Run function must necessarily be called from the same goroutine as
 // the main function or the application may fail when running on Mac OS.
 func Run(f func() error) error {
+	return RunArgs(os.Args, f)
+}
+
+// RunArgs runs the main QML event loop, runs f, and then terminates the
+// event loop once f returns.
+//
+// Most functions from the qml package block until RunArgs is called.
+//
+// The RunArgs function must necessarily be called from the same goroutine as
+// the main function or the application may fail when running on Mac OS.
+func RunArgs(args []string, f func() error) error {
 	if cdata.Ref() != guiMainRef {
-		panic("Run must be called on the initial goroutine so apps are portable to Mac OS")
+		panic("RunArgs must be called on the initial goroutine so apps are portable to Mac OS")
 	}
 	if !atomic.CompareAndSwapInt32(&initialized, 0, 1) {
-		panic("qml.Run called more than once")
+		panic("qml.RunArgs called more than once")
 	}
-	C.newGuiApplication()
+
+	// so, technically we should be freeing the C.CString below, but newGuiApplication
+	// can really only be called once, and the args are not going to be large
+	argc := len(args)
+	argv := make([]*C.char, argc+1)
+	for i := 0; i < argc; i++ {
+		argv[i] = C.CString(args[i])
+	}
+	argv[argc] = nil
+
+	argvP := unsafe.Pointer(&argv[0])
+
+	C.newGuiApplication(C.int(argc), argvP)
 	C.idleTimerInit((*C.int32_t)(&guiIdleRun))
 	done := make(chan error, 1)
 	go func() {
 		RunMain(func() {}) // Block until the event loop is running.
 		done <- f()
 		C.applicationExit()
+		// this is here to keep the argv slice alive while the application is running
+		// TODO: change this to something without side effects? runtime.KeepAlive?
+		fmt.Sprintln(argc, argv)
 	}()
 	C.applicationExec()
 	return <-done

@@ -108,7 +108,7 @@ typedef struct {
 } LogMessage;
 
 
-void newGuiApplication();
+void newGuiApplication(int argc, char **argv);
 void applicationExec();
 void applicationExit();
 void applicationFlushAll();
