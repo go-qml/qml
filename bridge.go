@@ -262,6 +262,28 @@ func hookIdleTimer() {
 	}
 }
 
+var valueFoldRefCounter C.GoValueRef = 1
+var valueFoldMap = make(map[C.GoValueRef]*valueFold)
+
+func getFoldRef(fold *valueFold) C.GoValueRef {
+	if fold.ref != 0 {
+		return fold.ref
+	}
+
+	ref := (C.GoValueRef)(atomic.AddUintptr((*uintptr)(unsafe.Pointer(&valueFoldRefCounter)), 1))
+	fold.ref = ref
+	valueFoldMap[ref] = fold
+	return ref
+}
+
+func foldFromRef(ref C.GoValueRef) *valueFold {
+	return valueFoldMap[ref]
+}
+
+func clearFoldRef(ref C.GoValueRef) {
+	delete(valueFoldMap, ref)
+}
+
 type valueFold struct {
 	engine *Engine
 	gvalue interface{}
@@ -270,6 +292,7 @@ type valueFold struct {
 	prev   *valueFold
 	next   *valueFold
 	owner  valueOwner
+	ref    C.GoValueRef
 }
 
 type valueOwner uint8
@@ -327,7 +350,7 @@ func wrapGoValue(engine *Engine, gvalue interface{}, owner valueOwner) (cvalue u
 		gvalue: gvalue,
 		owner:  owner,
 	}
-	fold.cvalue = C.newGoValue(unsafe.Pointer(fold), typeInfo(gvalue), parent)
+	fold.cvalue = C.newGoValue(getFoldRef(fold), typeInfo(gvalue), parent)
 	if prev != nil {
 		// Put new fold first so the single cppOwner, if any, is always the first entry.
 		fold.next = prev
@@ -365,7 +388,7 @@ func addrOf(gvalue interface{}) uintptr {
 var typeNew = make(map[*valueFold]bool)
 
 //export hookGoValueTypeNew
-func hookGoValueTypeNew(cvalue unsafe.Pointer, specp unsafe.Pointer) (foldp unsafe.Pointer) {
+func hookGoValueTypeNew(cvalue unsafe.Pointer, specp unsafe.Pointer) (foldp C.GoValueRef) {
 	// Initialization is postponed until the engine is available, so that
 	// we can hand Init the qml.Object that represents the object.
 	init := reflect.ValueOf((*TypeSpec)(specp).Init)
@@ -378,12 +401,12 @@ func hookGoValueTypeNew(cvalue unsafe.Pointer, specp unsafe.Pointer) (foldp unsa
 	typeNew[fold] = true
 	//fmt.Printf("[DEBUG] value alive (type-created): cvalue=%x gvalue=%x/%#v\n", fold.cvalue, addrOf(fold.gvalue), fold.gvalue)
 	stats.valuesAlive(+1)
-	return unsafe.Pointer(fold)
+	return getFoldRef(fold)
 }
 
 //export hookGoValueDestroyed
-func hookGoValueDestroyed(enginep unsafe.Pointer, foldp unsafe.Pointer) {
-	fold := (*valueFold)(foldp)
+func hookGoValueDestroyed(enginep unsafe.Pointer, foldp C.GoValueRef) {
+	fold := foldFromRef(foldp)
 	engine := fold.engine
 	if engine == nil {
 		before := len(typeNew)
@@ -435,7 +458,7 @@ func deref(value reflect.Value) reflect.Value {
 }
 
 //export hookGoValueReadField
-func hookGoValueReadField(enginep, foldp unsafe.Pointer, reflectIndex, getIndex, setIndex C.int, resultdv *C.DataValue) {
+func hookGoValueReadField(enginep unsafe.Pointer, foldp C.GoValueRef, reflectIndex, getIndex, setIndex C.int, resultdv *C.DataValue) {
 	fold := ensureEngine(enginep, foldp)
 
 	var field reflect.Value
@@ -492,7 +515,7 @@ func hookGoValueReadField(enginep, foldp unsafe.Pointer, reflectIndex, getIndex,
 }
 
 //export hookGoValueWriteField
-func hookGoValueWriteField(enginep, foldp unsafe.Pointer, reflectIndex, setIndex C.int, assigndv *C.DataValue) {
+func hookGoValueWriteField(enginep unsafe.Pointer, foldp C.GoValueRef, reflectIndex, setIndex C.int, assigndv *C.DataValue) {
 	fold := ensureEngine(enginep, foldp)
 	v := reflect.ValueOf(fold.gvalue)
 	ve := v
@@ -569,7 +592,7 @@ var (
 )
 
 //export hookGoValueCallMethod
-func hookGoValueCallMethod(enginep, foldp unsafe.Pointer, reflectIndex C.int, args *C.DataValue) {
+func hookGoValueCallMethod(enginep unsafe.Pointer, foldp C.GoValueRef, reflectIndex C.int, args *C.DataValue) {
 	fold := ensureEngine(enginep, foldp)
 	v := reflect.ValueOf(fold.gvalue)
 
@@ -638,7 +661,7 @@ func printPaintPanic() {
 }
 
 //export hookGoValuePaint
-func hookGoValuePaint(enginep, foldp unsafe.Pointer, reflectIndex C.intptr_t, qpainterptr unsafe.Pointer) {
+func hookGoValuePaint(enginep unsafe.Pointer, foldp C.GoValueRef, reflectIndex C.intptr_t, qpainterptr unsafe.Pointer) {
 	// Besides a convenience this is a workaround for http://golang.org/issue/8588
 	defer printPaintPanic()
 	defer atomic.StoreUintptr(&guiPaintRef, 0)
@@ -660,8 +683,8 @@ func hookGoValuePaint(enginep, foldp unsafe.Pointer, reflectIndex C.intptr_t, qp
 	method.Call([]reflect.Value{reflect.ValueOf(obj), reflect.ValueOf(painter)})
 }
 
-func ensureEngine(enginep, foldp unsafe.Pointer) *valueFold {
-	fold := (*valueFold)(foldp)
+func ensureEngine(enginep unsafe.Pointer, foldp C.GoValueRef) *valueFold {
+	fold := foldFromRef(foldp)
 	if fold.engine != nil {
 		if fold.init.IsValid() {
 			initGoType(fold)
@@ -729,22 +752,22 @@ func listSlice(fold *valueFold, reflectIndex C.intptr_t) *[]Object {
 }
 
 //export hookListPropertyAt
-func hookListPropertyAt(foldp unsafe.Pointer, reflectIndex, setIndex C.intptr_t, index C.int) (objp unsafe.Pointer) {
-	fold := (*valueFold)(foldp)
+func hookListPropertyAt(foldp C.GoValueRef, reflectIndex, setIndex C.intptr_t, index C.int) (objp unsafe.Pointer) {
+	fold := foldFromRef(foldp)
 	slice := listSlice(fold, reflectIndex)
 	return (*slice)[int(index)].Common().addr
 }
 
 //export hookListPropertyCount
-func hookListPropertyCount(foldp unsafe.Pointer, reflectIndex, setIndex C.intptr_t) C.int {
-	fold := (*valueFold)(foldp)
+func hookListPropertyCount(foldp C.GoValueRef, reflectIndex, setIndex C.intptr_t) C.int {
+	fold := foldFromRef(foldp)
 	slice := listSlice(fold, reflectIndex)
 	return C.int(len(*slice))
 }
 
 //export hookListPropertyAppend
-func hookListPropertyAppend(foldp unsafe.Pointer, reflectIndex, setIndex C.intptr_t, objp unsafe.Pointer) {
-	fold := (*valueFold)(foldp)
+func hookListPropertyAppend(foldp C.GoValueRef, reflectIndex, setIndex C.intptr_t, objp unsafe.Pointer) {
+	fold := foldFromRef(foldp)
 	slice := listSlice(fold, reflectIndex)
 	var objdv C.DataValue
 	objdv.dataType = C.DTObject
@@ -758,8 +781,8 @@ func hookListPropertyAppend(foldp unsafe.Pointer, reflectIndex, setIndex C.intpt
 }
 
 //export hookListPropertyClear
-func hookListPropertyClear(foldp unsafe.Pointer, reflectIndex, setIndex C.intptr_t) {
-	fold := (*valueFold)(foldp)
+func hookListPropertyClear(foldp C.GoValueRef, reflectIndex, setIndex C.intptr_t) {
+	fold := foldFromRef(foldp)
 	slice := listSlice(fold, reflectIndex)
 	newslice := (*slice)[0:0]
 	if setIndex >= 0 {

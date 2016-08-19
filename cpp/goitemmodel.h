@@ -15,7 +15,7 @@ class GoItemModel : public QAbstractItemModel
   Q_OBJECT
 public:
  	// QAbstractItemModel(QObject *parent = Q_NULLPTR)
- 	GoItemModel(QObject *parent, GoAddr *impl);
+ 	GoItemModel(QObject *parent, GoValueRef impl);
 	// virtual 	~QAbstractItemModel()
 
 	// Required functions
@@ -75,7 +75,7 @@ public:
 	// virtual Qt::DropActions 	supportedDropActions() const
 
 // private:
-    GoAddr *addr;
+    GoValueRef valueref;
 };
 
 #endif // GOITEMMODEL_H

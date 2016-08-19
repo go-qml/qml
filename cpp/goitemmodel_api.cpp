@@ -5,7 +5,7 @@
 #include <QAbstractItemModel>
 
 
-QItemModel_* newGoItemModel(QObject_* parent, GoAddr* impl) {
+QItemModel_* newGoItemModel(QObject_* parent, GoValueRef impl) {
 	return reinterpret_cast<QItemModel_*>(new GoItemModel(reinterpret_cast<QObject*>(parent), impl));
 }
 

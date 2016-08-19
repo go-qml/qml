@@ -5,13 +5,15 @@
 
 #include <stdint.h>
 
+typedef size_t GoValueRef;
+
 class Connector : public QObject
 {
     Q_OBJECT
 
     public:
 
-    Connector(QObject *sender, QMetaMethod method, QQmlEngine *engine, void *func, int argsLen)
+    Connector(QObject *sender, QMetaMethod method, QQmlEngine *engine, GoValueRef func, int argsLen)
         : QObject(sender), engine(engine), method(method), func(func), argsLen(argsLen) {};
 
     virtual ~Connector();
@@ -27,7 +29,7 @@ class Connector : public QObject
 
     QQmlEngine *engine;
     QMetaMethod method;
-    void *func;
+    GoValueRef func;
     int argsLen;
 };
 

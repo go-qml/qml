@@ -16,19 +16,19 @@ typedef void QVariant_;
 extern "C" {
 #endif
 
-// QItemModel_* newGoItemModel(QObject_*, GoAddr*);
+// QItemModel_* newGoItemModel(QObject_*, GoValueRef);
 // void deleteGoItemModel(QItemModel_*);
 
 // Required functions
-int 			implColumnCount(GoAddr *impl, QModelIndex_ *parent);
-void      implData(GoAddr *impl, QModelIndex_ *index, int role, DataValue *ret);
-QModelIndex_ 	*implIndex(GoAddr *impl, int row, int column, QModelIndex_ *parent);
-QModelIndex_ 	*implParent(GoAddr *impl, QModelIndex_ *index);
-int 			implRowCount(GoAddr *impl, QModelIndex_ *parent);
+int 			implColumnCount(GoValueRef impl, QModelIndex_ *parent);
+void      implData(GoValueRef impl, QModelIndex_ *index, int role, DataValue *ret);
+QModelIndex_ 	*implIndex(GoValueRef impl, int row, int column, QModelIndex_ *parent);
+QModelIndex_ 	*implParent(GoValueRef impl, QModelIndex_ *index);
+int 			implRowCount(GoValueRef impl, QModelIndex_ *parent);
 
 // Required for editing
-int 			implFlags(GoAddr *impl, QModelIndex_ *index);
-bool 			implSetData(GoAddr *impl, QModelIndex_ *index, DataValue *value, int role);
+int 			implFlags(GoValueRef impl, QModelIndex_ *index);
+bool 			implSetData(GoValueRef impl, QModelIndex_ *index, DataValue *value, int role);
 
 
 // virtual QModelIndex 	buddy(const QModelIndex &index) const

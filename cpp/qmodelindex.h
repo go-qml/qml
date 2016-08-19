@@ -12,7 +12,7 @@ typedef void QModelIndex_;
 extern "C" {
 #endif
 
-QItemModel_* newGoItemModel(QObject_*, GoAddr*);
+QItemModel_* newGoItemModel(QObject_*, GoValueRef);
 void deleteGoItemModel(QItemModel_*);
 
 

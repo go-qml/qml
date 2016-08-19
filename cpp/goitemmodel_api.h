@@ -18,7 +18,7 @@ typedef void QVariant_;
 extern "C" {
 #endif
 
-QItemModel_* newGoItemModel(QObject_*, GoAddr*);
+QItemModel_* newGoItemModel(QObject_*, GoValueRef);
 void deleteGoItemModel(QItemModel_*);
 
 QModelIndex_ *modelIndexChild(QModelIndex_ *mi, int row, int col);

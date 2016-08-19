@@ -1,8 +1,8 @@
 
 #include "goitemmodel.h"
 
-GoItemModel::GoItemModel(QObject* parent, GoAddr* addr)
-	: QAbstractItemModel(parent), addr(addr) {
+GoItemModel::GoItemModel(QObject* parent, GoValueRef valueref)
+	: QAbstractItemModel(parent), valueref(valueref) {
 
 }
 
@@ -18,13 +18,13 @@ QModelIndex miCastFrom(QModelIndex_ *index) {
 
 // Required functions
 int GoItemModel::columnCount(const QModelIndex &parent) const {
-	return implColumnCount(addr, miCastTo(parent));
+	return implColumnCount(valueref, miCastTo(parent));
 }
 
 QVariant GoItemModel::data(const QModelIndex &index, int role) const {
 	DataValue value;
 
-	implData(addr, miCastTo(index), role, &value);
+	implData(valueref, miCastTo(index), role, &value);
 
   QVariant var;
   unpackDataValue(&value, &var);
@@ -33,27 +33,27 @@ QVariant GoItemModel::data(const QModelIndex &index, int role) const {
 }
 
 QModelIndex GoItemModel::index(int row, int column, const QModelIndex &parent) const {
-	return miCastFrom(implIndex(addr, row, column, miCastTo(parent)));
+	return miCastFrom(implIndex(valueref, row, column, miCastTo(parent)));
 }
 
 QModelIndex GoItemModel::parent(const QModelIndex &index) const {
-	return miCastFrom(implParent(addr, miCastTo(index)));
+	return miCastFrom(implParent(valueref, miCastTo(index)));
 }
 
 int GoItemModel::rowCount(const QModelIndex &parent) const {
-	return implRowCount(addr, miCastTo(parent));
+	return implRowCount(valueref, miCastTo(parent));
 }
 
 
 // Required for editing
 Qt::ItemFlags GoItemModel::flags(const QModelIndex &index) const {
-	return (Qt::ItemFlags)implFlags(addr, miCastTo(index));
+	return (Qt::ItemFlags)implFlags(valueref, miCastTo(index));
 }
 
 bool GoItemModel::setData(const QModelIndex &index, const QVariant &value, int role) {
 	DataValue *dv = (DataValue *) malloc(sizeof(DataValue));
     packDataValue(&value, dv);
-	return implSetData(addr, miCastTo(index), dv, role);
+	return implSetData(valueref, miCastTo(index), dv, role);
 }
 
 // Internal Protected functions

@@ -63,7 +63,10 @@ func NewItemModel(engine *Engine, parent Object, impl ItemModelImpl) (ItemModel,
 	var imptr unsafe.Pointer
 
 	RunMain(func() {
-		imptr = C.newGoItemModel(parentPtr, unsafe.Pointer(im))
+		fold := &valueFold{
+			gvalue: im,
+		}
+		imptr = C.newGoItemModel(parentPtr, getFoldRef(fold))
 	})
 
 	im.common = CommonOf(imptr, engine)
@@ -191,16 +194,16 @@ func (qim *goItemModel) DataChanged(topLeft ModelIndex, bottomRight ModelIndex) 
 
 // Required functions
 //export implColumnCount
-func implColumnCount(qim uintptr, parent uintptr) int {
-	im := (*goItemModel)(unsafe.Pointer(qim))
+func implColumnCount(qim C.GoValueRef, parent uintptr) int {
+	im := foldFromRef(qim).gvalue.(*goItemModel)
 	parentMi := mkModelIndex(parent, im.common.engine)
 
 	return im.impl.ColumnCount(parentMi)
 }
 
 //export implData
-func implData(qim uintptr, index uintptr, role int, ret *C.DataValue) {
-	im := (*goItemModel)(unsafe.Pointer(qim))
+func implData(qim C.GoValueRef, index uintptr, role int, ret *C.DataValue) {
+	im := foldFromRef(qim).gvalue.(*goItemModel)
 	indexMi := mkModelIndex(index, im.common.engine)
 
 	v := im.impl.Data(indexMi, Role(role))
@@ -209,8 +212,8 @@ func implData(qim uintptr, index uintptr, role int, ret *C.DataValue) {
 }
 
 //export implIndex
-func implIndex(qim uintptr, row int, column int, parent uintptr) uintptr {
-	im := (*goItemModel)(unsafe.Pointer(qim))
+func implIndex(qim C.GoValueRef, row int, column int, parent uintptr) uintptr {
+	im := foldFromRef(qim).gvalue.(*goItemModel)
 	parentMi := mkModelIndex(parent, im.common.engine)
 
 	ret := im.impl.Index(row, column, parentMi)
@@ -222,8 +225,8 @@ func implIndex(qim uintptr, row int, column int, parent uintptr) uintptr {
 }
 
 //export implParent
-func implParent(qim uintptr, index uintptr) uintptr {
-	im := (*goItemModel)(unsafe.Pointer(qim))
+func implParent(qim C.GoValueRef, index uintptr) uintptr {
+	im := foldFromRef(qim).gvalue.(*goItemModel)
 	indexMi := mkModelIndex(index, im.common.engine)
 	parentMi := im.impl.Parent(indexMi)
 	if parentMi != nil {
@@ -234,8 +237,8 @@ func implParent(qim uintptr, index uintptr) uintptr {
 }
 
 //export implRowCount
-func implRowCount(qim uintptr, parent uintptr) int {
-	im := (*goItemModel)(unsafe.Pointer(qim))
+func implRowCount(qim C.GoValueRef, parent uintptr) int {
+	im := foldFromRef(qim).gvalue.(*goItemModel)
 	parentMi := mkModelIndex(parent, im.common.engine)
 
 	return im.impl.RowCount(parentMi)
@@ -243,16 +246,16 @@ func implRowCount(qim uintptr, parent uintptr) int {
 
 // Required for editing
 //export implFlags
-func implFlags(qim uintptr, index uintptr) ItemFlags {
-	im := (*goItemModel)(unsafe.Pointer(qim))
+func implFlags(qim C.GoValueRef, index uintptr) ItemFlags {
+	im := foldFromRef(qim).gvalue.(*goItemModel)
 	indexMi := mkModelIndex(index, im.common.engine)
 
 	return im.impl.Flags(indexMi)
 }
 
 //export implSetData
-func implSetData(qim uintptr, index uintptr, dv *C.DataValue, role int) bool {
-	im := (*goItemModel)(unsafe.Pointer(qim))
+func implSetData(qim C.GoValueRef, index uintptr, dv *C.DataValue, role int) bool {
+	im := foldFromRef(qim).gvalue.(*goItemModel)
 	indexMi := mkModelIndex(index, im.common.engine)
 
 	value := unpackDataValue(dv, im.common.engine)

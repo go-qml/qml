@@ -98,9 +98,9 @@ func (obj *Common) Interface() interface{} {
 	var result interface{}
 	var cerr *C.error
 	RunMain(func() {
-		var fold *valueFold
-		if cerr = C.objectGoAddr(obj.addr, (*unsafe.Pointer)(unsafe.Pointer(&fold))); cerr == nil {
-			result = fold.gvalue
+		var valueref C.GoValueRef
+		if cerr = C.objectGoAddr(obj.addr, &valueref); cerr == nil {
+			result = foldFromRef(valueref).gvalue
 		}
 	})
 	cmust(cerr)
@@ -402,7 +402,7 @@ func (obj *Common) Destroy() {
 	})
 }
 
-var connectedFunction = make(map[*interface{}]bool)
+var connectedFunction = make(map[interface{}]bool)
 
 // On connects the named signal from obj with the provided function, so that
 // when obj next emits that signal, the function is called with the parameters
@@ -437,10 +437,14 @@ func (obj *Common) On(signal string, function interface{}) {
 	csignal, csignallen := util.UnsafeStringData(signal)
 	var cerr *C.error
 	RunMain(func() {
-		cerr = C.objectConnect(obj.addr, (*C.char)(csignal), C.int(csignallen), obj.engine.addr, unsafe.Pointer(&function), C.int(funcv.Type().NumIn()))
+		fold := &valueFold{gvalue: function}
+		funcref := getFoldRef(fold)
+		cerr = C.objectConnect(obj.addr, (*C.char)(csignal), C.int(csignallen), obj.engine.addr, funcref, C.int(funcv.Type().NumIn()))
 		if cerr == nil {
-			connectedFunction[&function] = true
+			connectedFunction[function] = true
 			stats.connectionsAlive(+1)
+		} else {
+
 		}
 	})
 	cmust(cerr)
@@ -457,22 +461,24 @@ func (obj *Common) Clear() {
 }
 
 //export hookSignalDisconnect
-func hookSignalDisconnect(funcp unsafe.Pointer) {
-	before := len(connectedFunction)
-	delete(connectedFunction, (*interface{})(funcp))
-	if before == len(connectedFunction) {
+func hookSignalDisconnect(funcref C.GoValueRef) {
+	fold := foldFromRef(funcref)
+	if fold == nil {
 		panic("disconnecting unknown signal function")
 	}
+	delete(connectedFunction, fold.gvalue)
+	clearFoldRef(funcref)
 	stats.connectionsAlive(-1)
 }
 
 //export hookSignalCall
-func hookSignalCall(enginep unsafe.Pointer, funcp unsafe.Pointer, args *C.DataValue) {
+func hookSignalCall(enginep unsafe.Pointer, funcref C.GoValueRef, args *C.DataValue) {
 	engine := engines[enginep]
 	if engine == nil {
 		panic("signal called after engine was destroyed")
 	}
-	funcv := reflect.ValueOf(*(*interface{})(funcp))
+	fold := foldFromRef(funcref)
+	funcv := reflect.ValueOf(fold.gvalue)
 	funct := funcv.Type()
 	numIn := funct.NumIn()
 	var params [C.MaxParams]reflect.Value

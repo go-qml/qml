@@ -3,7 +3,7 @@
 #include "util.cpp"
 
 
-QModelIndex_* newGoModelIndex(QObject_* parent, GoAddr* impl) {
+QModelIndex_* newGoModelIndex(QObject_* parent, GoValueRef impl) {
 	return reinterpret_cast<QModelIndex_*>(new GoModelIndex(reinterpret_cast<QObject*>(parent), impl));
 }
 
