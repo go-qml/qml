@@ -15,11 +15,13 @@ import (
 	"testing"
 	"time"
 
-	. "gopkg.in/check.v1"
-	"gopkg.in/qml.v1"
-	"gopkg.in/qml.v1/cpptest"
-	"gopkg.in/qml.v1/gl/2.0"
 	"path/filepath"
+
+	"github.com/limetext/qml-go"
+	"github.com/limetext/qml-go/cpptest"
+	"github.com/limetext/qml-go/gl/2.0"
+	"github.com/limetext/qml-go/qpainter"
+	. "gopkg.in/check.v1"
 )
 
 func init() { qml.SetupTesting() }
@@ -79,10 +81,8 @@ type GoRect struct {
 	PaintCount int
 }
 
-func (r *GoRect) Paint(p *qml.Painter) {
+func (r *GoRect) Paint(obj qml.Object, p *qpainter.Painter) {
 	r.PaintCount++
-
-	obj := p.Object()
 
 	gl := GL.API(p)
 

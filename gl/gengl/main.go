@@ -595,7 +595,7 @@ func goTypeName(ctypeName string) string {
 func prepareParam(f Func, pi int) Param {
 	p := f.Param[pi]
 
-	// Qt seems to have gratuitously changed some names. 
+	// Qt seems to have gratuitously changed some names.
 	if name, ok := paramNameFixes[p.Name]; ok {
 		p.Name = name
 	}
@@ -603,9 +603,9 @@ func prepareParam(f Func, pi int) Param {
 		if strings.HasSuffix(f.GoName, "v") {
 			p.Name = "value"
 		} else if f.Param[1].Name == "count" {
-			p.Name = "v" + string('0' + pi-2)
+			p.Name = "v" + string('0'+pi-2)
 		} else {
-			p.Name = "v" + string('0' + pi-1)
+			p.Name = "v" + string('0'+pi-1)
 		}
 	}
 
@@ -1151,7 +1151,7 @@ var tmplGo = `
 
 package GL
 
-// #cgo CXXFLAGS: -std=c++0x -pedantic-errors -Wall -fno-strict-aliasing 
+// #cgo CXXFLAGS: -std=c++0x -pedantic-errors -Wall -fno-strict-aliasing
 // #cgo LDFLAGS: -lstdc++
 {{if eq $.GLVersionName "ES2"}}// #cgo !darwin LDFLAGS: -lGL
 // #cgo  darwin LDFLAGS: -framework OpenGL
@@ -1168,7 +1168,7 @@ import (
 	"reflect"
 	"unsafe"
 
-	"gopkg.in/qml.v1/gl/glbase"
+	"github.com/limetext/qml-go/gl/glbase"
 )
 
 // API returns a value that offers methods matching the OpenGL version {{$.GLVersionName}} API.

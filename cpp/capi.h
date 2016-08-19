@@ -27,8 +27,9 @@ typedef void QQuickWindow_;
 typedef void QQuickView_;
 typedef void QMessageLogContext_;
 typedef void QImage_;
+typedef void QPainter_;
 typedef void GoValue_;
-typedef void GoAddr;
+typedef size_t GoValueRef;
 typedef void GoTypeSpec_;
 
 typedef char error;
@@ -56,6 +57,7 @@ typedef enum {
     DTValueList    = 103,
     DTVariantList  = 104,
     DTListProperty = 105,
+    DTItemModel    = 106,
 
     // Used in type information, not in an actual data value.
     DTAny     = 201, // Can hold any of the above types.
@@ -105,7 +107,8 @@ typedef struct {
     int line;
 } LogMessage;
 
-void newGuiApplication();
+
+void newGuiApplication(int argc, char **argv);
 void applicationExec();
 void applicationExit();
 void applicationFlushAll();
@@ -116,12 +119,28 @@ void idleTimerStart();
 void *currentThread();
 void *appThread();
 
+
 QQmlEngine_ *newEngine(QObject_ *parent);
 QQmlContext_ *engineRootContext(QQmlEngine_ *engine);
 void engineSetOwnershipCPP(QQmlEngine_ *engine, QObject_ *object);
 void engineSetOwnershipJS(QQmlEngine_ *engine, QObject_ *object);
 void engineSetContextForObject(QQmlEngine_ *engine, QObject_ *object);
 void engineAddImageProvider(QQmlEngine_ *engine, QString_ *providerId, void *imageFunc);
+void engineClearImportPaths(QQmlEngine_ *engine);
+void engineAddImportPath(QQmlEngine_ *engine, const char *path, int pathLen);
+void engineClearPluginPaths(QQmlEngine_ *engine);
+void engineAddPluginPath(QQmlEngine_ *engine, const char *path, int pathLen);
+void engineClearComponentCache(QQmlEngine_ *engine);
+
+void coreAddLibraryPath(const char *path, int pathLen);
+void coreSetApplicationName(const char *path, int pathLen);
+void coreSetApplicationVersion(const char *path, int pathLen);
+void coreSetOrganizationDomain(const char *path, int pathLen);
+void coreSetOrganizationName(const char *path, int pathLen);
+
+void guiappSetApplicationDisplayName(const char *path, int pathLen);
+// void guiappSetDesktopFileName(const char *path, int pathLen); // Qt 5.7
+void guiappSetWindowIcon(const char *path, int pathLen);
 
 void contextGetProperty(QQmlContext_ *context, QString_ *name, DataValue *value);
 void contextSetProperty(QQmlContext_ *context, QString_ *name, DataValue *value);
@@ -140,8 +159,9 @@ QQmlContext_ *objectContext(QObject_ *object);
 int objectIsComponent(QObject_ *object);
 int objectIsWindow(QObject_ *object);
 int objectIsView(QObject_ *object);
-error *objectConnect(QObject_ *object, const char *signal, int signalLen, QQmlEngine_ *engine, void *func, int argsLen);
-error *objectGoAddr(QObject_ *object, GoAddr **addr);
+error *objectConnect(QObject_ *object, const char *signal, int signalLen, QQmlEngine_ *engine, GoValueRef func, int argsLen);
+error *objectDisconnect(QObject_ *object);
+error *objectGoAddr(QObject_ *object, GoValueRef *addr);
 
 QQmlComponent_ *newComponent(QQmlEngine_ *engine, QObject_ *parent);
 void componentLoadURL(QQmlComponent_ *component, const char *url, int urlLen);
@@ -166,15 +186,15 @@ const unsigned char *imageConstBits(QImage_ *image);
 QString_ *newString(const char *data, int len);
 void delString(QString_ *s);
 
-GoValue_ *newGoValue(GoAddr *addr, GoTypeInfo *typeInfo, QObject_ *parent);
+GoValue_ *newGoValue(GoValueRef valueref, GoTypeInfo *typeInfo, QObject_ *parent);
 void goValueActivate(GoValue_ *value, GoTypeInfo *typeInfo, int addrOffset);
 
-void packDataValue(QVariant_ *var, DataValue *result);
+void packDataValue(const QVariant_ *var, DataValue *result);
 void unpackDataValue(DataValue *value, QVariant_ *result);
 
 QVariantList_ *newVariantList(DataValue *list, int len);
 
-QQmlListProperty_ *newListProperty(GoAddr *addr, intptr_t reflectIndex, intptr_t setIndex);
+QQmlListProperty_ *newListProperty(GoValueRef valueref, intptr_t reflectIndex, intptr_t setIndex);
 
 int registerType(char *location, int major, int minor, char *name, GoTypeInfo *typeInfo, GoTypeSpec_ *spec);
 int registerSingleton(char *location, int major, int minor, char *name, GoTypeInfo *typeInfo, GoTypeSpec_ *spec);
@@ -183,21 +203,21 @@ void installLogHandler();
 
 void hookIdleTimer();
 void hookLogHandler(LogMessage *message);
-void hookGoValueReadField(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, int getIndex, int setIndex, DataValue *result);
-void hookGoValueWriteField(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, int setIndex, DataValue *assign);
-void hookGoValueCallMethod(QQmlEngine_ *engine, GoAddr *addr, int memberIndex, DataValue *result);
-void hookGoValueDestroyed(QQmlEngine_ *engine, GoAddr *addr);
-void hookGoValuePaint(QQmlEngine_ *engine, GoAddr *addr, intptr_t reflextIndex);
+void hookGoValueReadField(QQmlEngine_ *engine, GoValueRef valueref, int memberIndex, int getIndex, int setIndex, DataValue *result);
+void hookGoValueWriteField(QQmlEngine_ *engine, GoValueRef valueref, int memberIndex, int setIndex, DataValue *assign);
+void hookGoValueCallMethod(QQmlEngine_ *engine, GoValueRef valueref, int memberIndex, DataValue *result);
+void hookGoValueDestroyed(QQmlEngine_ *engine, GoValueRef valueref);
+void hookGoValuePaint(QQmlEngine_ *engine, GoValueRef valueref, intptr_t reflextIndex, QPainter_* painter);
 QImage_ *hookRequestImage(void *imageFunc, char *id, int idLen, int width, int height);
-GoAddr *hookGoValueTypeNew(GoValue_ *value, GoTypeSpec_ *spec);
+GoValueRef hookGoValueTypeNew(GoValue_ *value, GoTypeSpec_ *spec);
 void hookWindowHidden(QObject_ *addr);
-void hookSignalCall(QQmlEngine_ *engine, void *func, DataValue *params);
-void hookSignalDisconnect(void *func);
+void hookSignalCall(QQmlEngine_ *engine, GoValueRef func, DataValue *params);
+void hookSignalDisconnect(GoValueRef func);
 void hookPanic(char *message);
-int hookListPropertyCount(GoAddr *addr, intptr_t reflectIndex, intptr_t setIndex);
-QObject_ *hookListPropertyAt(GoAddr *addr, intptr_t reflectIndex, intptr_t setIndex, int i);
-void hookListPropertyAppend(GoAddr *addr, intptr_t reflectIndex, intptr_t setIndex, QObject_ *obj);
-void hookListPropertyClear(GoAddr *addr, intptr_t reflectIndex, intptr_t setIndex);
+int hookListPropertyCount(GoValueRef valueref, intptr_t reflectIndex, intptr_t setIndex);
+QObject_ *hookListPropertyAt(GoValueRef valueref, intptr_t reflectIndex, intptr_t setIndex, int i);
+void hookListPropertyAppend(GoValueRef valueref, intptr_t reflectIndex, intptr_t setIndex, QObject_ *obj);
+void hookListPropertyClear(GoValueRef valueref, intptr_t reflectIndex, intptr_t setIndex);
 
 void registerResourceData(int version, char *tree, char *name, char *data);
 void unregisterResourceData(int version, char *tree, char *name, char *data);

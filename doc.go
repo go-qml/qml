@@ -114,7 +114,7 @@
 //            Init: func(p *Person, obj qml.Object) { p.Name = "<none>" },
 //    }})
 //
-// With this logic in place, QML code can create new instances of Person by itself:     
+// With this logic in place, QML code can create new instances of Person by itself:
 //
 //    import QtQuick 2.0
 //    import GoExtensions 1.0
@@ -128,7 +128,7 @@
 //
 //
 // Lowercasing of names
-// 
+//
 // Independently from the mechanism used to publish a Go value to QML code, its methods
 // and fields are available to QML logic as methods and properties of the
 // respective QML object representing it. As required by QML, though, the Go
@@ -177,7 +177,7 @@
 // a Paint method such as:
 //
 //    func (p *Person) Paint(painter *qml.Painter) {
-//            // ... OpenGL calls with the gopkg.in/qml.v1/gl/<VERSION> package ...
+//            // ... OpenGL calls with the github.com/limetext/qml-go/gl/<VERSION> package ...
 //    }
 //
 // A simple example is available at:
@@ -190,7 +190,7 @@
 // Resource files (qml code, images, etc) may be packed into the Go qml application
 // binary to simplify its handling and distribution. This is done with the genqrc tool:
 //
-//   http://gopkg.in/qml.v1/cmd/genqrc#usage
+//   http://github.com/limetext/qml-go/cmd/genqrc#usage
 //
 // The following blog post provides more details:
 //

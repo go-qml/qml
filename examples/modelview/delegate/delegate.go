@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"gopkg.in/qml.v1"
 	"image/color"
 	"math/rand"
 	"os"
 	"time"
+
+	"github.com/limetext/qml-go"
 )
 
 func main() {

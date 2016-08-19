@@ -9,6 +9,9 @@ import (
 	"log"
 	"path/filepath"
 	"strings"
+	"unsafe"
+
+	"github.com/limetext/qml-go/internal/util"
 )
 
 // SetLogger sets the target for messages logged by the qml package,
@@ -97,7 +100,7 @@ func init() {
 //export hookLogHandler
 func hookLogHandler(cmsg *C.LogMessage) {
 	// Workarund for QTBUG-35943
-	text := unsafeString(cmsg.text, cmsg.textLen)
+	text := util.UnsafeString(unsafe.Pointer(cmsg.text), int(cmsg.textLen))
 	if strings.HasPrefix(text, `"Qt Warning: Compose file:`) {
 		return
 	}
@@ -139,8 +142,8 @@ func (m *logMessage) Line() int {
 
 func (m *logMessage) String() string {
 	m.assertValid()
-	file := unsafeString(m.c.file, m.c.fileLen)
-	text := unsafeString(m.c.text, m.c.textLen)
+	file := util.UnsafeString(unsafe.Pointer(m.c.file), int(m.c.fileLen))
+	text := util.UnsafeString(unsafe.Pointer(m.c.text), int(m.c.textLen))
 	return fmt.Sprintf("%s:%d: %s", filepath.Base(file), m.c.line, text)
 }
 

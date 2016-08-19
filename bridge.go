@@ -16,19 +16,28 @@ import (
 	"os"
 	"reflect"
 	"runtime"
+	"runtime/debug"
 	"sync/atomic"
 	"unsafe"
 
-	"gopkg.in/qml.v1/cdata"
+	"github.com/limetext/qml-go/cdata"
+	"github.com/limetext/qml-go/internal/util"
+	"github.com/limetext/qml-go/qpainter"
 )
 
+type mainThreadFunc struct {
+	f    func()
+	done chan struct{}
+}
+
 var (
-	guiFunc      = make(chan func())
-	guiDone      = make(chan struct{})
-	guiLock      = 0
-	guiMainRef   uintptr
-	guiPaintRef  uintptr
-	guiIdleRun   int32
+	guiFunc        = make(chan mainThreadFunc, 10)
+	doneChanBuffer = make(chan chan struct{}, 10)
+	// guiDone     = make(chan struct{})
+	guiLock     = 0
+	guiMainRef  uintptr
+	guiPaintRef uintptr
+	guiIdleRun  int32
 
 	initialized int32
 )
@@ -46,19 +55,45 @@ func init() {
 // The Run function must necessarily be called from the same goroutine as
 // the main function or the application may fail when running on Mac OS.
 func Run(f func() error) error {
+	return RunArgs(os.Args, f)
+}
+
+// RunArgs runs the main QML event loop, runs f, and then terminates the
+// event loop once f returns.
+//
+// Most functions from the qml package block until RunArgs is called.
+//
+// The RunArgs function must necessarily be called from the same goroutine as
+// the main function or the application may fail when running on Mac OS.
+func RunArgs(args []string, f func() error) error {
 	if cdata.Ref() != guiMainRef {
-		panic("Run must be called on the initial goroutine so apps are portable to Mac OS")
+		panic("RunArgs must be called on the initial goroutine so apps are portable to Mac OS")
 	}
 	if !atomic.CompareAndSwapInt32(&initialized, 0, 1) {
-		panic("qml.Run called more than once")
+		panic("qml.RunArgs called more than once")
 	}
-	C.newGuiApplication()
+
+	// so, technically we should be freeing the C.CString below, but newGuiApplication
+	// can really only be called once, and the args are not going to be large
+	argc := len(args)
+	argv := make([]*C.char, argc+1)
+	for i := 0; i < argc; i++ {
+		argv[i] = C.CString(args[i])
+	}
+	argv[argc] = nil
+
+	argvP := unsafe.Pointer(&argv[0])
+
+	C.newGuiApplication(C.int(argc), argvP)
 	C.idleTimerInit((*C.int32_t)(&guiIdleRun))
 	done := make(chan error, 1)
 	go func() {
 		RunMain(func() {}) // Block until the event loop is running.
 		done <- f()
 		C.applicationExit()
+		// this is here to keep the argv slice alive while the application is running
+		// TODO: change this to something without side effects? runtime.KeepAlive?
+		fmt.Sprintln(argc, argv)
 	}()
 	C.applicationExec()
 	return <-done
@@ -78,14 +113,31 @@ func RunMain(f func()) {
 
 	// Tell Qt we're waiting for the idle hook to be called.
 	if atomic.AddInt32(&guiIdleRun, 1) == 1 {
-		C.idleTimerStart()
+		// C.idleTimerStart()
+	}
+
+	var doneChan chan struct{}
+
+	select {
+	case doneChan = <-doneChanBuffer:
+		// yay
+	default:
+		doneChan = make(chan struct{}, 1)
 	}
 
 	// Send f to be executed by the idle hook in the main GUI thread.
-	guiFunc <- f
+	guiFunc <- mainThreadFunc{f: f, done: doneChan}
+	C.idleTimerStart()
 
 	// Wait until f is done executing.
-	<-guiDone
+	<-doneChan
+
+	select {
+	case doneChanBuffer <- doneChan:
+		return
+	default:
+		close(doneChan)
+	}
 }
 
 // Lock freezes all QML activity by blocking the main event loop.
@@ -176,7 +228,13 @@ func Changed(value, fieldAddr interface{}) {
 //
 //export hookIdleTimer
 func hookIdleTimer() {
-	var f func()
+	ref := cdata.Ref()
+	if ref != guiMainRef && ref != atomic.LoadUintptr(&guiPaintRef) {
+		// Not within the GUI or render threads!
+		fmt.Println("AAARG! hookIdleTimer didn't run on the main thread!")
+		// return
+	}
+	var f mainThreadFunc
 	for {
 		select {
 		case f = <-guiFunc:
@@ -187,10 +245,43 @@ func hookIdleTimer() {
 				return
 			}
 		}
-		f()
-		guiDone <- struct{}{}
+		// fmt.Fprintf(os.Stderr, "hookIdleTimer: %v\n", runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name())
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					fmt.Printf("Panic in RunMain func: %v\n", r)
+					debug.PrintStack()
+				}
+			}()
+
+			f.f()
+		}()
+
+		f.done <- struct{}{}
 		atomic.AddInt32(&guiIdleRun, -1)
 	}
+}
+
+var valueFoldRefCounter C.GoValueRef = 1
+var valueFoldMap = make(map[C.GoValueRef]*valueFold)
+
+func getFoldRef(fold *valueFold) C.GoValueRef {
+	if fold.ref != 0 {
+		return fold.ref
+	}
+
+	ref := (C.GoValueRef)(atomic.AddUintptr((*uintptr)(unsafe.Pointer(&valueFoldRefCounter)), 1))
+	fold.ref = ref
+	valueFoldMap[ref] = fold
+	return ref
+}
+
+func foldFromRef(ref C.GoValueRef) *valueFold {
+	return valueFoldMap[ref]
+}
+
+func clearFoldRef(ref C.GoValueRef) {
+	delete(valueFoldMap, ref)
 }
 
 type valueFold struct {
@@ -201,6 +292,7 @@ type valueFold struct {
 	prev   *valueFold
 	next   *valueFold
 	owner  valueOwner
+	ref    C.GoValueRef
 }
 
 type valueOwner uint8
@@ -217,7 +309,7 @@ const (
 func wrapGoValue(engine *Engine, gvalue interface{}, owner valueOwner) (cvalue unsafe.Pointer) {
 	gvaluev := reflect.ValueOf(gvalue)
 	gvaluek := gvaluev.Kind()
-	if gvaluek == reflect.Struct && !hashable(gvalue) {
+	if gvaluek == reflect.Struct && !util.Hashable(gvalue) {
 		name := gvaluev.Type().Name()
 		if name != "" {
 			name = " (" + name + ")"
@@ -230,10 +322,17 @@ func wrapGoValue(engine *Engine, gvalue interface{}, owner valueOwner) (cvalue u
 
 	painting := cdata.Ref() == atomic.LoadUintptr(&guiPaintRef)
 
+	hashableGvalue := gvalue
+	if gvaluev.Kind() == reflect.Slice {
+		hashableGvalue = *(*reflect.SliceHeader)(unsafe.Pointer(gvaluev.Pointer()))
+	} else if !util.Hashable(gvalue) {
+		panic(fmt.Sprintf("gvalue not hashable: %v %v", gvaluev.Type(), gvaluev.Kind()))
+	}
+
 	// Cannot reuse a jsOwner because the QML runtime may choose to destroy
 	// the value _after_ we hand it a new reference to the same value.
 	// See issue #68 for details.
-	prev, ok := engine.values[gvalue]
+	prev, ok := engine.values[hashableGvalue]
 	if ok && (prev.owner == cppOwner || painting) {
 		return prev.cvalue
 	}
@@ -251,13 +350,13 @@ func wrapGoValue(engine *Engine, gvalue interface{}, owner valueOwner) (cvalue u
 		gvalue: gvalue,
 		owner:  owner,
 	}
-	fold.cvalue = C.newGoValue(unsafe.Pointer(fold), typeInfo(gvalue), parent)
+	fold.cvalue = C.newGoValue(getFoldRef(fold), typeInfo(gvalue), parent)
 	if prev != nil {
 		// Put new fold first so the single cppOwner, if any, is always the first entry.
 		fold.next = prev
 		prev.prev = fold
 	}
-	engine.values[gvalue] = fold
+	engine.values[hashableGvalue] = fold
 
 	//fmt.Printf("[DEBUG] value alive (wrapped): cvalue=%x gvalue=%x/%#v\n", fold.cvalue, addrOf(fold.gvalue), fold.gvalue)
 	stats.valuesAlive(+1)
@@ -289,7 +388,7 @@ func addrOf(gvalue interface{}) uintptr {
 var typeNew = make(map[*valueFold]bool)
 
 //export hookGoValueTypeNew
-func hookGoValueTypeNew(cvalue unsafe.Pointer, specp unsafe.Pointer) (foldp unsafe.Pointer) {
+func hookGoValueTypeNew(cvalue unsafe.Pointer, specp unsafe.Pointer) (foldp C.GoValueRef) {
 	// Initialization is postponed until the engine is available, so that
 	// we can hand Init the qml.Object that represents the object.
 	init := reflect.ValueOf((*TypeSpec)(specp).Init)
@@ -302,12 +401,12 @@ func hookGoValueTypeNew(cvalue unsafe.Pointer, specp unsafe.Pointer) (foldp unsa
 	typeNew[fold] = true
 	//fmt.Printf("[DEBUG] value alive (type-created): cvalue=%x gvalue=%x/%#v\n", fold.cvalue, addrOf(fold.gvalue), fold.gvalue)
 	stats.valuesAlive(+1)
-	return unsafe.Pointer(fold)
+	return getFoldRef(fold)
 }
 
 //export hookGoValueDestroyed
-func hookGoValueDestroyed(enginep unsafe.Pointer, foldp unsafe.Pointer) {
-	fold := (*valueFold)(foldp)
+func hookGoValueDestroyed(enginep unsafe.Pointer, foldp C.GoValueRef) {
+	fold := foldFromRef(foldp)
 	engine := fold.engine
 	if engine == nil {
 		before := len(typeNew)
@@ -315,9 +414,9 @@ func hookGoValueDestroyed(enginep unsafe.Pointer, foldp unsafe.Pointer) {
 		if len(typeNew) == before {
 			panic("destroying value without an associated engine; who created the value?")
 		}
-	} else if engines[engine.addr] == nil {
+	} else if engines[engine.savedAddr] == nil {
 		// Must never do that. The engine holds memory references that C++ depends on.
-		panic(fmt.Sprintf("engine %p was released from global list while its values were still alive", engine.addr))
+		panic(fmt.Sprintf("engine %p was released from global list while its values were still alive", engine.savedAddr))
 	} else {
 		switch {
 		case fold.prev != nil:
@@ -339,7 +438,7 @@ func hookGoValueDestroyed(enginep unsafe.Pointer, foldp unsafe.Pointer) {
 				panic("destroying value that knows about the engine, but the engine doesn't know about the value; who cleared the engine?")
 			}
 			if engine.destroyed && len(engine.values) == 0 {
-				delete(engines, engine.addr)
+				delete(engines, engine.savedAddr)
 			}
 		}
 	}
@@ -356,18 +455,28 @@ func deref(value reflect.Value) reflect.Value {
 		}
 		return value
 	}
-	panic("cannot happen")
 }
 
 //export hookGoValueReadField
-func hookGoValueReadField(enginep, foldp unsafe.Pointer, reflectIndex, getIndex, setIndex C.int, resultdv *C.DataValue) {
+func hookGoValueReadField(enginep unsafe.Pointer, foldp C.GoValueRef, reflectIndex, getIndex, setIndex C.int, resultdv *C.DataValue) {
 	fold := ensureEngine(enginep, foldp)
 
 	var field reflect.Value
 	if getIndex >= 0 {
 		field = reflect.ValueOf(fold.gvalue).Method(int(getIndex)).Call(nil)[0]
 	} else {
-		field = deref(reflect.ValueOf(fold.gvalue)).Field(int(reflectIndex))
+		val := deref(reflect.ValueOf(fold.gvalue))
+		// defer func() {
+		// 	if r := recover(); r != nil {
+		// 		fmt.Fprintf(os.Stderr, "panic in hookGoValueReadField %v %v\n", val, reflectIndex)
+		// 	}
+		// }()
+		if !val.IsValid() {
+			// panic(fmt.Sprintf("invalid value in hookGoValueReadField %#v\n", fold))
+			resultdv.dataType = C.DTInvalid
+			return
+		}
+		field = val.Field(int(reflectIndex))
 	}
 	field = deref(field)
 
@@ -384,7 +493,7 @@ func hookGoValueReadField(enginep, foldp unsafe.Pointer, reflectIndex, getIndex,
 	if fieldk == reflect.Slice || fieldk == reflect.Struct && field.Type() != typeRGBA {
 		if field.CanAddr() {
 			field = field.Addr()
-		} else if !hashable(field.Interface()) {
+		} else if !util.Hashable(field.Interface()) {
 			t := reflect.ValueOf(fold.gvalue).Type()
 			for t.Kind() == reflect.Ptr {
 				t = t.Elem()
@@ -406,7 +515,7 @@ func hookGoValueReadField(enginep, foldp unsafe.Pointer, reflectIndex, getIndex,
 }
 
 //export hookGoValueWriteField
-func hookGoValueWriteField(enginep, foldp unsafe.Pointer, reflectIndex, setIndex C.int, assigndv *C.DataValue) {
+func hookGoValueWriteField(enginep unsafe.Pointer, foldp C.GoValueRef, reflectIndex, setIndex C.int, assigndv *C.DataValue) {
 	fold := ensureEngine(enginep, foldp)
 	v := reflect.ValueOf(fold.gvalue)
 	ve := v
@@ -483,7 +592,7 @@ var (
 )
 
 //export hookGoValueCallMethod
-func hookGoValueCallMethod(enginep, foldp unsafe.Pointer, reflectIndex C.int, args *C.DataValue) {
+func hookGoValueCallMethod(enginep unsafe.Pointer, foldp C.GoValueRef, reflectIndex C.int, args *C.DataValue) {
 	fold := ensureEngine(enginep, foldp)
 	v := reflect.ValueOf(fold.gvalue)
 
@@ -503,7 +612,11 @@ func hookGoValueCallMethod(enginep, foldp unsafe.Pointer, reflectIndex C.int, ar
 	for i := 0; i < numIn; i++ {
 		paramdv := (*C.DataValue)(unsafe.Pointer(uintptr(unsafe.Pointer(args)) + (uintptr(i)+1)*dataValueSize))
 		param := reflect.ValueOf(unpackDataValue(paramdv, fold.engine))
-		if argt := methodt.In(i); param.Type() != argt {
+		argt := methodt.In(i)
+		if !param.IsValid() {
+			fmt.Printf("Warning: %s called with zero parameter\n", methodName)
+			param = reflect.Zero(argt)
+		} else if param.Type() != argt {
 			param, err = convertParam(methodName, i, param, argt)
 			if err != nil {
 				panic(err.Error())
@@ -548,7 +661,7 @@ func printPaintPanic() {
 }
 
 //export hookGoValuePaint
-func hookGoValuePaint(enginep, foldp unsafe.Pointer, reflectIndex C.intptr_t) {
+func hookGoValuePaint(enginep unsafe.Pointer, foldp C.GoValueRef, reflectIndex C.intptr_t, qpainterptr unsafe.Pointer) {
 	// Besides a convenience this is a workaround for http://golang.org/issue/8588
 	defer printPaintPanic()
 	defer atomic.StoreUintptr(&guiPaintRef, 0)
@@ -562,14 +675,16 @@ func hookGoValuePaint(enginep, foldp unsafe.Pointer, reflectIndex C.intptr_t) {
 		return
 	}
 
-	painter := &Painter{engine: fold.engine, obj: &Common{fold.cvalue, fold.engine}}
+	obj := CommonOf(fold.cvalue, fold.engine)
+	painter := qpainter.FromPtr(qpainterptr)
+
 	v := reflect.ValueOf(fold.gvalue)
 	method := v.Method(int(reflectIndex))
-	method.Call([]reflect.Value{reflect.ValueOf(painter)})
+	method.Call([]reflect.Value{reflect.ValueOf(obj), reflect.ValueOf(painter)})
 }
 
-func ensureEngine(enginep, foldp unsafe.Pointer) *valueFold {
-	fold := (*valueFold)(foldp)
+func ensureEngine(enginep unsafe.Pointer, foldp C.GoValueRef) *valueFold {
+	fold := foldFromRef(foldp)
 	if fold.engine != nil {
 		if fold.init.IsValid() {
 			initGoType(fold)
@@ -617,7 +732,7 @@ func _initGoType(fold *valueFold, schedulePaint bool) {
 		return
 	}
 	// TODO Would be good to preserve identity on the Go side. See unpackDataValue as well.
-	obj := &Common{engine: fold.engine, addr: fold.cvalue}
+	obj := CommonOf(fold.cvalue, fold.engine)
 	fold.init.Call([]reflect.Value{reflect.ValueOf(fold.gvalue), reflect.ValueOf(obj)})
 	fold.init = reflect.Value{}
 	if schedulePaint {
@@ -637,22 +752,22 @@ func listSlice(fold *valueFold, reflectIndex C.intptr_t) *[]Object {
 }
 
 //export hookListPropertyAt
-func hookListPropertyAt(foldp unsafe.Pointer, reflectIndex, setIndex C.intptr_t, index C.int) (objp unsafe.Pointer) {
-	fold := (*valueFold)(foldp)
+func hookListPropertyAt(foldp C.GoValueRef, reflectIndex, setIndex C.intptr_t, index C.int) (objp unsafe.Pointer) {
+	fold := foldFromRef(foldp)
 	slice := listSlice(fold, reflectIndex)
 	return (*slice)[int(index)].Common().addr
 }
 
 //export hookListPropertyCount
-func hookListPropertyCount(foldp unsafe.Pointer, reflectIndex, setIndex C.intptr_t) C.int {
-	fold := (*valueFold)(foldp)
+func hookListPropertyCount(foldp C.GoValueRef, reflectIndex, setIndex C.intptr_t) C.int {
+	fold := foldFromRef(foldp)
 	slice := listSlice(fold, reflectIndex)
 	return C.int(len(*slice))
 }
 
 //export hookListPropertyAppend
-func hookListPropertyAppend(foldp unsafe.Pointer, reflectIndex, setIndex C.intptr_t, objp unsafe.Pointer) {
-	fold := (*valueFold)(foldp)
+func hookListPropertyAppend(foldp C.GoValueRef, reflectIndex, setIndex C.intptr_t, objp unsafe.Pointer) {
+	fold := foldFromRef(foldp)
 	slice := listSlice(fold, reflectIndex)
 	var objdv C.DataValue
 	objdv.dataType = C.DTObject
@@ -666,8 +781,8 @@ func hookListPropertyAppend(foldp unsafe.Pointer, reflectIndex, setIndex C.intpt
 }
 
 //export hookListPropertyClear
-func hookListPropertyClear(foldp unsafe.Pointer, reflectIndex, setIndex C.intptr_t) {
-	fold := (*valueFold)(foldp)
+func hookListPropertyClear(foldp C.GoValueRef, reflectIndex, setIndex C.intptr_t) {
+	fold := foldFromRef(foldp)
 	slice := listSlice(fold, reflectIndex)
 	newslice := (*slice)[0:0]
 	if setIndex >= 0 {
