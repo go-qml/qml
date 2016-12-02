@@ -1,7 +1,7 @@
 #ifndef CONNECTOR_H
 #define CONNECTOR_H
 
-#include <QObject>
+#include <QtCore/QObject>
 
 #include <stdint.h>
 
