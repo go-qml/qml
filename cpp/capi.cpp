@@ -4,6 +4,7 @@
 #include <QtQml>
 #include <QDebug>
 #include <QQuickImageProvider>
+#include <QtGui/QIcon>
 
 #include <string.h>
 
@@ -67,6 +68,12 @@ void applicationExit()
 void applicationFlushAll()
 {
     qApp->processEvents();
+}
+
+void setWindowIcon(QString_ *path){
+	QString *str = reinterpret_cast<QString *>(path);
+	QIcon icon(*str);
+	qApp->setWindowIcon(icon);
 }
 
 void *currentThread()

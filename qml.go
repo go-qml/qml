@@ -1107,3 +1107,16 @@ func UnloadResources(r *Resources) {
 	data := (*C.char)(unsafe.Pointer(uintptr(base)+uintptr(r.dataOffset)))
 	C.unregisterResourceData(C.int(r.version), tree, name, data)
 }
+
+// SetWindowIcon sets the Application Icon.
+// It should run in the func which is qml.Run param.
+// The path can be relative, absolute, or a qrc path.
+// If it is a qrc path, it should be like ":/some/path".
+func SetWindowIcon(path string) {
+	cname, cnamelen := unsafeStringData(path)
+	RunMain(func() {
+		qname := C.newString(cname, cnamelen)
+		fmt.Println(qname)
+		C.setWindowIcon(qname)
+	})
+}
