@@ -109,6 +109,7 @@ void newGuiApplication();
 void applicationExec();
 void applicationExit();
 void applicationFlushAll();
+void setWindowIcon(QString_ *path);
 
 void idleTimerInit(int32_t *guiIdleRun);
 void idleTimerStart();
