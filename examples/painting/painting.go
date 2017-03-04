@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"gopkg.in/qml.v1"
-	"gopkg.in/qml.v1/gl/2.0"
+	"github.com/SjB/qml"
+	"github.com/SjB/qml/gl/2.0"
 )
 
 func main() {
