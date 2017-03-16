@@ -1,6 +1,13 @@
 # QML support for the Go language
 
-Documentation
+## amlwwalker/qml
+
+* I have made the `go1.6-port` branch the master branch here as it seems more relevant in this day and age...
+* It is not my work, but I have been using it for a while so please shout if I can help!
+
+
+
+Original Documentation
 -------------
 
 The introductory documentation as well as the detailed API documentation is
