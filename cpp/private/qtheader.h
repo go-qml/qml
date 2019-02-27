@@ -35,6 +35,22 @@
 #define QT_MINOR 9
 #elif QT_MINOR_ == 10
 #define QT_MINOR 10
+#elif QT_MINOR_ == 11
+#define QT_MINOR 11
+#elif QT_MINOR_ == 12
+#define QT_MINOR 12
+#elif QT_MINOR_ == 13
+#define QT_MINOR 13
+#elif QT_MINOR_ == 14
+#define QT_MINOR 14
+#elif QT_MINOR_ == 15
+#define QT_MINOR 15
+#elif QT_MINOR_ == 16
+#define QT_MINOR 16
+#elif QT_MINOR_ == 17
+#define QT_MINOR 17
+#elif QT_MINOR_ == 18
+#define QT_MINOR 18
 #else 
 #error Unupported Qt minor version. Please report.
 #endif
