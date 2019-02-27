@@ -7,7 +7,7 @@ import (
 )
 
 type refPair struct {
-	ref1, ref2 uintptr
+	ref1, ref2 int64
 }
 
 func TestRef(t *testing.T) {
@@ -28,7 +28,7 @@ func TestRef(t *testing.T) {
 		}()
 	}
 	wg.Wait()
-	refs := make(map[uintptr]bool)
+	refs := make(map[uint32]bool)
 	for i := 0; i < N; i++ {
 		pair := <-ch
 		if pair.ref1 != pair.ref2 {

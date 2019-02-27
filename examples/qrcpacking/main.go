@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"gopkg.in/qml.v1"
+	"github.com/neclepsio/qml"
 )
 
 func main() {

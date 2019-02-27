@@ -11,14 +11,14 @@ public:
     GoValueType()
         : GoValue(hookGoValueTypeNew(this, typeSpec), typeInfo, 0) {};
 
-    static void init(GoTypeInfo *info, GoTypeSpec_ *spec)
+    static void init(GoTypeInfo *info, GoTypeSpec_ spec)
     {
         typeInfo = info;
         typeSpec = spec;
         static_cast<QMetaObject &>(staticMetaObject) = *metaObjectFor(typeInfo);
     };
 
-    static GoTypeSpec_ *typeSpec;
+    static GoTypeSpec_ typeSpec;
     static GoTypeInfo *typeInfo;
     static QMetaObject staticMetaObject;
 };
@@ -31,14 +31,14 @@ public:
     GoPaintedValueType()
         : GoPaintedValue(hookGoValueTypeNew(this, typeSpec), typeInfo, 0) {};
 
-    static void init(GoTypeInfo *info, GoTypeSpec_ *spec)
+    static void init(GoTypeInfo *info, GoTypeSpec_ spec)
     {
         typeInfo = info;
         typeSpec = spec;
         static_cast<QMetaObject &>(staticMetaObject) = *metaObjectFor(typeInfo);
     };
 
-    static GoTypeSpec_ *typeSpec;
+    static GoTypeSpec_ typeSpec;
     static GoTypeInfo *typeInfo;
     static QMetaObject staticMetaObject;
 };

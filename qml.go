@@ -9,7 +9,7 @@ import "C"
 import (
 	"errors"
 	"fmt"
-	"gopkg.in/qml.v1/gl/glbase"
+	"github.com/neclepsio/qml/gl/glbase"
 	"image"
 	"image/color"
 	"io"
@@ -484,8 +484,9 @@ func (obj *Common) Interface() interface{} {
 	var result interface{}
 	var cerr *C.error
 	RunMain(func() {
-		var fold *valueFold
-		if cerr = C.objectGoAddr(obj.addr, (*unsafe.Pointer)(unsafe.Pointer(&fold))); cerr == nil {
+		var foldr C.GoRef
+		if cerr = C.objectGoRef(obj.addr, &foldr); cerr == nil {
+			fold := getFoldFromGoRef(foldr)
 			result = fold.gvalue
 		}
 	})
@@ -765,7 +766,7 @@ func (obj *Common) Destroy() {
 	})
 }
 
-var connectedFunction = make(map[*interface{}]bool)
+var connectedFunction = make(map[C.GoRef]interface{})
 
 // On connects the named signal from obj with the provided function, so that
 // when obj next emits that signal, the function is called with the parameters
@@ -799,9 +800,10 @@ func (obj *Common) On(signal string, function interface{}) {
 	csignal, csignallen := unsafeStringData(signal)
 	var cerr *C.error
 	RunMain(func() {
-		cerr = C.objectConnect(obj.addr, csignal, csignallen, obj.engine.addr, unsafe.Pointer(&function), C.int(funcv.Type().NumIn()))
+		funcr := C.GoRef(uintptr(unsafe.Pointer(&function)))
+		cerr = C.objectConnect(obj.addr, csignal, csignallen, obj.engine.addr, funcr, C.int(funcv.Type().NumIn()))
 		if cerr == nil {
-			connectedFunction[&function] = true
+			connectedFunction[funcr] = function
 			stats.connectionsAlive(+1)
 		}
 	})
@@ -809,9 +811,9 @@ func (obj *Common) On(signal string, function interface{}) {
 }
 
 //export hookSignalDisconnect
-func hookSignalDisconnect(funcp unsafe.Pointer) {
+func hookSignalDisconnect(funcr C.GoRef) {
 	before := len(connectedFunction)
-	delete(connectedFunction, (*interface{})(funcp))
+	delete(connectedFunction, funcr)
 	if before == len(connectedFunction) {
 		panic("disconnecting unknown signal function")
 	}
@@ -819,12 +821,18 @@ func hookSignalDisconnect(funcp unsafe.Pointer) {
 }
 
 //export hookSignalCall
-func hookSignalCall(enginep unsafe.Pointer, funcp unsafe.Pointer, args *C.DataValue) {
+func hookSignalCall(enginep unsafe.Pointer, funcr C.GoRef, args *C.DataValue) {
 	engine := engines[enginep]
 	if engine == nil {
 		panic("signal called after engine was destroyed")
 	}
-	funcv := reflect.ValueOf(*(*interface{})(funcp))
+
+	function := connectedFunction[funcr]
+	if function == nil {
+		panic("signal called on disconnected function")
+	}
+
+	funcv := reflect.ValueOf(function)
 	funct := funcv.Type()
 	numIn := funct.NumIn()
 	var params [C.MaxParams]reflect.Value
@@ -990,7 +998,7 @@ type TypeSpec struct {
 	private struct{} // Force use of fields by name.
 }
 
-var types []*TypeSpec
+var types = make(map[C.GoTypeSpec_]*TypeSpec)
 
 // RegisterTypes registers the provided list of type specifications for use
 // by QML code. To access the registered types, they must be imported from the
@@ -1046,10 +1054,11 @@ func registerType(location string, major, minor int, spec *TypeSpec) error {
 		cloc := C.CString(location)
 		cname := C.CString(localSpec.Name)
 		cres := C.int(0)
+		localSpecRef := C.GoTypeSpec_(uintptr(unsafe.Pointer(&localSpec)))
 		if localSpec.Singleton {
-			cres = C.registerSingleton(cloc, C.int(major), C.int(minor), cname, customType, unsafe.Pointer(&localSpec))
+			cres = C.registerSingleton(cloc, C.int(major), C.int(minor), cname, customType, localSpecRef)
 		} else {
-			cres = C.registerType(cloc, C.int(major), C.int(minor), cname, customType, unsafe.Pointer(&localSpec))
+			cres = C.registerType(cloc, C.int(major), C.int(minor), cname, customType, localSpecRef)
 		}
 		// It doesn't look like it keeps references to these, but it's undocumented and unclear.
 		C.free(unsafe.Pointer(cloc))
@@ -1057,7 +1066,7 @@ func registerType(location string, major, minor int, spec *TypeSpec) error {
 		if cres == -1 {
 			err = fmt.Errorf("QML engine failed to register type; invalid type location or name?")
 		} else {
-			types = append(types, &localSpec)
+			types[localSpecRef] = &localSpec
 		}
 	})
 

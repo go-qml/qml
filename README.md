@@ -1,5 +1,13 @@
 # QML support for the Go language
 
+Notes for neclepsio/qml
+-----------------------
+
+This repository aims to keep go-qml/qml working. It includes several fixed and new features from other repositories
+forked from go-qml, but some of them are just copy and pasted, so the original author for the commit is sometimes lost (sorry!).
+The only fix I wrote are the support for Qt 5.11+ (trivial) and support for Go 1.12.
+
+
 Documentation
 -------------
 
