@@ -4,9 +4,8 @@ package GL
 
 // #cgo CXXFLAGS: -std=c++0x -pedantic-errors -Wall -fno-strict-aliasing
 // #cgo LDFLAGS: -lstdc++
-// #cgo !darwin,!windows LDFLAGS: -lGL
+// #cgo !darwin LDFLAGS: -lGL
 // #cgo  darwin LDFLAGS: -framework OpenGL
-// #cgo  windows LDFLAGS: -lopengl32
 // #cgo pkg-config: Qt5Core Qt5OpenGL
 //
 // #include "funcs.h"
@@ -20,7 +19,7 @@ import (
 	"reflect"
 	"unsafe"
 
-	"gopkg.in/qml.v1/gl/glbase"
+	"github.com/neclepsio/qml/gl/glbase"
 )
 
 // API returns a value that offers methods matching the OpenGL version ES2 API.
