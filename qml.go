@@ -9,6 +9,7 @@ import "C"
 import (
 	"errors"
 	"fmt"
+	"github.com/neclepsio/qml/gl/glbase"
 	"image"
 	"image/color"
 	"io"
@@ -19,8 +20,6 @@ import (
 	"strings"
 	"sync"
 	"unsafe"
-
-	"gopkg.in/qml.v1/gl/glbase"
 )
 
 // Engine provides an environment for instantiating QML components.
@@ -41,8 +40,8 @@ var engines = make(map[unsafe.Pointer]*Engine)
 func NewEngine() *Engine {
 	engine := &Engine{values: make(map[interface{}]*valueFold)}
 	RunMain(func() {
+		engine.addr = C.newEngine(nil)
 		engine.engine = engine
-		engine.setAddr(C.newEngine(nil))
 		engine.imageProviders = make(map[string]*func(imageId string, width, height int) image.Image)
 		engines[engine.addr] = engine
 		stats.enginesAlive(+1)
@@ -126,7 +125,7 @@ func (e *Engine) Load(location string, r io.Reader) (Object, error) {
 	comp := &Common{engine: e}
 	RunMain(func() {
 		// TODO The component's parent should probably be the engine.
-		comp.setAddr(C.newComponent(e.addr, nilPtr))
+		comp.addr = C.newComponent(e.addr, nilPtr)
 		if qrc {
 			C.componentLoadURL(comp.addr, cloc, cloclen)
 		} else {
@@ -178,48 +177,9 @@ func (e *Engine) Context() *Context {
 	var ctx Context
 	ctx.engine = e
 	RunMain(func() {
-		ctx.setAddr(C.engineRootContext(e.addr))
+		ctx.addr = C.engineRootContext(e.addr)
 	})
 	return &ctx
-}
-
-func (e *Engine) ClearImportPaths() {
-	RunMain(func() {
-		C.engineClearImportPaths(e.addr)
-	})
-}
-
-func (e *Engine) AddImportPath(path string) {
-	cpath, cpathLen := unsafeStringData(path)
-	RunMain(func() {
-		C.engineAddImportPath(e.addr, cpath, cpathLen)
-	})
-}
-
-func (e *Engine) ClearPluginPaths() {
-	RunMain(func() {
-		C.engineClearPluginPaths(e.addr)
-	})
-}
-
-func (e *Engine) AddPluginPath(path string) {
-	cpath, cpathLen := unsafeStringData(path)
-	RunMain(func() {
-		C.engineAddPluginPath(e.addr, cpath, cpathLen)
-	})
-}
-
-func (e *Engine) ClearComponentCache() {
-	RunMain(func() {
-		C.engineClearComponentCache(e.addr)
-	})
-}
-
-func AddLibraryPath(path string) {
-	cpath, cpathLen := unsafeStringData(path)
-	RunMain(func() {
-		C.coreAddLibraryPath(cpath, cpathLen)
-	})
 }
 
 // TODO ObjectOf is probably still worth it, but turned out unnecessary
@@ -380,7 +340,7 @@ func (ctx *Context) Spawn() *Context {
 	var result Context
 	result.engine = ctx.engine
 	RunMain(func() {
-		result.setAddr(C.contextSpawn(ctx.addr))
+		result.addr = C.contextSpawn(ctx.addr)
 	})
 	return &result
 }
@@ -476,10 +436,8 @@ func (m *Map) Convert(mapAddr interface{}) {
 // Common implements the common behavior of all QML objects.
 // It implements the Object interface.
 type Common struct {
-	addr        unsafe.Pointer
-	engine      *Engine
-	destroyed   bool
-	initialized bool
+	addr   unsafe.Pointer
+	engine *Engine
 }
 
 var _ Object = (*Common)(nil)
@@ -489,30 +447,7 @@ var _ Object = (*Common)(nil)
 // This is meant for extensions that integrate directly with the
 // underlying QML logic.
 func CommonOf(addr unsafe.Pointer, engine *Engine) *Common {
-	c := &Common{nil, engine, false, false}
-	c.setAddr(addr)
-	return c
-}
-
-func (obj *Common) setAddr(addr unsafe.Pointer) {
-	if obj.initialized || obj.addr != nil || obj.destroyed {
-		panic("Cannot reuse Common!")
-	}
-	obj.addr = addr
-	obj.initialized = true
-
-	if addr != nil {
-		obj.On("destroyed", func() { obj.addr = nil; obj.destroyed = true })
-	}
-}
-
-func (obj *Common) assertInitialized() {
-	if !obj.initialized {
-		panic("Use of uninitialized object")
-	}
-	if obj.destroyed {
-		panic("Use of destroyed object")
-	}
+	return &Common{addr, engine}
 }
 
 // Common returns obj itself.
@@ -525,7 +460,6 @@ func (obj *Common) Common() *Common {
 
 // TypeName returns the underlying type name for the held value.
 func (obj *Common) TypeName() string {
-	obj.assertInitialized()
 	var name string
 	RunMain(func() {
 		name = C.GoString(C.objectTypeName(obj.addr))
@@ -538,7 +472,6 @@ func (obj *Common) TypeName() string {
 // This is meant for extensions that integrate directly with the
 // underlying QML logic.
 func (obj *Common) Addr() uintptr {
-	obj.assertInitialized()
 	return uintptr(obj.addr)
 }
 
@@ -548,7 +481,6 @@ func (obj *Common) Addr() uintptr {
 // It is a runtime error to call Interface on values that are not
 // backed by a Go value.
 func (obj *Common) Interface() interface{} {
-	obj.assertInitialized()
 	var result interface{}
 	var cerr *C.error
 	RunMain(func() {
@@ -564,7 +496,6 @@ func (obj *Common) Interface() interface{} {
 
 // Set changes the named object property to the given value.
 func (obj *Common) Set(property string, value interface{}) {
-	obj.assertInitialized()
 	cproperty := C.CString(property)
 	defer C.free(unsafe.Pointer(cproperty))
 	var cerr *C.error
@@ -581,7 +512,6 @@ func (obj *Common) Set(property string, value interface{}) {
 // and String are more convenient to use.
 // Property panics if the property does not exist.
 func (obj *Common) Property(name string) interface{} {
-	obj.assertInitialized()
 	cname := C.CString(name)
 	defer C.free(unsafe.Pointer(cname))
 
@@ -733,7 +663,6 @@ func (obj *Common) Map(property string) *Map {
 // was defined with the objectName property set to the provided value.
 // ObjectByName panics if the object is not found.
 func (obj *Common) ObjectByName(objectName string) Object {
-	obj.assertInitialized()
 	cname, cnamelen := unsafeStringData(objectName)
 	var dvalue C.DataValue
 	var object Object
@@ -749,8 +678,7 @@ func (obj *Common) ObjectByName(objectName string) Object {
 			if fold.init.IsValid() {
 				panic("internal error: custom Go type not initialized")
 			}
-			cobject := CommonOf(fold.cvalue, fold.engine)
-			object = cobject
+			object = &Common{fold.cvalue, fold.engine}
 		} else {
 			object, _ = value.(Object)
 		}
@@ -764,7 +692,6 @@ func (obj *Common) ObjectByName(objectName string) Object {
 // Call calls the given object method with the provided parameters.
 // Call panics if the method does not exist.
 func (obj *Common) Call(method string, params ...interface{}) interface{} {
-	obj.assertInitialized()
 	if len(params) > len(dataValueArray) {
 		panic("too many parameters")
 	}
@@ -775,24 +702,8 @@ func (obj *Common) Call(method string, params ...interface{}) interface{} {
 		for i, param := range params {
 			packDataValue(param, &dataValueArray[i], obj.engine, jsOwner)
 		}
-		defer func() {
-			if r := recover(); r != nil {
-				fmt.Fprintf(os.Stderr, "Panic objectInvoke, %v\n", method)
-			}
-		}()
-		// if obj.addr == nil {
-		// fmt.Fprintf(os.Stderr, "objectInvoke, %v %v %v\n", obj.addr, method, len(params))
-		// }
-		if obj.destroyed {
-			// object wasn't destroyed before, checked by assertInitialized, so it was
-			// destroyed while waiting to run on the main thread
-			// TODO: What to do about this???
-		}
 		cerr = C.objectInvoke(obj.addr, cmethod, cmethodLen, &result, &dataValueArray[0], C.int(len(params)))
 	})
-	if cerr != nil {
-		fmt.Fprintf(os.Stderr, "Common: %#v\n", obj)
-	}
 	cmust(cerr)
 	return unpackDataValue(&result, obj.engine)
 }
@@ -804,7 +715,6 @@ func (obj *Common) Call(method string, params ...interface{}) interface{} {
 // The Create method panics if called on an object that does not
 // represent a QML component.
 func (obj *Common) Create(ctx *Context) Object {
-	obj.assertInitialized()
 	if C.objectIsComponent(obj.addr) == 0 {
 		panic("object is not a component")
 	}
@@ -815,7 +725,7 @@ func (obj *Common) Create(ctx *Context) Object {
 		if ctx != nil {
 			ctxaddr = ctx.addr
 		}
-		root.setAddr(C.componentCreate(obj.addr, ctxaddr))
+		root.addr = C.componentCreate(obj.addr, ctxaddr)
 	})
 	return &root
 }
@@ -828,7 +738,6 @@ func (obj *Common) Create(ctx *Context) Object {
 // The CreateWindow method panics if called on an object that
 // does not represent a QML component.
 func (obj *Common) CreateWindow(ctx *Context) *Window {
-	obj.assertInitialized()
 	if C.objectIsComponent(obj.addr) == 0 {
 		panic("object is not a component")
 	}
@@ -839,7 +748,7 @@ func (obj *Common) CreateWindow(ctx *Context) *Window {
 		if ctx != nil {
 			ctxaddr = ctx.addr
 		}
-		win.setAddr(C.componentCreateWindow(obj.addr, ctxaddr))
+		win.addr = C.componentCreateWindow(obj.addr, ctxaddr)
 	})
 	return &win
 }
@@ -880,7 +789,6 @@ var connectedFunction = make(map[C.GoRef]interface{})
 //     http://qt-project.org/doc/qt-5.0/qtqml/qml-qtquick2-connections.html
 //
 func (obj *Common) On(signal string, function interface{}) {
-	obj.assertInitialized()
 	funcv := reflect.ValueOf(function)
 	funct := funcv.Type()
 	if funcv.Kind() != reflect.Func {
@@ -924,7 +832,7 @@ func hookSignalCall(enginep unsafe.Pointer, funcr C.GoRef, args *C.DataValue) {
 		panic("signal called on disconnected function")
 	}
 
-	funcv := reflect.ValueOf(&function)
+	funcv := reflect.ValueOf(function)
 	funct := funcv.Type()
 	numIn := funct.NumIn()
 	var params [C.MaxParams]reflect.Value
@@ -992,7 +900,7 @@ func (win *Window) Root() Object {
 	var obj Common
 	obj.engine = win.engine
 	RunMain(func() {
-		obj.setAddr(C.windowRootObject(win.addr))
+		obj.addr = C.windowRootObject(win.addr)
 	})
 	return &obj
 }
@@ -1189,9 +1097,9 @@ func LoadResources(r *Resources) {
 	} else if len(r.bdata) > 0 {
 		base = *(*unsafe.Pointer)(unsafe.Pointer(&r.bdata))
 	}
-	tree := (*C.char)(unsafe.Pointer(uintptr(base) + uintptr(r.treeOffset)))
-	name := (*C.char)(unsafe.Pointer(uintptr(base) + uintptr(r.nameOffset)))
-	data := (*C.char)(unsafe.Pointer(uintptr(base) + uintptr(r.dataOffset)))
+	tree := (*C.char)(unsafe.Pointer(uintptr(base)+uintptr(r.treeOffset)))
+	name := (*C.char)(unsafe.Pointer(uintptr(base)+uintptr(r.nameOffset)))
+	data := (*C.char)(unsafe.Pointer(uintptr(base)+uintptr(r.dataOffset)))
 	C.registerResourceData(C.int(r.version), tree, name, data)
 }
 
@@ -1203,21 +1111,8 @@ func UnloadResources(r *Resources) {
 	} else if len(r.bdata) > 0 {
 		base = *(*unsafe.Pointer)(unsafe.Pointer(&r.bdata))
 	}
-	tree := (*C.char)(unsafe.Pointer(uintptr(base) + uintptr(r.treeOffset)))
-	name := (*C.char)(unsafe.Pointer(uintptr(base) + uintptr(r.nameOffset)))
-	data := (*C.char)(unsafe.Pointer(uintptr(base) + uintptr(r.dataOffset)))
+	tree := (*C.char)(unsafe.Pointer(uintptr(base)+uintptr(r.treeOffset)))
+	name := (*C.char)(unsafe.Pointer(uintptr(base)+uintptr(r.nameOffset)))
+	data := (*C.char)(unsafe.Pointer(uintptr(base)+uintptr(r.dataOffset)))
 	C.unregisterResourceData(C.int(r.version), tree, name, data)
-}
-
-// SetWindowIcon sets the Application Icon.
-// It should run in the func which is qml.Run param.
-// The path can be relative, absolute, or a qrc path.
-// If it is a qrc path, it should be like ":/some/path".
-func SetWindowIcon(path string) {
-	cname, cnamelen := unsafeStringData(path)
-	RunMain(func() {
-		qname := C.newString(cname, cnamelen)
-		fmt.Println(qname)
-		C.setWindowIcon(qname)
-	})
 }

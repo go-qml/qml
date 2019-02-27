@@ -19,15 +19,15 @@ import (
 	"sync/atomic"
 	"unsafe"
 
-	"gopkg.in/qml.v1/cdata"
+	"github.com/neclepsio/qml/cdata"
 )
 
 var (
 	guiFunc     = make(chan func())
 	guiDone     = make(chan struct{})
 	guiLock     = 0
-	guiMainRef  uintptr
-	guiPaintRef uintptr
+	guiMainRef  int64
+	guiPaintRef int64
 	guiIdleRun  int32
 
 	initialized int32
@@ -70,7 +70,7 @@ func Run(f func() error) error {
 // underlying QML logic.
 func RunMain(f func()) {
 	ref := cdata.Ref()
-	if ref == guiMainRef || ref == atomic.LoadUintptr(&guiPaintRef) {
+	if ref == guiMainRef || ref == atomic.LoadInt64(&guiPaintRef) {
 		// Already within the GUI or render threads. Attempting to wait would deadlock.
 		f()
 		return
@@ -187,7 +187,6 @@ func hookIdleTimer() {
 				return
 			}
 		}
-		// fmt.Fprintf(os.Stderr, "hookIdleTimer: %v\n", runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name())
 		f()
 		guiDone <- struct{}{}
 		atomic.AddInt32(&guiIdleRun, -1)
@@ -258,19 +257,12 @@ func wrapGoValue(engine *Engine, gvalue interface{}, owner valueOwner) (cvalue u
 		panic("cannot hand pointer of pointer to QML logic; use a simple pointer instead")
 	}
 
-	painting := cdata.Ref() == atomic.LoadUintptr(&guiPaintRef)
-
-	hashableGvalue := gvalue
-	if gvaluev.Kind() == reflect.Slice {
-		hashableGvalue = *(*reflect.SliceHeader)(unsafe.Pointer(gvaluev.Pointer()))
-	} else if !hashable(gvalue) {
-		panic(fmt.Sprintf("gvalue not hashable: %v %v", gvaluev.Type(), gvaluev.Kind()))
-	}
+	painting := cdata.Ref() == atomic.LoadInt64(&guiPaintRef)
 
 	// Cannot reuse a jsOwner because the QML runtime may choose to destroy
 	// the value _after_ we hand it a new reference to the same value.
 	// See issue #68 for details.
-	prev, ok := engine.values[hashableGvalue]
+	prev, ok := engine.values[gvalue]
 	if ok && (prev.owner == cppOwner || painting) {
 		return prev.cvalue
 	}
@@ -294,7 +286,7 @@ func wrapGoValue(engine *Engine, gvalue interface{}, owner valueOwner) (cvalue u
 		fold.next = prev
 		prev.prev = fold
 	}
-	engine.values[hashableGvalue] = fold
+	engine.values[gvalue] = fold
 
 	//fmt.Printf("[DEBUG] value alive (wrapped): cvalue=%x gvalue=%x/%#v\n", fold.cvalue, addrOf(fold.gvalue), fold.gvalue)
 	stats.valuesAlive(+1)
@@ -402,6 +394,7 @@ func deref(value reflect.Value) reflect.Value {
 		}
 		return value
 	}
+	panic("cannot happen")
 }
 
 //export hookGoValueReadField
@@ -412,18 +405,7 @@ func hookGoValueReadField(enginep unsafe.Pointer, foldr C.GoRef, reflectIndex, g
 	if getIndex >= 0 {
 		field = reflect.ValueOf(fold.gvalue).Method(int(getIndex)).Call(nil)[0]
 	} else {
-		val := deref(reflect.ValueOf(fold.gvalue))
-		// defer func() {
-		// 	if r := recover(); r != nil {
-		// 		fmt.Fprintf(os.Stderr, "panic in hookGoValueReadField %v %v\n", val, reflectIndex)
-		// 	}
-		// }()
-		if !val.IsValid() {
-			// panic(fmt.Sprintf("invalid value in hookGoValueReadField %#v\n", fold))
-			resultdv.dataType = C.DTInvalid
-			return
-		}
-		field = val.Field(int(reflectIndex))
+		field = deref(reflect.ValueOf(fold.gvalue)).Field(int(reflectIndex))
 	}
 	field = deref(field)
 
@@ -559,11 +541,7 @@ func hookGoValueCallMethod(enginep unsafe.Pointer, foldr C.GoRef, reflectIndex C
 	for i := 0; i < numIn; i++ {
 		paramdv := (*C.DataValue)(unsafe.Pointer(uintptr(unsafe.Pointer(args)) + (uintptr(i)+1)*dataValueSize))
 		param := reflect.ValueOf(unpackDataValue(paramdv, fold.engine))
-		argt := methodt.In(i)
-		if !param.IsValid() {
-			fmt.Printf("Warning: %s called with zero parameter\n", methodName)
-			param = reflect.Zero(argt)
-		} else if param.Type() != argt {
+		if argt := methodt.In(i); param.Type() != argt {
 			param, err = convertParam(methodName, i, param, argt)
 			if err != nil {
 				panic(err.Error())
@@ -611,18 +589,18 @@ func printPaintPanic() {
 func hookGoValuePaint(enginep unsafe.Pointer, foldr C.GoRef, reflectIndex C.intptr_t) {
 	// Besides a convenience this is a workaround for http://golang.org/issue/8588
 	defer printPaintPanic()
-	defer atomic.StoreUintptr(&guiPaintRef, 0)
+	defer atomic.StoreInt64(&guiPaintRef, 0)
 
 	// The main GUI thread is mutex-locked while paint methods are called,
 	// so no two paintings should be happening at the same time.
-	atomic.StoreUintptr(&guiPaintRef, cdata.Ref())
+	atomic.StoreInt64(&guiPaintRef, cdata.Ref())
 
 	fold := ensureEngine(enginep, foldr)
 	if fold.init.IsValid() {
 		return
 	}
 
-	painter := &Painter{engine: fold.engine, obj: CommonOf(fold.cvalue, fold.engine)}
+	painter := &Painter{engine: fold.engine, obj: &Common{fold.cvalue, fold.engine}}
 	v := reflect.ValueOf(fold.gvalue)
 	method := v.Method(int(reflectIndex))
 	method.Call([]reflect.Value{reflect.ValueOf(painter)})
@@ -665,7 +643,7 @@ func ensureEngine(enginep unsafe.Pointer, foldr C.GoRef) *valueFold {
 }
 
 func initGoType(fold *valueFold) {
-	if cdata.Ref() == atomic.LoadUintptr(&guiPaintRef) {
+	if cdata.Ref() == atomic.LoadInt64(&guiPaintRef) {
 		go RunMain(func() { _initGoType(fold, true) })
 	} else {
 		_initGoType(fold, false)
@@ -677,7 +655,7 @@ func _initGoType(fold *valueFold, schedulePaint bool) {
 		return
 	}
 	// TODO Would be good to preserve identity on the Go side. See unpackDataValue as well.
-	obj := CommonOf(fold.cvalue, fold.engine)
+	obj := &Common{engine: fold.engine, addr: fold.cvalue}
 	fold.init.Call([]reflect.Value{reflect.ValueOf(fold.gvalue), reflect.ValueOf(obj)})
 	fold.init = reflect.Value{}
 	if schedulePaint {

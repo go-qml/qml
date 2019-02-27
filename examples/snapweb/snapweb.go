@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"gopkg.in/qml.v1"
+	"github.com/neclepsio/qml"
 	"image/png"
 	"os"
 )
